@@ -201,10 +201,18 @@ class HRISSyncHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
+            sheets = []
+            if os.path.exists(TARGET_FILE):
+                try:
+                    with open(TARGET_FILE, "r", encoding="utf-8", errors="ignore") as f:
+                        sheets = re.findall(r'<Worksheet\s+ss:Name="([^"]+)"', f.read())
+                except Exception:
+                    pass
             resp = {
                 "status": "online",
                 "targetFile": TARGET_FILE,
                 "fileExists": os.path.exists(TARGET_FILE),
+                "sheets": sheets,
                 "timestamp": datetime.now().isoformat()
             }
             self.wfile.write(json.dumps(resp).encode("utf-8"))
