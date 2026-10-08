@@ -64,6 +64,134 @@
       font-family: 'Playfair Display', Georgia, serif;
     }
     
+    
+    /* HIERARCHICAL TREE ORG CHART (MAGNIFIC REFERENCE LAYOUT) */
+    .org-chart-canvas {
+      overflow-x: auto;
+      padding: 36px 20px;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      border-radius: 1.25rem;
+      border: 1px solid #e2e8f0;
+      min-height: 520px;
+      display: flex;
+      justify-content: center;
+    }
+    .org-tree {
+      display: flex;
+      justify-content: center;
+      min-width: max-content;
+      margin: 0 auto;
+      transform-origin: top center;
+      transition: transform 0.2s ease;
+    }
+    .org-tree, .org-tree ul, .org-tree li {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+    .org-tree ul {
+      display: flex;
+      justify-content: center;
+      padding-top: 32px;
+    }
+    .org-tree li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+      position: relative;
+    }
+    /* Horizontal connector bar */
+    .org-tree li::before, .org-tree li::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 32px;
+      border-top: 2px solid #94a3b8;
+    }
+    .org-tree li::before {
+      left: 0;
+    }
+    .org-tree li::after {
+      right: 0;
+      border-left: 2px solid #94a3b8;
+    }
+    .org-tree li:only-child::before, .org-tree li:only-child::after {
+      display: none;
+    }
+    .org-tree li:only-child {
+      padding-top: 0;
+    }
+    .org-tree li:first-child::before {
+      border-top: none;
+    }
+    .org-tree li:last-child::after {
+      border-top: none;
+    }
+    /* Vertical line from parent */
+    .org-tree ul::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 0;
+      height: 32px;
+      border-left: 2px solid #94a3b8;
+      transform: translateX(-50%);
+    }
+    .tree-node-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+      position: relative;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+    .tree-node-card:hover {
+      transform: translateY(-4px);
+    }
+    .tree-avatar-circle {
+      position: relative;
+      border-radius: 9999px;
+      padding: 3.5px;
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+    }
+    .tree-node-card:hover .tree-avatar-circle {
+      box-shadow: 0 16px 30px -6px rgba(0, 0, 0, 0.2);
+    }
+    .tree-camera-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #f37021;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      opacity: 0.85;
+      transition: all 0.2s;
+    }
+    .tree-node-card:hover .tree-camera-badge {
+      opacity: 1;
+      transform: scale(1.15);
+      background: #091b38;
+    }
+
     /* Custom Scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
@@ -582,121 +710,204 @@
             </div>
           </div>
 
-          <!-- 1. Advisory Board -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-crown text-move-orange-500"></i>
-                <h4 class="text-xs font-bold text-move-navy-900 uppercase tracking-wider">Honorary Advisory Board</h4>
+          <!-- ORG VIEW MODE SELECTOR & ZOOM CONTROLS -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm no-print">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs font-black text-move-navy-900 uppercase tracking-wider">Display Mode:</span>
+              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                <button type="button" onclick="setOrgViewMode('tree')" id="btnOrgModeTree"
+                        class="px-3.5 py-1.5 rounded-lg bg-move-navy-900 text-white shadow-xs flex items-center gap-2 transition">
+                  <i class="fa-solid fa-sitemap text-move-orange-400"></i>
+                  <span>Hierarchical Tree Chart</span>
+                </button>
+                <button type="button" onclick="setOrgViewMode('timeline')" id="btnOrgModeTimeline"
+                        class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-move-navy-900 flex items-center gap-2 transition">
+                  <i class="fa-solid fa-timeline text-move-orange-500"></i>
+                  <span>Leadership Timeline</span>
+                </button>
+                <button type="button" onclick="setOrgViewMode('committees')" id="btnOrgModeCommittees"
+                        class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-move-navy-900 flex items-center gap-2 transition">
+                  <i class="fa-solid fa-people-group text-move-orange-500"></i>
+                  <span>Committees Tree</span>
+                </button>
               </div>
-              <span class="text-[11px] font-semibold text-slate-400">City Leadership Patronage</span>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="orgAdvisoryGrid">
-              <!-- Rendered dynamically: Hon. Mayor Magalong & Hon. Vice Mayor Olowan -->
+
+            <div class="flex items-center gap-2">
+              <!-- Zoom Controls for Tree View -->
+              <div id="treeZoomControls" class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                <button type="button" onclick="zoomOrgTree(-0.1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center shadow-xs transition" title="Zoom Out">
+                  <i class="fa-solid fa-minus text-[10px]"></i>
+                </button>
+                <span id="treeZoomDisplay" class="px-2 text-[11px] font-bold text-move-navy-900 min-w-[42px] text-center">100%</span>
+                <button type="button" onclick="zoomOrgTree(0.1)" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center shadow-xs transition" title="Zoom In">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                </button>
+                <button type="button" onclick="resetOrgTreeZoom()" class="px-2 h-7 rounded-lg bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center shadow-xs text-[10px] transition" title="Reset Zoom">
+                  Reset
+                </button>
+              </div>
+
+              <!-- Print Org Chart -->
+              <button onclick="printOrgStructure()" class="px-3.5 py-1.5 bg-move-navy-900 hover:bg-move-navy-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition">
+                <i class="fa-solid fa-print text-move-orange-400"></i>
+                <span>Print Chart</span>
+              </button>
             </div>
           </div>
 
-          <!-- 2. Executive Leadership Timeline -->
-          <div class="space-y-4 pt-2">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-move-navy-900 text-move-orange-400 flex items-center justify-center text-sm shadow-sm">
-                  <i class="fa-solid fa-timeline"></i>
+          <!-- ============================================== -->
+          <!-- SECTION 1: HIERARCHICAL TREE CHART (DEFAULT)   -->
+          <!-- ============================================== -->
+          <div id="orgViewSectionTree" class="space-y-4">
+            <!-- Term Selector & Upload Instructions -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-move-navy-900 to-move-navy-800 p-4 rounded-2xl text-white shadow-sm border border-move-orange-500/20">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-move-orange-500/20 border border-move-orange-400/40 flex items-center justify-center text-move-orange-400 text-lg">
+                  <i class="fa-solid fa-network-wired"></i>
                 </div>
                 <div>
-                  <h4 class="text-sm font-bold text-move-navy-900 uppercase tracking-wider">Executive Officers Leadership Timeline</h4>
-                  <p class="text-[11px] text-slate-500">Chronological governance progression of the MOVE Baguio Chapter</p>
+                  <h4 class="text-sm font-bold tracking-wide">MOVE Executive Leadership Hierarchy</h4>
+                  <p class="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
+                    <i class="fa-solid fa-camera text-move-orange-400"></i>
+                    <span>Click any circular avatar node below to upload/set portrait photo</span>
+                  </p>
                 </div>
               </div>
-              
-              <!-- Timeline Term Selector -->
-              <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 self-start sm:self-auto text-xs font-bold" id="timelineTermSelector">
-                <button type="button" onclick="selectTimelineTerm('term_2026')" id="tab_term_2026"
-                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 bg-white text-move-navy-900 shadow-xs border border-slate-200 font-bold">
+
+              <!-- Term Switcher Tabs -->
+              <div class="flex items-center gap-1.5 p-1 bg-white/10 rounded-xl self-start sm:self-auto text-xs font-bold border border-white/10">
+                <button type="button" onclick="selectOrgTreeTerm('term_2026')" id="tabTreeTerm2026"
+                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 bg-white text-move-navy-900 shadow-xs font-black">
                   <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>2026 – Present (Current)</span>
+                  <span>Term 2026 – Present (Current)</span>
                 </button>
-                <button type="button" onclick="selectTimelineTerm('term_2025')" id="tab_term_2025"
-                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-600 hover:text-move-navy-900">
+                <button type="button" onclick="selectOrgTreeTerm('term_2025')" id="tabTreeTerm2025"
+                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-300 hover:text-white">
                   <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                  <span>2025 – 2026 (Inaugural)</span>
-                </button>
-                <button type="button" onclick="selectTimelineTerm('all')" id="tab_term_all"
-                        class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-600 hover:text-move-navy-900">
-                  <i class="fa-solid fa-arrows-split-up-and-left text-xs"></i>
-                  <span>Full Timeline Track</span>
+                  <span>Term 2025 – 2026 (Inaugural)</span>
                 </button>
               </div>
             </div>
 
-            <!-- Visual Timeline Milestone Tracker -->
-            <div class="bg-gradient-to-r from-move-navy-900 via-move-navy-800 to-move-navy-950 p-4 sm:p-5 rounded-2xl text-white shadow-sm relative overflow-hidden border border-move-orange-500/20">
-              <div class="relative z-10">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <!-- Term 2025 Milestone -->
-                  <div class="flex items-start gap-3 flex-1 cursor-pointer group" onclick="selectTimelineTerm('term_2025')">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-white/20 border border-white/20 flex items-center justify-center text-move-orange-400 text-lg shrink-0 transition">
-                      <i class="fa-solid fa-flag"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-white/10 text-slate-300">Milestone 1</span>
-                        <span class="text-xs text-slate-400 font-semibold">Sept 29, 2025</span>
-                      </div>
-                      <div class="text-sm font-bold text-white mt-0.5">Inaugural Chapter Administration</div>
-                      <div class="text-xs text-move-orange-300 font-medium">President: Dan Ricky M. Ong</div>
-                    </div>
-                  </div>
-
-                  <!-- Connector Arrow -->
-                  <div class="hidden md:flex items-center justify-center px-4">
-                    <div class="flex items-center gap-1.5 text-move-orange-400">
-                      <div class="h-0.5 w-12 bg-move-orange-500/40"></div>
-                      <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </div>
-                  </div>
-
-                  <!-- Term 2026 Milestone -->
-                  <div class="flex items-start gap-3 flex-1 cursor-pointer group" onclick="selectTimelineTerm('term_2026')">
-                    <div class="w-10 h-10 rounded-xl bg-move-orange-500/20 group-hover:bg-move-orange-500/30 border border-move-orange-400/50 flex items-center justify-center text-move-orange-400 text-lg shrink-0 transition">
-                      <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Active Milestone</span>
-                        <span class="text-xs text-slate-300 font-semibold">Sept 29, 2026</span>
-                      </div>
-                      <div class="text-sm font-bold text-white mt-0.5">2nd General Chapter Assembly</div>
-                      <div class="text-xs text-move-orange-300 font-medium">President: Mario D. Ganga Jr.</div>
-                    </div>
-                  </div>
-                </div>
+            <!-- Interactive Canvas & Tree Container -->
+            <div class="org-chart-canvas shadow-xs">
+              <div id="orgTreeHierarchy" class="org-tree">
+                <!-- Dynamically populated by renderOrgChartTree() -->
               </div>
             </div>
 
-            <!-- Officers Container (dynamically rendered by selectTimelineTerm) -->
-            <div id="orgTimelineContainer" class="space-y-6">
-              <!-- Rendered dynamically -->
+            <!-- Legend Bar -->
+            <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-2 px-4 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 shadow-xs">
+              <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-amber-500 bg-amber-50"></span>
+                <span>Chapter President</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-orange-500 bg-orange-50"></span>
+                <span>Vice President</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-indigo-500 bg-indigo-50"></span>
+                <span>Secretariat & Records</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-sky-500 bg-sky-50"></span>
+                <span>Finance & Treasury</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full border-2 border-emerald-500 bg-emerald-50"></span>
+                <span>Public Relations & Media</span>
+              </div>
             </div>
           </div>
 
-          <!-- 3. Standing Functional Committees (From Official Slide) -->
-          <div class="space-y-3 pt-2">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-users-gear text-move-orange-500 text-sm"></i>
-                <div>
-                  <h4 class="text-xs font-bold text-move-navy-900 uppercase tracking-wider">Standing Functional Committees</h4>
-                  <p class="text-[11px] text-slate-500">Official committees ratified under Chapter Assembly</p>
+          <!-- ============================================== -->
+          <!-- SECTION 2: LEADERSHIP TIMELINE (TAB VIEW)      -->
+          <!-- ============================================== -->
+          <div id="orgViewSectionTimeline" class="space-y-4 hidden">
+            <!-- 1. Advisory Board -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div class="flex items-center gap-2">
+                  <i class="fa-solid fa-crown text-move-orange-500"></i>
+                  <h4 class="text-xs font-bold text-move-navy-900 uppercase tracking-wider">Honorary Advisory Board</h4>
                 </div>
+                <span class="text-[11px] font-semibold text-slate-400">City Leadership Patronage</span>
               </div>
-              <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
-                <i class="fa-solid fa-file-excel text-emerald-600 mr-1"></i> Synchronized with 'Committees' Excel Sheet
-              </span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="orgAdvisoryGrid">
+                <!-- Rendered dynamically: Hon. Mayor Magalong & Hon. Vice Mayor Olowan -->
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="orgCommitteesGrid">
-              <!-- Rendered dynamically from authentic committees data -->
+            <!-- 2. Executive Leadership Timeline -->
+            <div class="space-y-4 pt-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-move-navy-900 text-move-orange-400 flex items-center justify-center text-sm shadow-sm">
+                    <i class="fa-solid fa-timeline"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-move-navy-900 uppercase tracking-wider">Executive Officers Leadership Timeline</h4>
+                    <p class="text-[11px] text-slate-500">Chronological governance progression of the MOVE Baguio Chapter</p>
+                  </div>
+                </div>
+                
+                <!-- Timeline Term Selector -->
+                <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 self-start sm:self-auto text-xs font-bold" id="timelineTermSelector">
+                  <button type="button" onclick="selectTimelineTerm('term_2026')" id="tab_term_2026"
+                          class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 bg-white text-move-navy-900 shadow-xs border border-slate-200 font-bold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>2026 – Present (Current)</span>
+                  </button>
+                  <button type="button" onclick="selectTimelineTerm('term_2025')" id="tab_term_2025"
+                          class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-600 hover:text-move-navy-900">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    <span>2025 – 2026 (Inaugural)</span>
+                  </button>
+                  <button type="button" onclick="selectTimelineTerm('all')" id="tab_term_all"
+                          class="px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-600 hover:text-move-navy-900">
+                    <i class="fa-solid fa-arrows-split-up-and-left text-xs"></i>
+                    <span>Full Timeline Track</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Officers Container (rendered by selectTimelineTerm) -->
+              <div id="orgTimelineContainer" class="space-y-6">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- SECTION 3: STANDING COMMITTEES (TAB VIEW)      -->
+          <!-- ============================================== -->
+          <div id="orgViewSectionCommittees" class="space-y-4 hidden">
+            <!-- Standing Committees Tree -->
+            <div class="bg-gradient-to-r from-move-navy-900 to-move-navy-800 p-4 rounded-2xl text-white shadow-sm flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-move-orange-500/20 border border-move-orange-400/40 flex items-center justify-center text-move-orange-400 text-lg">
+                  <i class="fa-solid fa-people-group"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold tracking-wide">Standing Functional Committees Hierarchy</h4>
+                  <p class="text-xs text-slate-300">Synchronized with 'Committees' sheet in ALL MALES MARIED WITH TRAINING.xls</p>
+                </div>
+              </div>
+              <span class="text-xs bg-move-orange-500 text-white font-black px-3 py-1 rounded-full uppercase tracking-wider">3 Ratified Committees</span>
+            </div>
+
+            <!-- Committee Tree Canvas -->
+            <div class="org-chart-canvas shadow-xs">
+              <div id="orgCommitteesTreeHierarchy" class="org-tree">
+                <!-- Dynamically populated by renderCommitteesTree() -->
+              </div>
+            </div>
+
+            <!-- Committee Cards from Slide -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-3" id="orgCommitteesGrid">
+              <!-- Rendered dynamically -->
             </div>
           </div>
 
@@ -1433,6 +1644,90 @@
   <!-- ============================================== -->
   <!-- MODAL: MEMBER FULL DOSSIER / PROFILE           -->
   <!-- ============================================== -->
+  <!-- ============================================== -->
+  <!-- MODAL: UPLOAD / UPDATE OFFICER PHOTO           -->
+  <!-- ============================================== -->
+  <div id="modalOfficerPhoto" class="fixed inset-0 z-50 bg-move-navy-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden no-print">
+    <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div class="bg-move-navy-900 p-4 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-move-orange-500 flex items-center justify-center text-white text-sm shadow-sm">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold">Officer Portrait Photo</h4>
+            <p class="text-[10px] text-slate-300">Set or change avatar image in Org Chart</p>
+          </div>
+        </div>
+        <button onclick="closeOfficerPhotoModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-5">
+        <!-- Live Circle Preview -->
+        <div class="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div id="photoModalRing" class="w-24 h-24 rounded-full p-1 bg-white shadow-xl border-4 border-amber-500 relative transition-transform">
+            <img id="photoModalPreviewImg" src="" class="w-full h-full object-cover rounded-full hidden" alt="Preview">
+            <div id="photoModalDefaultSvg" class="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-300">
+              <svg class="w-full h-full p-3" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <div class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-move-orange-500 text-white flex items-center justify-center text-[10px] shadow-sm border border-white">
+              <i class="fa-solid fa-camera"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-center">
+            <h5 id="photoModalName" class="text-sm font-black text-move-navy-900"></h5>
+            <p id="photoModalRole" class="text-xs text-move-orange-600 font-bold uppercase tracking-wider mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- File Upload Form -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-folder-open text-move-orange-500 mr-1"></i> Upload Image File (PNG, JPG, WebP)
+            </label>
+            <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoFileSelected(event)"
+                   class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-move-orange-50 file:text-move-orange-600 hover:file:bg-move-orange-100 cursor-pointer border border-slate-200 rounded-xl p-1 bg-slate-50">
+          </div>
+
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">or image url</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-link text-move-orange-500 mr-1"></i> Direct Image URL
+            </label>
+            <input type="url" id="photoUrlInput" placeholder="https://example.com/portrait.jpg" oninput="handlePhotoUrlInput(event)"
+                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-move-orange-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+        <button type="button" onclick="removeOfficerPhoto()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Reset Avatar</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeOfficerPhotoModal()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition">
+            Cancel
+          </button>
+          <button type="button" onclick="saveOfficerPhoto()" class="px-4 py-2 bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <i class="fa-solid fa-check"></i>
+            <span>Save Photo</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="modalMemberProfile" class="fixed inset-0 z-50 bg-move-navy-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden no-print">
     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
       <div class="bg-move-navy-900 p-4 text-white flex items-center justify-between">
@@ -1768,8 +2063,422 @@
     }
 
     // --- ORGANIZATIONAL STRUCTURE RENDERER ---
+    let orgCurrentViewMode = 'tree'; // 'tree', 'timeline', 'committees'
+    let orgTreeCurrentTerm = 'term_2026';
+    let orgTreeZoomLevel = 1.0;
     let activeTimelineTerm = 'term_2026';
+    let activePhotoTargetName = '';
+    let activePhotoTargetRole = '';
+    let tempPhotoDataUrl = null;
 
+    function setOrgViewMode(mode) {
+      orgCurrentViewMode = mode;
+      
+      const btnTree = document.getElementById('btnOrgModeTree');
+      const btnTimeline = document.getElementById('btnOrgModeTimeline');
+      const btnComm = document.getElementById('btnOrgModeCommittees');
+      const zoomControls = document.getElementById('treeZoomControls');
+
+      const secTree = document.getElementById('orgViewSectionTree');
+      const secTimeline = document.getElementById('orgViewSectionTimeline');
+      const secComm = document.getElementById('orgViewSectionCommittees');
+
+      [btnTree, btnTimeline, btnComm].forEach(b => {
+        if (b) {
+          b.className = 'px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-move-navy-900 flex items-center gap-2 transition font-bold';
+        }
+      });
+
+      if (secTree) secTree.classList.add('hidden');
+      if (secTimeline) secTimeline.classList.add('hidden');
+      if (secComm) secComm.classList.add('hidden');
+
+      if (mode === 'tree') {
+        if (btnTree) btnTree.className = 'px-3.5 py-1.5 rounded-lg bg-move-navy-900 text-white shadow-xs flex items-center gap-2 transition font-bold';
+        if (secTree) secTree.classList.remove('hidden');
+        if (zoomControls) zoomControls.classList.remove('hidden');
+        renderOrgChartTree();
+      } else if (mode === 'timeline') {
+        if (btnTimeline) btnTimeline.className = 'px-3.5 py-1.5 rounded-lg bg-move-navy-900 text-white shadow-xs flex items-center gap-2 transition font-bold';
+        if (secTimeline) secTimeline.classList.remove('hidden');
+        if (zoomControls) zoomControls.classList.add('hidden');
+        selectTimelineTerm(activeTimelineTerm);
+      } else if (mode === 'committees') {
+        if (btnComm) btnComm.className = 'px-3.5 py-1.5 rounded-lg bg-move-navy-900 text-white shadow-xs flex items-center gap-2 transition font-bold';
+        if (secComm) secComm.classList.remove('hidden');
+        if (zoomControls) zoomControls.classList.remove('hidden');
+        renderCommitteesTree();
+      }
+    }
+
+    function selectOrgTreeTerm(termId) {
+      orgTreeCurrentTerm = termId;
+      const tab2026 = document.getElementById('tabTreeTerm2026');
+      const tab2025 = document.getElementById('tabTreeTerm2025');
+
+      if (termId === 'term_2026') {
+        if (tab2026) tab2026.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-2 bg-white text-move-navy-900 shadow-xs font-black';
+        if (tab2025) tab2025.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-300 hover:text-white font-bold';
+      } else {
+        if (tab2026) tab2026.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-2 text-slate-300 hover:text-white font-bold';
+        if (tab2025) tab2025.className = 'px-3 py-1.5 rounded-lg transition flex items-center gap-2 bg-white text-move-navy-900 shadow-xs font-black';
+      }
+
+      renderOrgChartTree();
+    }
+
+    function zoomOrgTree(delta) {
+      orgTreeZoomLevel = Math.min(1.5, Math.max(0.6, orgTreeZoomLevel + delta));
+      const display = document.getElementById('treeZoomDisplay');
+      if (display) display.textContent = `${Math.round(orgTreeZoomLevel * 100)}%`;
+      
+      const target = orgCurrentViewMode === 'committees' 
+        ? document.getElementById('orgCommitteesTreeHierarchy')
+        : document.getElementById('orgTreeHierarchy');
+        
+      if (target) {
+        target.style.transform = `scale(${orgTreeZoomLevel})`;
+      }
+    }
+
+    function resetOrgTreeZoom() {
+      orgTreeZoomLevel = 1.0;
+      const display = document.getElementById('treeZoomDisplay');
+      if (display) display.textContent = '100%';
+      const t1 = document.getElementById('orgTreeHierarchy');
+      const t2 = document.getElementById('orgCommitteesTreeHierarchy');
+      if (t1) t1.style.transform = 'scale(1)';
+      if (t2) t2.style.transform = 'scale(1)';
+    }
+
+    // PHOTO STORAGE HELPERS
+    function getOfficerPhotoKey(name) {
+      return 'move_officer_photo_' + (name || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    }
+
+    function getOfficerPhoto(name) {
+      try {
+        return localStorage.getItem(getOfficerPhotoKey(name)) || null;
+      } catch(e) {
+        return null;
+      }
+    }
+
+    function renderAvatarNodeHtml(name, role, office, ringBorderClass, sizePx, crownBadge = false, isFemale = false) {
+      const photo = getOfficerPhoto(name);
+      const photoKey = getOfficerPhotoKey(name);
+      
+      let avatarContent = '';
+      if (photo) {
+        avatarContent = `<img src="${photo}" class="w-full h-full object-cover rounded-full" alt="${name}">`;
+      } else {
+        // Vector silhouette avatar matching Magnific reference style
+        avatarContent = `
+          <div class="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+            <svg class="w-full h-full p-2.5 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+        `;
+      }
+
+      const badgeHtml = crownBadge 
+        ? `<div class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shadow-sm border-2 border-white z-10"><i class="fa-solid fa-crown text-[9px]"></i></div>`
+        : '';
+
+      return `
+        <div class="tree-node-card group" onclick="openPhotoUploadModal('${name.replace(/'/g, "\'")}', '${role.replace(/'/g, "\'")}', '${ringBorderClass}')" title="Click to upload/change photo for ${name}">
+          <div class="relative">
+            <div class="tree-avatar-circle ${ringBorderClass}" style="width: ${sizePx}px; height: ${sizePx}px;">
+              <div class="w-full h-full rounded-full overflow-hidden bg-slate-100 flex items-center justify-center relative">
+                ${avatarContent}
+              </div>
+              <div class="tree-camera-badge" title="Upload Photo">
+                <i class="fa-solid fa-camera"></i>
+              </div>
+            </div>
+            ${badgeHtml}
+          </div>
+          <div class="mt-2 text-center max-w-[130px]">
+            <div class="text-xs font-black text-move-navy-900 group-hover:text-move-orange-600 transition leading-snug tracking-tight">${name}</div>
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">${role}</div>
+            ${office ? `<div class="text-[9px] text-move-orange-600 font-semibold truncate mt-0.5">${office}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderOrgChartTree() {
+      const container = document.getElementById('orgTreeHierarchy');
+      if (!container) return;
+
+      const timelineList = officersData.timeline || [];
+      const termData = timelineList.find(t => t.id === orgTreeCurrentTerm) || timelineList[0];
+      if (!termData) return;
+
+      const board = termData.board || [];
+      const pres = board.find(b => b.role.toLowerCase().includes('president') && !b.role.toLowerCase().includes('vice'));
+      const vp = board.find(b => b.role.toLowerCase().includes('vice president'));
+      
+      const sec = board.find(b => b.role.toLowerCase() === 'secretary');
+      const asstSec = board.find(b => b.role.toLowerCase().includes('assistant secretary'));
+
+      const tres = board.find(b => b.role.toLowerCase() === 'treasurer');
+      const asstTres = board.find(b => b.role.toLowerCase().includes('assistant treasurer') || b.role.toLowerCase().includes('assistant tresurer'));
+
+      const pro = board.find(b => b.role.toLowerCase().includes('public relations officer') && !b.role.toLowerCase().includes('assistant'));
+      const asstPro = board.find(b => b.role.toLowerCase().includes('assistant public relations officer'));
+
+      const presName = pres ? pres.name : 'Dan Ricky M. Ong';
+      const vpName = vp ? vp.name : 'Jay Dee A. Mangayan';
+
+      const secName = sec ? sec.name : 'Secretary';
+      const asstSecName = asstSec ? asstSec.name : 'Asst. Secretary';
+
+      const tresName = tres ? tres.name : 'Treasurer';
+      const asstTresName = asstTres ? asstTres.name : 'Asst. Treasurer';
+
+      const proName = pro ? pro.name : 'P.R.O.';
+      const asstProName = asstPro ? asstPro.name : 'Asst. P.R.O.';
+
+      container.innerHTML = `
+        <ul>
+          <li>
+            <!-- TIER 1: PRESIDENT (GOLD/AMBER RING) -->
+            ${renderAvatarNodeHtml(presName, 'Chapter President', 'MOVE Baguio', 'border-4 border-amber-500', 88, true)}
+            
+            <ul>
+              <li>
+                <!-- TIER 2: VICE PRESIDENT (ORANGE RING) -->
+                ${renderAvatarNodeHtml(vpName, 'Vice President', 'MOVE Baguio', 'border-4 border-orange-500', 78)}
+
+                <ul>
+                  <!-- PILLAR 1: SECRETARIAT & RECORDS (INDIGO RING) -->
+                  <li>
+                    ${renderAvatarNodeHtml(secName, 'Secretary', 'Secretariat', 'border-4 border-indigo-500', 68)}
+                    <ul>
+                      <li>
+                        ${renderAvatarNodeHtml(asstSecName, 'Asst. Secretary', 'Secretariat', 'border-4 border-indigo-400', 58)}
+                      </li>
+                    </ul>
+                  </li>
+
+                  <!-- PILLAR 2: FINANCE & TREASURY (SKY BLUE RING) -->
+                  <li>
+                    ${renderAvatarNodeHtml(tresName, 'Treasurer', 'Treasury & Finance', 'border-4 border-sky-500', 68)}
+                    <ul>
+                      <li>
+                        ${renderAvatarNodeHtml(asstTresName, 'Asst. Treasurer', 'Treasury & Finance', 'border-4 border-sky-400', 58)}
+                      </li>
+                    </ul>
+                  </li>
+
+                  <!-- PILLAR 3: PUBLIC RELATIONS & MEDIA (EMERALD GREEN RING) -->
+                  <li>
+                    ${renderAvatarNodeHtml(proName, 'Public Relations Officer', 'Advocacy & Media', 'border-4 border-emerald-500', 68)}
+                    <ul>
+                      <li>
+                        ${renderAvatarNodeHtml(asstProName, 'Asst. P.R.O.', 'Advocacy & Media', 'border-4 border-emerald-400', 58)}
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      `;
+    }
+
+    function renderCommitteesTree() {
+      const container = document.getElementById('orgCommitteesTreeHierarchy');
+      if (!container) return;
+
+      const comms = officersData.committees || [];
+      const c1 = comms[0]; // Membership & Recruitment
+      const c2 = comms[1]; // Education & Training
+      const c3 = comms[2]; // Information & Advocacy
+
+      const c1Chair = c1 ? c1.chair : 'Mario D. Ganga Jr.';
+      const c1Vice = c1 ? c1.viceChair : 'Noriel Anthony Buenavista';
+      const c1Members = c1 ? c1.members : [];
+
+      const c2Chair = c2 ? c2.chair : 'Rhey Delmendo';
+      const c2Members = c2 ? c2.members : [];
+
+      const c3Chair = c3 ? c3.chair : 'Dexter See';
+      const c3Vice = c3 ? c3.viceChair : 'James Cosep';
+      const c3Members = c3 ? c3.members : [];
+
+      container.innerHTML = `
+        <ul>
+          <li>
+            <!-- HERO: CHAPTER PRESIDENT -->
+            ${renderAvatarNodeHtml('MARIO D. GANGA JR.', 'Chapter President', 'MOVE Baguio', 'border-4 border-amber-500', 88, true)}
+
+            <ul>
+              <!-- COMMITTEE 1: MEMBERSHIP & RECRUITMENT -->
+              <li>
+                <div class="px-2 py-1 mb-2 bg-orange-100 text-orange-800 text-[10px] font-black rounded uppercase tracking-wider">
+                  Membership & Recruitment
+                </div>
+                ${renderAvatarNodeHtml(c1Chair, 'Chairperson', 'CMR Committee', 'border-4 border-orange-500', 74)}
+                <ul>
+                  ${c1Vice ? `
+                  <li>
+                    ${renderAvatarNodeHtml(c1Vice, 'Vice-Chairperson', 'CMR Committee', 'border-4 border-orange-400', 64)}
+                    <ul>
+                      ${c1Members.map(m => `
+                        <li>${renderAvatarNodeHtml(m, 'Member', 'CMR Committee', 'border-3 border-orange-300', 54)}</li>
+                      `).join('')}
+                    </ul>
+                  </li>` : `
+                    ${c1Members.map(m => `
+                      <li>${renderAvatarNodeHtml(m, 'Member', 'CMR Committee', 'border-3 border-orange-300', 54)}</li>
+                    `).join('')}
+                  `}
+                </ul>
+              </li>
+
+              <!-- COMMITTEE 2: EDUCATION, TRAINING & CAPACITY BUILDING -->
+              <li>
+                <div class="px-2 py-1 mb-2 bg-indigo-100 text-indigo-800 text-[10px] font-black rounded uppercase tracking-wider">
+                  Education & Training
+                </div>
+                ${renderAvatarNodeHtml(c2Chair, 'Chairperson', 'CETCB Committee', 'border-4 border-indigo-500', 74)}
+                <ul>
+                  ${c2Members.map(m => `
+                    <li>${renderAvatarNodeHtml(m, 'Member', 'CETCB Committee', 'border-3 border-indigo-300', 54)}</li>
+                  `).join('')}
+                </ul>
+              </li>
+
+              <!-- COMMITTEE 3: INFORMATION & ADVOCACY -->
+              <li>
+                <div class="px-2 py-1 mb-2 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded uppercase tracking-wider">
+                  Information & Advocacy
+                </div>
+                ${renderAvatarNodeHtml(c3Chair, 'Chairperson', 'CIA Committee', 'border-4 border-emerald-500', 74)}
+                <ul>
+                  ${c3Vice ? `
+                  <li>
+                    ${renderAvatarNodeHtml(c3Vice, 'Vice-Chairperson', 'CIA Committee', 'border-4 border-emerald-400', 64)}
+                    <ul>
+                      ${c3Members.map(m => `
+                        <li>${renderAvatarNodeHtml(m, 'Member', 'CIA Committee', 'border-3 border-emerald-300', 54)}</li>
+                      `).join('')}
+                    </ul>
+                  </li>` : `
+                    ${c3Members.map(m => `
+                      <li>${renderAvatarNodeHtml(m, 'Member', 'CIA Committee', 'border-3 border-emerald-300', 54)}</li>
+                    `).join('')}
+                  `}
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      `;
+    }
+
+    // PHOTO UPLOAD MODAL LOGIC
+    function openPhotoUploadModal(name, role, ringClass = 'border-4 border-amber-500') {
+      activePhotoTargetName = name;
+      activePhotoTargetRole = role;
+      tempPhotoDataUrl = null;
+
+      document.getElementById('photoModalName').textContent = name;
+      document.getElementById('photoModalRole').textContent = role;
+
+      const ringEl = document.getElementById('photoModalRing');
+      if (ringEl) {
+        ringEl.className = `w-24 h-24 rounded-full p-1 bg-white shadow-xl relative transition-transform ${ringClass}`;
+      }
+
+      const existingPhoto = getOfficerPhoto(name);
+      const imgEl = document.getElementById('photoModalPreviewImg');
+      const svgEl = document.getElementById('photoModalDefaultSvg');
+
+      if (existingPhoto) {
+        imgEl.src = existingPhoto;
+        imgEl.classList.remove('hidden');
+        svgEl.classList.add('hidden');
+        tempPhotoDataUrl = existingPhoto;
+      } else {
+        imgEl.src = '';
+        imgEl.classList.add('hidden');
+        svgEl.classList.remove('hidden');
+      }
+
+      document.getElementById('photoFileInput').value = '';
+      document.getElementById('photoUrlInput').value = '';
+      document.getElementById('modalOfficerPhoto').classList.remove('hidden');
+    }
+
+    function closeOfficerPhotoModal() {
+      document.getElementById('modalOfficerPhoto').classList.add('hidden');
+      tempPhotoDataUrl = null;
+    }
+
+    function handlePhotoFileSelected(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        tempPhotoDataUrl = e.target.result;
+        const imgEl = document.getElementById('photoModalPreviewImg');
+        const svgEl = document.getElementById('photoModalDefaultSvg');
+        imgEl.src = tempPhotoDataUrl;
+        imgEl.classList.remove('hidden');
+        svgEl.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handlePhotoUrlInput(ev) {
+      const url = ev.target.value.trim();
+      if (!url) return;
+      tempPhotoDataUrl = url;
+      const imgEl = document.getElementById('photoModalPreviewImg');
+      const svgEl = document.getElementById('photoModalDefaultSvg');
+      imgEl.src = tempPhotoDataUrl;
+      imgEl.classList.remove('hidden');
+      svgEl.classList.add('hidden');
+    }
+
+    function saveOfficerPhoto() {
+      if (!activePhotoTargetName) return;
+      if (!tempPhotoDataUrl) {
+        showToast('Please select an image file or enter an image URL first.', 'error');
+        return;
+      }
+
+      try {
+        localStorage.setItem(getOfficerPhotoKey(activePhotoTargetName), tempPhotoDataUrl);
+        showToast(`Photo saved successfully for ${activePhotoTargetName}!`);
+      } catch(err) {
+        showToast('Image file too large for browser storage. Please try a smaller photo.', 'error');
+      }
+
+      closeOfficerPhotoModal();
+      renderOrgChartTree();
+      renderCommitteesTree();
+    }
+
+    function removeOfficerPhoto() {
+      if (!activePhotoTargetName) return;
+      try {
+        localStorage.removeItem(getOfficerPhotoKey(activePhotoTargetName));
+        showToast(`Photo removed. Reset to default vector avatar for ${activePhotoTargetName}.`);
+      } catch(e) {}
+
+      closeOfficerPhotoModal();
+      renderOrgChartTree();
+      renderCommitteesTree();
+    }
+
+    // TIMELINE TAB LOGIC
     function selectTimelineTerm(termId) {
       activeTimelineTerm = termId;
       
@@ -1837,9 +2546,9 @@
           <!-- Top Leadership (President & Vice President) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             ${pres ? `
-            <div class="p-4 rounded-xl border-2 border-move-orange-400 bg-gradient-to-br from-move-orange-50/50 to-white shadow-xs flex items-center gap-4">
-              <div class="w-14 h-14 rounded-2xl bg-move-orange-500 text-white flex items-center justify-center text-2xl shadow-sm shrink-0">
-                <i class="fa-solid ${pres.avatar || 'fa-user-shield'}"></i>
+            <div class="p-4 rounded-xl border-2 border-move-orange-400 bg-gradient-to-br from-move-orange-50/50 to-white shadow-xs flex items-center gap-4 cursor-pointer" onclick="openPhotoUploadModal('${pres.name.replace(/'/g, "\'")}', '${pres.role.replace(/'/g, "\'")}')">
+              <div class="w-14 h-14 rounded-2xl bg-move-orange-500 text-white flex items-center justify-center text-2xl shadow-sm shrink-0 overflow-hidden relative">
+                ${getOfficerPhoto(pres.name) ? `<img src="${getOfficerPhoto(pres.name)}" class="w-full h-full object-cover">` : `<i class="fa-solid ${pres.avatar || 'fa-user-shield'}"></i>`}
               </div>
               <div class="min-w-0">
                 <span class="px-2 py-0.5 rounded bg-move-orange-100 text-move-orange-800 text-[10px] font-black uppercase tracking-wider">
@@ -1851,9 +2560,9 @@
             </div>` : ''}
 
             ${vp ? `
-            <div class="p-4 rounded-xl border border-move-navy-200 bg-gradient-to-br from-slate-50 to-white shadow-xs flex items-center gap-4">
-              <div class="w-14 h-14 rounded-2xl bg-move-navy-900 text-white flex items-center justify-center text-2xl shadow-sm shrink-0">
-                <i class="fa-solid ${vp.avatar || 'fa-user-check'}"></i>
+            <div class="p-4 rounded-xl border border-move-navy-200 bg-gradient-to-br from-slate-50 to-white shadow-xs flex items-center gap-4 cursor-pointer" onclick="openPhotoUploadModal('${vp.name.replace(/'/g, "\'")}', '${vp.role.replace(/'/g, "\'")}')">
+              <div class="w-14 h-14 rounded-2xl bg-move-navy-900 text-white flex items-center justify-center text-2xl shadow-sm shrink-0 overflow-hidden relative">
+                ${getOfficerPhoto(vp.name) ? `<img src="${getOfficerPhoto(vp.name)}" class="w-full h-full object-cover">` : `<i class="fa-solid ${vp.avatar || 'fa-user-check'}"></i>`}
               </div>
               <div class="min-w-0">
                 <span class="px-2 py-0.5 rounded bg-move-navy-100 text-move-navy-800 text-[10px] font-black uppercase tracking-wider">
@@ -1870,9 +2579,9 @@
             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Executive Secretariat, Treasury & Advocacy Officers</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               ${others.map(o => `
-                <div class="p-3 rounded-xl border border-slate-200 bg-white hover:border-move-orange-300 hover:shadow-xs transition flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-move-navy-50 text-move-navy-900 flex items-center justify-center text-base shrink-0">
-                    <i class="fa-solid ${o.avatar || 'fa-user'}"></i>
+                <div class="p-3 rounded-xl border border-slate-200 bg-white hover:border-move-orange-300 hover:shadow-xs transition flex items-center gap-3 cursor-pointer" onclick="openPhotoUploadModal('${o.name.replace(/'/g, "\'")}', '${o.role.replace(/'/g, "\'")}')">
+                  <div class="w-10 h-10 rounded-xl bg-move-navy-50 text-move-navy-900 flex items-center justify-center text-base shrink-0 overflow-hidden">
+                    ${getOfficerPhoto(o.name) ? `<img src="${getOfficerPhoto(o.name)}" class="w-full h-full object-cover">` : `<i class="fa-solid ${o.avatar || 'fa-user'}"></i>`}
                   </div>
                   <div class="min-w-0">
                     <div class="text-[10px] font-bold text-move-orange-600 uppercase tracking-wider">${o.role}</div>
@@ -1889,99 +2598,98 @@
     }
 
     function renderOrgStructure() {
-      // Advisory Board (Maintained Mayor & Vice Mayor)
+      // 1. Advisory Board (Mayor & Vice Mayor)
       const advGrid = document.getElementById('orgAdvisoryGrid');
-      advGrid.innerHTML = '';
-      officersData.advisory.forEach(off => {
-        const card = document.createElement('div');
-        card.className = 'bg-white p-4 rounded-2xl border border-move-orange-200/80 shadow-sm flex items-center gap-4';
-        card.innerHTML = `
-          <div class="w-13 h-13 rounded-2xl bg-move-orange-50 border border-move-orange-200 flex items-center justify-center text-move-orange-500 text-2xl shrink-0 p-3">
-            <i class="fa-solid ${off.avatar || 'fa-user-tie'}"></i>
-          </div>
-          <div class="min-w-0">
-            <div class="text-[10px] font-black uppercase tracking-wider text-move-orange-600">${off.role}</div>
-            <div class="text-base font-black text-move-navy-900 truncate">${off.name}</div>
-            <div class="text-xs text-slate-600 truncate font-semibold">${off.title} &bull; ${off.office}</div>
-            <div class="text-[10px] text-slate-400 mt-0.5"><i class="fa-solid fa-envelope text-[9px] text-move-orange-500 mr-1"></i>${off.contact}</div>
-          </div>
-        `;
-        advGrid.appendChild(card);
-      });
+      if (advGrid) {
+        advGrid.innerHTML = '';
+        (officersData.advisory || []).forEach(off => {
+          const card = document.createElement('div');
+          card.className = 'bg-white p-4 rounded-2xl border border-move-orange-200/80 shadow-sm flex items-center gap-4';
+          card.innerHTML = `
+            <div class="w-13 h-13 rounded-2xl bg-move-orange-50 border border-move-orange-200 flex items-center justify-center text-move-orange-500 text-2xl shrink-0 p-3">
+              <i class="fa-solid ${off.avatar || 'fa-user-tie'}"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[10px] font-black uppercase tracking-wider text-move-orange-600">${off.role}</div>
+              <div class="text-base font-black text-move-navy-900 truncate">${off.name}</div>
+              <div class="text-xs text-slate-600 truncate font-semibold">${off.title} &bull; ${off.office}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5"><i class="fa-solid fa-envelope text-[9px] text-move-orange-500 mr-1"></i>${off.contact}</div>
+            </div>
+          `;
+          advGrid.appendChild(card);
+        });
+      }
 
-      // Officers Timeline (Default active: term_2026)
-      selectTimelineTerm(activeTimelineTerm);
-
-      // Standing Functional Committees (From Official Slide)
+      // 2. Standing Functional Committees Cards (from Official Slide)
       const commGrid = document.getElementById('orgCommitteesGrid');
-      commGrid.innerHTML = '';
-      officersData.committees.forEach(c => {
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between';
-        
-        let membersHtml = '';
-        if (c.members && c.members.length > 0) {
-          membersHtml = c.members.map(m => `
-            <li class="flex items-center gap-2 text-xs font-bold text-move-navy-900">
-              <span class="w-1.5 h-1.5 rounded-full bg-move-orange-500"></span>
-              <span>${m}</span>
-            </li>
-          `).join('');
-        }
+      if (commGrid) {
+        commGrid.innerHTML = '';
+        (officersData.committees || []).forEach(c => {
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between';
+          
+          let membersHtml = '';
+          if (c.members && c.members.length > 0) {
+            membersHtml = c.members.map(m => `
+              <li class="flex items-center gap-2 text-xs font-bold text-move-navy-900">
+                <span class="w-1.5 h-1.5 rounded-full bg-move-orange-500"></span>
+                <span>${m}</span>
+              </li>
+            `).join('');
+          }
 
-        card.innerHTML = `
-          <div>
-            <!-- Banner inspired by Official MOVE Slide -->
-            <div class="bg-gradient-to-r from-move-navy-900 to-move-navy-800 p-4 border-b-4 border-move-orange-500">
-              <div class="bg-move-orange-500 text-white font-black text-xs uppercase px-3 py-2 rounded-lg tracking-wider shadow-xs leading-snug">
-                ${c.name}
+          card.innerHTML = `
+            <div>
+              <div class="bg-gradient-to-r from-move-navy-900 to-move-navy-800 p-4 border-b-4 border-move-orange-500">
+                <div class="bg-move-orange-500 text-white font-black text-xs uppercase px-3 py-2 rounded-lg tracking-wider shadow-xs leading-snug">
+                  ${c.name}
+                </div>
+              </div>
+
+              <div class="p-4 space-y-4">
+                <div class="p-3 rounded-xl bg-orange-50/60 border border-move-orange-200 space-y-1">
+                  <div class="text-[10px] font-black uppercase tracking-wider text-move-orange-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-crown text-[10px]"></i>
+                    <span>Chairperson</span>
+                  </div>
+                  <div class="text-sm font-black text-move-navy-900">${c.chair}</div>
+                </div>
+
+                ${c.viceChair ? `
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div class="text-[10px] font-black uppercase tracking-wider text-move-navy-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-award text-[10px] text-move-orange-500"></i>
+                    <span>Vice-Chairperson</span>
+                  </div>
+                  <div class="text-sm font-black text-move-navy-900">${c.viceChair}</div>
+                </div>` : ''}
+
+                <div class="space-y-2 pt-1">
+                  <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    Committee Members
+                  </div>
+                  <ul class="space-y-1.5 pl-1">
+                    ${membersHtml}
+                  </ul>
+                </div>
               </div>
             </div>
 
-            <!-- Committee Leadership & Members -->
-            <div class="p-4 space-y-4">
-              <!-- Chairperson -->
-              <div class="p-3 rounded-xl bg-orange-50/60 border border-move-orange-200 space-y-1">
-                <div class="text-[10px] font-black uppercase tracking-wider text-move-orange-700 flex items-center gap-1.5">
-                  <i class="fa-solid fa-crown text-[10px]"></i>
-                  <span>Chairperson</span>
-                </div>
-                <div class="text-sm font-black text-move-navy-900">${c.chair}</div>
-              </div>
-
-              <!-- Vice Chairperson (if present) -->
-              ${c.viceChair ? `
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                <div class="text-[10px] font-black uppercase tracking-wider text-move-navy-800 flex items-center gap-1.5">
-                  <i class="fa-solid fa-award text-[10px] text-move-orange-500"></i>
-                  <span>Vice-Chairperson</span>
-                </div>
-                <div class="text-sm font-black text-move-navy-900">${c.viceChair}</div>
-              </div>` : ''}
-
-              <!-- Committee Members -->
-              <div class="space-y-2 pt-1">
-                <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  Committee Members
-                </div>
-                <ul class="space-y-1.5 pl-1">
-                  ${membersHtml}
-                </ul>
-              </div>
+            <div class="p-3 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 rounded-b-2xl">
+              <i class="fa-solid fa-bullseye text-move-orange-500 mr-1"></i>
+              ${c.desc}
             </div>
-          </div>
+          `;
+          commGrid.appendChild(card);
+        });
+      }
 
-          <!-- Functional Scope Footer -->
-          <div class="p-3 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 rounded-b-2xl">
-            <i class="fa-solid fa-bullseye text-move-orange-500 mr-1"></i>
-            ${c.desc}
-          </div>
-        `;
-        commGrid.appendChild(card);
-      });
+      // 3. Render Tree (Default view)
+      renderOrgChartTree();
+      renderCommitteesTree();
 
-      // Coordinators
-      renderCoordinatorsList(officersData.coordinators);
+      // 4. Department Coordinators
+      renderCoordinatorsList(officersData.coordinators || []);
     }
 
     function renderCoordinatorsList(list) {
