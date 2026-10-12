@@ -248,7 +248,75 @@
         display: none !important;
       }
     }
-  </style>
+  
+    /* CERTIFICATE STUDIO & DESIGNER STYLES */
+    .cert-edit-active [data-cert-element] {
+      cursor: grab !important;
+      position: relative;
+      outline: 2px dashed rgba(249, 115, 22, 0.5) !important;
+      outline-offset: 4px;
+      border-radius: 6px;
+      transition: outline-color 0.15s, background-color 0.15s;
+    }
+    .cert-edit-active [data-cert-element]:hover {
+      outline: 2px dashed #f97316 !important;
+      background-color: rgba(249, 115, 22, 0.05);
+    }
+    .cert-edit-active [data-cert-element].is-selected-element {
+      outline: 2.5px solid #ea580c !important;
+      background-color: rgba(249, 115, 22, 0.08);
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+    }
+    .cert-edit-active [data-cert-element].is-dragging {
+      cursor: grabbing !important;
+      outline: 3px solid #c2410c !important;
+      z-index: 50;
+      opacity: 0.95;
+    }
+    .cert-edit-active [data-cert-element]::after {
+      content: attr(data-cert-label);
+      position: absolute;
+      top: -20px;
+      left: 4px;
+      background: #091b38;
+      color: #fff;
+      font-size: 10px;
+      font-family: 'Inter', ui-sans-serif, sans-serif;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 60;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      white-space: nowrap;
+    }
+    .cert-edit-active [data-cert-element]:hover::after,
+    .cert-edit-active [data-cert-element].is-selected-element::after {
+      opacity: 1;
+    }
+    .cert-watermark-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .cert-designer-tab-btn.active {
+      background-color: #091b38;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .cert-designer-tab-btn {
+      color: #475569;
+    }
+    .cert-designer-tab-btn:hover:not(.active) {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+</style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col relative selection:bg-move-orange-500 selection:text-white">
 
@@ -1127,7 +1195,8 @@
         </div>
 
         <!-- ============================================== -->
-        <!-- VIEW 5: CERTIFICATE STUDIO (BOTH LOGOS)        -->
+                <!-- ============================================== -->
+        <!-- VIEW 5: CERTIFICATE STUDIO & DESIGNER          -->
         <!-- ============================================== -->
         <div id="pageCertificates" class="space-y-4 hidden">
           <!-- Top Controls Bar -->
@@ -1135,51 +1204,104 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
                 <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
-                  <i class="fa-solid fa-award text-move-orange-500"></i>
-                  <span>Official MOVE Certificate Studio</span>
+                  <i class="fa-solid fa-award text-move-orange-500 text-lg"></i>
+                  <span>Official MOVE Certificate Studio &amp; Designer</span>
                 </h3>
-                <p class="text-[11px] text-slate-500">Includes official City of Baguio seal and MOVE Baguio chapter logo &bull; For verified attendees</p>
+                <p class="text-[11px] text-slate-500">Live template designer, drag-to-move elements, attach custom logos &amp; signatures, and save versioned templates</p>
               </div>
 
-              <!-- Print & Batch Actions -->
+              <!-- Main Mode & Print Actions -->
               <div class="flex items-center flex-wrap gap-2 text-xs">
-                <button onclick="batchPrintCertificates()" class="px-4 py-2 bg-gradient-to-r from-move-orange-500 to-move-orange-600 hover:from-move-orange-600 hover:to-[#be4607] text-white font-extrabold rounded-xl shadow-md transition flex items-center gap-2">
-                  <i class="fa-solid fa-print"></i>
-                  <span id="btnBatchPrintText">Batch Print All Present (47)</span>
+                <!-- Edit / Designer Mode Toggle -->
+                <button type="button" id="btnToggleCertEdit" onclick="toggleCertEditMode()"
+                        class="px-4 py-2 rounded-xl font-black flex items-center gap-2 transition bg-move-orange-500 hover:bg-move-orange-600 text-white shadow-md">
+                  <i class="fa-solid fa-pen-ruler" id="iconCertEditBtn"></i>
+                  <span id="lblCertEditMode">Enable Designer / Edit Mode</span>
                 </button>
-                <button onclick="printSingleCurrentCertificate()" class="px-3.5 py-2 bg-move-navy-900 hover:bg-move-navy-800 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+
+                <!-- Print Actions -->
+                <button type="button" onclick="printSingleCurrentCertificate()"
+                        class="px-3.5 py-2 bg-move-navy-900 hover:bg-move-navy-800 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
                   <i class="fa-solid fa-file-pdf text-move-orange-400"></i>
                   <span>Print Single</span>
+                </button>
+                <button type="button" onclick="batchPrintCertificates()"
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-2">
+                  <i class="fa-solid fa-print text-move-orange-400"></i>
+                  <span id="btnBatchPrintText">Batch Print All Present (47)</span>
                 </button>
               </div>
             </div>
 
-            <!-- Certificate Options Bar -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-slate-100 text-xs">
+            <!-- Version Management Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 bg-slate-50/70 p-3 rounded-xl border">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="text-xs font-black text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="fa-solid fa-layer-group text-move-orange-500"></i>
+                  <span>Active Template:</span>
+                </span>
+                <select id="certVersionSelect" onchange="handleCertVersionChange(this.value)"
+                        class="py-1.5 px-3 bg-white border border-slate-300 rounded-lg text-xs font-bold text-move-navy-900 shadow-2xs focus:ring-1 focus:ring-move-orange-500 max-w-xs">
+                  <!-- Populated dynamically with built-ins and saved versions -->
+                </select>
+                <span id="badgeCurrentVersionStatus" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-move-navy-100 text-move-navy-800 border border-move-navy-200">
+                  Built-in Preset
+                </span>
+              </div>
+
+              <!-- Version Actions -->
+              <div class="flex items-center gap-1.5 flex-wrap text-xs">
+                <button type="button" onclick="saveCurrentCertTemplate()" title="Save changes to this template version"
+                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-1.5 shadow-2xs">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Save Version</span>
+                </button>
+                <button type="button" onclick="openModalSaveAsNewTemplate()" title="Save as a brand new custom template version"
+                        class="px-3 py-1.5 bg-move-navy-900 hover:bg-move-navy-800 text-white font-bold rounded-lg transition flex items-center gap-1.5 shadow-2xs">
+                  <i class="fa-solid fa-copy text-move-orange-400"></i>
+                  <span>Save as New Version</span>
+                </button>
+                <button type="button" id="btnDeleteCertVersion" onclick="deleteCurrentCertTemplate()" title="Delete this custom version"
+                        class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-lg transition hidden flex items-center gap-1">
+                  <i class="fa-solid fa-trash-can"></i>
+                  <span>Delete</span>
+                </button>
+                <button type="button" onclick="resetCurrentCertTemplate()" title="Reset current template to original default"
+                        class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition flex items-center gap-1">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Activity & Recipient Selector Bar -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-1 text-xs">
               <!-- Activity Select -->
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Select Activity</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Select Activity / Event</label>
                 <select id="certActivitySelect" onchange="handleCertActivityChange()"
                         class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-move-orange-500">
                   <!-- Populated dynamically -->
                 </select>
               </div>
 
-              <!-- Certificate Type -->
+              <!-- Certificate Type Preset -->
               <div>
                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Certificate Type</label>
-                <select id="certTypeSelect" onchange="renderCertificatePreview()"
+                <select id="certTypeSelect" onchange="handleCertTypeSelectChange(this.value)"
                         class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-move-orange-500">
                   <option value="participation">Certificate of Participation</option>
                   <option value="appreciation">Certificate of Appreciation</option>
+                  <option value="recognition">Certificate of Recognition</option>
                   <option value="membership">Certificate of Membership</option>
+                  <option value="custom">Custom Title</option>
                 </select>
               </div>
 
-              <!-- Border Style Theme -->
+              <!-- Quick Theme Preset -->
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Border &amp; Style Theme</label>
-                <select id="certThemeSelect" onchange="renderCertificatePreview()"
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Theme Palette</label>
+                <select id="certThemeSelect" onchange="handleQuickThemeChange(this.value)"
                         class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-move-orange-500">
                   <option value="move_official">MOVE Signature (Navy &amp; Radiant Orange)</option>
                   <option value="gold_navy">Classic Royal Gold &amp; Midnight Navy</option>
@@ -1189,16 +1311,16 @@
 
               <!-- Recipient Selector -->
               <div>
-                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Current Recipient</label>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Preview Attendee (Present)</label>
                 <div class="flex items-center gap-1">
-                  <button onclick="navigateCertRecipient(-1)" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 border rounded font-bold">
+                  <button type="button" onclick="navigateCertRecipient(-1)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border rounded-lg font-bold">
                     &larr;
                   </button>
                   <select id="certRecipientSelect" onchange="handleCertRecipientChange()"
                           class="flex-1 py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold truncate">
                     <!-- Populated dynamically with PRESENT participants -->
                   </select>
-                  <button onclick="navigateCertRecipient(1)" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 border rounded font-bold">
+                  <button type="button" onclick="navigateCertRecipient(1)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 border rounded-lg font-bold">
                     &rarr;
                   </button>
                 </div>
@@ -1206,15 +1328,511 @@
             </div>
           </div>
 
-          <!-- LIVE CERTIFICATE PREVIEW CONTAINER WITH BOTH REAL LOGOS -->
-          <div class="bg-slate-200/80 p-4 sm:p-8 rounded-2xl flex items-center justify-center overflow-x-auto no-print">
-            <div id="certificateFrame" class="w-full max-w-4xl bg-white aspect-[1.414/1] shadow-2xl rounded-sm p-6 sm:p-10 relative flex flex-col justify-between border-8 border-double border-move-navy-900 select-none">
-              <!-- Rendered dynamically -->
+          <!-- MAIN WORKSPACE: DESIGNER TOOLS & CERTIFICATE CANVAS -->
+          <div class="flex flex-col lg:flex-row gap-4 items-start">
+
+            <!-- DESIGNER DRAWER / TOOLBOX PANEL (TOGGLED IN EDIT MODE) -->
+            <div id="certDesignerPanel" class="w-full lg:w-96 bg-white rounded-2xl border border-slate-200 shadow-md p-4 space-y-4 shrink-0 hidden no-print">
+              <!-- Designer Header -->
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-move-orange-500 text-white flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-sliders"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-black text-move-navy-900 uppercase tracking-wider">Designer Toolbox</h4>
+                    <p class="text-[10px] text-slate-400">Live customization &amp; repositioning</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Edit Active</span>
+                </span>
+              </div>
+
+              <!-- Designer Tabs -->
+              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-bold overflow-x-auto">
+                <button type="button" onclick="switchDesignerTab('move')" id="tabBtn-move"
+                        class="cert-designer-tab-btn active px-2.5 py-1.5 rounded-lg flex-1 text-center transition whitespace-nowrap">
+                  <i class="fa-solid fa-up-down-left-right mr-1"></i>Move
+                </button>
+                <button type="button" onclick="switchDesignerTab('images')" id="tabBtn-images"
+                        class="cert-designer-tab-btn px-2.5 py-1.5 rounded-lg flex-1 text-center transition whitespace-nowrap">
+                  <i class="fa-solid fa-image mr-1"></i>Images
+                </button>
+                <button type="button" onclick="switchDesignerTab('text')" id="tabBtn-text"
+                        class="cert-designer-tab-btn px-2.5 py-1.5 rounded-lg flex-1 text-center transition whitespace-nowrap">
+                  <i class="fa-solid fa-font mr-1"></i>Text
+                </button>
+                <button type="button" onclick="switchDesignerTab('signatories')" id="tabBtn-signatories"
+                        class="cert-designer-tab-btn px-2.5 py-1.5 rounded-lg flex-1 text-center transition whitespace-nowrap">
+                  <i class="fa-solid fa-signature mr-1"></i>Signatures
+                </button>
+                <button type="button" onclick="switchDesignerTab('style')" id="tabBtn-style"
+                        class="cert-designer-tab-btn px-2.5 py-1.5 rounded-lg flex-1 text-center transition whitespace-nowrap">
+                  <i class="fa-solid fa-palette mr-1"></i>Border
+                </button>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- TAB 1: MOVE & REPOSITION ELEMENTS              -->
+              <!-- ============================================== -->
+              <div id="paneDesigner-move" class="space-y-3.5 text-xs">
+                <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+                  <i class="fa-solid fa-hand-pointer text-move-orange-500 mt-0.5"></i>
+                  <div>
+                    <strong>Interactive Drag:</strong> Click &amp; drag any element directly on the certificate canvas to reposition it freely, or use the fine-tune controls below:
+                  </div>
+                </div>
+
+                <!-- Element Selector -->
+                <div>
+                  <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Target Element to Nudge / Move</label>
+                  <select id="moveElementTargetSelect" onchange="handleMoveElementTargetChange(this.value)"
+                          class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-move-navy-900">
+                    <option value="title">Certificate Title ("CERTIFICATE OF...")</option>
+                    <option value="recipient">Recipient Name ("JUAN M. DELA CRUZ")</option>
+                    <option value="citation">Citation / Body Text Paragraph</option>
+                    <option value="header">Top Header Block (Logos &amp; Republic Text)</option>
+                    <option value="leftLogo">Left Logo (City Hall Seal)</option>
+                    <option value="rightLogo">Right Logo (MOVE Chapter Emblem)</option>
+                    <option value="signatories">Signatories &amp; Signatures Block</option>
+                    <option value="goldSeal">Official Gold Seal / Ribbon</option>
+                    <option value="watermark">Center Background Watermark</option>
+                  </select>
+                </div>
+
+                <!-- Nudge D-Pad Controls -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-2">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Precision Nudge Controls</span>
+                  <div class="flex flex-col items-center gap-1.5">
+                    <button type="button" onclick="nudgeActiveElement(0, -5)" title="Nudge Up 5px"
+                            class="w-10 h-8 rounded-lg bg-white border border-slate-300 shadow-2xs hover:bg-move-navy-900 hover:text-white transition flex items-center justify-center font-bold">
+                      <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                      <button type="button" onclick="nudgeActiveElement(-5, 0)" title="Nudge Left 5px"
+                              class="w-10 h-8 rounded-lg bg-white border border-slate-300 shadow-2xs hover:bg-move-navy-900 hover:text-white transition flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-arrow-left"></i>
+                      </button>
+                      <div class="w-12 text-[10px] font-mono text-slate-500 font-bold" id="lblActiveElementOffset">0, 0</div>
+                      <button type="button" onclick="nudgeActiveElement(5, 0)" title="Nudge Right 5px"
+                              class="w-10 h-8 rounded-lg bg-white border border-slate-300 shadow-2xs hover:bg-move-navy-900 hover:text-white transition flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-arrow-right"></i>
+                      </button>
+                    </div>
+                    <button type="button" onclick="nudgeActiveElement(0, 5)" title="Nudge Down 5px"
+                            class="w-10 h-8 rounded-lg bg-white border border-slate-300 shadow-2xs hover:bg-move-navy-900 hover:text-white transition flex items-center justify-center font-bold">
+                      <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Direct Offset Inputs -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase">X Offset (px)</label>
+                    <input type="number" id="inputOffsetX" onchange="syncOffsetFromInputs()" class="w-full py-1 px-2 border rounded-lg text-center font-mono">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Y Offset (px)</label>
+                    <input type="number" id="inputOffsetY" onchange="syncOffsetFromInputs()" class="w-full py-1 px-2 border rounded-lg text-center font-mono">
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                  <button type="button" onclick="resetActiveElementPosition()" class="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>Reset Target (0,0)
+                  </button>
+                  <button type="button" onclick="resetAllElementPositions()" class="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-lg text-xs transition border border-rose-200">
+                    Reset All
+                  </button>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- TAB 2: ATTACH IMAGES & LOGOS                    -->
+              <!-- ============================================== -->
+              <div id="paneDesigner-images" class="space-y-3.5 text-xs hidden">
+                <!-- 1. Left Logo (City Hall) -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-move-navy-900">Left Header Logo (City Seal)</span>
+                    <button type="button" onclick="resetImageSlot('leftLogo')" class="text-[10px] text-slate-400 hover:text-rose-600">Reset</button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg border p-1 shrink-0 flex items-center justify-center">
+                      <img id="thumbLeftLogo" src="CITY%20HALL%20LOGO.png" class="max-w-full max-h-full object-contain">
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <input type="file" id="uploadLeftLogoInput" accept="image/*" onchange="handleImageUpload(event, 'leftLogo')" class="hidden">
+                      <button type="button" onclick="document.getElementById('uploadLeftLogoInput').click()"
+                              class="w-full py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-upload text-move-orange-500"></i>Attach Custom Image
+                      </button>
+                      <div class="flex items-center gap-2 text-[10px]">
+                        <span class="text-slate-400">Size:</span>
+                        <input type="range" id="sizeLeftLogoSlider" min="40" max="130" value="76" oninput="handleImageSizeChange('leftLogo', this.value)" class="w-full accent-move-orange-500">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Right Logo (MOVE Logo) -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-move-navy-900">Right Header Logo (MOVE Emblem)</span>
+                    <button type="button" onclick="resetImageSlot('rightLogo')" class="text-[10px] text-slate-400 hover:text-rose-600">Reset</button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg border p-1 shrink-0 flex items-center justify-center">
+                      <img id="thumbRightLogo" src="MOVE%20BAGUIO%20LOGO.png" class="max-w-full max-h-full object-contain">
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <input type="file" id="uploadRightLogoInput" accept="image/*" onchange="handleImageUpload(event, 'rightLogo')" class="hidden">
+                      <button type="button" onclick="document.getElementById('uploadRightLogoInput').click()"
+                              class="w-full py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-upload text-move-orange-500"></i>Attach Custom Image
+                      </button>
+                      <div class="flex items-center gap-2 text-[10px]">
+                        <span class="text-slate-400">Size:</span>
+                        <input type="range" id="sizeRightLogoSlider" min="40" max="130" value="76" oninput="handleImageSizeChange('rightLogo', this.value)" class="w-full accent-move-orange-500">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Center Watermark -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 font-bold text-move-navy-900 cursor-pointer">
+                      <input type="checkbox" id="chkEnableWatermark" onchange="toggleWatermarkEnabled(this.checked)" class="rounded accent-move-orange-500">
+                      <span>Center Background Watermark</span>
+                    </label>
+                    <button type="button" onclick="resetImageSlot('watermark')" class="text-[10px] text-slate-400 hover:text-rose-600">Reset</button>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-lg border p-1 shrink-0 flex items-center justify-center">
+                      <img id="thumbWatermark" src="MOVE%20BAGUIO%20LOGO.png" class="max-w-full max-h-full object-contain opacity-40">
+                    </div>
+                    <div class="flex-1 space-y-1">
+                      <input type="file" id="uploadWatermarkInput" accept="image/*" onchange="handleImageUpload(event, 'watermark')" class="hidden">
+                      <button type="button" onclick="document.getElementById('uploadWatermarkInput').click()"
+                              class="w-full py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-upload text-move-orange-500"></i>Attach Custom Watermark
+                      </button>
+                      <div class="flex items-center gap-2 text-[10px]">
+                        <span class="text-slate-400">Opacity:</span>
+                        <input type="range" id="sliderWatermarkOpacity" min="3" max="35" value="10" oninput="handleWatermarkOpacityChange(this.value)" class="w-full accent-move-orange-500">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Digital Signature Signatory 1 -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-move-navy-900">Signatory 1 Digital Signature</span>
+                    <button type="button" onclick="removeSignatureImage('sig1')" class="text-[10px] text-rose-500 hover:underline">Remove</button>
+                  </div>
+                  <input type="file" id="uploadSig1Input" accept="image/*" onchange="handleImageUpload(event, 'sig1')" class="hidden">
+                  <button type="button" onclick="document.getElementById('uploadSig1Input').click()"
+                          class="w-full py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-file-signature text-move-orange-500"></i>Attach Signature PNG (President)
+                  </button>
+                </div>
+
+                <!-- 5. Digital Signature Signatory 2 -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-move-navy-900">Signatory 2 Digital Signature</span>
+                    <button type="button" onclick="removeSignatureImage('sig2')" class="text-[10px] text-rose-500 hover:underline">Remove</button>
+                  </div>
+                  <input type="file" id="uploadSig2Input" accept="image/*" onchange="handleImageUpload(event, 'sig2')" class="hidden">
+                  <button type="button" onclick="document.getElementById('uploadSig2Input').click()"
+                          class="w-full py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[11px] font-bold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-file-signature text-move-orange-500"></i>Attach Signature PNG (Mayor)
+                  </button>
+                </div>
+
+                <!-- 6. Official Gold Seal -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <label class="flex items-center gap-2 font-bold text-move-navy-900 cursor-pointer">
+                    <input type="checkbox" id="chkEnableGoldSeal" onchange="toggleGoldSealEnabled(this.checked)" checked class="rounded accent-move-orange-500">
+                    <span>Show Official Gold Embossed Seal</span>
+                  </label>
+                  <div class="flex items-center gap-2 text-[10px]">
+                    <span class="text-slate-400">Position:</span>
+                    <select id="selectGoldSealPos" onchange="handleGoldSealPosChange(this.value)" class="flex-1 py-1 px-2 border rounded-lg bg-white">
+                      <option value="bottom-center">Bottom Center (Classic)</option>
+                      <option value="bottom-left">Bottom Left Corner</option>
+                      <option value="bottom-right">Bottom Right Corner</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- TAB 3: TEXT & TYPOGRAPHY                       -->
+              <!-- ============================================== -->
+              <div id="paneDesigner-text" class="space-y-3.5 text-xs hidden">
+                <!-- Certificate Title -->
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Certificate Title Text</label>
+                  <input type="text" id="inputCertTitle" oninput="handleCertTitleTextInput(this.value)"
+                         class="w-full py-1.5 px-2 border border-slate-300 rounded-lg font-bold text-move-navy-900">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Title Font</label>
+                    <select id="selectTitleFontFamily" onchange="handleTitleFontChange(this.value)" class="w-full py-1 px-2 border rounded-lg bg-white">
+                      <option value="cinzel">Cinzel (Classical)</option>
+                      <option value="playfair">Playfair (Serif)</option>
+                      <option value="inter">Inter (Modern Sans)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase">Title Font Size</label>
+                    <input type="range" id="sliderTitleFontSize" min="20" max="42" value="28" oninput="handleTitleFontSizeChange(this.value)" class="w-full accent-move-orange-500 mt-2">
+                  </div>
+                </div>
+
+                <!-- Award Intro -->
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Intro Line</label>
+                  <input type="text" id="inputAwardIntro" oninput="handleAwardIntroInput(this.value)"
+                         class="w-full py-1.5 px-2 border border-slate-300 rounded-lg text-slate-700">
+                </div>
+
+                <!-- Recipient Formatting -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span class="font-bold text-move-navy-900 block">Recipient Name Style</span>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block mb-0.5">Font Style</span>
+                      <select id="selectRecipientFont" onchange="handleRecipientFontChange(this.value)" class="w-full py-1 px-2 border rounded-lg bg-white">
+                        <option value="cinzel">Cinzel (Bold Dignified)</option>
+                        <option value="playfair">Playfair Display</option>
+                        <option value="inter">Inter Clean</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block mb-0.5">Size: <span id="lblRecipientSize">34px</span></span>
+                      <input type="range" id="sliderRecipientSize" min="24" max="48" value="34" oninput="handleRecipientSizeChange(this.value)" class="w-full accent-move-orange-500 mt-1">
+                    </div>
+                  </div>
+                  <label class="flex items-center gap-2 text-[11px] cursor-pointer">
+                    <input type="checkbox" id="chkRecipientUnderline" onchange="handleRecipientUnderlineChange(this.checked)" checked class="rounded accent-move-orange-500">
+                    <span class="font-medium text-slate-700">Show Decorative Underline Accent</span>
+                  </label>
+                </div>
+
+                <!-- Body Citation Text -->
+                <div class="space-y-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Citation Lead Text</label>
+                  <textarea id="inputCitationLead" rows="2" oninput="handleCitationLeadInput(this.value)"
+                            class="w-full py-1.5 px-2 border border-slate-300 rounded-lg text-slate-700 leading-snug"></textarea>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-[10px] font-bold text-slate-500 uppercase">Citation Details Line (Tokens: {date}, {venue}, {duration})</label>
+                  <textarea id="inputCitationDetails" rows="2" oninput="handleCitationDetailsInput(this.value)"
+                            class="w-full py-1.5 px-2 border border-slate-300 rounded-lg text-slate-700 leading-snug"></textarea>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- TAB 4: SIGNATORIES & LEADERSHIP                -->
+              <!-- ============================================== -->
+              <div id="paneDesigner-signatories" class="space-y-3.5 text-xs hidden">
+                <!-- Signatory 1 -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span class="font-bold text-move-navy-900 block">Signatory 1 (Left: Chapter President)</span>
+                  <div>
+                    <span class="text-[10px] text-slate-400 block">Full Name:</span>
+                    <input type="text" id="inputSig1Name" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg font-bold">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Title:</span>
+                      <input type="text" id="inputSig1Title" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block">Agency / Office:</span>
+                      <input type="text" id="inputSig1Office" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Signatory 2 -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span class="font-bold text-move-navy-900 block">Signatory 2 (Right: City Mayor)</span>
+                  <div>
+                    <span class="text-[10px] text-slate-400 block">Full Name:</span>
+                    <input type="text" id="inputSig2Name" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg font-bold">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Title:</span>
+                      <input type="text" id="inputSig2Title" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block">Agency / Office:</span>
+                      <input type="text" id="inputSig2Office" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Signatory 3 (Optional) -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <label class="flex items-center gap-2 font-bold text-move-navy-900 cursor-pointer">
+                    <input type="checkbox" id="chkSig3Enable" onchange="toggleSig3Enabled(this.checked)" class="rounded accent-move-orange-500">
+                    <span>Include 3rd Signatory (Center: Vice Mayor / Guest)</span>
+                  </label>
+                  <div id="sig3InputsContainer" class="space-y-2 hidden pt-1">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Full Name:</span>
+                      <input type="text" id="inputSig3Name" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg font-bold">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[10px]">
+                      <div>
+                        <span class="text-slate-400 block">Title:</span>
+                        <input type="text" id="inputSig3Title" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                      </div>
+                      <div>
+                        <span class="text-slate-400 block">Agency:</span>
+                        <input type="text" id="inputSig3Office" oninput="handleSigUpdate()" class="w-full py-1 px-2 border rounded-lg">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- TAB 5: BORDER, FRAME & STYLES                  -->
+              <!-- ============================================== -->
+              <div id="paneDesigner-style" class="space-y-3.5 text-xs hidden">
+                <!-- Border Style & Colors -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+                  <span class="font-bold text-move-navy-900 block">Frame Border Styling</span>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Border Style</span>
+                      <select id="selectBorderStyle" onchange="handleBorderStyleChange(this.value)" class="w-full py-1 px-2 border rounded-lg bg-white">
+                        <option value="double">Double Classic</option>
+                        <option value="solid">Solid Bold</option>
+                        <option value="groove">Groove Inset</option>
+                        <option value="ridge">Ridge 3D</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block">Border Width (px)</span>
+                      <input type="range" id="sliderBorderWidth" min="4" max="16" value="8" oninput="handleBorderWidthChange(this.value)" class="w-full accent-move-orange-500 mt-2">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block mb-1">Outer Border Color</span>
+                      <div class="flex items-center gap-2">
+                        <input type="color" id="pickerOuterBorder" onchange="handleOuterBorderColorChange(this.value)" value="#091b38" class="w-8 h-8 rounded border cursor-pointer p-0">
+                        <span class="text-[10px] font-mono text-slate-500" id="lblOuterBorderColor">#091b38</span>
+                      </div>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block mb-1">Inner Accent Color</span>
+                      <div class="flex items-center gap-2">
+                        <input type="color" id="pickerInnerBorder" onchange="handleInnerBorderColorChange(this.value)" value="#f97316" class="w-8 h-8 rounded border cursor-pointer p-0">
+                        <span class="text-[10px] font-mono text-slate-500" id="lblInnerBorderColor">#f97316</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Background Tint -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span class="font-bold text-move-navy-900 block">Background Tone</span>
+                  <select id="selectBgTone" onchange="handleBgToneChange(this.value)" class="w-full py-1 px-2 border rounded-lg bg-white">
+                    <option value="#ffffff">Clean Bright White (#FFFFFF)</option>
+                    <option value="#fefce8">Warm Royal Ivory (#FEFCE8)</option>
+                    <option value="#f0fdf4">Baguio Pine Tint (#F0FDF4)</option>
+                    <option value="#f8fafc">Subtle Pearl Grey (#F8FAFC)</option>
+                  </select>
+                </div>
+
+                <!-- Corner Ornaments -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                  <span class="font-bold text-move-navy-900 block">Corner Emblems</span>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Ornament Type</span>
+                      <select id="selectCornerOrnament" onchange="handleCornerOrnamentChange(this.value)" class="w-full py-1 px-2 border rounded-lg bg-white">
+                        <option value="certificate">Medallion Rosette</option>
+                        <option value="star">Five-Point Star</option>
+                        <option value="none">None (Clean Corners)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block mb-1">Ornament Color</span>
+                      <input type="color" id="pickerCornerColor" onchange="handleCornerColorChange(this.value)" value="#f97316" class="w-8 h-8 rounded border cursor-pointer p-0">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LIVE CERTIFICATE PREVIEW CONTAINER WITH INTERACTIVE DRAG STAGE -->
+            <div class="flex-1 w-full bg-slate-200/80 p-4 sm:p-6 rounded-2xl flex flex-col items-center justify-center overflow-x-auto no-print min-h-[500px]">
+              <!-- Stage Notice Bar -->
+              <div id="certStageNoticeBar" class="w-full max-w-4xl pb-2.5 flex items-center justify-between text-xs text-slate-600 font-medium">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-move-navy-900" id="lblPreviewAttendeeSummary">JUAN M. DELA CRUZ (CBAO)</span>
+                  <span class="text-slate-400">&bull;</span>
+                  <span class="text-[11px] text-slate-500" id="lblPreviewTemplateName">Official MOVE Standard (2026)</span>
+                </div>
+                <div class="text-[11px] text-move-orange-600 font-bold hidden" id="lblDragInstructions">
+                  <i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>Edit Mode: Drag elements to move
+                </div>
+              </div>
+
+              <!-- Certificate Frame Canvas -->
+              <div id="certificateFrame" class="w-full max-w-4xl bg-white aspect-[1.414/1] shadow-2xl rounded-sm p-6 sm:p-10 relative flex flex-col justify-between border-8 border-double border-move-navy-900 select-none transition-all">
+                <!-- Rendered dynamically by renderCertificatePreview() -->
+              </div>
             </div>
           </div>
         </div>
 
         <!-- ============================================== -->
+        <!-- MODAL: SAVE CERTIFICATE AS NEW VERSION         -->
+        <!-- ============================================== -->
+        <div id="modalSaveCertVersion" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden no-print">
+          <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-scale-up">
+            <div class="p-4 bg-gradient-to-r from-move-navy-900 to-move-navy-800 text-white flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-copy text-move-orange-400"></i>
+                <h3 class="font-black text-sm uppercase tracking-wider">Save As New Template Version</h3>
+              </div>
+              <button onclick="closeModalSaveAsNewTemplate()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleConfirmSaveAsNewTemplate(event)" class="p-5 space-y-4 text-xs">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Template Version Name</label>
+                <input type="text" id="inputNewVersionName" required placeholder="e.g. 2026 Anti-VAWC Standard, Speaker Plaque v2..."
+                       class="w-full py-2 px-3 border border-slate-300 rounded-xl text-sm font-semibold text-move-navy-900 focus:ring-2 focus:ring-move-orange-500">
+                <p class="text-[11px] text-slate-400 mt-1">This version will be saved in your browser and available anytime from the template dropdown.</p>
+              </div>
+              <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModalSaveAsNewTemplate()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white font-bold transition shadow-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-check"></i>Save Template Version
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- VIEW 6: 50-PARTICIPANT FILTER ROSTER ENGINE    -->
         <!-- ============================================== -->
         <div id="pageRoster" class="space-y-4 hidden">
@@ -3289,294 +3907,1368 @@
       showToast(`Activity "${title}" created with ${participants.length} participants!`, 'fa-calendar-check');
     }
 
-    // --- CERTIFICATE STUDIO ENGINE (FEATURING BOTH REAL LOGOS) ---
+    
+    // ==============================================================================
+    // --- CERTIFICATE STUDIO & DESIGNER ENGINE (FULL VERSIONED SUITE) ---
+    // ==============================================================================
+
+    const DEFAULT_CERT_TEMPLATES = {
+      'move_official_2026': {
+        id: 'move_official_2026',
+        name: 'Official MOVE Standard (2026)',
+        isBuiltIn: true,
+        theme: {
+          outerBorderColor: '#091b38',
+          innerBorderColor: '#f97316',
+          borderStyle: 'double',
+          borderWidth: 8,
+          backgroundColor: '#ffffff',
+          cornerOrnament: 'certificate',
+          cornerColor: '#f97316'
+        },
+        header: {
+          republicText: 'Republic of the Philippines',
+          cityText: 'City Government of Baguio',
+          chapterText: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+          subText: 'City Hall Chapter • Baguio City, Philippines',
+          leftLogo: 'CITY%20HALL%20LOGO.png',
+          leftLogoWidth: 76,
+          rightLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          rightLogoWidth: 76,
+          watermarkLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          watermarkOpacity: 10,
+          watermarkEnabled: false,
+          goldSeal: true,
+          goldSealPosition: 'bottom-center'
+        },
+        title: {
+          type: 'participation',
+          customTitle: 'CERTIFICATE OF PARTICIPATION',
+          fontFamily: 'cinzel',
+          color: '#091b38',
+          accentColor: '#f97316',
+          fontSize: 28,
+          introText: 'This certificate is proudly awarded to'
+        },
+        recipient: {
+          fontFamily: 'cinzel',
+          fontSize: 34,
+          color: '#091b38',
+          underline: true,
+          underlineColor: '#f97316',
+          subtitleColor: '#ea580c'
+        },
+        citation: {
+          leadText: 'for actively participating and successfully completing the capacity-building seminar on',
+          customEventTitle: '',
+          detailTemplate: 'Conducted on {date} at {venue} with an equivalent duration of {duration}.',
+          fontSize: 13,
+          color: '#334155'
+        },
+        signatories: {
+          sig1Name: 'DAN RICKY M. ONG',
+          sig1Title: 'MOVE Chapter President',
+          sig1Office: 'City Government of Baguio',
+          sig1SignatureImage: '',
+          sig2Name: 'HON. BENJAMIN B. MAGALONG',
+          sig2Title: 'City Mayor',
+          sig2Office: 'City Government of Baguio',
+          sig2SignatureImage: '',
+          sig3Enabled: false,
+          sig3Name: 'HON. FAUSTINO A. OLOWAN',
+          sig3Title: 'City Vice Mayor',
+          sig3Office: 'City Government of Baguio',
+          sig3SignatureImage: ''
+        },
+        offsets: {
+          header: { x: 0, y: 0 },
+          title: { x: 0, y: 0 },
+          recipient: { x: 0, y: 0 },
+          citation: { x: 0, y: 0 },
+          signatories: { x: 0, y: 0 },
+          leftLogo: { x: 0, y: 0 },
+          rightLogo: { x: 0, y: 0 },
+          goldSeal: { x: 0, y: 0 },
+          watermark: { x: 0, y: 0 }
+        }
+      },
+      'gold_appreciation': {
+        id: 'gold_appreciation',
+        name: 'Executive Gold & Navy (Appreciation)',
+        isBuiltIn: true,
+        theme: {
+          outerBorderColor: '#78350f',
+          innerBorderColor: '#d97706',
+          borderStyle: 'double',
+          borderWidth: 10,
+          backgroundColor: '#fefce8',
+          cornerOrnament: 'certificate',
+          cornerColor: '#d97706'
+        },
+        header: {
+          republicText: 'Republic of the Philippines',
+          cityText: 'City Government of Baguio',
+          chapterText: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+          subText: 'City Hall Chapter • Baguio City, Philippines',
+          leftLogo: 'CITY%20HALL%20LOGO.png',
+          leftLogoWidth: 76,
+          rightLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          rightLogoWidth: 76,
+          watermarkLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          watermarkOpacity: 12,
+          watermarkEnabled: false,
+          goldSeal: true,
+          goldSealPosition: 'bottom-center'
+        },
+        title: {
+          type: 'appreciation',
+          customTitle: 'CERTIFICATE OF APPRECIATION',
+          fontFamily: 'cinzel',
+          color: '#78350f',
+          accentColor: '#d97706',
+          fontSize: 28,
+          introText: 'In grateful recognition and profound appreciation to'
+        },
+        recipient: {
+          fontFamily: 'cinzel',
+          fontSize: 34,
+          color: '#78350f',
+          underline: true,
+          underlineColor: '#d97706',
+          subtitleColor: '#b45309'
+        },
+        citation: {
+          leadText: 'for his invaluable contribution and dedicated leadership during the implementation of',
+          customEventTitle: '',
+          detailTemplate: 'Conducted on {date} at {venue} with an equivalent duration of {duration}.',
+          fontSize: 13,
+          color: '#451a03'
+        },
+        signatories: {
+          sig1Name: 'DAN RICKY M. ONG',
+          sig1Title: 'MOVE Chapter President',
+          sig1Office: 'City Government of Baguio',
+          sig1SignatureImage: '',
+          sig2Name: 'HON. BENJAMIN B. MAGALONG',
+          sig2Title: 'City Mayor',
+          sig2Office: 'City Government of Baguio',
+          sig2SignatureImage: '',
+          sig3Enabled: false,
+          sig3Name: 'HON. FAUSTINO A. OLOWAN',
+          sig3Title: 'City Vice Mayor',
+          sig3Office: 'City Government of Baguio',
+          sig3SignatureImage: ''
+        },
+        offsets: {
+          header: { x: 0, y: 0 },
+          title: { x: 0, y: 0 },
+          recipient: { x: 0, y: 0 },
+          citation: { x: 0, y: 0 },
+          signatories: { x: 0, y: 0 },
+          leftLogo: { x: 0, y: 0 },
+          rightLogo: { x: 0, y: 0 },
+          goldSeal: { x: 0, y: 0 },
+          watermark: { x: 0, y: 0 }
+        }
+      },
+      'pine_green_heritage': {
+        id: 'pine_green_heritage',
+        name: 'Baguio Pine Heritage (Green & Gold)',
+        isBuiltIn: true,
+        theme: {
+          outerBorderColor: '#064e3b',
+          innerBorderColor: '#059669',
+          borderStyle: 'double',
+          borderWidth: 8,
+          backgroundColor: '#f0fdf4',
+          cornerOrnament: 'star',
+          cornerColor: '#059669'
+        },
+        header: {
+          republicText: 'Republic of the Philippines',
+          cityText: 'City Government of Baguio',
+          chapterText: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+          subText: 'City Hall Chapter • Baguio City, Philippines',
+          leftLogo: 'CITY%20HALL%20LOGO.png',
+          leftLogoWidth: 76,
+          rightLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          rightLogoWidth: 76,
+          watermarkLogo: 'MOVE%20BAGUIO%20LOGO.png',
+          watermarkOpacity: 10,
+          watermarkEnabled: false,
+          goldSeal: true,
+          goldSealPosition: 'bottom-center'
+        },
+        title: {
+          type: 'recognition',
+          customTitle: 'CERTIFICATE OF RECOGNITION',
+          fontFamily: 'cinzel',
+          color: '#064e3b',
+          accentColor: '#059669',
+          fontSize: 28,
+          introText: 'This certificate of recognition is proudly presented to'
+        },
+        recipient: {
+          fontFamily: 'cinzel',
+          fontSize: 34,
+          color: '#064e3b',
+          underline: true,
+          underlineColor: '#059669',
+          subtitleColor: '#047857'
+        },
+        citation: {
+          leadText: 'for exemplary advocacy and active participation in promoting a VAW-free community during',
+          customEventTitle: '',
+          detailTemplate: 'Conducted on {date} at {venue} with an equivalent duration of {duration}.',
+          fontSize: 13,
+          color: '#064e3b'
+        },
+        signatories: {
+          sig1Name: 'DAN RICKY M. ONG',
+          sig1Title: 'MOVE Chapter President',
+          sig1Office: 'City Government of Baguio',
+          sig1SignatureImage: '',
+          sig2Name: 'HON. BENJAMIN B. MAGALONG',
+          sig2Title: 'City Mayor',
+          sig2Office: 'City Government of Baguio',
+          sig2SignatureImage: '',
+          sig3Enabled: false,
+          sig3Name: 'HON. FAUSTINO A. OLOWAN',
+          sig3Title: 'City Vice Mayor',
+          sig3Office: 'City Government of Baguio',
+          sig3SignatureImage: ''
+        },
+        offsets: {
+          header: { x: 0, y: 0 },
+          title: { x: 0, y: 0 },
+          recipient: { x: 0, y: 0 },
+          citation: { x: 0, y: 0 },
+          signatories: { x: 0, y: 0 },
+          leftLogo: { x: 0, y: 0 },
+          rightLogo: { x: 0, y: 0 },
+          goldSeal: { x: 0, y: 0 },
+          watermark: { x: 0, y: 0 }
+        }
+      }
+    };
+
+    let allCertTemplates = {};
+    let activeCertTemplateId = 'move_official_2026';
+    let currentCertTemplate = JSON.parse(JSON.stringify(DEFAULT_CERT_TEMPLATES['move_official_2026']));
+    let isCertEditMode = false;
+    let activeMoveElementKey = 'title';
+
+    // Drag tracking variables
+    let isDraggingCertElement = false;
+    let activeDragElementKey = null;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragElemInitX = 0;
+    let dragElemInitY = 0;
+
     function initCertificateStudio() {
+      // 1. Load Templates from Storage
+      loadAllCertTemplates();
+
+      // 2. Populate Activities
       const actSelect = document.getElementById('certActivitySelect');
-      actSelect.innerHTML = '';
-      activitiesList.forEach(act => {
-        const opt = document.createElement('option');
-        opt.value = act.id;
-        opt.textContent = `${act.date} - ${act.title}`;
-        actSelect.appendChild(opt);
-      });
+      if (actSelect) {
+        actSelect.innerHTML = '';
+        activitiesList.forEach(act => {
+          const opt = document.createElement('option');
+          opt.value = act.id;
+          opt.textContent = `${act.date} - ${act.title}`;
+          actSelect.appendChild(opt);
+        });
+      }
 
+      // 3. Render Version Dropdown
+      renderCertVersionSelect();
+
+      // 4. Populate Attendees for Active Activity
       handleCertActivityChange();
+
+      // 5. Initialize Drag Listeners
+      initCertDragListeners();
     }
 
-    function handleCertActivityChange() {
-      const actId = document.getElementById('certActivitySelect').value;
-      const act = activitiesList.find(a => a.id === actId);
-      if (!act) return;
+    function loadAllCertTemplates() {
+      allCertTemplates = JSON.parse(JSON.stringify(DEFAULT_CERT_TEMPLATES));
+      try {
+        const stored = localStorage.getItem('move_certificate_templates_v2');
+        if (stored) {
+          const customTpls = JSON.parse(stored);
+          Object.keys(customTpls).forEach(k => {
+            allCertTemplates[k] = customTpls[k];
+          });
+        }
+      } catch(e) {
+        console.warn('Error loading custom certificate templates:', e);
+      }
 
-      const presentList = act.participants.filter(p => p.isPresent);
-      const recSelect = document.getElementById('certRecipientSelect');
-      recSelect.innerHTML = '';
+      const savedActiveId = localStorage.getItem('move_active_cert_template_id');
+      if (savedActiveId && allCertTemplates[savedActiveId]) {
+        activeCertTemplateId = savedActiveId;
+      } else {
+        activeCertTemplateId = 'move_official_2026';
+      }
 
-      presentList.forEach((p, idx) => {
+      currentCertTemplate = JSON.parse(JSON.stringify(allCertTemplates[activeCertTemplateId]));
+    }
+
+    function saveTemplatesToStorage() {
+      try {
+        const customOnly = {};
+        Object.keys(allCertTemplates).forEach(k => {
+          if (!allCertTemplates[k].isBuiltIn) {
+            customOnly[k] = allCertTemplates[k];
+          }
+        });
+        localStorage.setItem('move_certificate_templates_v2', JSON.stringify(customOnly));
+        localStorage.setItem('move_active_cert_template_id', activeCertTemplateId);
+      } catch(e) {
+        console.warn('Error saving templates to localStorage:', e);
+      }
+    }
+
+    function renderCertVersionSelect() {
+      const sel = document.getElementById('certVersionSelect');
+      if (!sel) return;
+      sel.innerHTML = '';
+
+      const builtInGroup = document.createElement('optgroup');
+      builtInGroup.label = 'Built-in Presets';
+
+      const customGroup = document.createElement('optgroup');
+      customGroup.label = 'Custom Saved Versions';
+
+      let hasCustom = false;
+      Object.keys(allCertTemplates).forEach(k => {
+        const t = allCertTemplates[k];
         const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = `${idx + 1}. ${p.name} (${p.office})`;
-        recSelect.appendChild(opt);
+        opt.value = t.id;
+        opt.textContent = t.name + (t.isBuiltIn ? '' : ' (Custom)');
+        if (t.isBuiltIn) {
+          builtInGroup.appendChild(opt);
+        } else {
+          customGroup.appendChild(opt);
+          hasCustom = true;
+        }
       });
 
-      document.getElementById('btnBatchPrintText').textContent = `Batch Print All Present (${presentList.length})`;
-      certCurrentRecipientIndex = 0;
+      sel.appendChild(builtInGroup);
+      if (hasCustom) sel.appendChild(customGroup);
+      sel.value = activeCertTemplateId;
+
+      updateVersionBadge();
+    }
+
+    function updateVersionBadge() {
+      const badge = document.getElementById('badgeCurrentVersionStatus');
+      const delBtn = document.getElementById('btnDeleteCertVersion');
+      const isCustom = !currentCertTemplate.isBuiltIn;
+
+      if (badge) {
+        if (isCustom) {
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+          badge.textContent = 'Custom Version';
+        } else {
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-black bg-move-navy-100 text-move-navy-800 border border-move-navy-200';
+          badge.textContent = 'Built-in Preset';
+        }
+      }
+
+      if (delBtn) {
+        if (isCustom) delBtn.classList.remove('hidden');
+        else delBtn.classList.add('hidden');
+      }
+
+      const previewName = document.getElementById('lblPreviewTemplateName');
+      if (previewName) previewName.textContent = currentCertTemplate.name;
+    }
+
+    function handleCertVersionChange(tplId) {
+      if (!allCertTemplates[tplId]) return;
+      activeCertTemplateId = tplId;
+      currentCertTemplate = JSON.parse(JSON.stringify(allCertTemplates[tplId]));
+      localStorage.setItem('move_active_cert_template_id', tplId);
+      updateVersionBadge();
+      syncDesignerInputsFromTemplate();
+      renderCertificatePreview();
+      showToast(`Loaded version "${currentCertTemplate.name}"`, 'fa-layer-group');
+    }
+
+    function saveCurrentCertTemplate() {
+      if (currentCertTemplate.isBuiltIn) {
+        // Built-ins cannot be overwritten directly - prompt to save as a new version
+        openModalSaveAsNewTemplate();
+        showToast('Saving as a new custom version...', 'fa-copy');
+        return;
+      }
+
+      // Overwrite custom template
+      allCertTemplates[currentCertTemplate.id] = JSON.parse(JSON.stringify(currentCertTemplate));
+      saveTemplatesToStorage();
+      renderCertVersionSelect();
+      showToast(`Saved version "${currentCertTemplate.name}" successfully!`, 'fa-floppy-disk');
+    }
+
+    function openModalSaveAsNewTemplate() {
+      const modal = document.getElementById('modalSaveCertVersion');
+      const input = document.getElementById('inputNewVersionName');
+      if (input) {
+        input.value = currentCertTemplate.name.replace(' (Custom)', '') + ' (Copy)';
+      }
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeModalSaveAsNewTemplate() {
+      const modal = document.getElementById('modalSaveCertVersion');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleConfirmSaveAsNewTemplate(ev) {
+      ev.preventDefault();
+      const input = document.getElementById('inputNewVersionName');
+      const vName = (input ? input.value : '').trim();
+      if (!vName) return;
+
+      const newId = 'custom_tpl_' + Date.now();
+      const newTemplate = JSON.parse(JSON.stringify(currentCertTemplate));
+      newTemplate.id = newId;
+      newTemplate.name = vName;
+      newTemplate.isBuiltIn = false;
+
+      allCertTemplates[newId] = newTemplate;
+      activeCertTemplateId = newId;
+      currentCertTemplate = newTemplate;
+
+      saveTemplatesToStorage();
+      renderCertVersionSelect();
+      closeModalSaveAsNewTemplate();
+      updateVersionBadge();
+      renderCertificatePreview();
+
+      showToast(`Created & saved new version "${vName}"!`, 'fa-circle-check');
+    }
+
+    function deleteCurrentCertTemplate() {
+      if (currentCertTemplate.isBuiltIn) return;
+      if (!confirm(`Are you sure you want to delete custom version "${currentCertTemplate.name}"?`)) return;
+
+      delete allCertTemplates[currentCertTemplate.id];
+      saveTemplatesToStorage();
+
+      activeCertTemplateId = 'move_official_2026';
+      currentCertTemplate = JSON.parse(JSON.stringify(allCertTemplates['move_official_2026']));
+      renderCertVersionSelect();
+      syncDesignerInputsFromTemplate();
+      renderCertificatePreview();
+
+      showToast('Version deleted. Reverted to Official MOVE Standard.', 'fa-trash-can');
+    }
+
+    function resetCurrentCertTemplate() {
+      if (DEFAULT_CERT_TEMPLATES[currentCertTemplate.id]) {
+        currentCertTemplate = JSON.parse(JSON.stringify(DEFAULT_CERT_TEMPLATES[currentCertTemplate.id]));
+      } else {
+        currentCertTemplate.offsets = {
+          header: { x: 0, y: 0 },
+          title: { x: 0, y: 0 },
+          recipient: { x: 0, y: 0 },
+          citation: { x: 0, y: 0 },
+          signatories: { x: 0, y: 0 },
+          leftLogo: { x: 0, y: 0 },
+          rightLogo: { x: 0, y: 0 },
+          goldSeal: { x: 0, y: 0 },
+          watermark: { x: 0, y: 0 }
+        };
+      }
+      syncDesignerInputsFromTemplate();
+      renderCertificatePreview();
+      showToast('Template offsets and layout reset to default.', 'fa-rotate-left');
+    }
+
+    // --- TOGGLE DESIGNER / EDIT MODE ---
+    function toggleCertEditMode() {
+      isCertEditMode = !isCertEditMode;
+      const panel = document.getElementById('certDesignerPanel');
+      const btn = document.getElementById('btnToggleCertEdit');
+      const lbl = document.getElementById('lblCertEditMode');
+      const icon = document.getElementById('iconCertEditBtn');
+      const frame = document.getElementById('certificateFrame');
+      const dragHint = document.getElementById('lblDragInstructions');
+
+      if (isCertEditMode) {
+        if (panel) panel.classList.remove('hidden');
+        if (frame) frame.classList.add('cert-edit-active');
+        if (btn) {
+          btn.className = 'px-4 py-2 rounded-xl font-black flex items-center gap-2 transition bg-move-navy-900 hover:bg-move-navy-950 text-white shadow-md border border-move-orange-400';
+        }
+        if (lbl) lbl.textContent = 'Exit Designer Mode';
+        if (icon) icon.className = 'fa-solid fa-check text-emerald-400';
+        if (dragHint) dragHint.classList.remove('hidden');
+
+        syncDesignerInputsFromTemplate();
+        showToast('Designer Mode Active: Click and drag any element to move it freely!', 'fa-pen-ruler');
+      } else {
+        if (panel) panel.classList.add('hidden');
+        if (frame) frame.classList.remove('cert-edit-active');
+        if (btn) {
+          btn.className = 'px-4 py-2 rounded-xl font-black flex items-center gap-2 transition bg-move-orange-500 hover:bg-move-orange-600 text-white shadow-md';
+        }
+        if (lbl) lbl.textContent = 'Enable Designer / Edit Mode';
+        if (icon) icon.className = 'fa-solid fa-pen-ruler';
+        if (dragHint) dragHint.classList.add('hidden');
+      }
+
       renderCertificatePreview();
     }
 
-    function handleCertRecipientChange() {
-      certCurrentRecipientIndex = parseInt(document.getElementById('certRecipientSelect').value) || 0;
+    function switchDesignerTab(tabKey) {
+      const tabs = ['move', 'images', 'text', 'signatories', 'style'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tabBtn-' + t);
+        const pane = document.getElementById('paneDesigner-' + t);
+        if (btn) {
+          if (t === tabKey) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+        if (pane) {
+          if (t === tabKey) pane.classList.remove('hidden');
+          else pane.classList.add('hidden');
+        }
+      });
+    }
+
+    // --- DRAG & DROP REPOSITIONING LISTENERS ---
+    function initCertDragListeners() {
+      const frame = document.getElementById('certificateFrame');
+      if (!frame) return;
+
+      frame.addEventListener('mousedown', (e) => {
+        if (!isCertEditMode) return;
+        const targetEl = e.target.closest('[data-cert-element]');
+        if (!targetEl) return;
+
+        activeDragElementKey = targetEl.getAttribute('data-cert-element');
+        isDraggingCertElement = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+
+        if (!currentCertTemplate.offsets[activeDragElementKey]) {
+          currentCertTemplate.offsets[activeDragElementKey] = { x: 0, y: 0 };
+        }
+        dragElemInitX = currentCertTemplate.offsets[activeDragElementKey].x || 0;
+        dragElemInitY = currentCertTemplate.offsets[activeDragElementKey].y || 0;
+
+        // Visual selection
+        frame.querySelectorAll('[data-cert-element]').forEach(el => el.classList.remove('is-selected-element'));
+        targetEl.classList.add('is-selected-element', 'is-dragging');
+
+        // Select in designer dropdown
+        activeMoveElementKey = activeDragElementKey;
+        const sel = document.getElementById('moveElementTargetSelect');
+        if (sel) sel.value = activeDragElementKey;
+        updateOffsetLabels();
+
+        e.preventDefault();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingCertElement || !activeDragElementKey || !isCertEditMode) return;
+        const dx = Math.round(e.clientX - dragStartX);
+        const dy = Math.round(e.clientY - dragStartY);
+
+        currentCertTemplate.offsets[activeDragElementKey].x = dragElemInitX + dx;
+        currentCertTemplate.offsets[activeDragElementKey].y = dragElemInitY + dy;
+
+        const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
+        if (targetEl) {
+          targetEl.style.transform = `translate(${currentCertTemplate.offsets[activeDragElementKey].x}px, ${currentCertTemplate.offsets[activeDragElementKey].y}px)`;
+        }
+        updateOffsetLabels();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDraggingCertElement && activeDragElementKey) {
+          const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
+          if (targetEl) targetEl.classList.remove('is-dragging');
+          isDraggingCertElement = false;
+        }
+      });
+    }
+
+    function handleMoveElementTargetChange(key) {
+      activeMoveElementKey = key;
+      updateOffsetLabels();
+
+      const frame = document.getElementById('certificateFrame');
+      if (frame) {
+        frame.querySelectorAll('[data-cert-element]').forEach(el => el.classList.remove('is-selected-element'));
+        const el = frame.querySelector(`[data-cert-element="${key}"]`);
+        if (el) el.classList.add('is-selected-element');
+      }
+    }
+
+    function nudgeActiveElement(dx, dy) {
+      if (!currentCertTemplate.offsets[activeMoveElementKey]) {
+        currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
+      }
+      currentCertTemplate.offsets[activeMoveElementKey].x += dx;
+      currentCertTemplate.offsets[activeMoveElementKey].y += dy;
+
+      renderCertificatePreview();
+      updateOffsetLabels();
+    }
+
+    function syncOffsetFromInputs() {
+      const ix = parseInt(document.getElementById('inputOffsetX').value) || 0;
+      const iy = parseInt(document.getElementById('inputOffsetY').value) || 0;
+      if (!currentCertTemplate.offsets[activeMoveElementKey]) {
+        currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
+      }
+      currentCertTemplate.offsets[activeMoveElementKey].x = ix;
+      currentCertTemplate.offsets[activeMoveElementKey].y = iy;
+
+      renderCertificatePreview();
+      updateOffsetLabels();
+    }
+
+    function resetActiveElementPosition() {
+      if (!currentCertTemplate.offsets[activeMoveElementKey]) {
+        currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
+      }
+      currentCertTemplate.offsets[activeMoveElementKey].x = 0;
+      currentCertTemplate.offsets[activeMoveElementKey].y = 0;
+      renderCertificatePreview();
+      updateOffsetLabels();
+      showToast(`Position reset for ${activeMoveElementKey}`, 'fa-rotate-left');
+    }
+
+    function resetAllElementPositions() {
+      Object.keys(currentCertTemplate.offsets).forEach(k => {
+        currentCertTemplate.offsets[k] = { x: 0, y: 0 };
+      });
+      renderCertificatePreview();
+      updateOffsetLabels();
+      showToast('All element offsets reset to (0, 0)', 'fa-rotate-left');
+    }
+
+    function updateOffsetLabels() {
+      const off = (currentCertTemplate.offsets[activeMoveElementKey]) || { x: 0, y: 0 };
+      const lbl = document.getElementById('lblActiveElementOffset');
+      const ix = document.getElementById('inputOffsetX');
+      const iy = document.getElementById('inputOffsetY');
+
+      if (lbl) lbl.textContent = `${off.x}, ${off.y}`;
+      if (ix) ix.value = off.x;
+      if (iy) iy.value = off.y;
+    }
+
+    // --- IMAGE ATTACHMENT HANDLERS ---
+    function handleImageUpload(ev, slotKey) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        if (slotKey === 'leftLogo') {
+          currentCertTemplate.header.leftLogo = dataUrl;
+          const th = document.getElementById('thumbLeftLogo');
+          if (th) th.src = dataUrl;
+        } else if (slotKey === 'rightLogo') {
+          currentCertTemplate.header.rightLogo = dataUrl;
+          const th = document.getElementById('thumbRightLogo');
+          if (th) th.src = dataUrl;
+        } else if (slotKey === 'watermark') {
+          currentCertTemplate.header.watermarkLogo = dataUrl;
+          currentCertTemplate.header.watermarkEnabled = true;
+          const chk = document.getElementById('chkEnableWatermark');
+          if (chk) chk.checked = true;
+          const th = document.getElementById('thumbWatermark');
+          if (th) th.src = dataUrl;
+        } else if (slotKey === 'sig1') {
+          currentCertTemplate.signatories.sig1SignatureImage = dataUrl;
+        } else if (slotKey === 'sig2') {
+          currentCertTemplate.signatories.sig2SignatureImage = dataUrl;
+        }
+
+        renderCertificatePreview();
+        showToast('Image attached successfully!', 'fa-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetImageSlot(slotKey) {
+      if (slotKey === 'leftLogo') {
+        currentCertTemplate.header.leftLogo = 'CITY%20HALL%20LOGO.png';
+        const th = document.getElementById('thumbLeftLogo');
+        if (th) th.src = 'CITY%20HALL%20LOGO.png';
+      } else if (slotKey === 'rightLogo') {
+        currentCertTemplate.header.rightLogo = 'MOVE%20BAGUIO%20LOGO.png';
+        const th = document.getElementById('thumbRightLogo');
+        if (th) th.src = 'MOVE%20BAGUIO%20LOGO.png';
+      } else if (slotKey === 'watermark') {
+        currentCertTemplate.header.watermarkLogo = 'MOVE%20BAGUIO%20LOGO.png';
+        currentCertTemplate.header.watermarkEnabled = false;
+        const chk = document.getElementById('chkEnableWatermark');
+        if (chk) chk.checked = false;
+      }
+      renderCertificatePreview();
+      showToast('Image reset to default', 'fa-rotate-left');
+    }
+
+    function removeSignatureImage(sigKey) {
+      if (sigKey === 'sig1') {
+        currentCertTemplate.signatories.sig1SignatureImage = '';
+      } else if (sigKey === 'sig2') {
+        currentCertTemplate.signatories.sig2SignatureImage = '';
+      }
+      renderCertificatePreview();
+      showToast('Digital signature removed', 'fa-trash-can');
+    }
+
+    function handleImageSizeChange(slot, val) {
+      const w = parseInt(val) || 76;
+      if (slot === 'leftLogo') currentCertTemplate.header.leftLogoWidth = w;
+      if (slot === 'rightLogo') currentCertTemplate.header.rightLogoWidth = w;
       renderCertificatePreview();
     }
 
-    function navigateCertRecipient(delta) {
-      const actId = document.getElementById('certActivitySelect').value;
-      const act = activitiesList.find(a => a.id === actId);
-      if (!act) return;
-      const presentList = act.participants.filter(p => p.isPresent);
-      if (presentList.length === 0) return;
-
-      certCurrentRecipientIndex = (certCurrentRecipientIndex + delta + presentList.length) % presentList.length;
-      document.getElementById('certRecipientSelect').value = certCurrentRecipientIndex;
+    function toggleWatermarkEnabled(val) {
+      currentCertTemplate.header.watermarkEnabled = val;
       renderCertificatePreview();
     }
 
-    function renderCertificatePreview() {
-      const actId = document.getElementById('certActivitySelect').value;
-      const act = activitiesList.find(a => a.id === actId);
-      if (!act) return;
+    function handleWatermarkOpacityChange(val) {
+      currentCertTemplate.header.watermarkOpacity = parseInt(val) || 10;
+      renderCertificatePreview();
+    }
 
-      const presentList = act.participants.filter(p => p.isPresent);
-      const recipient = presentList[certCurrentRecipientIndex] || { name: 'JUAN M. DELA CRUZ', office: 'CBAO' };
-      const certType = document.getElementById('certTypeSelect').value;
-      const certTheme = document.getElementById('certThemeSelect').value;
+    function toggleGoldSealEnabled(val) {
+      currentCertTemplate.header.goldSeal = val;
+      renderCertificatePreview();
+    }
 
+    function handleGoldSealPosChange(val) {
+      currentCertTemplate.header.goldSealPosition = val;
+      renderCertificatePreview();
+    }
+
+    // --- TEXT & CONTENT HANDLERS ---
+    function handleCertTitleTextInput(val) {
+      currentCertTemplate.title.customTitle = val;
+      renderCertificatePreview();
+    }
+
+    function handleTitleFontChange(val) {
+      currentCertTemplate.title.fontFamily = val;
+      renderCertificatePreview();
+    }
+
+    function handleTitleFontSizeChange(val) {
+      currentCertTemplate.title.fontSize = parseInt(val) || 28;
+      renderCertificatePreview();
+    }
+
+    function handleAwardIntroInput(val) {
+      currentCertTemplate.title.introText = val;
+      renderCertificatePreview();
+    }
+
+    function handleRecipientFontChange(val) {
+      currentCertTemplate.recipient.fontFamily = val;
+      renderCertificatePreview();
+    }
+
+    function handleRecipientSizeChange(val) {
+      const sz = parseInt(val) || 34;
+      currentCertTemplate.recipient.fontSize = sz;
+      const lbl = document.getElementById('lblRecipientSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      renderCertificatePreview();
+    }
+
+    function handleRecipientUnderlineChange(val) {
+      currentCertTemplate.recipient.underline = val;
+      renderCertificatePreview();
+    }
+
+    function handleCitationLeadInput(val) {
+      currentCertTemplate.citation.leadText = val;
+      renderCertificatePreview();
+    }
+
+    function handleCitationDetailsInput(val) {
+      currentCertTemplate.citation.detailTemplate = val;
+      renderCertificatePreview();
+    }
+
+    // --- SIGNATORIES HANDLERS ---
+    function handleSigUpdate() {
+      currentCertTemplate.signatories.sig1Name = (document.getElementById('inputSig1Name').value || '').trim();
+      currentCertTemplate.signatories.sig1Title = (document.getElementById('inputSig1Title').value || '').trim();
+      currentCertTemplate.signatories.sig1Office = (document.getElementById('inputSig1Office').value || '').trim();
+
+      currentCertTemplate.signatories.sig2Name = (document.getElementById('inputSig2Name').value || '').trim();
+      currentCertTemplate.signatories.sig2Title = (document.getElementById('inputSig2Title').value || '').trim();
+      currentCertTemplate.signatories.sig2Office = (document.getElementById('inputSig2Office').value || '').trim();
+
+      currentCertTemplate.signatories.sig3Name = (document.getElementById('inputSig3Name').value || '').trim();
+      currentCertTemplate.signatories.sig3Title = (document.getElementById('inputSig3Title').value || '').trim();
+      currentCertTemplate.signatories.sig3Office = (document.getElementById('inputSig3Office').value || '').trim();
+
+      renderCertificatePreview();
+    }
+
+    function toggleSig3Enabled(val) {
+      currentCertTemplate.signatories.sig3Enabled = val;
+      const c = document.getElementById('sig3InputsContainer');
+      if (c) {
+        if (val) c.classList.remove('hidden');
+        else c.classList.add('hidden');
+      }
+      renderCertificatePreview();
+    }
+
+    // --- BORDER & STYLE HANDLERS ---
+    function handleBorderStyleChange(val) {
+      currentCertTemplate.theme.borderStyle = val;
+      renderCertificatePreview();
+    }
+
+    function handleBorderWidthChange(val) {
+      currentCertTemplate.theme.borderWidth = parseInt(val) || 8;
+      renderCertificatePreview();
+    }
+
+    function handleOuterBorderColorChange(val) {
+      currentCertTemplate.theme.outerBorderColor = val;
+      const lbl = document.getElementById('lblOuterBorderColor');
+      if (lbl) lbl.textContent = val;
+      renderCertificatePreview();
+    }
+
+    function handleInnerBorderColorChange(val) {
+      currentCertTemplate.theme.innerBorderColor = val;
+      const lbl = document.getElementById('lblInnerBorderColor');
+      if (lbl) lbl.textContent = val;
+      renderCertificatePreview();
+    }
+
+    function handleBgToneChange(val) {
+      currentCertTemplate.theme.backgroundColor = val;
+      renderCertificatePreview();
+    }
+
+    function handleCornerOrnamentChange(val) {
+      currentCertTemplate.theme.cornerOrnament = val;
+      renderCertificatePreview();
+    }
+
+    function handleCornerColorChange(val) {
+      currentCertTemplate.theme.cornerColor = val;
+      renderCertificatePreview();
+    }
+
+    function handleCertTypeSelectChange(typeKey) {
       const typeTitles = {
         participation: 'CERTIFICATE OF PARTICIPATION',
         appreciation: 'CERTIFICATE OF APPRECIATION',
-        membership: 'CERTIFICATE OF MEMBERSHIP'
+        recognition: 'CERTIFICATE OF RECOGNITION',
+        membership: 'CERTIFICATE OF MEMBERSHIP',
+        custom: currentCertTemplate.title.customTitle || 'CERTIFICATE OF COMMENDATION'
       };
+      if (typeKey !== 'custom') {
+        currentCertTemplate.title.customTitle = typeTitles[typeKey];
+        currentCertTemplate.title.type = typeKey;
+        const inp = document.getElementById('inputCertTitle');
+        if (inp) inp.value = typeTitles[typeKey];
+      }
+      renderCertificatePreview();
+    }
 
-      const themeConfigs = {
-        move_official: {
-          outerBorder: 'border-move-navy-900',
-          innerBorder: 'border-move-orange-500',
-          titleColor: 'text-move-navy-900',
-          titleAccent: 'text-move-orange-500',
-          cornerColor: 'text-move-orange-500'
-        },
-        gold_navy: {
-          outerBorder: 'border-amber-700',
-          innerBorder: 'border-amber-500',
-          titleColor: 'text-amber-900',
-          titleAccent: 'text-amber-600',
-          cornerColor: 'text-amber-600'
-        },
-        pine_green: {
-          outerBorder: 'border-emerald-900',
-          innerBorder: 'border-emerald-600',
-          titleColor: 'text-emerald-950',
-          titleAccent: 'text-emerald-700',
-          cornerColor: 'text-emerald-600'
-        }
-      };
-      const cfg = themeConfigs[certTheme] || themeConfigs.move_official;
+    function handleQuickThemeChange(themeKey) {
+      if (themeKey === 'move_official') {
+        currentCertTemplate.theme.outerBorderColor = '#091b38';
+        currentCertTemplate.theme.innerBorderColor = '#f97316';
+        currentCertTemplate.theme.cornerColor = '#f97316';
+        currentCertTemplate.theme.backgroundColor = '#ffffff';
+        currentCertTemplate.title.color = '#091b38';
+        currentCertTemplate.title.accentColor = '#f97316';
+        currentCertTemplate.recipient.color = '#091b38';
+      } else if (themeKey === 'gold_navy') {
+        currentCertTemplate.theme.outerBorderColor = '#78350f';
+        currentCertTemplate.theme.innerBorderColor = '#d97706';
+        currentCertTemplate.theme.cornerColor = '#d97706';
+        currentCertTemplate.theme.backgroundColor = '#fefce8';
+        currentCertTemplate.title.color = '#78350f';
+        currentCertTemplate.title.accentColor = '#d97706';
+        currentCertTemplate.recipient.color = '#78350f';
+      } else if (themeKey === 'pine_green') {
+        currentCertTemplate.theme.outerBorderColor = '#064e3b';
+        currentCertTemplate.theme.innerBorderColor = '#059669';
+        currentCertTemplate.theme.cornerColor = '#059669';
+        currentCertTemplate.theme.backgroundColor = '#f0fdf4';
+        currentCertTemplate.title.color = '#064e3b';
+        currentCertTemplate.title.accentColor = '#059669';
+        currentCertTemplate.recipient.color = '#064e3b';
+      }
 
-      const frame = document.getElementById('certificateFrame');
-      frame.className = `w-full max-w-4xl bg-white aspect-[1.414/1] shadow-2xl rounded-sm p-6 sm:p-10 relative flex flex-col justify-between border-8 border-double ${cfg.outerBorder} select-none`;
+      syncDesignerInputsFromTemplate();
+      renderCertificatePreview();
+    }
 
-      const serialNo = `MOVE-2026-${act.id.replace('ACT-', '')}-${String(certCurrentRecipientIndex + 1).padStart(4, '0')}`;
+    function syncDesignerInputsFromTemplate() {
+      const t = currentCertTemplate;
+      if (!t) return;
 
-      frame.innerHTML = `
-        <!-- Corner Medallions -->
-        <div class="absolute top-2.5 left-2.5 ${cfg.cornerColor} text-lg"><i class="fa-solid fa-certificate"></i></div>
-        <div class="absolute top-2.5 right-2.5 ${cfg.cornerColor} text-lg"><i class="fa-solid fa-certificate"></i></div>
-        <div class="absolute bottom-2.5 left-2.5 ${cfg.cornerColor} text-lg"><i class="fa-solid fa-certificate"></i></div>
-        <div class="absolute bottom-2.5 right-2.5 ${cfg.cornerColor} text-lg"><i class="fa-solid fa-certificate"></i></div>
+      // Text inputs
+      const inpTitle = document.getElementById('inputCertTitle');
+      if (inpTitle) inpTitle.value = t.title.customTitle || '';
 
-        <!-- Certificate Header with BOTH REAL LOGOS -->
-        <div class="text-center space-y-1">
-          <div class="flex items-center justify-center gap-6 sm:gap-10">
-            <!-- 1. Official Baguio City Seal (CITY HALL LOGO.png) -->
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white p-1 flex items-center justify-center shadow-md border-2 border-slate-200 shrink-0">
-              <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">
+      const selTitleFont = document.getElementById('selectTitleFontFamily');
+      if (selTitleFont) selTitleFont.value = t.title.fontFamily || 'cinzel';
+
+      const sldTitleSize = document.getElementById('sliderTitleFontSize');
+      if (sldTitleSize) sldTitleSize.value = t.title.fontSize || 28;
+
+      const inpIntro = document.getElementById('inputAwardIntro');
+      if (inpIntro) inpIntro.value = t.title.introText || '';
+
+      const selRecFont = document.getElementById('selectRecipientFont');
+      if (selRecFont) selRecFont.value = t.recipient.fontFamily || 'cinzel';
+
+      const sldRecSize = document.getElementById('sliderRecipientSize');
+      if (sldRecSize) sldRecSize.value = t.recipient.fontSize || 34;
+      const lblRecSize = document.getElementById('lblRecipientSize');
+      if (lblRecSize) lblRecSize.textContent = (t.recipient.fontSize || 34) + 'px';
+
+      const chkRecUnderline = document.getElementById('chkRecipientUnderline');
+      if (chkRecUnderline) chkRecUnderline.checked = !!t.recipient.underline;
+
+      const inpLead = document.getElementById('inputCitationLead');
+      if (inpLead) inpLead.value = t.citation.leadText || '';
+
+      const inpDet = document.getElementById('inputCitationDetails');
+      if (inpDet) inpDet.value = t.citation.detailTemplate || '';
+
+      // Signatories
+      const s1n = document.getElementById('inputSig1Name');
+      if (s1n) s1n.value = t.signatories.sig1Name || '';
+      const s1t = document.getElementById('inputSig1Title');
+      if (s1t) s1t.value = t.signatories.sig1Title || '';
+      const s1o = document.getElementById('inputSig1Office');
+      if (s1o) s1o.value = t.signatories.sig1Office || '';
+
+      const s2n = document.getElementById('inputSig2Name');
+      if (s2n) s2n.value = t.signatories.sig2Name || '';
+      const s2t = document.getElementById('inputSig2Title');
+      if (s2t) s2t.value = t.signatories.sig2Title || '';
+      const s2o = document.getElementById('inputSig2Office');
+      if (s2o) s2o.value = t.signatories.sig2Office || '';
+
+      const chkS3 = document.getElementById('chkSig3Enable');
+      if (chkS3) chkS3.checked = !!t.signatories.sig3Enabled;
+      const c3 = document.getElementById('sig3InputsContainer');
+      if (c3) {
+        if (t.signatories.sig3Enabled) c3.classList.remove('hidden');
+        else c3.classList.add('hidden');
+      }
+
+      // Border & Theme
+      const selStyle = document.getElementById('selectBorderStyle');
+      if (selStyle) selStyle.value = t.theme.borderStyle || 'double';
+
+      const sldWidth = document.getElementById('sliderBorderWidth');
+      if (sldWidth) sldWidth.value = t.theme.borderWidth || 8;
+
+      const pickOut = document.getElementById('pickerOuterBorder');
+      if (pickOut) pickOut.value = t.theme.outerBorderColor || '#091b38';
+      const lblOut = document.getElementById('lblOuterBorderColor');
+      if (lblOut) lblOut.textContent = t.theme.outerBorderColor || '#091b38';
+
+      const pickIn = document.getElementById('pickerInnerBorder');
+      if (pickIn) pickIn.value = t.theme.innerBorderColor || '#f97316';
+      const lblIn = document.getElementById('lblInnerBorderColor');
+      if (lblIn) lblIn.textContent = t.theme.innerBorderColor || '#f97316';
+
+      const selBg = document.getElementById('selectBgTone');
+      if (selBg) selBg.value = t.theme.backgroundColor || '#ffffff';
+
+      const chkWm = document.getElementById('chkEnableWatermark');
+      if (chkWm) chkWm.checked = !!t.header.watermarkEnabled;
+
+      const sldWm = document.getElementById('sliderWatermarkOpacity');
+      if (sldWm) sldWm.value = t.header.watermarkOpacity || 10;
+
+      const chkGs = document.getElementById('chkEnableGoldSeal');
+      if (chkGs) chkGs.checked = !!t.header.goldSeal;
+
+      const selGsPos = document.getElementById('selectGoldSealPos');
+      if (selGsPos) selGsPos.value = t.header.goldSealPosition || 'bottom-center';
+
+      updateOffsetLabels();
+    }
+
+    // --- CORE HTML CERTIFICATE BUILDER (USED FOR PREVIEW & PRINT) ---
+    function buildCertificateHtml(recipient, act, serialNo, tpl, isPrint) {
+      const t = tpl || currentCertTemplate;
+      const offsets = t.offsets || {};
+
+      function getOffsetStyle(key) {
+        if (!offsets[key]) return '';
+        const x = offsets[key].x || 0;
+        const y = offsets[key].y || 0;
+        if (x === 0 && y === 0) return '';
+        return `transform: translate(${x}px, ${y}px);`;
+      }
+
+      function getDragAttrs(key, label) {
+        if (isPrint) return '';
+        return `data-cert-element="${key}" data-cert-label="${label}"`;
+      }
+
+      const fontClassTitle = t.title.fontFamily === 'cinzel' ? 'font-cinzel' : (t.title.fontFamily === 'playfair' ? 'font-serif-title' : 'font-sans');
+      const fontClassRec = t.recipient.fontFamily === 'cinzel' ? 'font-cinzel' : (t.recipient.fontFamily === 'playfair' ? 'font-serif-title' : 'font-sans');
+
+      // Citation formatted text
+      let detailText = t.citation.detailTemplate || 'Conducted on {date} at {venue} with an equivalent duration of {duration}.';
+      detailText = detailText.replace('{date}', `<strong>${act.date}</strong>`)
+                             .replace('{venue}', act.venue || 'Baguio City Hall')
+                             .replace('{duration}', `<strong>${act.duration}</strong>`);
+
+      const outerStyle = `border: ${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'}; background-color: ${t.theme.backgroundColor || '#ffffff'};`;
+
+      // Corner ornaments
+      let cornerOrnamentHtml = '';
+      if (t.theme.cornerOrnament === 'certificate') {
+        cornerOrnamentHtml = `
+          <div class="absolute top-2.5 left-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-certificate"></i></div>
+          <div class="absolute top-2.5 right-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-certificate"></i></div>
+          <div class="absolute bottom-2.5 left-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-certificate"></i></div>
+          <div class="absolute bottom-2.5 right-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-certificate"></i></div>
+        `;
+      } else if (t.theme.cornerOrnament === 'star') {
+        cornerOrnamentHtml = `
+          <div class="absolute top-2.5 left-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-star"></i></div>
+          <div class="absolute top-2.5 right-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-star"></i></div>
+          <div class="absolute bottom-2.5 left-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-star"></i></div>
+          <div class="absolute bottom-2.5 right-2.5 text-lg" style="color: ${t.theme.cornerColor};"><i class="fa-solid fa-star"></i></div>
+        `;
+      }
+
+      // Watermark
+      let watermarkHtml = '';
+      if (t.header.watermarkEnabled && t.header.watermarkLogo) {
+        watermarkHtml = `
+          <div class="cert-watermark-overlay" style="opacity: ${(t.header.watermarkOpacity || 10) / 100}; ${getOffsetStyle('watermark')}" ${getDragAttrs('watermark', 'Center Watermark')}>
+            <img src="${t.header.watermarkLogo}" class="w-72 sm:w-80 h-72 sm:h-80 object-contain pointer-events-none select-none">
+          </div>
+        `;
+      }
+
+      // Gold seal badge
+      let goldSealHtml = '';
+      if (t.header.goldSeal) {
+        let posClass = 'bottom-6 left-1/2 -translate-x-1/2';
+        if (t.header.goldSealPosition === 'bottom-left') posClass = 'bottom-6 left-12';
+        if (t.header.goldSealPosition === 'bottom-right') posClass = 'bottom-6 right-12';
+
+        goldSealHtml = `
+          <div class="absolute ${posClass} pointer-events-none z-10" style="${getOffsetStyle('goldSeal')}" ${getDragAttrs('goldSeal', 'Official Gold Seal')}>
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 p-0.5 shadow-md flex items-center justify-center border-2 border-amber-300">
+              <div class="w-full h-full rounded-full border border-amber-700/40 flex flex-col items-center justify-center text-center p-1 bg-amber-500/10">
+                <i class="fa-solid fa-award text-amber-900 text-lg sm:text-xl"></i>
+                <span class="text-[7px] font-black uppercase tracking-tighter text-amber-950 font-cinzel leading-none mt-0.5">SEAL OF MOVE</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <!-- Outer Framed Container -->
+        <div class="w-full h-full flex flex-col justify-between relative select-none" style="${outerStyle}">
+          ${cornerOrnamentHtml}
+          ${watermarkHtml}
+          ${goldSealHtml}
+
+          <!-- Header Section -->
+          <div class="text-center pt-2 sm:pt-4 px-4 relative z-10" style="${getOffsetStyle('header')}" ${getDragAttrs('header', 'Header Block')}>
+            <div class="flex items-center justify-center gap-4 sm:gap-8">
+              <!-- Left Logo -->
+              <div class="rounded-full bg-white p-1 flex items-center justify-center shadow-md border-2 border-slate-200 shrink-0"
+                   style="width: ${t.header.leftLogoWidth || 76}px; height: ${t.header.leftLogoWidth || 76}px; ${getOffsetStyle('leftLogo')}"
+                   ${getDragAttrs('leftLogo', 'Left Seal Logo')}>
+                <img src="${t.header.leftLogo || 'CITY%20HALL%20LOGO.png'}" alt="Left Logo" class="w-full h-full object-contain">
+              </div>
+
+              <!-- Header Texts -->
+              <div class="text-center">
+                <div class="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase">${t.header.republicText || 'Republic of the Philippines'}</div>
+                <div class="text-xs sm:text-sm font-black tracking-widest uppercase" style="color: ${t.theme.outerBorderColor || '#091b38'};">${t.header.cityText || 'City Government of Baguio'}</div>
+                <div class="text-[10px] sm:text-xs font-black tracking-wider uppercase mt-0.5" style="color: ${t.theme.innerBorderColor || '#f97316'};">${t.header.chapterText || 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</div>
+                <div class="text-[9px] text-slate-400 font-semibold">${t.header.subText || 'City Hall Chapter • Baguio City, Philippines'}</div>
+              </div>
+
+              <!-- Right Logo -->
+              <div class="rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border-2 shrink-0"
+                   style="width: ${t.header.rightLogoWidth || 76}px; height: ${t.header.rightLogoWidth || 76}px; border-color: ${t.theme.innerBorderColor || '#f97316'}; ${getOffsetStyle('rightLogo')}"
+                   ${getDragAttrs('rightLogo', 'Right Emblem Logo')}>
+                <img src="${t.header.rightLogo || 'MOVE%20BAGUIO%20LOGO.png'}" alt="Right Logo" class="w-full h-full object-contain">
+              </div>
             </div>
 
-            <div class="text-center">
-              <div class="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase">Republic of the Philippines</div>
-              <div class="text-xs sm:text-sm font-black tracking-widest text-move-navy-900 uppercase">City Government of Baguio</div>
-              <div class="text-[10px] sm:text-xs font-black tracking-wider text-move-orange-600 uppercase mt-0.5">Men Opposed to Violence Against Women Everywhere (MOVE)</div>
-              <div class="text-[9px] text-slate-400 font-semibold">City Hall Chapter &bull; Baguio City, Philippines</div>
-            </div>
-
-            <!-- 2. Hero MOVE Baguio Emblem (MOVE BAGUIO LOGO.png) -->
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border-2 border-move-orange-400 shrink-0">
-              <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">
+            <!-- Title & Intro -->
+            <div class="pt-3 sm:pt-4" style="${getOffsetStyle('title')}" ${getDragAttrs('title', 'Main Title')}>
+              <h2 class="${fontClassTitle} font-black tracking-wider uppercase"
+                  style="font-size: ${t.title.fontSize || 28}px; color: ${t.title.color || t.theme.outerBorderColor || '#091b38'};">
+                ${t.title.customTitle || 'CERTIFICATE OF PARTICIPATION'}
+              </h2>
+              <div class="w-40 h-1 mx-auto mt-1" style="background: linear-gradient(to right, transparent, ${t.title.accentColor || t.theme.innerBorderColor || '#f97316'}, transparent);"></div>
+              <p class="text-xs italic text-slate-500 mt-1.5 font-serif-title">${t.title.introText || 'This certificate is proudly awarded to'}</p>
             </div>
           </div>
 
-          <div class="pt-4 sm:pt-6">
-            <h2 class="text-2xl sm:text-3xl font-black font-cinzel tracking-wider ${cfg.titleColor} uppercase">${typeTitles[certType]}</h2>
-            <div class="w-40 h-1 bg-gradient-to-r from-transparent via-move-orange-500 to-transparent mx-auto mt-1"></div>
-            <p class="text-xs italic text-slate-500 mt-2 font-serif-title">This certificate is proudly awarded to</p>
-          </div>
-        </div>
-
-        <!-- Recipient Section -->
-        <div class="text-center my-3 sm:my-4 space-y-1">
-          <div class="text-2xl sm:text-4xl font-black text-move-navy-900 tracking-wide font-cinzel underline decoration-move-orange-500 decoration-2 underline-offset-8">
-            ${recipient.name}
-          </div>
-          <div class="text-xs sm:text-sm font-bold text-move-orange-600 pt-2 uppercase tracking-wider">
-            ${recipient.office} &bull; ${recipient.position || 'Civil Service Personnel'}
-          </div>
-        </div>
-
-        <!-- Citation Body in Official MOVE Voice -->
-        <div class="text-center max-w-2xl mx-auto space-y-1.5 px-4 text-xs sm:text-[13px] text-slate-700 leading-relaxed font-serif-title">
-          <p>
-            for actively participating and successfully completing the capacity-building seminar on
-          </p>
-          <p class="text-sm sm:text-base font-black text-move-navy-900 uppercase font-sans tracking-tight">
-            "${act.title}"
-          </p>
-          <p class="text-[11px] sm:text-xs text-slate-600">
-            Conducted on <strong>${act.date}</strong> at ${act.venue} with an equivalent duration of <strong>${act.duration}</strong>.
-          </p>
-        </div>
-
-        <!-- Signatures & Verification Footer -->
-        <div class="pt-6 sm:pt-8 border-t border-slate-200 mt-2 flex items-end justify-between px-4 sm:px-8">
-          <!-- Signatory 1: MOVE President -->
-          <div class="text-center">
-            <div class="w-40 sm:w-48 border-b-2 border-move-navy-900 mx-auto pb-1 font-bold text-xs sm:text-sm text-move-navy-900">
-              ENGR. ALBERTO B. RAMOS
+          <!-- Recipient Section -->
+          <div class="text-center my-2 sm:my-3 px-4 relative z-10" style="${getOffsetStyle('recipient')}" ${getDragAttrs('recipient', 'Recipient Name')}>
+            <div class="${fontClassRec} font-black tracking-wide"
+                 style="font-size: ${t.recipient.fontSize || 34}px; color: ${t.recipient.color || '#091b38'}; ${t.recipient.underline ? `text-decoration: underline; text-decoration-color: ${t.recipient.underlineColor || '#f97316'}; text-underline-offset: 8px; text-decoration-thickness: 2.5px;` : ''}">
+              ${recipient.name || 'JUAN M. DELA CRUZ'}
             </div>
-            <div class="text-[10px] font-bold text-move-orange-600 mt-0.5 uppercase tracking-wider">MOVE Chapter President</div>
-            <div class="text-[9px] text-slate-500">City Government of Baguio</div>
+            <div class="text-xs sm:text-sm font-bold pt-2 uppercase tracking-wider" style="color: ${t.recipient.subtitleColor || '#ea580c'};">
+              ${recipient.office || 'CBAO'} &bull; ${recipient.position || 'Civil Service Personnel'}
+            </div>
           </div>
 
-          <!-- Official QR Code & Serial Verification -->
-          <div class="flex flex-col items-center text-center">
-            <div class="w-12 h-12 bg-move-navy-900 p-1 rounded-lg border border-move-orange-400 flex items-center justify-center text-white shadow-xs">
-              <i class="fa-solid fa-qrcode text-3xl"></i>
-            </div>
-            <div class="text-[8px] font-mono text-slate-500 mt-1 font-bold">${serialNo}</div>
+          <!-- Citation Body -->
+          <div class="text-center max-w-2xl mx-auto space-y-1 px-6 text-xs sm:text-[13px] leading-relaxed font-serif-title relative z-10"
+               style="color: ${t.citation.color || '#334155'}; font-size: ${t.citation.fontSize || 13}px; ${getOffsetStyle('citation')}"
+               ${getDragAttrs('citation', 'Citation Body')}>
+            <p>${t.citation.leadText || 'for actively participating and successfully completing the capacity-building seminar on'}</p>
+            <p class="text-sm sm:text-base font-black uppercase font-sans tracking-tight" style="color: ${t.theme.outerBorderColor || '#091b38'};">
+              "${t.citation.customEventTitle || act.title}"
+            </p>
+            <p class="text-[11px] sm:text-xs text-slate-600 leading-normal">
+              ${detailText}
+            </p>
           </div>
 
-          <!-- Signatory 2: City Mayor -->
-          <div class="text-center">
-            <div class="w-40 sm:w-48 border-b-2 border-move-navy-900 mx-auto pb-1 font-bold text-xs sm:text-sm text-move-navy-900">
-              HON. BENJAMIN B. MAGALONG
+          <!-- Signatures & Verification Footer -->
+          <div class="pt-4 sm:pt-6 border-t border-slate-200 pb-3 sm:pb-5 px-6 sm:px-10 flex items-end justify-between relative z-10"
+               style="${getOffsetStyle('signatories')}" ${getDragAttrs('signatories', 'Signatures Block')}>
+            <!-- Signatory 1 -->
+            <div class="text-center relative">
+              ${t.signatories.sig1SignatureImage ? `
+                <div class="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none">
+                  <img src="${t.signatories.sig1SignatureImage}" class="h-12 w-32 object-contain">
+                </div>
+              ` : ''}
+              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
+                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+                ${t.signatories.sig1Name || 'DAN RICKY M. ONG'}
+              </div>
+              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+                ${t.signatories.sig1Title || 'MOVE Chapter President'}
+              </div>
+              <div class="text-[9px] text-slate-500">${t.signatories.sig1Office || 'City Government of Baguio'}</div>
             </div>
-            <div class="text-[10px] font-bold text-move-orange-600 mt-0.5 uppercase tracking-wider">City Mayor</div>
-            <div class="text-[9px] text-slate-500">City Government of Baguio</div>
+
+            <!-- QR Code & Serial Verification -->
+            <div class="flex flex-col items-center text-center">
+              <div class="w-11 h-11 p-1 rounded-lg border flex items-center justify-center text-white shadow-2xs"
+                   style="background-color: ${t.theme.outerBorderColor || '#091b38'}; border-color: ${t.theme.innerBorderColor || '#f97316'};">
+                <i class="fa-solid fa-qrcode text-2xl"></i>
+              </div>
+              <div class="text-[8px] font-mono text-slate-500 mt-1 font-bold">${serialNo}</div>
+            </div>
+
+            <!-- Optional 3rd Signatory -->
+            ${t.signatories.sig3Enabled ? `
+              <div class="text-center relative">
+                ${t.signatories.sig3SignatureImage ? `
+                  <div class="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none">
+                    <img src="${t.signatories.sig3SignatureImage}" class="h-12 w-32 object-contain">
+                  </div>
+                ` : ''}
+                <div class="w-40 sm:w-44 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
+                     style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+                  ${t.signatories.sig3Name || 'HON. FAUSTINO A. OLOWAN'}
+                </div>
+                <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+                  ${t.signatories.sig3Title || 'City Vice Mayor'}
+                </div>
+                <div class="text-[9px] text-slate-500">${t.signatories.sig3Office || 'City Government of Baguio'}</div>
+              </div>
+            ` : ''}
+
+            <!-- Signatory 2 -->
+            <div class="text-center relative">
+              ${t.signatories.sig2SignatureImage ? `
+                <div class="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none">
+                  <img src="${t.signatories.sig2SignatureImage}" class="h-12 w-32 object-contain">
+                </div>
+              ` : ''}
+              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
+                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+                ${t.signatories.sig2Name || 'HON. BENJAMIN B. MAGALONG'}
+              </div>
+              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+                ${t.signatories.sig2Title || 'City Mayor'}
+              </div>
+              <div class="text-[9px] text-slate-500">${t.signatories.sig2Office || 'City Government of Baguio'}</div>
+            </div>
           </div>
         </div>
       `;
     }
 
+    function renderCertificatePreview() {
+      const actId = document.getElementById('certActivitySelect') ? document.getElementById('certActivitySelect').value : null;
+      const act = activitiesList.find(a => a.id === actId) || activitiesList[0] || {
+        id: 'ACT-001',
+        title: 'Orientation on RA 9262 & Role of Men in VAW-Free Communities',
+        date: 'October 15, 2026',
+        venue: 'Baguio City Hall Multi-Purpose Hall',
+        duration: '8 Hours',
+        participants: []
+      };
+
+      const presentList = (act.participants || []).filter(p => p.isPresent);
+      const recipient = presentList[certCurrentRecipientIndex] || { name: 'JUAN M. DELA CRUZ', office: 'CBAO', position: 'Administrative Aide' };
+
+      const serialNo = `MOVE-2026-${(act.id || 'ACT-001').replace('ACT-', '')}-${String(certCurrentRecipientIndex + 1).padStart(4, '0')}`;
+
+      const attendeeLbl = document.getElementById('lblPreviewAttendeeSummary');
+      if (attendeeLbl) attendeeLbl.textContent = `${recipient.name} (${recipient.office || 'City Hall'})`;
+
+      const frame = document.getElementById('certificateFrame');
+      if (!frame) return;
+
+      frame.innerHTML = buildCertificateHtml(recipient, act, serialNo, currentCertTemplate, false);
+
+      if (isCertEditMode) {
+        frame.classList.add('cert-edit-active');
+        // re-highlight currently selected target element
+        if (activeMoveElementKey) {
+          const el = frame.querySelector(`[data-cert-element="${activeMoveElementKey}"]`);
+          if (el) el.classList.add('is-selected-element');
+        }
+      } else {
+        frame.classList.remove('cert-edit-active');
+      }
+    }
+
+    function handleCertActivityChange() {
+      const actSelect = document.getElementById('certActivitySelect');
+      if (!actSelect) return;
+      const actId = actSelect.value;
+      const act = activitiesList.find(a => a.id === actId);
+      if (!act) return;
+
+      const presentList = act.participants.filter(p => p.isPresent);
+      const recSelect = document.getElementById('certRecipientSelect');
+      if (recSelect) {
+        recSelect.innerHTML = '';
+        presentList.forEach((p, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = `${idx + 1}. ${p.name} (${p.office})`;
+          recSelect.appendChild(opt);
+        });
+      }
+
+      const batchBtnText = document.getElementById('btnBatchPrintText');
+      if (batchBtnText) batchBtnText.textContent = `Batch Print All Present (${presentList.length})`;
+
+      certCurrentRecipientIndex = 0;
+      renderCertificatePreview();
+    }
+
+    function handleCertRecipientChange() {
+      const sel = document.getElementById('certRecipientSelect');
+      certCurrentRecipientIndex = parseInt(sel ? sel.value : 0) || 0;
+      renderCertificatePreview();
+    }
+
+    function navigateCertRecipient(delta) {
+      const actSelect = document.getElementById('certActivitySelect');
+      if (!actSelect) return;
+      const actId = actSelect.value;
+      const act = activitiesList.find(a => a.id === actId);
+      if (!act) return;
+
+      const presentList = act.participants.filter(p => p.isPresent);
+      if (presentList.length === 0) return;
+
+      certCurrentRecipientIndex = (certCurrentRecipientIndex + delta + presentList.length) % presentList.length;
+      const sel = document.getElementById('certRecipientSelect');
+      if (sel) sel.value = certCurrentRecipientIndex;
+      renderCertificatePreview();
+    }
+
     function printSingleCurrentCertificate() {
-      const frameHtml = document.getElementById('certificateFrame').outerHTML;
+      const actSelect = document.getElementById('certActivitySelect');
+      const actId = actSelect ? actSelect.value : null;
+      const act = activitiesList.find(a => a.id === actId) || activitiesList[0];
+      const presentList = (act.participants || []).filter(p => p.isPresent);
+      const recipient = presentList[certCurrentRecipientIndex] || { name: 'JUAN M. DELA CRUZ', office: 'CBAO', position: 'Administrative Aide' };
+      const serialNo = `MOVE-2026-${(act.id || 'ACT-001').replace('ACT-', '')}-${String(certCurrentRecipientIndex + 1).padStart(4, '0')}`;
+
       const printBox = document.getElementById('batchPrintContainer');
-      printBox.innerHTML = `<div class="certificate-print-sheet">${frameHtml}</div>`;
-      window.print();
+      if (!printBox) return;
+
+      printBox.innerHTML = `
+        <div class="certificate-print-sheet">
+          <div class="w-full max-w-4xl bg-white aspect-[1.414/1] shadow-none rounded-none p-6 sm:p-10 relative flex flex-col justify-between">
+            ${buildCertificateHtml(recipient, act, serialNo, currentCertTemplate, true)}
+          </div>
+        </div>
+      `;
+
+      showToast(`Preparing certificate for ${recipient.name}...`, 'fa-print');
+      setTimeout(() => {
+        window.print();
+      }, 250);
     }
 
     function batchPrintCertificates() {
-      const actId = document.getElementById('certActivitySelect').value;
+      const actSelect = document.getElementById('certActivitySelect');
+      const actId = actSelect ? actSelect.value : null;
       const act = activitiesList.find(a => a.id === actId);
       if (!act) return;
 
       const presentList = act.participants.filter(p => p.isPresent);
       if (presentList.length === 0) {
-        showToast('No participants currently marked as PRESENT to print certificates for!', 'fa-circle-exclamation');
+        showToast('No attendees marked as PRESENT to generate certificates for!', 'fa-circle-exclamation');
         return;
       }
 
       const printBox = document.getElementById('batchPrintContainer');
+      if (!printBox) return;
       printBox.innerHTML = '';
-
-      const certType = document.getElementById('certTypeSelect').value;
-      const typeTitles = {
-        participation: 'CERTIFICATE OF PARTICIPATION',
-        appreciation: 'CERTIFICATE OF APPRECIATION',
-        membership: 'CERTIFICATE OF MEMBERSHIP'
-      };
 
       presentList.forEach((p, idx) => {
         const serialNo = `MOVE-2026-${act.id.replace('ACT-', '')}-${String(idx + 1).padStart(4, '0')}`;
         const sheet = document.createElement('div');
         sheet.className = 'certificate-print-sheet';
         sheet.innerHTML = `
-          <div class="w-full max-w-4xl bg-white aspect-[1.414/1] p-10 relative flex flex-col justify-between border-8 border-double border-move-navy-900">
-            <!-- Header with BOTH REAL LOGOS -->
-            <div class="text-center space-y-1">
-              <div class="flex items-center justify-center gap-10">
-                <div class="w-20 h-20 rounded-full bg-white p-1 flex items-center justify-center shadow-md border-2 border-slate-200">
-                  <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">
-                </div>
-                <div class="text-center">
-                  <div class="text-[11px] font-bold tracking-widest text-slate-500 uppercase">Republic of the Philippines</div>
-                  <div class="text-sm font-black tracking-widest text-move-navy-900 uppercase">City Government of Baguio</div>
-                  <div class="text-xs font-black tracking-wider text-move-orange-600 uppercase mt-0.5">Men Opposed to Violence Against Women Everywhere (MOVE)</div>
-                  <div class="text-[9px] text-slate-400 font-semibold">City Hall Chapter &bull; Baguio City, Philippines</div>
-                </div>
-                <div class="w-20 h-20 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border-2 border-move-orange-400">
-                  <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">
-                </div>
-              </div>
-              <div class="pt-6">
-                <h2 class="text-3xl font-black font-cinzel text-move-navy-900 uppercase">${typeTitles[certType]}</h2>
-                <div class="w-40 h-1 bg-move-orange-500 mx-auto mt-1"></div>
-                <p class="text-xs italic text-slate-500 mt-2 font-serif-title">This certificate is proudly awarded to</p>
-              </div>
-            </div>
-
-            <!-- Recipient -->
-            <div class="text-center my-4 space-y-1">
-              <div class="text-4xl font-black text-move-navy-900 font-cinzel underline decoration-move-orange-500 decoration-2 underline-offset-8">
-                ${p.name}
-              </div>
-              <div class="text-sm font-bold text-move-orange-600 pt-2 uppercase tracking-wider">
-                ${p.office} &bull; ${p.position || 'Civil Service Personnel'}
-              </div>
-            </div>
-
-            <!-- Citation -->
-            <div class="text-center max-w-2xl mx-auto space-y-1.5 px-4 text-[13px] text-slate-700 font-serif-title">
-              <p>for actively participating and successfully completing the capacity-building seminar on</p>
-              <p class="text-base font-black text-move-navy-900 uppercase font-sans tracking-tight">"${act.title}"</p>
-              <p class="text-xs text-slate-600">Conducted on <strong>${act.date}</strong> at ${act.venue} with an equivalent duration of <strong>${act.duration}</strong>.</p>
-            </div>
-
-            <!-- Signatures -->
-            <div class="pt-8 border-t border-slate-200 mt-2 flex items-end justify-between px-8">
-              <div class="text-center">
-                <div class="w-48 border-b-2 border-move-navy-900 mx-auto pb-1 font-bold text-sm text-move-navy-900">ENGR. ALBERTO B. RAMOS</div>
-                <div class="text-[10px] font-bold text-move-orange-600 mt-0.5 uppercase tracking-wider">MOVE Chapter President</div>
-                <div class="text-[9px] text-slate-500">City Government of Baguio</div>
-              </div>
-              <div class="text-center">
-                <div class="w-12 h-12 bg-move-navy-900 p-1 rounded-lg border border-move-orange-400 flex items-center justify-center text-white"><i class="fa-solid fa-qrcode text-3xl"></i></div>
-                <div class="text-[8px] font-mono text-slate-500 mt-1 font-bold">${serialNo}</div>
-              </div>
-              <div class="text-center">
-                <div class="w-48 border-b-2 border-move-navy-900 mx-auto pb-1 font-bold text-sm text-move-navy-900">HON. BENJAMIN B. MAGALONG</div>
-                <div class="text-[10px] font-bold text-move-orange-600 mt-0.5 uppercase tracking-wider">City Mayor</div>
-                <div class="text-[9px] text-slate-500">City Government of Baguio</div>
-              </div>
-            </div>
+          <div class="w-full max-w-4xl bg-white aspect-[1.414/1] shadow-none rounded-none p-6 sm:p-10 relative flex flex-col justify-between">
+            ${buildCertificateHtml(p, act, serialNo, currentCertTemplate, true)}
           </div>
         `;
         printBox.appendChild(sheet);
       });
 
-      showToast(`Batch generating ${presentList.length} certificates for print...`, 'fa-print');
+      showToast(`Generating ${presentList.length} customized certificates using "${currentCertTemplate.name}"...`, 'fa-print');
       setTimeout(() => {
         window.print();
-      }, 300);
+      }, 350);
     }
+
 
     // --- ROSTER ENGINE (50-PARTICIPANT BALANCING) ---
     function initRosterEngine() {

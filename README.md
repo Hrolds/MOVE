@@ -130,21 +130,30 @@ To ensure clarity across both administrative reporting and training execution, t
   * One-click attendance toggles (`✓ YES / ✗ NO`).
   * Direct action shortcut: **"🎓 Generate Certificates for Present Attendees"**.
 
-### 6. 🎓 Official Certificate Studio
-* Dynamic, automated certificate generation engine:
+### 6. 🎓 Official Certificate Studio & Interactive Designer
+* Dynamic, automated certificate generation & live design studio:
   * **Attendance-Gated Issuance**: Automatically validates and issues certificates **only** to participants confirmed as `Present`.
-  * **3 Certificate Categories**:
-    1. *Certificate of Participation* (for seminar trainees).
-    2. *Certificate of Appreciation* (for guest speakers and trainers).
-    3. *Certificate of Membership* (for official chapter inductees).
-  * **Executive Design & Formatting**:
-    * Landscape A4 border frame with ornamental gold and navy flourishes.
-    * Official Baguio City Seal and MOVE National Emblem.
-    * Typography: Cinzel / Trajan serif and Playfair Display cursive script.
-    * Signatories: MOVE Chapter President & City Mayor.
-    * Dynamic verification QR code and unique issuance serials (`MOVE-2026-ACT-XXXX`).
-  * **Batch Printing Engine**:
-    * 1-click **"Batch Print All Present"** generating clean print pages (`page-break-after: always`) while hiding all application UI.
+  * **Interactive Designer / Edit Mode**:
+    * **Live Drag-to-Move**: Click and drag any element (title, recipient, body, logos, signatures, gold seal) directly on the certificate canvas to freely reposition it.
+    * **Precision Nudge Controls**: D-Pad arrow buttons and numeric X/Y offset inputs for pixel-perfect alignment.
+  * **Image & Logo Attachments**:
+    * Attach/replace custom image files for **Left Seal Logo** and **Right MOVE Emblem** with size sliders.
+    * Optional **Center Background Watermark** with opacity and scale controls.
+    * Attach **Digital Signature PNGs** for both Signatory 1 (President) and Signatory 2 (Mayor).
+    * Official embossed **Gold Seal / Ribbon Stamp** with position options.
+  * **Typography & Content Customization**:
+    * Custom Certificate Title (*Participation*, *Appreciation*, *Recognition*, *Membership*, or Custom).
+    * Font family selectors (*Cinzel Classical*, *Playfair Display*, *Inter Clean*), font size sliders, and color pickers.
+    * Dynamic body citation templates with tokens (`{date}`, `{venue}`, `{duration}`).
+    * Configurable Signatories: 2 or 3 signatories with live name and title editing.
+    * Customizable frames: Double, Solid, Groove, Ridge borders with custom widths and color palettes.
+  * **Template Version Management**:
+    * **Save Version**: Save edits directly to current template.
+    * **Save As New Version**: Create and name new custom versions (*e.g., "Anti-VAWC Seminar 2026", "Speaker Plaque v2"*).
+    * Versions dropdown to switch between built-in presets and user-saved custom versions.
+    * Persistent storage in `localStorage`.
+  * **Batch & Single Printing Engine**:
+    * 1-click **"Print Single"** and **"Batch Print All Present"** faithfully applying the active custom template version (with custom layout, uploaded logos, signatures, and typography) across landscape pages (`page-break-after: always`).
 
 ### 7. ⚙️ 50-Participant Balancing & Roster Engine
 * Multi-parameter algorithmic filter tool:
