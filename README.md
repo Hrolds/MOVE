@@ -134,7 +134,9 @@ To ensure clarity across both administrative reporting and training execution, t
 * Dynamic, automated certificate generation & live design studio:
   * **Attendance-Gated Issuance**: Automatically validates and issues certificates **only** to participants confirmed as `Present`.
   * **Interactive Designer / Edit Mode**:
-    * **Live Drag-to-Move**: Click and drag any element (title, recipient, body, logos, signatures, gold seal) directly on the certificate canvas to freely reposition it.
+    * **Direct Canvas Inline Editing**: Click directly on any text on the certificate canvas (citation paragraph, event title, recipient name, main title, header texts, or signatories) to type and edit in place immediately.
+    * **Full Undo & Redo Controls (`Ctrl+Z` / `Ctrl+Y`)**: Dedicated Undo and Redo toolbar buttons and global keyboard shortcuts (`Ctrl+Z` to undo, `Ctrl+Y` or `Ctrl+Shift+Z` to redo) with up to 40 history steps tracking all inline text edits, moves, and styling changes.
+    * **Live Drag-to-Move**: Click and drag any element or drag handle (title, recipient, body citation, logos, signatures, gold seal) directly on the certificate canvas to freely reposition it.
     * **Precision Nudge Controls**: D-Pad arrow buttons and numeric X/Y offset inputs for pixel-perfect alignment.
   * **Image & Logo Attachments**:
     * Attach/replace custom image files for **Left Seal Logo** and **Right MOVE Emblem** with size sliders.

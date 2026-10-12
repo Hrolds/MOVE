@@ -316,6 +316,59 @@
       background-color: #f1f5f9;
       color: #0f172a;
     }
+
+    /* INLINE EDITABLE TEXT ON CANVAS */
+    .cert-edit-active .cert-inline-editable {
+      cursor: text !important;
+      outline: 1.5px dashed rgba(249, 115, 22, 0.45) !important;
+      outline-offset: 3px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      min-width: 40px;
+      display: inline-block;
+    }
+    .cert-edit-active .cert-inline-editable:hover {
+      outline: 2px dashed #f97316 !important;
+      background-color: rgba(249, 115, 22, 0.08) !important;
+    }
+    .cert-edit-active .cert-inline-editable:focus {
+      outline: 2.5px solid #ea580c !important;
+      background-color: rgba(255, 255, 255, 0.98) !important;
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.25) !important;
+      color: #0f172a !important;
+      z-index: 45;
+      position: relative;
+    }
+    .cert-edit-active .cert-drag-handle {
+      display: flex !important;
+    }
+    .cert-drag-handle {
+      display: none;
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      width: 22px;
+      height: 22px;
+      background-color: #091b38;
+      color: #f97316;
+      border-radius: 6px;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      z-index: 40;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      border: 1px solid #f97316;
+      font-size: 10px;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    .cert-drag-handle:hover {
+      transform: scale(1.15);
+      background-color: #f97316;
+      color: #091b38;
+    }
+    .cert-drag-handle:active {
+      cursor: grabbing;
+    }
 </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col relative selection:bg-move-orange-500 selection:text-white">
@@ -1219,6 +1272,20 @@
                   <span id="lblCertEditMode">Enable Designer / Edit Mode</span>
                 </button>
 
+                <!-- Undo / Redo History Controls -->
+                <div id="certUndoRedoGroup" class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  <button type="button" id="btnCertUndo" onclick="undoCertState()" title="Undo (Ctrl+Z)" disabled
+                          class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-200 text-slate-700 font-bold transition flex items-center gap-1.5 shadow-2xs text-xs opacity-50 cursor-not-allowed">
+                    <i class="fa-solid fa-rotate-left text-move-orange-500"></i>
+                    <span>Undo</span>
+                  </button>
+                  <button type="button" id="btnCertRedo" onclick="redoCertState()" title="Redo (Ctrl+Y)" disabled
+                          class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-200 text-slate-700 font-bold transition flex items-center gap-1.5 shadow-2xs text-xs opacity-50 cursor-not-allowed">
+                    <i class="fa-solid fa-rotate-right text-move-orange-500"></i>
+                    <span>Redo</span>
+                  </button>
+                </div>
+
                 <!-- Print Actions -->
                 <button type="button" onclick="printSingleCurrentCertificate()"
                         class="px-3.5 py-2 bg-move-navy-900 hover:bg-move-navy-800 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
@@ -1344,7 +1411,11 @@
                     <p class="text-[10px] text-slate-400">Live customization &amp; repositioning</p>
                   </div>
                 </div>
-                <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="undoCertState()" title="Undo (Ctrl+Z)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-[11px] font-bold text-slate-700">
+                    <i class="fa-solid fa-rotate-left text-move-orange-500"></i> Undo
+                  </button>
+                  <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   <span>Edit Active</span>
                 </span>
@@ -3909,7 +3980,7 @@
 
     
     // ==============================================================================
-    // --- CERTIFICATE STUDIO & DESIGNER ENGINE (FULL VERSIONED SUITE) ---
+    // --- CERTIFICATE STUDIO & DESIGNER ENGINE (WITH INLINE EDIT & UNDO/REDO) ---
     // ==============================================================================
 
     const DEFAULT_CERT_TEMPLATES = {
@@ -3956,7 +4027,9 @@
           color: '#091b38',
           underline: true,
           underlineColor: '#f97316',
-          subtitleColor: '#ea580c'
+          subtitleColor: '#ea580c',
+          customName: '',
+          customSubtitle: ''
         },
         citation: {
           leadText: 'for actively participating and successfully completing the capacity-building seminar on',
@@ -4035,7 +4108,9 @@
           color: '#78350f',
           underline: true,
           underlineColor: '#d97706',
-          subtitleColor: '#b45309'
+          subtitleColor: '#b45309',
+          customName: '',
+          customSubtitle: ''
         },
         citation: {
           leadText: 'for his invaluable contribution and dedicated leadership during the implementation of',
@@ -4114,7 +4189,9 @@
           color: '#064e3b',
           underline: true,
           underlineColor: '#059669',
-          subtitleColor: '#047857'
+          subtitleColor: '#047857',
+          customName: '',
+          customSubtitle: ''
         },
         citation: {
           leadText: 'for exemplary advocacy and active participation in promoting a VAW-free community during',
@@ -4166,6 +4243,94 @@
     let dragElemInitX = 0;
     let dragElemInitY = 0;
 
+    // --- UNDO / REDO HISTORY STACK ---
+    let certHistoryStack = [];
+    let certHistoryIndex = -1;
+    const MAX_CERT_HISTORY = 40;
+
+    function pushCertHistoryState(actionDesc) {
+      if (!isCertEditMode && certHistoryStack.length > 0) return;
+      // Truncate any future redo branch
+      if (certHistoryIndex < certHistoryStack.length - 1) {
+        certHistoryStack = certHistoryStack.slice(0, certHistoryIndex + 1);
+      }
+      // Push deep clone snapshot
+      const snapshot = JSON.parse(JSON.stringify(currentCertTemplate));
+      certHistoryStack.push({
+        snapshot: snapshot,
+        description: actionDesc || 'Edit'
+      });
+      if (certHistoryStack.length > MAX_CERT_HISTORY) {
+        certHistoryStack.shift();
+      } else {
+        certHistoryIndex++;
+      }
+      updateUndoRedoButtons();
+    }
+
+    function undoCertState() {
+      if (certHistoryIndex > 0) {
+        certHistoryIndex--;
+        currentCertTemplate = JSON.parse(JSON.stringify(certHistoryStack[certHistoryIndex].snapshot));
+        syncDesignerInputsFromTemplate();
+        renderCertificatePreview();
+        updateUndoRedoButtons();
+        showToast(`Undo: ${certHistoryStack[certHistoryIndex + 1].description}`, 'fa-rotate-left');
+      } else {
+        showToast('Nothing to undo', 'fa-info-circle');
+      }
+    }
+
+    function redoCertState() {
+      if (certHistoryIndex < certHistoryStack.length - 1) {
+        certHistoryIndex++;
+        currentCertTemplate = JSON.parse(JSON.stringify(certHistoryStack[certHistoryIndex].snapshot));
+        syncDesignerInputsFromTemplate();
+        renderCertificatePreview();
+        updateUndoRedoButtons();
+        showToast(`Redo: ${certHistoryStack[certHistoryIndex].description}`, 'fa-rotate-right');
+      } else {
+        showToast('Nothing to redo', 'fa-info-circle');
+      }
+    }
+
+    function updateUndoRedoButtons() {
+      const btnUndo = document.getElementById('btnCertUndo');
+      const btnRedo = document.getElementById('btnCertRedo');
+
+      const canUndo = certHistoryIndex > 0;
+      const canRedo = certHistoryIndex < certHistoryStack.length - 1;
+
+      if (btnUndo) {
+        btnUndo.disabled = !canUndo;
+        btnUndo.className = `px-3 py-1.5 rounded-lg bg-white font-bold transition flex items-center gap-1.5 shadow-2xs text-xs ${canUndo ? 'text-slate-800 hover:bg-slate-200 cursor-pointer opacity-100' : 'text-slate-400 opacity-50 cursor-not-allowed'}`;
+      }
+      if (btnRedo) {
+        btnRedo.disabled = !canRedo;
+        btnRedo.className = `px-3 py-1.5 rounded-lg bg-white font-bold transition flex items-center gap-1.5 shadow-2xs text-xs ${canRedo ? 'text-slate-800 hover:bg-slate-200 cursor-pointer opacity-100' : 'text-slate-400 opacity-50 cursor-not-allowed'}`;
+      }
+    }
+
+    // Global keyboard listener for Undo (Ctrl+Z) and Redo (Ctrl+Y or Ctrl+Shift+Z)
+    window.addEventListener('keydown', (e) => {
+      if (!isCertEditMode) return;
+      // If user is editing a standard input or textarea inside the designer drawer, let browser handle native undo
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea') return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redoCertState();
+        } else {
+          undoCertState();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redoCertState();
+      }
+    });
+
     function initCertificateStudio() {
       // 1. Load Templates from Storage
       loadAllCertTemplates();
@@ -4188,8 +4353,14 @@
       // 4. Populate Attendees for Active Activity
       handleCertActivityChange();
 
-      // 5. Initialize Drag Listeners
+      // 5. Initialize Drag & Inline Edit Listeners
       initCertDragListeners();
+      initCertInlineEditListeners();
+
+      // 6. Push initial baseline into history stack
+      certHistoryStack = [];
+      certHistoryIndex = -1;
+      pushCertHistoryState('Initial State');
     }
 
     function loadAllCertTemplates() {
@@ -4295,18 +4466,18 @@
       updateVersionBadge();
       syncDesignerInputsFromTemplate();
       renderCertificatePreview();
+
+      pushCertHistoryState(`Loaded version "${currentCertTemplate.name}"`);
       showToast(`Loaded version "${currentCertTemplate.name}"`, 'fa-layer-group');
     }
 
     function saveCurrentCertTemplate() {
       if (currentCertTemplate.isBuiltIn) {
-        // Built-ins cannot be overwritten directly - prompt to save as a new version
         openModalSaveAsNewTemplate();
         showToast('Saving as a new custom version...', 'fa-copy');
         return;
       }
 
-      // Overwrite custom template
       allCertTemplates[currentCertTemplate.id] = JSON.parse(JSON.stringify(currentCertTemplate));
       saveTemplatesToStorage();
       renderCertVersionSelect();
@@ -4349,6 +4520,7 @@
       updateVersionBadge();
       renderCertificatePreview();
 
+      pushCertHistoryState(`Saved as version "${vName}"`);
       showToast(`Created & saved new version "${vName}"!`, 'fa-circle-check');
     }
 
@@ -4365,6 +4537,7 @@
       syncDesignerInputsFromTemplate();
       renderCertificatePreview();
 
+      pushCertHistoryState('Deleted custom version');
       showToast('Version deleted. Reverted to Official MOVE Standard.', 'fa-trash-can');
     }
 
@@ -4386,6 +4559,7 @@
       }
       syncDesignerInputsFromTemplate();
       renderCertificatePreview();
+      pushCertHistoryState('Reset to default layout');
       showToast('Template offsets and layout reset to default.', 'fa-rotate-left');
     }
 
@@ -4410,7 +4584,8 @@
         if (dragHint) dragHint.classList.remove('hidden');
 
         syncDesignerInputsFromTemplate();
-        showToast('Designer Mode Active: Click and drag any element to move it freely!', 'fa-pen-ruler');
+        updateUndoRedoButtons();
+        showToast('Edit Mode: Click any text to type directly, or drag to move! (Ctrl+Z to undo)', 'fa-pen-ruler');
       } else {
         if (panel) panel.classList.add('hidden');
         if (frame) frame.classList.remove('cert-edit-active');
@@ -4441,6 +4616,80 @@
       });
     }
 
+    // --- INLINE EDITING ENGINE (DIRECT CLICK & TYPE ON CANVAS) ---
+    function initCertInlineEditListeners() {
+      const frame = document.getElementById('certificateFrame');
+      if (!frame) return;
+
+      let beforeFocusText = '';
+
+      frame.addEventListener('focusin', (e) => {
+        if (!isCertEditMode) return;
+        const target = e.target.closest('.cert-inline-editable');
+        if (!target) return;
+        beforeFocusText = target.innerText.trim();
+      });
+
+      frame.addEventListener('input', (e) => {
+        if (!isCertEditMode) return;
+        const target = e.target.closest('.cert-inline-editable');
+        if (!target) return;
+        const fieldKey = target.getAttribute('data-cert-field');
+        if (!fieldKey) return;
+
+        const updatedVal = target.innerText.trim();
+        setTemplateField(fieldKey, updatedVal);
+        syncSingleDesignerInput(fieldKey, updatedVal);
+      });
+
+      frame.addEventListener('focusout', (e) => {
+        if (!isCertEditMode) return;
+        const target = e.target.closest('.cert-inline-editable');
+        if (!target) return;
+        const fieldKey = target.getAttribute('data-cert-field');
+        if (!fieldKey) return;
+
+        const afterEditText = target.innerText.trim();
+        if (afterEditText !== beforeFocusText) {
+          setTemplateField(fieldKey, afterEditText);
+          pushCertHistoryState(`Edited ${fieldKey.split('.').pop()}`);
+        }
+      });
+    }
+
+    function setTemplateField(path, value) {
+      const parts = path.split('.');
+      let obj = currentCertTemplate;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!obj[parts[i]]) obj[parts[i]] = {};
+        obj = obj[parts[i]];
+      }
+      obj[parts[parts.length - 1]] = value;
+    }
+
+    function syncSingleDesignerInput(path, value) {
+      const map = {
+        'title.customTitle': 'inputCertTitle',
+        'title.introText': 'inputAwardIntro',
+        'citation.leadText': 'inputCitationLead',
+        'citation.detailTemplate': 'inputCitationDetails',
+        'signatories.sig1Name': 'inputSig1Name',
+        'signatories.sig1Title': 'inputSig1Title',
+        'signatories.sig1Office': 'inputSig1Office',
+        'signatories.sig2Name': 'inputSig2Name',
+        'signatories.sig2Title': 'inputSig2Title',
+        'signatories.sig2Office': 'inputSig2Office',
+        'signatories.sig3Name': 'inputSig3Name',
+        'signatories.sig3Title': 'inputSig3Title',
+        'signatories.sig3Office': 'inputSig3Office'
+      };
+      const inputId = map[path];
+      if (inputId) {
+        const el = document.getElementById(inputId);
+        if (el && el !== document.activeElement) el.value = value;
+      }
+    }
+
     // --- DRAG & DROP REPOSITIONING LISTENERS ---
     function initCertDragListeners() {
       const frame = document.getElementById('certificateFrame');
@@ -4448,6 +4697,12 @@
 
       frame.addEventListener('mousedown', (e) => {
         if (!isCertEditMode) return;
+
+        // If clicking inside editable text to type, do NOT start dragging!
+        if (e.target.closest('.cert-inline-editable')) {
+          return;
+        }
+
         const targetEl = e.target.closest('[data-cert-element]');
         if (!targetEl) return;
 
@@ -4462,11 +4717,9 @@
         dragElemInitX = currentCertTemplate.offsets[activeDragElementKey].x || 0;
         dragElemInitY = currentCertTemplate.offsets[activeDragElementKey].y || 0;
 
-        // Visual selection
         frame.querySelectorAll('[data-cert-element]').forEach(el => el.classList.remove('is-selected-element'));
         targetEl.classList.add('is-selected-element', 'is-dragging');
 
-        // Select in designer dropdown
         activeMoveElementKey = activeDragElementKey;
         const sel = document.getElementById('moveElementTargetSelect');
         if (sel) sel.value = activeDragElementKey;
@@ -4494,6 +4747,13 @@
         if (isDraggingCertElement && activeDragElementKey) {
           const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
           if (targetEl) targetEl.classList.remove('is-dragging');
+
+          const finalX = currentCertTemplate.offsets[activeDragElementKey].x;
+          const finalY = currentCertTemplate.offsets[activeDragElementKey].y;
+          if (finalX !== dragElemInitX || finalY !== dragElemInitY) {
+            pushCertHistoryState(`Moved ${activeDragElementKey}`);
+          }
+
           isDraggingCertElement = false;
         }
       });
@@ -4520,6 +4780,7 @@
 
       renderCertificatePreview();
       updateOffsetLabels();
+      pushCertHistoryState(`Nudged ${activeMoveElementKey}`);
     }
 
     function syncOffsetFromInputs() {
@@ -4533,6 +4794,7 @@
 
       renderCertificatePreview();
       updateOffsetLabels();
+      pushCertHistoryState(`Positioned ${activeMoveElementKey}`);
     }
 
     function resetActiveElementPosition() {
@@ -4543,6 +4805,7 @@
       currentCertTemplate.offsets[activeMoveElementKey].y = 0;
       renderCertificatePreview();
       updateOffsetLabels();
+      pushCertHistoryState(`Reset position of ${activeMoveElementKey}`);
       showToast(`Position reset for ${activeMoveElementKey}`, 'fa-rotate-left');
     }
 
@@ -4552,6 +4815,7 @@
       });
       renderCertificatePreview();
       updateOffsetLabels();
+      pushCertHistoryState('Reset all positions');
       showToast('All element offsets reset to (0, 0)', 'fa-rotate-left');
     }
 
@@ -4596,6 +4860,7 @@
         }
 
         renderCertificatePreview();
+        pushCertHistoryState(`Attached image to ${slotKey}`);
         showToast('Image attached successfully!', 'fa-image');
       };
       reader.readAsDataURL(file);
@@ -4617,6 +4882,7 @@
         if (chk) chk.checked = false;
       }
       renderCertificatePreview();
+      pushCertHistoryState(`Reset image slot ${slotKey}`);
       showToast('Image reset to default', 'fa-rotate-left');
     }
 
@@ -4627,6 +4893,7 @@
         currentCertTemplate.signatories.sig2SignatureImage = '';
       }
       renderCertificatePreview();
+      pushCertHistoryState(`Removed signature from ${sigKey}`);
       showToast('Digital signature removed', 'fa-trash-can');
     }
 
@@ -4640,6 +4907,7 @@
     function toggleWatermarkEnabled(val) {
       currentCertTemplate.header.watermarkEnabled = val;
       renderCertificatePreview();
+      pushCertHistoryState('Toggled watermark');
     }
 
     function handleWatermarkOpacityChange(val) {
@@ -4650,11 +4918,13 @@
     function toggleGoldSealEnabled(val) {
       currentCertTemplate.header.goldSeal = val;
       renderCertificatePreview();
+      pushCertHistoryState('Toggled gold seal');
     }
 
     function handleGoldSealPosChange(val) {
       currentCertTemplate.header.goldSealPosition = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed gold seal position');
     }
 
     // --- TEXT & CONTENT HANDLERS ---
@@ -4666,6 +4936,7 @@
     function handleTitleFontChange(val) {
       currentCertTemplate.title.fontFamily = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed title font');
     }
 
     function handleTitleFontSizeChange(val) {
@@ -4681,6 +4952,7 @@
     function handleRecipientFontChange(val) {
       currentCertTemplate.recipient.fontFamily = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed recipient font');
     }
 
     function handleRecipientSizeChange(val) {
@@ -4694,6 +4966,7 @@
     function handleRecipientUnderlineChange(val) {
       currentCertTemplate.recipient.underline = val;
       renderCertificatePreview();
+      pushCertHistoryState('Toggled recipient underline');
     }
 
     function handleCitationLeadInput(val) {
@@ -4731,12 +5004,14 @@
         else c.classList.add('hidden');
       }
       renderCertificatePreview();
+      pushCertHistoryState('Toggled 3rd signatory');
     }
 
     // --- BORDER & STYLE HANDLERS ---
     function handleBorderStyleChange(val) {
       currentCertTemplate.theme.borderStyle = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed border style');
     }
 
     function handleBorderWidthChange(val) {
@@ -4749,6 +5024,7 @@
       const lbl = document.getElementById('lblOuterBorderColor');
       if (lbl) lbl.textContent = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed border color');
     }
 
     function handleInnerBorderColorChange(val) {
@@ -4756,21 +5032,25 @@
       const lbl = document.getElementById('lblInnerBorderColor');
       if (lbl) lbl.textContent = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed inner accent color');
     }
 
     function handleBgToneChange(val) {
       currentCertTemplate.theme.backgroundColor = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed background tone');
     }
 
     function handleCornerOrnamentChange(val) {
       currentCertTemplate.theme.cornerOrnament = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed corner ornament');
     }
 
     function handleCornerColorChange(val) {
       currentCertTemplate.theme.cornerColor = val;
       renderCertificatePreview();
+      pushCertHistoryState('Changed corner color');
     }
 
     function handleCertTypeSelectChange(typeKey) {
@@ -4788,6 +5068,7 @@
         if (inp) inp.value = typeTitles[typeKey];
       }
       renderCertificatePreview();
+      pushCertHistoryState(`Selected ${typeKey} type`);
     }
 
     function handleQuickThemeChange(themeKey) {
@@ -4819,13 +5100,13 @@
 
       syncDesignerInputsFromTemplate();
       renderCertificatePreview();
+      pushCertHistoryState(`Switched to ${themeKey} theme`);
     }
 
     function syncDesignerInputsFromTemplate() {
       const t = currentCertTemplate;
       if (!t) return;
 
-      // Text inputs
       const inpTitle = document.getElementById('inputCertTitle');
       if (inpTitle) inpTitle.value = t.title.customTitle || '';
 
@@ -4911,9 +5192,10 @@
       if (selGsPos) selGsPos.value = t.header.goldSealPosition || 'bottom-center';
 
       updateOffsetLabels();
+      updateUndoRedoButtons();
     }
 
-    // --- CORE HTML CERTIFICATE BUILDER (USED FOR PREVIEW & PRINT) ---
+    // --- CORE HTML CERTIFICATE BUILDER (WITH INLINE EDIT & DRAG HANDLES) ---
     function buildCertificateHtml(recipient, act, serialNo, tpl, isPrint) {
       const t = tpl || currentCertTemplate;
       const offsets = t.offsets || {};
@@ -4931,10 +5213,15 @@
         return `data-cert-element="${key}" data-cert-label="${label}"`;
       }
 
+      function getEditableAttrs(fieldKey) {
+        if (isPrint || !isCertEditMode) return '';
+        return `contenteditable="true" data-cert-field="${fieldKey}" spellcheck="false" class="cert-inline-editable" title="Click directly to edit text"`;
+      }
+
       const fontClassTitle = t.title.fontFamily === 'cinzel' ? 'font-cinzel' : (t.title.fontFamily === 'playfair' ? 'font-serif-title' : 'font-sans');
       const fontClassRec = t.recipient.fontFamily === 'cinzel' ? 'font-cinzel' : (t.recipient.fontFamily === 'playfair' ? 'font-serif-title' : 'font-sans');
 
-      // Citation formatted text
+      // Citation formatted details text
       let detailText = t.citation.detailTemplate || 'Conducted on {date} at {venue} with an equivalent duration of {duration}.';
       detailText = detailText.replace('{date}', `<strong>${act.date}</strong>`)
                              .replace('{venue}', act.venue || 'Baguio City Hall')
@@ -4960,7 +5247,7 @@
         `;
       }
 
-      // Watermark
+      // Center background watermark
       let watermarkHtml = '';
       if (t.header.watermarkEnabled && t.header.watermarkLogo) {
         watermarkHtml = `
@@ -4989,6 +5276,9 @@
         `;
       }
 
+      const recDisplayName = t.recipient.customName || recipient.name || 'JUAN M. DELA CRUZ';
+      const recDisplaySub = t.recipient.customSubtitle || `${recipient.office || 'CBAO'} • ${recipient.position || 'Civil Service Personnel'}`;
+
       return `
         <!-- Outer Framed Container -->
         <div class="w-full h-full flex flex-col justify-between relative select-none" style="${outerStyle}">
@@ -4998,61 +5288,73 @@
 
           <!-- Header Section -->
           <div class="text-center pt-2 sm:pt-4 px-4 relative z-10" style="${getOffsetStyle('header')}" ${getDragAttrs('header', 'Header Block')}>
+            ${isCertEditMode && !isPrint ? `<div class="cert-drag-handle" title="Drag to move Header Block"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>` : ''}
             <div class="flex items-center justify-center gap-4 sm:gap-8">
               <!-- Left Logo -->
-              <div class="rounded-full bg-white p-1 flex items-center justify-center shadow-md border-2 border-slate-200 shrink-0"
+              <div class="rounded-full bg-white p-1 flex items-center justify-center shadow-md border-2 border-slate-200 shrink-0 relative"
                    style="width: ${t.header.leftLogoWidth || 76}px; height: ${t.header.leftLogoWidth || 76}px; ${getOffsetStyle('leftLogo')}"
                    ${getDragAttrs('leftLogo', 'Left Seal Logo')}>
-                <img src="${t.header.leftLogo || 'CITY%20HALL%20LOGO.png'}" alt="Left Logo" class="w-full h-full object-contain">
+                <img src="${t.header.leftLogo || 'CITY%20HALL%20LOGO.png'}" alt="Left Logo" class="w-full h-full object-contain pointer-events-none">
               </div>
 
               <!-- Header Texts -->
               <div class="text-center">
-                <div class="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase">${t.header.republicText || 'Republic of the Philippines'}</div>
-                <div class="text-xs sm:text-sm font-black tracking-widest uppercase" style="color: ${t.theme.outerBorderColor || '#091b38'};">${t.header.cityText || 'City Government of Baguio'}</div>
-                <div class="text-[10px] sm:text-xs font-black tracking-wider uppercase mt-0.5" style="color: ${t.theme.innerBorderColor || '#f97316'};">${t.header.chapterText || 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</div>
-                <div class="text-[9px] text-slate-400 font-semibold">${t.header.subText || 'City Hall Chapter • Baguio City, Philippines'}</div>
+                <div class="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase" ${getEditableAttrs('header.republicText')}>${t.header.republicText || 'Republic of the Philippines'}</div>
+                <div class="text-xs sm:text-sm font-black tracking-widest uppercase" style="color: ${t.theme.outerBorderColor || '#091b38'};" ${getEditableAttrs('header.cityText')}>${t.header.cityText || 'City Government of Baguio'}</div>
+                <div class="text-[10px] sm:text-xs font-black tracking-wider uppercase mt-0.5" style="color: ${t.theme.innerBorderColor || '#f97316'};" ${getEditableAttrs('header.chapterText')}>${t.header.chapterText || 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</div>
+                <div class="text-[9px] text-slate-400 font-semibold" ${getEditableAttrs('header.subText')}>${t.header.subText || 'City Hall Chapter • Baguio City, Philippines'}</div>
               </div>
 
               <!-- Right Logo -->
-              <div class="rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border-2 shrink-0"
+              <div class="rounded-2xl bg-white p-1 flex items-center justify-center shadow-md border-2 shrink-0 relative"
                    style="width: ${t.header.rightLogoWidth || 76}px; height: ${t.header.rightLogoWidth || 76}px; border-color: ${t.theme.innerBorderColor || '#f97316'}; ${getOffsetStyle('rightLogo')}"
                    ${getDragAttrs('rightLogo', 'Right Emblem Logo')}>
-                <img src="${t.header.rightLogo || 'MOVE%20BAGUIO%20LOGO.png'}" alt="Right Logo" class="w-full h-full object-contain">
+                <img src="${t.header.rightLogo || 'MOVE%20BAGUIO%20LOGO.png'}" alt="Right Logo" class="w-full h-full object-contain pointer-events-none">
               </div>
             </div>
 
             <!-- Title & Intro -->
-            <div class="pt-3 sm:pt-4" style="${getOffsetStyle('title')}" ${getDragAttrs('title', 'Main Title')}>
-              <h2 class="${fontClassTitle} font-black tracking-wider uppercase"
-                  style="font-size: ${t.title.fontSize || 28}px; color: ${t.title.color || t.theme.outerBorderColor || '#091b38'};">
+            <div class="pt-3 sm:pt-4 relative" style="${getOffsetStyle('title')}" ${getDragAttrs('title', 'Main Title')}>
+              ${isCertEditMode && !isPrint ? `<div class="cert-drag-handle" title="Drag to move Title"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>` : ''}
+              <h2 class="${fontClassTitle} font-black tracking-wider uppercase inline-block"
+                  style="font-size: ${t.title.fontSize || 28}px; color: ${t.title.color || t.theme.outerBorderColor || '#091b38'};"
+                  ${getEditableAttrs('title.customTitle')}>
                 ${t.title.customTitle || 'CERTIFICATE OF PARTICIPATION'}
               </h2>
               <div class="w-40 h-1 mx-auto mt-1" style="background: linear-gradient(to right, transparent, ${t.title.accentColor || t.theme.innerBorderColor || '#f97316'}, transparent);"></div>
-              <p class="text-xs italic text-slate-500 mt-1.5 font-serif-title">${t.title.introText || 'This certificate is proudly awarded to'}</p>
+              <p class="text-xs italic text-slate-500 mt-1.5 font-serif-title" ${getEditableAttrs('title.introText')}>
+                ${t.title.introText || 'This certificate is proudly awarded to'}
+              </p>
             </div>
           </div>
 
           <!-- Recipient Section -->
           <div class="text-center my-2 sm:my-3 px-4 relative z-10" style="${getOffsetStyle('recipient')}" ${getDragAttrs('recipient', 'Recipient Name')}>
-            <div class="${fontClassRec} font-black tracking-wide"
-                 style="font-size: ${t.recipient.fontSize || 34}px; color: ${t.recipient.color || '#091b38'}; ${t.recipient.underline ? `text-decoration: underline; text-decoration-color: ${t.recipient.underlineColor || '#f97316'}; text-underline-offset: 8px; text-decoration-thickness: 2.5px;` : ''}">
-              ${recipient.name || 'JUAN M. DELA CRUZ'}
+            ${isCertEditMode && !isPrint ? `<div class="cert-drag-handle" title="Drag to move Recipient"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>` : ''}
+            <div class="${fontClassRec} font-black tracking-wide inline-block"
+                 style="font-size: ${t.recipient.fontSize || 34}px; color: ${t.recipient.color || '#091b38'}; ${t.recipient.underline ? `text-decoration: underline; text-decoration-color: ${t.recipient.underlineColor || '#f97316'}; text-underline-offset: 8px; text-decoration-thickness: 2.5px;` : ''}"
+                 ${getEditableAttrs('recipient.customName')}>
+              ${recDisplayName}
             </div>
-            <div class="text-xs sm:text-sm font-bold pt-2 uppercase tracking-wider" style="color: ${t.recipient.subtitleColor || '#ea580c'};">
-              ${recipient.office || 'CBAO'} &bull; ${recipient.position || 'Civil Service Personnel'}
+            <div class="text-xs sm:text-sm font-bold pt-2 uppercase tracking-wider block" style="color: ${t.recipient.subtitleColor || '#ea580c'};"
+                 ${getEditableAttrs('recipient.customSubtitle')}>
+              ${recDisplaySub}
             </div>
           </div>
 
-          <!-- Citation Body -->
-          <div class="text-center max-w-2xl mx-auto space-y-1 px-6 text-xs sm:text-[13px] leading-relaxed font-serif-title relative z-10"
+          <!-- Citation Body Paragraph -->
+          <div class="text-center max-w-2xl mx-auto space-y-1.5 px-6 text-xs sm:text-[13px] leading-relaxed font-serif-title relative z-10"
                style="color: ${t.citation.color || '#334155'}; font-size: ${t.citation.fontSize || 13}px; ${getOffsetStyle('citation')}"
                ${getDragAttrs('citation', 'Citation Body')}>
-            <p>${t.citation.leadText || 'for actively participating and successfully completing the capacity-building seminar on'}</p>
-            <p class="text-sm sm:text-base font-black uppercase font-sans tracking-tight" style="color: ${t.theme.outerBorderColor || '#091b38'};">
+            ${isCertEditMode && !isPrint ? `<div class="cert-drag-handle" title="Drag to move Citation Body"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>` : ''}
+            <p ${getEditableAttrs('citation.leadText')}>
+              ${t.citation.leadText || 'for actively participating and successfully completing the capacity-building seminar on'}
+            </p>
+            <p class="text-sm sm:text-base font-black uppercase font-sans tracking-tight" style="color: ${t.theme.outerBorderColor || '#091b38'};"
+               ${getEditableAttrs('citation.customEventTitle')}>
               "${t.citation.customEventTitle || act.title}"
             </p>
-            <p class="text-[11px] sm:text-xs text-slate-600 leading-normal">
+            <p class="text-[11px] sm:text-xs text-slate-600 leading-normal" ${getEditableAttrs('citation.detailTemplate')}>
               ${detailText}
             </p>
           </div>
@@ -5060,6 +5362,8 @@
           <!-- Signatures & Verification Footer -->
           <div class="pt-4 sm:pt-6 border-t border-slate-200 pb-3 sm:pb-5 px-6 sm:px-10 flex items-end justify-between relative z-10"
                style="${getOffsetStyle('signatories')}" ${getDragAttrs('signatories', 'Signatures Block')}>
+            ${isCertEditMode && !isPrint ? `<div class="cert-drag-handle" title="Drag to move Signatures Block"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>` : ''}
+
             <!-- Signatory 1 -->
             <div class="text-center relative">
               ${t.signatories.sig1SignatureImage ? `
@@ -5067,14 +5371,18 @@
                   <img src="${t.signatories.sig1SignatureImage}" class="h-12 w-32 object-contain">
                 </div>
               ` : ''}
-              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
-                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm inline-block"
+                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};"
+                   ${getEditableAttrs('signatories.sig1Name')}>
                 ${t.signatories.sig1Name || 'DAN RICKY M. ONG'}
               </div>
-              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider block" style="color: ${t.theme.innerBorderColor || '#f97316'};"
+                   ${getEditableAttrs('signatories.sig1Title')}>
                 ${t.signatories.sig1Title || 'MOVE Chapter President'}
               </div>
-              <div class="text-[9px] text-slate-500">${t.signatories.sig1Office || 'City Government of Baguio'}</div>
+              <div class="text-[9px] text-slate-500 block" ${getEditableAttrs('signatories.sig1Office')}>
+                ${t.signatories.sig1Office || 'City Government of Baguio'}
+              </div>
             </div>
 
             <!-- QR Code & Serial Verification -->
@@ -5094,14 +5402,18 @@
                     <img src="${t.signatories.sig3SignatureImage}" class="h-12 w-32 object-contain">
                   </div>
                 ` : ''}
-                <div class="w-40 sm:w-44 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
-                     style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+                <div class="w-40 sm:w-44 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm inline-block"
+                     style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};"
+                     ${getEditableAttrs('signatories.sig3Name')}>
                   ${t.signatories.sig3Name || 'HON. FAUSTINO A. OLOWAN'}
                 </div>
-                <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+                <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider block" style="color: ${t.theme.innerBorderColor || '#f97316'};"
+                     ${getEditableAttrs('signatories.sig3Title')}>
                   ${t.signatories.sig3Title || 'City Vice Mayor'}
                 </div>
-                <div class="text-[9px] text-slate-500">${t.signatories.sig3Office || 'City Government of Baguio'}</div>
+                <div class="text-[9px] text-slate-500 block" ${getEditableAttrs('signatories.sig3Office')}>
+                  ${t.signatories.sig3Office || 'City Government of Baguio'}
+                </div>
               </div>
             ` : ''}
 
@@ -5112,14 +5424,18 @@
                   <img src="${t.signatories.sig2SignatureImage}" class="h-12 w-32 object-contain">
                 </div>
               ` : ''}
-              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm"
-                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};">
+              <div class="w-40 sm:w-48 border-b-2 mx-auto pb-1 font-bold text-xs sm:text-sm inline-block"
+                   style="border-color: ${t.theme.outerBorderColor || '#091b38'}; color: ${t.theme.outerBorderColor || '#091b38'};"
+                   ${getEditableAttrs('signatories.sig2Name')}>
                 ${t.signatories.sig2Name || 'HON. BENJAMIN B. MAGALONG'}
               </div>
-              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider" style="color: ${t.theme.innerBorderColor || '#f97316'};">
+              <div class="text-[10px] font-bold mt-0.5 uppercase tracking-wider block" style="color: ${t.theme.innerBorderColor || '#f97316'};"
+                   ${getEditableAttrs('signatories.sig2Title')}>
                 ${t.signatories.sig2Title || 'City Mayor'}
               </div>
-              <div class="text-[9px] text-slate-500">${t.signatories.sig2Office || 'City Government of Baguio'}</div>
+              <div class="text-[9px] text-slate-500 block" ${getEditableAttrs('signatories.sig2Office')}>
+                ${t.signatories.sig2Office || 'City Government of Baguio'}
+              </div>
             </div>
           </div>
         </div>
@@ -5143,7 +5459,7 @@
       const serialNo = `MOVE-2026-${(act.id || 'ACT-001').replace('ACT-', '')}-${String(certCurrentRecipientIndex + 1).padStart(4, '0')}`;
 
       const attendeeLbl = document.getElementById('lblPreviewAttendeeSummary');
-      if (attendeeLbl) attendeeLbl.textContent = `${recipient.name} (${recipient.office || 'City Hall'})`;
+      if (attendeeLbl) attendeeLbl.textContent = `${currentCertTemplate.recipient.customName || recipient.name} (${recipient.office || 'City Hall'})`;
 
       const frame = document.getElementById('certificateFrame');
       if (!frame) return;
@@ -5152,7 +5468,6 @@
 
       if (isCertEditMode) {
         frame.classList.add('cert-edit-active');
-        // re-highlight currently selected target element
         if (activeMoveElementKey) {
           const el = frame.querySelector(`[data-cert-element="${activeMoveElementKey}"]`);
           if (el) el.classList.add('is-selected-element');
