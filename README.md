@@ -131,31 +131,46 @@ To ensure clarity across both administrative reporting and training execution, t
   * Direct action shortcut: **"🎓 Generate Certificates for Present Attendees"**.
 
 ### 6. 🎓 Official Certificate Studio & Interactive Designer
-* Dynamic, automated certificate generation & live design studio:
+* Dynamic, automated certificate generation & live WYSIWYG design studio:
   * **Attendance-Gated Issuance**: Automatically validates and issues certificates **only** to participants confirmed as `Present`.
-  * **Interactive Designer / Edit Mode**:
-    * **Direct Canvas Inline Editing**: Click directly on any text on the certificate canvas (citation paragraph, event title, recipient name, main title, header texts, or signatories) to type and edit in place immediately.
-    * **Full Undo & Redo Controls (`Ctrl+Z` / `Ctrl+Y`)**: Dedicated Undo and Redo toolbar buttons and global keyboard shortcuts (`Ctrl+Z` to undo, `Ctrl+Y` or `Ctrl+Shift+Z` to redo) with up to 40 history steps tracking all inline text edits, moves, and styling changes.
-    * **Live Drag-to-Move**: Click and drag any element or drag handle (title, recipient, body citation, logos, signatures, gold seal) directly on the certificate canvas to freely reposition it.
-    * **Precision Nudge Controls**: D-Pad arrow buttons and numeric X/Y offset inputs for pixel-perfect alignment.
+  * **Side-by-Side Responsive Studio Workspace**:
+    * Clean two-column layout (`flex-col md:flex-row items-start w-full`):
+      * **Left Column**: Sticky, scrollable **Designer Toolbox** (`w-full md:w-80 lg:w-96`, `sticky top-4 max-h-[calc(100vh-120px)] overflow-y-auto`) housing tabbed toolsets (*Move*, *Images*, *Text*, *Signatures*, *Border*).
+      * **Right Column**: Live **Certificate Stage Canvas** (`flex-1 min-w-0`), rendering the full A4 landscape certificate (`aspect-[1.414/1]`) side-by-side with zero overlap and zero blank margins.
+    * When Designer Mode is toggled off, the canvas smoothly centers across the full workspace stage.
+  * **In-Place Canvas Click-to-Edit (WYSIWYG)**:
+    * Click directly on any text element on the certificate canvas to focus and type in place:
+      * **Header Block**: Republic text, City Hall name, MOVE chapter name, and subtitle.
+      * **Award Title & Lead-in**: Main title (`CERTIFICATE OF PARTICIPATION`, etc.) and intro text.
+      * **Recipient Section**: Full attendee name and municipal office/position subtitle.
+      * **Citation Paragraph**: Lead statement, event title, and comprehensive details template (`{date}`, `{venue}`, `{duration}`).
+      * **Signatories Block**: Signatory names, titles, and offices.
+    * Polished typography interaction:
+      * **Hover Outline**: Subtle dashed orange box (`1.5px dashed #f97316`) on hover signaling editability without cluttering unselected elements.
+      * **Focus Ring**: Crisp active focus border (`2px solid #ea580c`) with white focus background and cursor retention.
+      * **Keyboard Controls**: Pressing <kbd>Enter</kbd> commits single-line text; <kbd>Escape</kbd> clears focus.
+  * **Comprehensive Undo & Redo History Engine (`Ctrl+Z` / `Ctrl+Y`)**:
+    * 40-step history stack (`certHistoryStack`) tracking all text edits, nudge repositionings, palette tweaks, and version changes.
+    * Dedicated **Undo** (<i class="fa-solid fa-rotate-left"></i>) and **Redo** (<i class="fa-solid fa-rotate-right"></i>) toolbar buttons with live enabled/disabled visual states.
+    * Keyboard shortcuts: <kbd>Ctrl</kbd> + <kbd>Z</kbd> for undo and <kbd>Ctrl</kbd> + <kbd>Y</kbd> (or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd>) for redo.
+  * **Live Drag & Precision Repositioning**:
+    * Click & drag any element directly on the canvas to freely reposition it.
+    * Precision Nudge D-Pad controls (Up, Down, Left, Right) with numeric X/Y pixel offsets.
   * **Image & Logo Attachments**:
-    * Attach/replace custom image files for **Left Seal Logo** and **Right MOVE Emblem** with size sliders.
-    * Optional **Center Background Watermark** with opacity and scale controls.
-    * Attach **Digital Signature PNGs** for both Signatory 1 (President) and Signatory 2 (Mayor).
-    * Official embossed **Gold Seal / Ribbon Stamp** with position options.
-  * **Typography & Content Customization**:
-    * Custom Certificate Title (*Participation*, *Appreciation*, *Recognition*, *Membership*, or Custom).
-    * Font family selectors (*Cinzel Classical*, *Playfair Display*, *Inter Clean*), font size sliders, and color pickers.
-    * Dynamic body citation templates with tokens (`{date}`, `{venue}`, `{duration}`).
-    * Configurable Signatories: 2 or 3 signatories with live name and title editing.
-    * Customizable frames: Double, Solid, Groove, Ridge borders with custom widths and color palettes.
+    * Upload/replace custom logos for **Left Seal** (City Hall) and **Right Emblem** (MOVE Baguio) with live size sliders.
+    * Optional **Center Background Watermark** with opacity slider and scale controls.
+    * Upload **Digital Signature PNGs** for both Signatory 1 (President) and Signatory 2 (Mayor).
+    * Official embossed **Gold Seal / Ribbon Stamp** with bottom-center, bottom-left, or bottom-right placement.
+  * **Custom Framing & Theming**:
+    * Master border styling (Double, Solid, Ridge, Groove) and color pickers.
+    * Background tones (Clean White, Royal Ivory, Baguio Pine Tint, Pearl Grey).
+    * Corner emblems (Medallion Rosette, Star, Clean).
   * **Template Version Management**:
-    * **Save Version**: Save edits directly to current template.
-    * **Save As New Version**: Create and name new custom versions (*e.g., "Anti-VAWC Seminar 2026", "Speaker Plaque v2"*).
-    * Versions dropdown to switch between built-in presets and user-saved custom versions.
-    * Persistent storage in `localStorage`.
-  * **Batch & Single Printing Engine**:
-    * 1-click **"Print Single"** and **"Batch Print All Present"** faithfully applying the active custom template version (with custom layout, uploaded logos, signatures, and typography) across landscape pages (`page-break-after: always`).
+    * **Save Version**: Save modifications directly to the current working template.
+    * **Save As New Version**: Name and save independent custom presets (*e.g., "Anti-VAWC Seminar 2026", "Leadership Summit v2"*).
+    * Persistent browser storage via `localStorage` (`move_cert_templates_v2`).
+  * **Batch & Single High-Resolution Printing**:
+    * 1-click **"Print Single"** and **"Batch Print All Present"** applying custom templates across standardized A4 landscape pages (`page-break-after: always`).
 
 ### 7. ⚙️ 50-Participant Balancing & Roster Engine
 * Multi-parameter algorithmic filter tool:
@@ -176,21 +191,22 @@ To ensure clarity across both administrative reporting and training execution, t
 ## 📁 Repository Structure
 
 ```text
-├── index.html                           # Full MOVE System Single-Page Application (HTML5/Tailwind/JS)
-├── sync_server.py                       # Local Python Database Sync Engine (Port 8765)
-├── Start_HRIS_System.bat                # 1-Click Launcher (Starts Server & Launches Web App)
-├── ALL MALES MARIED WITH TRAINING.xls   # Master 7-Sheet Excel Database
-│   ├── Sheet                            # 506 Permanent Employees Directory
-│   ├── Casual                           # 275 Casual & Temporary Employees Directory
-│   ├── Officer                          # 17 Chapter Executive Officers (2025 & 2026 Terms)
-│   ├── Committees                       # 15 Standing Committee Leaders
-│   ├── Selected_Participants            # 51 Verified 50-Participant Balanced Training Roster
-│   ├── Office_Summary                   # 19 Department Allocation Summary
-│   └── Members                          # 51 Official MOVE Chapter Membership Registry
-├── CASUAL, TEM.xls                      # Source Casual & Temporary Employees Dataset
-├── MOVE BAGUIO LOGO.png                 # Official Chapter Emblem
-├── CITY HALL LOGO.png                   # Official Baguio City Hall Seal
-└── README.md                            # Comprehensive System Documentation
+├── index.html                                 # Full MOVE System Single-Page Application (HTML5/Tailwind/JS)
+├── sync_server.py                             # Local Python Database Sync Engine (Port 8765)
+├── Start_HRIS_System.bat                      # 1-Click Launcher (Starts Server & Launches Web App)
+├── ALL MALES MARIED WITH TRAINING.xls         # Master 7-Sheet Excel Database
+│   ├── Sheet                                  # 506 Permanent Employees Directory
+│   ├── Casual                                 # 275 Casual & Temporary Employees Directory
+│   ├── Officer                                # 17 Chapter Executive Officers (2025 & 2026 Terms)
+│   ├── Committees                             # 15 Standing Committee Leaders
+│   ├── Selected_Participants                  # 51 Verified 50-Participant Balanced Training Roster
+│   ├── Office_Summary                         # 19 Department Allocation Summary
+│   └── Members                                # 51 Official MOVE Chapter Membership Registry
+├── CASUAL, TEM.xls                            # Source Casual & Temporary Employees Dataset
+├── MEMO TO MOVE (Men In The Kitchen) 2026.docx # Official Administrative Memorandum Document
+├── MOVE BAGUIO LOGO.png                       # Official Chapter Emblem
+├── CITY HALL LOGO.png                         # Official Baguio City Hall Seal
+└── README.md                                  # Comprehensive System Documentation
 ```
 
 ---
