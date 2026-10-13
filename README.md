@@ -123,11 +123,14 @@ To ensure clarity across both administrative reporting and training execution, t
 ### 5. 📅 Activities & Interactive Attendance Modal
 * **Master Activities Table**:
   * Tracks `#`, `Date`, `Type of Activity`, `Title`, `Purpose`, `Trainer / Speaker`, `Duration`, and `Attendance Ratio`.
+  * **Double-Click Edit**: Double-clicking any activity row in the Activities Table or Dashboard immediately opens the **Edit Activity / Training Details Modal** (`#modalEditActivity`).
+  * **Action Button**: Dedicated **Edit** button (`<button>Edit</button>`) next to `Attendance →` for single-click access.
 * **Drill-Down Participant Attendance Modal**:
   * Interactive modal displaying complete participant roster.
   * Real-time attendance rate calculation.
   * Filter by attendance state (`All`, `Present Only`, `Absent Only`).
   * One-click attendance toggles (`✓ YES / ✗ NO`).
+  * **Header Editing**: Double-clicking the attendance modal header or clicking **"Edit Training"** opens the Edit modal and updates attendance headers, dashboard, and certificate dropdowns in real time upon saving.
   * Direct action shortcut: **"🎓 Generate Certificates for Present Attendees"**.
 
 ### 6. 🎓 Official Certificate Studio & Interactive Designer
@@ -156,19 +159,28 @@ To ensure clarity across both administrative reporting and training execution, t
   * **Live Drag & Precision Repositioning**:
     * Click & drag any element directly on the canvas to freely reposition it.
     * Precision Nudge D-Pad controls (Up, Down, Left, Right) with numeric X/Y pixel offsets.
+  * **Digital Signature Width & Height Sizing Engine**:
+    * **Independent Dimensions**: Complete dual-axis control with dedicated **Width** (`40px`–`320px`) and **Height** (`20px`–`140px`) sliders.
+    * **Top Toolbar Controls**: Quick-adjust **W** and **H** sliders directly above the preview canvas in the Tier 4 toolbar.
+    * **Per-Signatory Sliders**: Individual Width & Height cards for **Signatory 1**, **Signatory 2**, and **Signatory 3**.
+    * **Signature Fit Mode Toggle**:
+      * **Free Stretch (`Fill`)** *(Default)*: Stretches the handwritten signature graphic directly to the exact width and height pixel boundaries to span neatly across the signature line.
+      * **Proportional (`Contain`)**: Constrains scaling to the image's natural aspect ratio.
+    * **Unconstrained CSS Styling**: Uses `max-width: none !important; max-height: none !important;` to bypass Tailwind preflight capping and ensure exact rendered dimensions.
   * **Image & Logo Attachments**:
-    * Upload/replace custom logos for **Left Seal** (City Hall) and **Right Emblem** (MOVE Baguio) with live size sliders.
-    * Optional **Center Background Watermark** with opacity slider and scale controls.
-    * Upload **Digital Signature PNGs** for both Signatory 1 (President) and Signatory 2 (Mayor).
+    * Upload/replace custom logos for **Left Seal** (City Hall), **Right Emblem** (MOVE Baguio), and **Event Logo** (*Men in the Kitchen 2*) with live size sliders.
+    * **Center Background Watermark**: Opacity slider, scale slider, and **Layering Selector** (**Behind Text** `z-0` vs **In Front of Text** `z-20`).
+    * Upload **Digital Signature PNGs** for Signatory 1 (President), Signatory 2 (Mayor), and Signatory 3 (Vice Mayor).
     * Official embossed **Gold Seal / Ribbon Stamp** with bottom-center, bottom-left, or bottom-right placement.
-  * **Custom Framing & Theming**:
+  * **Custom Framing, Presets & Theming**:
     * Master border styling (Double, Solid, Ridge, Groove) and color pickers.
-    * Background tones (Clean White, Royal Ivory, Baguio Pine Tint, Pearl Grey).
+    * **Whole-Certificate Preset Borders**: One-click border overlays around the entire certificate perimeter.
+    * Background tones (Clean White, Royal Ivory, Baguio Pine Tint, Pearl Grey, Amber Parchment).
     * Corner emblems (Medallion Rosette, Star, Clean).
   * **Template Version Management**:
     * **Save Version**: Save modifications directly to the current working template.
-    * **Save As New Version**: Name and save independent custom presets (*e.g., "Anti-VAWC Seminar 2026", "Leadership Summit v2"*).
-    * Persistent browser storage via `localStorage` (`move_cert_templates_v2`).
+    * **Save As New Version**: Name and save independent custom presets (*e.g., "Anti-VAWC Seminar 2026", "Men in the Kitchen 2", "Leadership Summit v2"*).
+    * Persistent browser storage via `localStorage` (`move_cert_templates_v5`).
   * **Batch & Single High-Resolution Printing**:
     * 1-click **"Print Single"** and **"Batch Print All Present"** applying custom templates across standardized A4 landscape pages (`page-break-after: always`).
 
@@ -191,7 +203,13 @@ To ensure clarity across both administrative reporting and training execution, t
 ## 📁 Repository Structure
 
 ```text
-├── index.html                                 # Full MOVE System Single-Page Application (HTML5/Tailwind/JS)
+├── index.html                                 # Clean Main Application HTML5 Layout & Views
+├── css/
+│   └── styles.css                             # Centralized Styles, Typography, Print & Certificate Canvas Rules
+├── js/
+│   ├── data.js                                # Master SpreadsheetML Initial Data (Officers, Committees, Roster, Sheets)
+│   ├── app.js                                 # Application State, Auth, Dashboard, Org Hierarchy, Roster Balancing & Activities
+│   └── certificates.js                        # Dedicated Certificate Studio Engine, WYSIWYG Editor, Signatures & Batch Print
 ├── sync_server.py                             # Local Python Database Sync Engine (Port 8765)
 ├── Start_HRIS_System.bat                      # 1-Click Launcher (Starts Server & Launches Web App)
 ├── ALL MALES MARIED WITH TRAINING.xls         # Master 7-Sheet Excel Database
@@ -206,6 +224,8 @@ To ensure clarity across both administrative reporting and training execution, t
 ├── MEMO TO MOVE (Men In The Kitchen) 2026.docx # Official Administrative Memorandum Document
 ├── MOVE BAGUIO LOGO.png                       # Official Chapter Emblem
 ├── CITY HALL LOGO.png                         # Official Baguio City Hall Seal
+├── MEN IN THE KITCHEN 2 LOGO.png              # Official Advocacy & Culinary Event Emblem
+├── signature (15).png                         # High-Resolution Official E-Signature PNG
 └── README.md                                  # Comprehensive System Documentation
 ```
 
