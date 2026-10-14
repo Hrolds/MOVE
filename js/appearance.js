@@ -25,6 +25,9 @@ const caState = {
   signatureWidth: 150,
   showCityLogo: true,
   showMoveLogo: true,
+  showBreatheBaguio: true,
+  breatheBaguioWidth: 95,
+  breatheBaguioPosition: 'footer', // 'footer' | 'bottom-left' | 'bottom-right' | 'watermark'
   filterPresentOnly: true,
   searchTerm: '',
   selectedMemberIds: new Set(),
@@ -823,6 +826,11 @@ function syncCaInputsFromState() {
   setChecked('caShowSignature', caState.showSignature);
   setChecked('caShowCityLogo', caState.showCityLogo);
   setChecked('caShowMoveLogo', caState.showMoveLogo);
+  setChecked('caShowBreatheBaguio', caState.showBreatheBaguio !== false);
+  setVal('caBreatheBaguioWidth', caState.breatheBaguioWidth || 95);
+  const bbLabel = document.getElementById('caBreatheBaguioWidthVal');
+  if (bbLabel) bbLabel.textContent = `${caState.breatheBaguioWidth || 95}px`;
+  setVal('caBreatheBaguioPosition', caState.breatheBaguioPosition || 'footer');
   setChecked('caFilterPresentOnly', caState.filterPresentOnly);
 
   syncCaAlignmentButtons();
@@ -851,6 +859,10 @@ function handleCaInputChange(field, val) {
   caState[field] = val;
   if (field === 'signatureWidth') {
     const wLabel = document.getElementById('caSigWidthVal');
+    if (wLabel) wLabel.textContent = `${val}px`;
+  }
+  if (field === 'breatheBaguioWidth') {
+    const wLabel = document.getElementById('caBreatheBaguioWidthVal');
     if (wLabel) wLabel.textContent = `${val}px`;
   }
   if (field === 'honorificMode') {
@@ -1152,8 +1164,16 @@ function renderAppearancePreview() {
     <div id="caActiveSheet" class="ca-landscape-sheet bg-white text-slate-900 shadow-2xl mx-auto relative select-text"
          style="width: 210mm; height: 148mm; min-height: 148mm; max-height: 148mm; padding: 6mm 10mm 5mm 10mm; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
       
+      <!-- Optional Background Watermark Mode -->
+      ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'watermark' ? `
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+          <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO Watermark" 
+               style="width: 260px; opacity: 0.08;" class="object-contain">
+        </div>
+      ` : ''}
+
       <!-- ================= HEADER SECTION ================= -->
-      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700">
+      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700 relative z-10">
         <!-- Left Logo: City Hall Seal -->
         <div class="w-12 h-12 flex items-center justify-center shrink-0">
           ${caState.showCityLogo ? `<img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">` : ''}
@@ -1182,7 +1202,7 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= DOCUMENT TITLE ================= -->
-      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'}" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
+      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'} relative z-10" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
         <h1 id="caDocTitleEl" contenteditable="true" spellcheck="false"
             oninput="handleCaSheetEdit(this, 'documentTitle')"
             class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
@@ -1193,7 +1213,7 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= BODY CONTENT ================= -->
-      <div class="flex-1 flex flex-col justify-center py-0.5">
+      <div class="flex-1 flex flex-col justify-center py-0.5 relative z-10">
         ${bodyContentHtml}
 
         <!-- Purpose Clause (Live Editable) -->
@@ -1221,13 +1241,18 @@ function renderAppearancePreview() {
         <!-- ================= SIGNATORY BLOCK ================= -->
         <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
           <!-- Control Initials (DRMO / CTB) -->
-          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
+          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2">
             <span id="caInitialsEl" contenteditable="true" spellcheck="false"
                   oninput="handleCaSheetEdit(this, 'initials')"
                   class="text-[9px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
                   title="Click to edit initials">
               ${escapeHtml(caState.initials)}
             </span>
+            ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'bottom-left' ? `
+              <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                   style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 24px;" 
+                   class="object-contain drop-shadow-2xs">
+            ` : ''}
           </div>
 
           <!-- Official Signatory (Benjamin B. Magalong) -->
@@ -1252,13 +1277,31 @@ function renderAppearancePreview() {
               ${escapeHtml(caState.signatoryTitle2)}
             </div>
           </div>
+
+          ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'bottom-right' ? `
+            <div class="${sigAlign === 'center' ? 'absolute right-0 bottom-0' : ''} text-right">
+              <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                   style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 24px;" 
+                   class="object-contain drop-shadow-2xs ml-auto">
+            </div>
+          ` : ''}
         </div>
       </div>
 
       <!-- ================= FOOTER SECTION ================= -->
-      <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium">
-        <div>Tel. No. (074)-442-89-20</div>
-        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[8px]">Official Public Document &bull; MOVE Baguio Chapter</div>
+      <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium relative z-10">
+        <div class="flex items-center gap-2">
+          <div>Tel. No. (074)-442-89-20</div>
+          <span>&bull;</span>
+          <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[7.5px]">Official Public Document &bull; MOVE Baguio</div>
+        </div>
+        ${caState.showBreatheBaguio && (caState.breatheBaguioPosition === 'footer' || !caState.breatheBaguioPosition) ? `
+          <div class="flex items-center justify-center px-1">
+            <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                 style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 25px;" 
+                 class="object-contain drop-shadow-2xs">
+          </div>
+        ` : ''}
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
 
@@ -1387,8 +1430,13 @@ function batchPrintAllAppearance() {
 
         <!-- SIGNATORY BLOCK -->
         <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
-          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
+          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2">
             <span class="text-[9px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
+            ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'bottom-left' ? `
+              <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                   style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 24px;" 
+                   class="object-contain drop-shadow-2xs">
+            ` : ''}
           </div>
           <div class="text-center w-64">
             ${sigImgHtml}
@@ -1396,13 +1444,30 @@ function batchPrintAllAppearance() {
             <div class="text-[10px] font-bold text-slate-800">${escapeHtml(caState.signatoryTitle1)}</div>
             <div class="text-[9px] text-slate-600 font-semibold">${escapeHtml(caState.signatoryTitle2)}</div>
           </div>
+          ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'bottom-right' ? `
+            <div class="${sigAlign === 'center' ? 'absolute right-0 bottom-0' : ''} text-right">
+              <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                   style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 24px;" 
+                   class="object-contain drop-shadow-2xs ml-auto">
+            </div>
+          ` : ''}
         </div>
       </div>
 
       <!-- FOOTER -->
       <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium">
-        <div>Tel. No. (074)-442-89-20</div>
-        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[8px]">Official Public Document &bull; MOVE Baguio Chapter</div>
+        <div class="flex items-center gap-2">
+          <div>Tel. No. (074)-442-89-20</div>
+          <span>&bull;</span>
+          <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[7.5px]">Official Public Document &bull; MOVE Baguio</div>
+        </div>
+        ${caState.showBreatheBaguio && (caState.breatheBaguioPosition === 'footer' || !caState.breatheBaguioPosition) ? `
+          <div class="flex items-center justify-center px-1">
+            <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
+                 style="width: ${caState.breatheBaguioWidth || 95}px; max-height: 25px;" 
+                 class="object-contain drop-shadow-2xs">
+          </div>
+        ` : ''}
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
     `;

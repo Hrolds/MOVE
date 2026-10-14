@@ -2792,6 +2792,44 @@
                       <span class="font-semibold text-slate-600">MOVE Seal</span>
                     </label>
                   </div>
+
+                  <!-- #breathe BAGUIO Official Campaign Branding -->
+                  <div class="pt-2.5 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="caShowBreatheBaguio" onchange="handleCaInputChange('showBreatheBaguio', this.checked)" checked
+                               class="rounded text-emerald-600 focus:ring-emerald-500">
+                        <span class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                          <i class="fa-solid fa-mountain-sun text-emerald-600"></i>
+                          <span>#breathe BAGUIO Emblem</span>
+                        </span>
+                      </label>
+                      <span class="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">Official</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs items-center">
+                      <div class="space-y-1">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-slate-600">
+                          <span>Size:</span>
+                          <span id="caBreatheBaguioWidthVal" class="font-mono text-emerald-700">95px</span>
+                        </div>
+                        <input type="range" id="caBreatheBaguioWidth" min="50" max="150" step="5" value="95"
+                               oninput="handleCaInputChange('breatheBaguioWidth', parseInt(this.value, 10))"
+                               class="w-full accent-emerald-600 cursor-pointer">
+                      </div>
+
+                      <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-600 block">Position:</span>
+                        <select id="caBreatheBaguioPosition" onchange="handleCaInputChange('breatheBaguioPosition', this.value)"
+                                class="w-full py-1 px-2 border border-slate-300 rounded-lg text-[10.5px] font-bold bg-white text-move-navy-900 focus:ring-1 focus:ring-emerald-500">
+                          <option value="footer">Footer (Official)</option>
+                          <option value="bottom-left">Bottom-Left (Initials)</option>
+                          <option value="bottom-right">Bottom-Right</option>
+                          <option value="watermark">Center Watermark</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -2896,6 +2934,28 @@
 
               <!-- Action Buttons -->
               <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <!-- Designer Mode Toggle Button -->
+                <button type="button" id="btnToggleApprecEdit" onclick="toggleApprecEditMode()"
+                        class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm whitespace-nowrap"
+                        title="Toggle Live Visual Designer Mode with inline text editing and outline guides">
+                  <i id="iconApprecEditBtn" class="fa-solid fa-pen-ruler"></i>
+                  <span id="lblApprecEditMode">Enable Designer / Edit Mode</span>
+                </button>
+
+                <!-- Undo / Redo History -->
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200" id="apprecUndoRedoGroup">
+                  <button type="button" id="btnApprecUndo" onclick="undoApprecState()" disabled
+                          class="px-2.5 py-1 text-slate-700 hover:bg-white rounded-lg text-xs font-bold transition disabled:opacity-40 disabled:hover:bg-transparent"
+                          title="Undo changes (Ctrl+Z)">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </button>
+                  <button type="button" id="btnApprecRedo" onclick="redoApprecState()" disabled
+                          class="px-2.5 py-1 text-slate-700 hover:bg-white rounded-lg text-xs font-bold transition disabled:opacity-40 disabled:hover:bg-transparent"
+                          title="Redo changes (Ctrl+Y)">
+                    <i class="fa-solid fa-rotate-right"></i>
+                  </button>
+                </div>
+
                 <button type="button" onclick="printAppreciationCertificate()"
                         class="px-3.5 py-2 bg-gradient-to-r from-move-navy-900 to-move-navy-800 hover:from-black hover:to-move-navy-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
                   <i class="fa-solid fa-print text-amber-400"></i>
@@ -3349,14 +3409,104 @@
                       </select>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                      <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
-                        <input type="checkbox" id="apprecWatermarkEnabled" onchange="handleAppreciationStyleChange('watermarkEnabled', this.checked)" checked class="rounded accent-amber-500">
-                        <span>Background MOVE Watermark</span>
-                      </label>
-                      <div class="flex items-center gap-1.5">
-                        <span class="text-[10px] text-slate-500">Opacity:</span>
-                        <input type="range" id="apprecWatermarkOpacity" min="5" max="30" value="12" oninput="handleAppreciationStyleChange('watermarkOpacity', this.value)" class="w-16 accent-amber-500">
+                    <!-- Dynamic Watermark & Background Emblem Studio -->
+                    <div class="pt-2 border-t border-slate-100 space-y-2.5">
+                      <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800 text-[11px]">
+                          <input type="checkbox" id="apprecWatermarkEnabled" onchange="handleAppreciationStyleChange('watermarkEnabled', this.checked)" checked class="rounded accent-amber-500">
+                          <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-stamp text-amber-600"></i>
+                            Center Watermark / Emblem
+                          </span>
+                        </label>
+                        <button type="button" id="btnResetApprecWatermark" onclick="resetApprecWatermark()"
+                                class="text-[10px] text-slate-400 hover:text-amber-700 font-semibold flex items-center gap-1 transition"
+                                title="Reset watermark to default MOVE Baguio seal">
+                          <i class="fa-solid fa-rotate-left"></i>
+                          <span>Reset</span>
+                        </button>
+                      </div>
+
+                      <!-- 1-Click Preset Emblem Thumbnails (4 Choices) -->
+                      <div>
+                        <span class="block text-[10px] font-bold text-slate-500 mb-1">Select Watermark Preset:</span>
+                        <div class="grid grid-cols-4 gap-1.5">
+                          <!-- MOVE Baguio Seal -->
+                          <button type="button" id="btnApprecWmPreset-move" onclick="setApprecWatermarkPreset('MOVE%20BAGUIO%20LOGO.png')"
+                                  class="p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition flex flex-col items-center gap-1 group"
+                                  title="MOVE Baguio Chapter Official Seal">
+                            <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio" class="w-7 h-7 object-contain drop-shadow-2xs group-hover:scale-105 transition-transform">
+                            <span class="text-[9px] font-bold text-slate-600 group-hover:text-amber-900 truncate max-w-full">MOVE</span>
+                          </button>
+
+                          <!-- City Hall Seal -->
+                          <button type="button" id="btnApprecWmPreset-city" onclick="setApprecWatermarkPreset('CITY%20HALL%20LOGO.png')"
+                                  class="p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition flex flex-col items-center gap-1 group"
+                                  title="City Government of Baguio Seal">
+                            <img src="CITY%20HALL%20LOGO.png" alt="City Hall" class="w-7 h-7 object-contain drop-shadow-2xs group-hover:scale-105 transition-transform">
+                            <span class="text-[9px] font-bold text-slate-600 group-hover:text-amber-900 truncate max-w-full">City Hall</span>
+                          </button>
+
+                          <!-- Men in the Kitchen 2 Logo -->
+                          <button type="button" id="btnApprecWmPreset-kitchen" onclick="setApprecWatermarkPreset('MEN%20IN%20THE%20KITCHEN%202%20LOGO.png')"
+                                  class="p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition flex flex-col items-center gap-1 group"
+                                  title="Men in the Kitchen 2 Activity Logo">
+                            <img src="MEN%20IN%20THE%20KITCHEN%202%20LOGO.png" alt="Men in the Kitchen 2" class="w-7 h-7 object-contain drop-shadow-2xs group-hover:scale-105 transition-transform">
+                            <span class="text-[9px] font-bold text-slate-600 group-hover:text-amber-900 truncate max-w-full">Kitchen 2</span>
+                          </button>
+
+                          <!-- #breathe BAGUIO Logo -->
+                          <button type="button" id="btnApprecWmPreset-breathe" onclick="setApprecWatermarkPreset('BREATHE_BAGUIO.png')"
+                                  class="p-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 transition flex flex-col items-center gap-1 group"
+                                  title="#breathe BAGUIO Official Campaign Emblem">
+                            <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" class="w-7 h-7 object-contain drop-shadow-2xs group-hover:scale-105 transition-transform">
+                            <span class="text-[9px] font-bold text-slate-600 group-hover:text-amber-900 truncate max-w-full">Breathe</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Custom Upload Button -->
+                      <div>
+                        <input type="file" id="uploadApprecWatermarkInput" accept="image/*" onchange="handleApprecWatermarkUpload(event)" class="hidden">
+                        <button type="button" onclick="document.getElementById('uploadApprecWatermarkInput').click()"
+                                class="w-full py-1.5 px-2 bg-slate-50 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 transition flex items-center justify-center gap-1.5">
+                          <i class="fa-solid fa-cloud-arrow-up text-amber-600"></i>
+                          <span>Upload Custom Watermark Image</span>
+                        </button>
+                      </div>
+
+                      <!-- Word-Style Layering Dropdown -->
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Watermark Layering Mode:</label>
+                        <select id="apprecWatermarkLayer" onchange="setApprecWatermarkLayer(this.value)"
+                                class="w-full p-1.5 border border-slate-300 rounded-xl bg-white text-xs font-semibold">
+                          <option value="behind">Behind Text (Standard Watermark)</option>
+                          <option value="washout">Soft Washout (Word Multiply Tint)</option>
+                          <option value="bottom-behind">Lower Behind (Bottom Emphasized)</option>
+                          <option value="infront">In Front of Text (Overlaid Stamp)</option>
+                        </select>
+                      </div>
+
+                      <!-- Watermark Opacity & Size Sliders -->
+                      <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                          <div class="flex items-center justify-between text-[10px] font-bold text-slate-600 mb-1">
+                            <span>Opacity:</span>
+                            <span id="apprecWatermarkOpacityVal" class="text-amber-700">12%</span>
+                          </div>
+                          <input type="range" id="apprecWatermarkOpacity" min="2" max="40" value="12"
+                                 oninput="handleAppreciationStyleChange('watermarkOpacity', this.value)"
+                                 class="w-full accent-amber-500">
+                        </div>
+                        <div>
+                          <div class="flex items-center justify-between text-[10px] font-bold text-slate-600 mb-1">
+                            <span>Size:</span>
+                            <span id="apprecWatermarkSizeVal" class="text-amber-700">320px</span>
+                          </div>
+                          <input type="range" id="apprecWatermarkSize" min="140" max="480" step="10" value="320"
+                                 oninput="handleAppreciationStyleChange('watermarkSize', this.value)"
+                                 class="w-full accent-amber-500">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3378,9 +3528,20 @@
                     <span class="text-slate-600 ml-1">You can click and type directly on any text (names, titles, citation paragraphs, date) on the certificate sheet below to edit live.</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
+                <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                  <!-- Signatories count quick toggle -->
+                  <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200 text-[11px] font-bold shadow-2xs">
+                    <span class="text-[10px] text-slate-500 font-semibold mr-1 flex items-center gap-1">
+                      <i class="fa-solid fa-signature text-amber-600"></i>
+                      <span>Signatures:</span>
+                    </span>
+                    <button type="button" id="stageBtnApprecSig1" onclick="setApprecSignatureCountMode(1)" class="px-2 py-0.5 rounded-md border font-bold hover:bg-slate-100 transition">1</button>
+                    <button type="button" id="stageBtnApprecSig2" onclick="setApprecSignatureCountMode(2)" class="px-2 py-0.5 rounded-md border font-bold hover:bg-slate-100 transition">2</button>
+                    <button type="button" id="stageBtnApprecSig3" onclick="setApprecSignatureCountMode(3)" class="px-2 py-0.5 rounded-md border bg-amber-600 text-white font-bold transition">3</button>
+                  </div>
+
                   <!-- Zoom controls -->
-                  <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200 text-[11px] font-bold">
+                  <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200 text-[11px] font-bold shadow-2xs">
                     <button type="button" onclick="setAppreciationZoom(75)" class="px-1.5 py-0.5 rounded hover:bg-slate-100">75%</button>
                     <button type="button" onclick="setAppreciationZoom(100)" class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">100%</button>
                     <button type="button" onclick="setAppreciationZoom(120)" class="px-1.5 py-0.5 rounded hover:bg-slate-100">120%</button>

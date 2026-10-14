@@ -344,39 +344,50 @@
     }
   
     /* CERTIFICATE STUDIO & DESIGNER STYLES (CLEAN & PROFESSIONAL) */
-    .cert-edit-active {
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    .cert-edit-active,
+    .apprec-edit-active {
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     }
-    .cert-edit-active [data-cert-element]:not(.cert-watermark-overlay):not(.cert-watermark-box):not(.absolute) {
+    .cert-edit-active [data-cert-element]:not(.cert-watermark-overlay):not(.cert-watermark-box):not(.absolute),
+    .apprec-edit-active [data-apprec-field],
+    .apprec-edit-active [data-slot] {
       position: relative;
     }
-    .cert-edit-active [data-cert-element] {
+    .cert-edit-active [data-cert-element],
+    .apprec-edit-active [data-apprec-field],
+    .apprec-edit-active [data-slot] {
       transition: background-color 0.15s, outline 0.15s;
     }
-    .cert-edit-active [data-cert-element]:hover {
-      outline: 1.5px dashed rgba(249, 115, 22, 0.6) !important;
+    .cert-edit-active [data-cert-element]:hover,
+    .apprec-edit-active [data-apprec-field]:hover,
+    .apprec-edit-active [data-slot]:hover {
+      outline: 1.5px dashed rgba(245, 158, 11, 0.7) !important;
       outline-offset: 3px;
-      background-color: rgba(249, 115, 22, 0.03);
+      background-color: rgba(245, 158, 11, 0.04);
     }
-    .cert-edit-active [data-cert-element].is-selected-element {
-      outline: 2px solid #ea580c !important;
+    .cert-edit-active [data-cert-element].is-selected-element,
+    .apprec-edit-active [data-apprec-field].is-selected-element {
+      outline: 2px solid #d97706 !important;
       outline-offset: 4px;
-      background-color: rgba(249, 115, 22, 0.04);
+      background-color: rgba(245, 158, 11, 0.05);
     }
-    .cert-inline-editable {
+    .cert-inline-editable,
+    .inline-edit-apprec {
       cursor: text !important;
       border-radius: 4px;
       transition: background-color 0.15s, outline 0.15s;
       padding: 1px 4px;
     }
-    .cert-inline-editable:hover {
-      outline: 1.5px dashed rgba(249, 115, 22, 0.65) !important;
-      background-color: rgba(249, 115, 22, 0.06) !important;
+    .cert-inline-editable:hover,
+    .apprec-edit-active .inline-edit-apprec:hover {
+      outline: 1.5px dashed rgba(245, 158, 11, 0.7) !important;
+      background-color: rgba(245, 158, 11, 0.06) !important;
     }
-    .cert-inline-editable:focus {
-      outline: 2px solid #ea580c !important;
+    .cert-inline-editable:focus,
+    .inline-edit-apprec:focus {
+      outline: 2px solid #d97706 !important;
       background-color: rgba(255, 255, 255, 0.98) !important;
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.25) !important;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25) !important;
       color: #0f172a !important;
       position: relative;
       z-index: 40;

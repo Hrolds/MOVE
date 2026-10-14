@@ -56,6 +56,11 @@ const appreciationState = {
   goldSealPosition: 'bottom-left',   // bottom-left | bottom-center | bottom-right
   watermarkEnabled: true,
   watermarkOpacity: 12,
+  watermarkSize: 320,
+  watermarkImage: 'MOVE%20BAGUIO%20LOGO.png',
+  watermarkLayer: 'behind', // behind | washout | infront | bottom-behind
+  customWatermarkDataUrl: '',
+  isDesignerMode: false,
   zoom: 100,
   activeVersionId: 'preset_speaker'
 };
@@ -469,15 +474,173 @@ function removeApprecSigImage(sigNum) {
   showToast(`Signature image removed from Signatory ${sigNum}`, 'fa-trash');
 }
 
+// --- DESIGNER / EDIT MODE TOGGLE ---
+function toggleApprecEditMode() {
+  appreciationState.isDesignerMode = !appreciationState.isDesignerMode;
+  const btn = document.getElementById('btnToggleApprecEdit');
+  const lbl = document.getElementById('lblApprecEditMode');
+  const icon = document.getElementById('iconApprecEditBtn');
+  const canvas = document.getElementById('appreciationSheetCanvas');
+
+  if (appreciationState.isDesignerMode) {
+    if (canvas) canvas.classList.add('cert-edit-active', 'apprec-edit-active');
+    if (btn) {
+      btn.className = 'px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-move-navy-900 hover:bg-move-navy-950 text-white shadow-sm border border-amber-400 whitespace-nowrap';
+    }
+    if (lbl) lbl.textContent = 'Exit Designer Mode';
+    if (icon) icon.className = 'fa-solid fa-check text-emerald-400';
+    showToast('Appreciation Designer Mode Active: Click any text to edit inline, change watermarks, or fine-tune layout!', 'fa-pen-ruler');
+  } else {
+    if (canvas) canvas.classList.remove('cert-edit-active', 'apprec-edit-active');
+    if (btn) {
+      btn.className = 'px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-amber-500 hover:bg-amber-600 text-white shadow-sm whitespace-nowrap';
+    }
+    if (lbl) lbl.textContent = 'Enable Designer / Edit Mode';
+    if (icon) icon.className = 'fa-solid fa-pen-ruler';
+  }
+  renderAppreciationPreview();
+}
+
+// --- UNDO / REDO HISTORY ENGINE FOR APPRECIATION ---
+const apprecHistory = [];
+let apprecHistoryIdx = -1;
+
+function pushApprecHistoryState() {
+  const snap = JSON.stringify(appreciationState);
+  if (apprecHistoryIdx >= 0 && apprecHistory[apprecHistoryIdx] === snap) return;
+  if (apprecHistoryIdx < apprecHistory.length - 1) {
+    apprecHistory.splice(apprecHistoryIdx + 1);
+  }
+  apprecHistory.push(snap);
+  if (apprecHistory.length > 25) apprecHistory.shift();
+  apprecHistoryIdx = apprecHistory.length - 1;
+  updateApprecUndoRedoButtons();
+}
+
+function undoApprecState() {
+  if (apprecHistoryIdx > 0) {
+    apprecHistoryIdx--;
+    const parsed = JSON.parse(apprecHistory[apprecHistoryIdx]);
+    Object.assign(appreciationState, parsed);
+    syncAppreciationInputsFromState();
+    renderAppreciationPreview();
+    updateApprecUndoRedoButtons();
+    showToast('Undo performed (Appreciation)', 'fa-rotate-left');
+  }
+}
+
+function redoApprecState() {
+  if (apprecHistoryIdx < apprecHistory.length - 1) {
+    apprecHistoryIdx++;
+    const parsed = JSON.parse(apprecHistory[apprecHistoryIdx]);
+    Object.assign(appreciationState, parsed);
+    syncAppreciationInputsFromState();
+    renderAppreciationPreview();
+    updateApprecUndoRedoButtons();
+    showToast('Redo performed (Appreciation)', 'fa-rotate-right');
+  }
+}
+
+function updateApprecUndoRedoButtons() {
+  const btnUndo = document.getElementById('btnApprecUndo');
+  const btnRedo = document.getElementById('btnApprecRedo');
+  if (btnUndo) {
+    btnUndo.disabled = apprecHistoryIdx <= 0;
+    btnUndo.classList.toggle('opacity-50', apprecHistoryIdx <= 0);
+    btnUndo.classList.toggle('cursor-not-allowed', apprecHistoryIdx <= 0);
+  }
+  if (btnRedo) {
+    btnRedo.disabled = apprecHistoryIdx >= apprecHistory.length - 1;
+    btnRedo.classList.toggle('opacity-50', apprecHistoryIdx >= apprecHistory.length - 1);
+    btnRedo.classList.toggle('cursor-not-allowed', apprecHistoryIdx >= apprecHistory.length - 1);
+  }
+}
+
+// --- WATERMARK CHANGING FEATURES ---
+function setApprecWatermarkPreset(imgSrc) {
+  appreciationState.watermarkImage = imgSrc;
+  appreciationState.customWatermarkDataUrl = '';
+  appreciationState.watermarkEnabled = true;
+  syncAppreciationInputsFromState();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+  showToast('Appreciation watermark changed!', 'fa-image');
+}
+
+function setApprecWatermarkLayer(layer) {
+  appreciationState.watermarkLayer = layer;
+  syncAppreciationInputsFromState();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+}
+
+function handleApprecWatermarkUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    appreciationState.customWatermarkDataUrl = e.target.result;
+    appreciationState.watermarkEnabled = true;
+    syncAppreciationInputsFromState();
+    renderAppreciationPreview();
+    pushApprecHistoryState();
+    showToast('Custom watermark image loaded!', 'fa-upload');
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetApprecWatermark() {
+  appreciationState.customWatermarkDataUrl = '';
+  appreciationState.watermarkImage = 'MOVE%20BAGUIO%20LOGO.png';
+  appreciationState.watermarkOpacity = 12;
+  appreciationState.watermarkSize = 320;
+  appreciationState.watermarkLayer = 'behind';
+  appreciationState.watermarkEnabled = true;
+  syncAppreciationInputsFromState();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+  showToast('Watermark reset to official MOVE Baguio seal.', 'fa-rotate-left');
+}
+
+function setApprecSignatureCountMode(count) {
+  appreciationState.sigMode = count;
+  if (count === 1) {
+    appreciationState.sig1.enabled = true;
+    appreciationState.sig2.enabled = false;
+    appreciationState.sig3.enabled = false;
+  } else if (count === 2) {
+    appreciationState.sig1.enabled = true;
+    appreciationState.sig2.enabled = true;
+    appreciationState.sig3.enabled = false;
+  } else if (count === 3) {
+    appreciationState.sig1.enabled = true;
+    appreciationState.sig2.enabled = true;
+    appreciationState.sig3.enabled = true;
+  }
+  syncAppreciationInputsFromState();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+}
+
 // --- FIELD & STYLE UPDATES ---
 function handleAppreciationFieldChange(field, val) {
   appreciationState[field] = val;
   renderAppreciationPreview();
+  pushApprecHistoryState();
 }
 
 function handleAppreciationStyleChange(field, val) {
   appreciationState[field] = val;
+  if (field === 'watermarkOpacity') {
+    const el = document.getElementById('apprecWatermarkOpacityVal');
+    if (el) el.textContent = `${val}%`;
+  }
+  if (field === 'watermarkSize') {
+    const el = document.getElementById('apprecWatermarkSizeVal');
+    if (el) el.textContent = `${val}px`;
+  }
   renderAppreciationPreview();
+  pushApprecHistoryState();
 }
 
 function formatAppreciationRecipientUppercase() {
@@ -486,6 +649,7 @@ function formatAppreciationRecipientUppercase() {
     input.value = input.value.toUpperCase();
     appreciationState.recipientName = input.value;
     renderAppreciationPreview();
+    pushApprecHistoryState();
   }
 }
 
@@ -500,6 +664,7 @@ function insertAppreciationTag(tag) {
   ta.focus();
   ta.setSelectionRange(start + tag.length, start + tag.length);
   renderAppreciationPreview();
+  pushApprecHistoryState();
 }
 
 function setAppreciationZoom(pct) {
@@ -570,11 +735,52 @@ function syncAppreciationInputsFromState() {
   const gsPos = document.getElementById('apprecGoldSealPosition');
   if (gsPos) gsPos.value = s.goldSealPosition;
 
+  // Watermark Inputs
   const wmChk = document.getElementById('apprecWatermarkEnabled');
   if (wmChk) wmChk.checked = !!s.watermarkEnabled;
 
   const wmOp = document.getElementById('apprecWatermarkOpacity');
   if (wmOp) wmOp.value = s.watermarkOpacity;
+  const wmOpVal = document.getElementById('apprecWatermarkOpacityVal');
+  if (wmOpVal) wmOpVal.textContent = `${s.watermarkOpacity}%`;
+
+  const wmSz = document.getElementById('apprecWatermarkSize');
+  if (wmSz) wmSz.value = s.watermarkSize || 320;
+  const wmSzVal = document.getElementById('apprecWatermarkSizeVal');
+  if (wmSzVal) wmSzVal.textContent = `${s.watermarkSize || 320}px`;
+
+  const wmLayer = document.getElementById('apprecWatermarkLayer');
+  if (wmLayer) wmLayer.value = s.watermarkLayer || 'behind';
+
+  // Highlight active watermark thumbnail preset
+  const curImg = s.customWatermarkDataUrl || s.watermarkImage || '';
+  ['move', 'city', 'kitchen', 'breathe'].forEach(k => {
+    const btn = document.getElementById(`btnApprecWmPreset-${k}`);
+    if (btn) {
+      let isMatch = false;
+      if (k === 'move' && curImg.includes('MOVE%20BAGUIO%20LOGO')) isMatch = true;
+      else if (k === 'city' && curImg.includes('CITY%20HALL%20LOGO')) isMatch = true;
+      else if (k === 'kitchen' && curImg.includes('MEN%20IN%20THE%20KITCHEN%202%20LOGO')) isMatch = true;
+      else if (k === 'breathe' && curImg.includes('BREATHE_BAGUIO')) isMatch = true;
+      btn.classList.toggle('ring-2', isMatch);
+      btn.classList.toggle('ring-amber-500', isMatch);
+      btn.classList.toggle('border-amber-500', isMatch);
+    }
+  });
+
+  // Highlight signature mode buttons
+  [1, 2, 3].forEach(m => {
+    const btn = document.getElementById(`stageBtnApprecSig${m}`);
+    if (btn) {
+      if (s.sigMode === m) {
+        btn.className = 'px-2 py-0.5 rounded-md border bg-amber-600 text-white font-bold transition';
+      } else {
+        btn.className = 'px-2 py-0.5 rounded-md border bg-white text-slate-700 font-bold hover:bg-slate-100 transition';
+      }
+    }
+  });
+
+  updateApprecUndoRedoButtons();
 }
 
 // --- RENDER LIVE APPRECIATION PREVIEW CANVAS ---
@@ -650,14 +856,24 @@ function renderAppreciationPreview() {
     </div>
   ` : '';
 
-  // Watermark
-  const watermarkHtml = s.watermarkEnabled ? `
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
-      <img src="MOVE%20BAGUIO%20LOGO.png" alt="Watermark"
-           style="opacity: ${s.watermarkOpacity / 100}; filter: grayscale(20%); width: 340px; transform: scale(1.1);"
-           class="max-w-none">
-    </div>
-  ` : '';
+  // Watermark (Dynamic Preset/Upload, Layering & Sizing)
+  let watermarkHtml = '';
+  if (s.watermarkEnabled) {
+    const watermarkImgSrc = s.customWatermarkDataUrl || s.watermarkImage || 'MOVE%20BAGUIO%20LOGO.png';
+    const wmSize = s.watermarkSize || 320;
+    const wmOpacity = (s.watermarkOpacity !== undefined ? s.watermarkOpacity : 12) / 100;
+    const layerClass = s.watermarkLayer === 'infront' ? 'wm-layer-infront' :
+                      (s.watermarkLayer === 'washout' ? 'wm-layer-washout' :
+                      (s.watermarkLayer === 'bottom-behind' ? 'wm-layer-bottom-behind' : 'wm-layer-behind'));
+
+    watermarkHtml = `
+      <div class="cert-watermark-overlay ${layerClass} select-none">
+        <div class="cert-watermark-box" style="width: ${wmSize}px; height: ${wmSize}px; opacity: ${wmOpacity};">
+          <img src="${watermarkImgSrc}" alt="Watermark" class="w-full h-full object-contain pointer-events-none select-none">
+        </div>
+      </div>
+    `;
+  }
 
   // Build Signatures Block
   let signaturesBlock = '';
@@ -710,7 +926,7 @@ function renderAppreciationPreview() {
   // Full A4 Landscape Frame HTML
   const sheetHtml = `
     <div id="appreciationSheetCanvas"
-         class="appreciation-landscape-sheet shadow-2xl relative select-text transition-all bg-[#fffdfa] overflow-hidden"
+         class="appreciation-landscape-sheet shadow-2xl relative select-text transition-all bg-[#fffdfa] overflow-hidden ${s.isDesignerMode ? 'cert-edit-active apprec-edit-active' : ''}"
          style="width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; box-sizing: border-box; ${outerBorderCss}; font-family: ${s.fontFamily === 'cinzel' ? "'Cinzel', serif" : (s.fontFamily === 'playfair' ? "'Playfair Display', serif" : "'Montserrat', sans-serif")}; padding: 10mm 14mm;">
 
       <!-- Inner Decorative Border -->
@@ -859,9 +1075,13 @@ function printAppreciationCertificate() {
   const canvas = document.getElementById('appreciationSheetCanvas');
   if (!canvas) return;
 
+  const clone = canvas.cloneNode(true);
+  clone.classList.remove('cert-edit-active', 'apprec-edit-active');
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+
   printBox.innerHTML = `
     <div class="appreciation-print-page">
-      ${canvas.outerHTML}
+      ${clone.outerHTML}
     </div>
   `;
 
@@ -1148,7 +1368,28 @@ function initAppreciationStudio() {
   populateAppreciationSigDropdowns();
   syncAppreciationInputsFromState();
   renderAppreciationPreview();
+  if (apprecHistory.length === 0) pushApprecHistoryState();
 }
+
+// Global Keyboard listener for Appreciation Studio Undo (Ctrl+Z) and Redo (Ctrl+Y or Ctrl+Shift+Z)
+window.addEventListener('keydown', (e) => {
+  const page = document.getElementById('pageAppreciation');
+  if (!page || page.classList.contains('hidden')) return;
+  const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+  if (tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable)) return;
+
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    if (e.shiftKey) {
+      redoApprecState();
+    } else {
+      undoApprecState();
+    }
+  } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+    e.preventDefault();
+    redoApprecState();
+  }
+});
 
 // Global exports
 window.initAppreciationStudio = initAppreciationStudio;
@@ -1162,6 +1403,7 @@ window.handleAppreciationActivityChange = handleAppreciationActivityChange;
 window.handleApprecPickSignatory = handleApprecPickSignatory;
 window.saveApprecInputsToSignatoriesDb = saveApprecInputsToSignatoriesDb;
 window.setAppreciationSigMode = setAppreciationSigMode;
+window.setApprecSignatureCountMode = setApprecSignatureCountMode;
 window.handleApprecSigUpdate = handleApprecSigUpdate;
 window.handleApprecSigImageUpload = handleApprecSigImageUpload;
 window.useOfficialApprecSig = useOfficialApprecSig;
@@ -1174,3 +1416,10 @@ window.setAppreciationZoom = setAppreciationZoom;
 window.printAppreciationCertificate = printAppreciationCertificate;
 window.exportAppreciationDocx = exportAppreciationDocx;
 window.resetAppreciationToDefault = resetAppreciationToDefault;
+window.toggleApprecEditMode = toggleApprecEditMode;
+window.undoApprecState = undoApprecState;
+window.redoApprecState = redoApprecState;
+window.setApprecWatermarkPreset = setApprecWatermarkPreset;
+window.setApprecWatermarkLayer = setApprecWatermarkLayer;
+window.handleApprecWatermarkUpload = handleApprecWatermarkUpload;
+window.resetApprecWatermark = resetApprecWatermark;
