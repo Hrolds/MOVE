@@ -9,13 +9,13 @@ const caState = {
   mode: 'individual', // Default to INDIVIDUAL employee certificate
   currentMemberIndex: 0,
   honorificMode: 'auto', // 'auto' (Mr./Ms. by gender), 'mr', 'ms', 'none'
-  attendanceBasis: 'based on the verified present attendance on the activity',
-  title: 'MEN IN THE KITCHEN 2',
+  attendanceBasis: 'was duly verified to have attended and participated in the activity entitled',
+  title: 'Men in the Kitchen 2',
   theme: 'Love Served in the Kitchen',
-  date: 'December 9, 2025',
-  venue: 'CDRRMO Building, CEO Compound, Lower Rock Quarry, Baguio City',
-  purpose: 'This certification is issued to support the non-entry of on the daily time records above date.',
-  issueDate: 'Issued this 9th of December 2025, Baguio City.',
+  date: 'October 20, 2026',
+  venue: 'CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City',
+  purpose: 'This certification is issued upon the request of the above-named individual for whatever lawful purpose it may serve.',
+  issueDate: 'Issued this 20th day of October 2026, Baguio City, Philippines.',
   signatoryName: 'BENJAMIN B. MAGALONG',
   signatoryTitle1: 'City Mayor',
   signatoryTitle2: 'LCAT-VAWC Chairperson',
@@ -84,7 +84,7 @@ function populateCaEmployeeDropdown() {
   list.forEach((p, idx) => {
     const opt = document.createElement('option');
     opt.value = idx;
-    const hon = getCaHonorific(p);
+    const hon = getCaHonorific(p, false);
     opt.textContent = `${idx + 1}. ${hon}${p.name || 'Unnamed'} (${p.office || 'N/A'})`;
     if (idx === caState.currentMemberIndex) opt.selected = true;
     sel.appendChild(opt);
@@ -101,16 +101,43 @@ function handleCaEmployeeDropdownChange(val) {
   }
 }
 
+// --- HELPER: FORMAL COMBINED ACTIVITY TITLE & THEME ---
+function getCaActivityFullTitle(title, theme) {
+  const t = (title || '').trim();
+  const th = (theme || '').trim();
+  if (!th) return t;
+  if (t.toLowerCase().includes(th.toLowerCase())) return t;
+  return `${t}: ${th}`;
+}
+
+// --- HELPER: FORMAT VENUE CLAUSE ---
+function formatCaVenueText(venue) {
+  const v = (venue || '').trim();
+  if (!v) return '';
+  if (/^(at\s+the|at|in\s+the|in)\s+/i.test(v)) return v;
+  return `at the ${v}`;
+}
+
+// --- HELPER: FORMAT DATE CLAUSE ---
+function formatCaDateText(dateStr) {
+  const d = (dateStr || '').trim();
+  if (!d) return '';
+  if (/^held\s+on\s+/i.test(d)) return d;
+  return `held on ${d}`;
+}
+
 // --- HONORIFIC RESOLUTION (MR. / MS.) ---
-function getCaHonorific(member) {
+function getCaHonorific(member, uppercase = false) {
   if (caState.honorificMode === 'none') return '';
-  if (caState.honorificMode === 'mr') return 'Mr. ';
-  if (caState.honorificMode === 'ms') return 'Ms. ';
-  
-  // Auto mode based on employee gender
-  const g = (member && member.gender ? String(member.gender) : 'M').toUpperCase();
-  if (g === 'F' || g === 'FEMALE') return 'Ms. ';
-  return 'Mr. ';
+  let hon = 'Mr. ';
+  if (caState.honorificMode === 'mr') hon = 'Mr. ';
+  else if (caState.honorificMode === 'ms') hon = 'Ms. ';
+  else {
+    const g = (member && member.gender ? String(member.gender) : 'M').toUpperCase();
+    if (g === 'F' || g === 'FEMALE') hon = 'Ms. ';
+    else hon = 'Mr. ';
+  }
+  return uppercase ? hon.toUpperCase() : hon;
 }
 
 // --- APPLY SELECTED ACTIVITY ---
@@ -119,11 +146,11 @@ function applyCaActivity(act) {
   caState.selectedActivityId = act.id;
   caState.title = act.title || 'Official MOVE Activity';
   caState.theme = act.shortDescription || (act.id === 'ACT-KITCHEN-2' ? 'Love Served in the Kitchen' : '');
-  caState.date = act.date || 'December 9, 2025';
-  caState.venue = act.venue || 'Baguio City';
+  caState.date = act.date || 'October 20, 2026';
+  caState.venue = act.venue || 'CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City';
   
   if (act.date) {
-    caState.issueDate = `Issued this ${formatCaDateOrd(act.date)}, Baguio City.`;
+    caState.issueDate = `Issued this ${formatCaDateOrd(act.date)}, Baguio City, Philippines.`;
   }
   
   refreshCaParticipants();
@@ -141,7 +168,7 @@ function formatCaDateOrd(dateStr) {
       const ord = s[(v - 20) % 10] || s[v] || s[0];
       const month = d.toLocaleString('en-US', { month: 'long' });
       const year = d.getFullYear();
-      return `${day}${ord} of ${month} ${year}`;
+      return `${day}${ord} day of ${month} ${year}`;
     }
   } catch(e) {}
   return dateStr;
@@ -433,7 +460,7 @@ function renderAppearancePreview() {
       `;
     } else {
       tableRows = participants.map((p, idx) => {
-        const hon = getCaHonorific(p);
+        const hon = getCaHonorific(p, false);
         return `
           <tr class="${idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white'} border-b border-slate-200">
             <td class="py-1 px-2 text-center text-[11px] font-mono font-bold text-slate-700">${idx + 1}</td>
@@ -446,11 +473,15 @@ function renderAppearancePreview() {
       }).join('');
     }
 
+    const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
+    const dateClause = escapeHtml(formatCaDateText(caState.date));
+    const venueClause = escapeHtml(formatCaVenueText(caState.venue));
+
     bodyContentHtml = `
       <div class="space-y-4">
         <!-- Certification Clause -->
-        <p class="text-justify text-[13px] text-slate-900 leading-relaxed indent-8">
-          This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>:
+        <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
+          This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
         </p>
 
         <!-- Official Participants Table -->
@@ -476,34 +507,26 @@ function renderAppearancePreview() {
     // --- INDIVIDUAL CERTIFICATION MODE (EVERY SINGLE EMPLOYEE) ---
     const currMember = participants[caState.currentMemberIndex] || {
       name: 'EMPLOYEE FULL NAME',
-      position: 'Official Position Title',
+      position: 'OFFICIAL POSITION TITLE',
       office: 'DEPARTMENT / OFFICE',
       role: 'Participant',
       gender: 'M'
     };
 
-    const hon = getCaHonorific(currMember);
+    const hon = getCaHonorific(currMember, true);
+    const mName = escapeHtml((currMember.name || 'EMPLOYEE FULL NAME').toUpperCase());
+    const mPos = escapeHtml((currMember.position || 'OFFICIAL POSITION TITLE').toUpperCase());
+    const mOff = escapeHtml((currMember.office || 'DEPARTMENT / OFFICE').toUpperCase());
+    const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
+    const dateClause = escapeHtml(formatCaDateText(caState.date));
+    const venueClause = escapeHtml(formatCaVenueText(caState.venue));
+    const basisClause = escapeHtml(caState.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
 
     bodyContentHtml = `
-      <div class="space-y-6 my-6">
-        <!-- Main Certification Lead Statement -->
-        <p class="text-justify text-[14px] text-slate-900 leading-relaxed indent-10">
-          This is to certify that
-        </p>
-
-        <!-- Centered Recipient Box (Large Bold Name with Mr./Ms.) -->
-        <div class="text-center py-5 my-3 border-y-2 border-slate-300 bg-slate-50/60 rounded-xl">
-          <div class="text-xl sm:text-2xl font-black uppercase text-move-navy-900 tracking-wider font-cinzel">
-            ${hon}${escapeHtml(currMember.name || '')}
-          </div>
-          <div class="text-xs font-bold text-move-orange-600 mt-1 uppercase tracking-wider">
-            ${escapeHtml(currMember.position || '')} &bull; <span class="text-slate-800">${escapeHtml(currMember.office || '')}</span>
-          </div>
-        </div>
-
-        <!-- Attendance Accreditation Clause -->
-        <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
-          ${escapeHtml(caState.attendanceBasis)}, appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
+      <div class="my-6 space-y-6">
+        <!-- Main Formal Certification Flowing Paragraph -->
+        <p class="text-justify text-[13.5px] text-slate-900 leading-[2.1] indent-10">
+          This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
         </p>
       </div>
     `;
@@ -566,15 +589,15 @@ function renderAppearancePreview() {
         ${bodyContentHtml}
 
         <!-- Purpose Clause -->
-        <div class="pt-4">
-          <p class="text-justify text-[13px] text-slate-900 leading-relaxed indent-8">
+        <div class="pt-2">
+          <p class="text-justify text-[13.5px] text-slate-900 leading-[2] indent-10">
             ${escapeHtml(caState.purpose)}
           </p>
         </div>
 
         <!-- Issuance Line -->
-        <div class="pt-5 pb-8">
-          <p class="text-[13px] text-slate-900 leading-relaxed">
+        <div class="pt-6 pb-8">
+          <p class="text-[13.5px] text-slate-900 leading-relaxed">
             ${escapeHtml(caState.issueDate)}
           </p>
         </div>
@@ -674,7 +697,15 @@ function batchPrintAllAppearance() {
   ` : `<div class="h-10"></div>`;
 
   participants.forEach((currMember, idx) => {
-    const hon = getCaHonorific(currMember);
+    const hon = getCaHonorific(currMember, true);
+    const mName = escapeHtml((currMember.name || 'EMPLOYEE FULL NAME').toUpperCase());
+    const mPos = escapeHtml((currMember.position || 'OFFICIAL POSITION TITLE').toUpperCase());
+    const mOff = escapeHtml((currMember.office || 'DEPARTMENT / OFFICE').toUpperCase());
+    const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
+    const dateClause = escapeHtml(formatCaDateText(caState.date));
+    const venueClause = escapeHtml(formatCaVenueText(caState.venue));
+    const basisClause = escapeHtml(caState.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
+
     const pageDiv = document.createElement('div');
     pageDiv.className = 'ca-portrait-sheet ca-print-page bg-white text-slate-900 mx-auto select-text';
     pageDiv.style.cssText = 'width: 210mm; min-height: 297mm; padding: 22mm 22mm 18mm 22mm; font-family: Arial, sans-serif; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between;';
@@ -706,27 +737,18 @@ function batchPrintAllAppearance() {
 
       <!-- BODY -->
       <div class="flex-1 py-1">
-        <div class="space-y-6 my-6">
-          <p class="text-justify text-[14px] text-slate-900 leading-relaxed indent-10">This is to certify that</p>
-          <div class="text-center py-5 my-3 border-y-2 border-slate-300 bg-slate-50/60 rounded-xl">
-            <div class="text-2xl font-black uppercase text-move-navy-900 tracking-wider font-cinzel">
-              ${hon}${escapeHtml(currMember.name || '')}
-            </div>
-            <div class="text-xs font-bold text-move-orange-600 mt-1 uppercase tracking-wider">
-              ${escapeHtml(currMember.position || '')} &bull; <span class="text-slate-800">${escapeHtml(currMember.office || '')}</span>
-            </div>
-          </div>
-          <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
-            ${escapeHtml(caState.attendanceBasis)}, appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
+        <div class="my-6 space-y-6">
+          <p class="text-justify text-[13.5px] text-slate-900 leading-[2.1] indent-10">
+            This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
           </p>
         </div>
 
-        <div class="pt-4">
-          <p class="text-justify text-[13px] text-slate-900 leading-relaxed indent-8">${escapeHtml(caState.purpose)}</p>
+        <div class="pt-2">
+          <p class="text-justify text-[13.5px] text-slate-900 leading-[2] indent-10">${escapeHtml(caState.purpose)}</p>
         </div>
 
-        <div class="pt-5 pb-8">
-          <p class="text-[13px] text-slate-900 leading-relaxed">${escapeHtml(caState.issueDate)}</p>
+        <div class="pt-6 pb-8">
+          <p class="text-[13.5px] text-slate-900 leading-relaxed">${escapeHtml(caState.issueDate)}</p>
         </div>
 
         <!-- SIGNATORY -->
@@ -830,49 +852,119 @@ function generateClientSideDocx(data) {
     ? `Certificate_of_Appearance_${safeTitle}_ALL_EMPLOYEES.doc`
     : `Certificate_of_Appearance_${((data.individualMember || {}).name || 'Employee').replace(/[^a-zA-Z0-9_-]/g, '_')}.doc`;
 
-  let participantsHtml = '';
+  const fullActTitle = escapeHtml(getCaActivityFullTitle(data.activityTitle, data.theme));
+  const dateClause = escapeHtml(formatCaDateText(data.date));
+  const venueClause = escapeHtml(formatCaVenueText(data.venue));
+  const basisClause = escapeHtml(data.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
+
+  let bodyContent = '';
   if (data.mode === 'group') {
-    participantsHtml = `
-      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 10pt; margin-top: 15px; margin-bottom: 15px;">
-        <thead>
-          <tr style="background-color: #f1f5f9; font-weight: bold; text-align: left;">
-            <th style="width: 40px; text-align: center;">No.</th>
-            <th>Full Name</th>
-            <th>Position Title</th>
-            <th style="width: 100px; text-align: center;">Office</th>
-            <th style="width: 100px; text-align: center;">Role</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${(data.participants || []).map((p, i) => `
-            <tr>
-              <td style="text-align: center;">${i + 1}</td>
-              <td style="font-weight: bold;">${getCaHonorific(p)}${escapeHtml(p.name || '')}</td>
-              <td>${escapeHtml(p.position || '')}</td>
-              <td style="text-align: center;">${escapeHtml(p.office || '')}</td>
-              <td style="text-align: center;">${escapeHtml(p.role || 'Participant')}</td>
+    bodyContent = `
+      <div class="Section1">
+        <div style="text-align: center; border-bottom: 2pt solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 10pt; font-weight: bold;">REPUBLIC OF THE PHILIPPINES</p>
+          <p style="margin: 0; font-size: 11pt; font-weight: bold;">CITY GOVERNMENT OF BAGUIO</p>
+          <p style="margin: 2px 0 0 0; font-size: 9.5pt; font-weight: bold; color: #ea580c;">MEN OPPOSED TO VIOLENCE AGAINST WOMEN EVERYWHERE</p>
+          <p style="margin: 1px 0 0 0; font-size: 8.5pt; color: #555;">Baguio City Chapter &bull; Local Committee on Anti-VAWC</p>
+        </div>
+
+        <h1>CERTIFICATE OF APPEARANCE</h1>
+
+        <p class="certify">
+          This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
+        </p>
+
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 10pt; margin-top: 15px; margin-bottom: 15px;">
+          <thead>
+            <tr style="background-color: #f1f5f9; font-weight: bold; text-align: left;">
+              <th style="width: 40px; text-align: center;">No.</th>
+              <th>Full Name</th>
+              <th>Position Title</th>
+              <th style="width: 100px; text-align: center;">Office</th>
+              <th style="width: 100px; text-align: center;">Role</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${(data.participants || []).map((p, i) => `
+              <tr>
+                <td style="text-align: center;">${i + 1}</td>
+                <td style="font-weight: bold;">${getCaHonorific(p, false)}${escapeHtml(p.name || '')}</td>
+                <td>${escapeHtml(p.position || '')}</td>
+                <td style="text-align: center;">${escapeHtml(p.office || '')}</td>
+                <td style="text-align: center;">${escapeHtml(p.role || 'Participant')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <p class="purpose">${escapeHtml(data.purpose)}</p>
+        <p class="issue">${escapeHtml(data.issueDate)}</p>
+
+        <table style="width: 100%; margin-top: 40px; border: none;">
+          <tr>
+            <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666;">
+              ${escapeHtml(data.initials)}
+            </td>
+            <td style="width: 250px; text-align: center; vertical-align: bottom;">
+              <p style="margin: 0; font-size: 11pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(data.signatoryName)}</p>
+              <p style="margin: 0; font-size: 10pt; font-weight: bold;">${escapeHtml(data.signatoryTitle1)}</p>
+              <p style="margin: 0; font-size: 9pt; color: #333;">${escapeHtml(data.signatoryTitle2)}</p>
+            </td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 40px; border-top: 1pt solid #ccc; padding-top: 8px; font-size: 8.5pt; color: #666;">
+          <span>Tel. No. (074)-442-89-20</span>
+          <span style="float: right;">website: http://www.baguio.gov.ph</span>
+        </div>
+      </div>
     `;
   } else {
     const listToRender = data.exportAll ? (data.participants || []) : [data.individualMember || (data.participants && data.participants[0]) || {}];
-    participantsHtml = listToRender.map((m, i) => `
-      <div ${i > 0 ? 'style="page-break-before: always; margin-top: 40px;"' : ''}>
-        <div style="text-align: center; margin: 25px 0; padding: 15px 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000;">
-          <h2 style="margin: 0; font-size: 16pt; font-weight: bold; text-transform: uppercase;">
-            ${getCaHonorific(m)}${escapeHtml(m.name || '')}
-          </h2>
-          <p style="margin: 5px 0 0 0; font-size: 11pt; color: #ea580c; font-weight: bold;">
-            ${escapeHtml(m.position || '')} &bull; ${escapeHtml(m.office || '')}
+    bodyContent = listToRender.map((m, i) => {
+      const hon = getCaHonorific(m, true);
+      const mName = escapeHtml((m.name || 'EMPLOYEE FULL NAME').toUpperCase());
+      const mPos = escapeHtml((m.position || 'OFFICIAL POSITION TITLE').toUpperCase());
+      const mOff = escapeHtml((m.office || 'DEPARTMENT / OFFICE').toUpperCase());
+
+      return `
+        <div class="Section1" ${i > 0 ? 'style="page-break-before: always; margin-top: 30px;"' : ''}>
+          <div style="text-align: center; border-bottom: 2pt solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <p style="margin: 0; font-size: 10pt; font-weight: bold;">REPUBLIC OF THE PHILIPPINES</p>
+            <p style="margin: 0; font-size: 11pt; font-weight: bold;">CITY GOVERNMENT OF BAGUIO</p>
+            <p style="margin: 2px 0 0 0; font-size: 9.5pt; font-weight: bold; color: #ea580c;">MEN OPPOSED TO VIOLENCE AGAINST WOMEN EVERYWHERE</p>
+            <p style="margin: 1px 0 0 0; font-size: 8.5pt; color: #555;">Baguio City Chapter &bull; Local Committee on Anti-VAWC</p>
+          </div>
+
+          <h1>CERTIFICATE OF APPEARANCE</h1>
+
+          <p class="certify">
+            This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
           </p>
+
+          <p class="purpose">${escapeHtml(data.purpose)}</p>
+          <p class="issue">${escapeHtml(data.issueDate)}</p>
+
+          <table style="width: 100%; margin-top: 40px; border: none;">
+            <tr>
+              <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666;">
+                ${escapeHtml(data.initials)}
+              </td>
+              <td style="width: 250px; text-align: center; vertical-align: bottom;">
+                <p style="margin: 0; font-size: 11pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(data.signatoryName)}</p>
+                <p style="margin: 0; font-size: 10pt; font-weight: bold;">${escapeHtml(data.signatoryTitle1)}</p>
+                <p style="margin: 0; font-size: 9pt; color: #333;">${escapeHtml(data.signatoryTitle2)}</p>
+              </td>
+            </tr>
+          </table>
+
+          <div style="margin-top: 40px; border-top: 1pt solid #ccc; padding-top: 8px; font-size: 8.5pt; color: #666;">
+            <span>Tel. No. (074)-442-89-20</span>
+            <span style="float: right;">website: http://www.baguio.gov.ph</span>
+          </div>
         </div>
-        <p class="certify">
-          ${escapeHtml(data.attendanceBasis || 'based on the verified present attendance on the activity')}, appeared as <strong>${escapeHtml(m.role || 'Participant')}</strong> during the “<strong>${escapeHtml(data.activityTitle)}</strong>”${data.theme ? ` with the theme “<em>${escapeHtml(data.theme)}</em>”` : ''} on <strong>${escapeHtml(data.date)}</strong> at the <strong>${escapeHtml(data.venue)}</strong>.
-        </p>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   const htmlDoc = `
@@ -889,49 +981,15 @@ function generateClientSideDocx(data) {
           mso-paper-source: 0;
         }
         div.Section1 { page: Section1; }
-        body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #000; }
-        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 25px; margin-bottom: 25px; }
-        p.certify { text-align: justify; text-indent: 30pt; margin-bottom: 15pt; }
-        p.purpose { text-align: justify; text-indent: 30pt; margin-top: 15pt; }
+        body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.6; color: #000; }
+        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 25px; margin-bottom: 25px; letter-spacing: 1.5pt; }
+        p.certify { text-align: justify; text-indent: 36pt; margin-top: 20pt; margin-bottom: 15pt; line-height: 1.8; }
+        p.purpose { text-align: justify; text-indent: 36pt; margin-top: 15pt; margin-bottom: 20pt; line-height: 1.8; }
         p.issue { margin-top: 15pt; margin-bottom: 30pt; }
       </style>
     </head>
     <body>
-      <div class="Section1">
-        <div style="text-align: center; border-bottom: 2pt solid #000; padding-bottom: 10px; margin-bottom: 20px;">
-          <p style="margin: 0; font-size: 10pt; font-weight: bold;">REPUBLIC OF THE PHILIPPINES</p>
-          <p style="margin: 0; font-size: 11pt; font-weight: bold;">CITY GOVERNMENT OF BAGUIO</p>
-          <p style="margin: 2px 0 0 0; font-size: 9.5pt; font-weight: bold; color: #ea580c;">MEN OPPOSED TO VIOLENCE AGAINST WOMEN EVERYWHERE</p>
-        </div>
-
-        <h1>CERTIFICATE OF APPEARANCE</h1>
-
-        <p class="certify">This is to certify that</p>
-
-        ${participantsHtml}
-
-        <p class="purpose">${escapeHtml(data.purpose)}</p>
-
-        <p class="issue">${escapeHtml(data.issueDate)}</p>
-
-        <table style="width: 100%; margin-top: 40px; border: none;">
-          <tr>
-            <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666;">
-              ${escapeHtml(data.initials)}
-            </td>
-            <td style="width: 250px; text-align: center; vertical-align: bottom;">
-              <p style="margin: 0; font-size: 11pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(data.signatoryName)}</p>
-              <p style="margin: 0; font-size: 10pt; font-weight: bold;">${escapeHtml(data.signatoryTitle1)}</p>
-              <p style="margin: 0; font-size: 9pt; color: #333;">${escapeHtml(data.signatoryTitle2)}</p>
-            </td>
-          </tr>
-        </table>
-
-        <div style="margin-top: 40px; border-top: 1pt solid #ccc; padding-top: 8px; font-size: 8.5pt; color: #666; display: flex; justify-content: space-between;">
-          <span>Tel. No. (074)-442-89-20</span>
-          <span style="float: right;">website: http://www.baguio.gov.ph</span>
-        </div>
-      </div>
+      ${bodyContent}
     </body>
     </html>
   `;

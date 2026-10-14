@@ -192,13 +192,13 @@ def save_sheets_to_xls(sheet_name, participants, include_office_summary=True):
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 ET.register_namespace("w", W_NS)
 
-def create_docx_run(text, bold=False, italic=False, size=24):
+def create_docx_run(text, bold=False, italic=False, size=24, font_name="Arial"):
     r = ET.Element(f"{{{W_NS}}}r")
     rPr = ET.SubElement(r, f"{{{W_NS}}}rPr")
     rFonts = ET.SubElement(rPr, f"{{{W_NS}}}rFonts")
-    rFonts.set(f"{{{W_NS}}}ascii", "Arial")
-    rFonts.set(f"{{{W_NS}}}hAnsi", "Arial")
-    rFonts.set(f"{{{W_NS}}}cs", "Arial")
+    rFonts.set(f"{{{W_NS}}}ascii", font_name)
+    rFonts.set(f"{{{W_NS}}}hAnsi", font_name)
+    rFonts.set(f"{{{W_NS}}}cs", font_name)
     if bold:
         ET.SubElement(rPr, f"{{{W_NS}}}b")
         ET.SubElement(rPr, f"{{{W_NS}}}bCs")
@@ -295,37 +295,61 @@ def build_docx_table(participants):
 
     return tbl
 
+def get_full_activity_title(title, theme):
+    t = (title or "").strip()
+    th = (theme or "").strip()
+    if not th:
+        return t
+    if th.lower() in t.lower():
+        return t
+    return f"{t}: {th}"
+
+def format_venue_clause(venue):
+    v = (venue or "").strip()
+    if not v:
+        return ""
+    if any(v.lower().startswith(prefix) for prefix in ["at the ", "in the ", "at ", "in "]):
+        return v
+    return f"at the {v}"
+
+def format_date_clause(date_str):
+    d = (date_str or "").strip()
+    if not d:
+        return ""
+    if d.lower().startswith("held on "):
+        return d
+    return f"held on {d}"
+
 def populate_individual_elements(parent, member, title, theme, date_str, venue, purpose, issue_date, signatory, sig_t1, sig_t2, initials, attendance_basis, hon):
-    m_name = member.get("name", "EMPLOYEE NAME")
-    m_pos = member.get("position", "Position Title")
-    m_off = member.get("office", "Office")
-    m_role = member.get("role", "Participant")
+    m_name = (member.get("name") or "EMPLOYEE FULL NAME").upper()
+    m_pos = (member.get("position") or "OFFICIAL POSITION TITLE").upper()
+    m_off = (member.get("office") or "DEPARTMENT / OFFICE").upper()
+
+    full_act_title = get_full_activity_title(title, theme)
+    date_clause = format_date_clause(date_str)
+    venue_clause = format_venue_clause(venue)
+    basis = attendance_basis.strip() if attendance_basis else "was duly verified to have attended and participated in the activity entitled"
 
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_title = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_title, [create_docx_run("CERTIFICATE OF APPEARANCE", bold=True, size=40)], jc="center")
-    p_intro = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_intro, [create_docx_run("This is to certify that")], jc="both", first_line_ind=720)
+    set_docx_para(p_title, [create_docx_run("CERTIFICATE OF APPEARANCE", bold=True, size=40, font_name="MS Reference Sans Serif")], jc="center")
     
-    p_name = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_name, [create_docx_run(f"{hon}{m_name}", bold=True, size=32)], jc="center")
-    p_sub = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_sub, [create_docx_run(f"{m_pos} \u2022 {m_off}", bold=True, size=22)], jc="center")
-    
-    p_act = ET.SubElement(parent, f"{{{W_NS}}}p")
-    runs_act = [
-        create_docx_run(f"{attendance_basis}, appeared as "),
-        create_docx_run(m_role, bold=True),
-        create_docx_run(' during the \u201c'),
-        create_docx_run(title, bold=True),
-        create_docx_run('\u201d')
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+
+    # Main Formal Certification Flowing Paragraph
+    p_main = ET.SubElement(parent, f"{{{W_NS}}}p")
+    runs_main = [
+        create_docx_run("This is to certify that "),
+        create_docx_run(f"{hon}{m_name}", bold=True),
+        create_docx_run(", holding the position of "),
+        create_docx_run(m_pos, bold=True),
+        create_docx_run(" under "),
+        create_docx_run(m_off, bold=True),
+        create_docx_run(f", {basis} \u201c"),
+        create_docx_run(full_act_title, bold=True),
+        create_docx_run(f",\u201d {date_clause}, {venue_clause}.")
     ]
-    if theme:
-        runs_act.append(create_docx_run(' with the theme \u201c'))
-        runs_act.append(create_docx_run(theme, italic=True))
-        runs_act.append(create_docx_run('\u201d'))
-    runs_act.append(create_docx_run(f" on {date_str} at the {venue}."))
-    set_docx_para(p_act, runs_act, jc="both", first_line_ind=720)
+    set_docx_para(p_main, runs_main, jc="both", first_line_ind=720)
     
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_purp = ET.SubElement(parent, f"{{{W_NS}}}p")
@@ -353,14 +377,14 @@ def generate_ca_docx(data):
 
     mode = data.get("mode", "individual")
     export_all = data.get("exportAll", False)
-    title = data.get("activityTitle", "Activity")
-    theme = data.get("theme", "")
-    date_str = data.get("date", "")
-    venue = data.get("venue", "")
-    attendance_basis = data.get("attendanceBasis", "based on the verified present attendance on the activity")
+    title = data.get("activityTitle", "Men in the Kitchen 2")
+    theme = data.get("theme", "Love Served in the Kitchen")
+    date_str = data.get("date", "October 20, 2026")
+    venue = data.get("venue", "CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City")
+    attendance_basis = data.get("attendanceBasis", "was duly verified to have attended and participated in the activity entitled")
     honorific_mode = data.get("honorificMode", "auto")
-    purpose = data.get("purpose", "")
-    issue_date = data.get("issueDate", "")
+    purpose = data.get("purpose", "This certification is issued upon the request of the above-named individual for whatever lawful purpose it may serve.")
+    issue_date = data.get("issueDate", "Issued this 20th day of October 2026, Baguio City, Philippines.")
     signatory = data.get("signatoryName", "BENJAMIN B. MAGALONG")
     sig_t1 = data.get("signatoryTitle1", "City Mayor")
     sig_t2 = data.get("signatoryTitle2", "LCAT-VAWC Chairperson")
@@ -372,13 +396,13 @@ def generate_ca_docx(data):
         if honorific_mode == "none":
             return ""
         if honorific_mode == "mr":
-            return "Mr. "
+            return "MR. "
         if honorific_mode == "ms":
-            return "Ms. "
+            return "MS. "
         g = str(member.get("gender", "M")).upper()
         if g in ["F", "FEMALE"]:
-            return "Ms. "
-        return "Mr. "
+            return "MS. "
+        return "MR. "
 
     with zipfile.ZipFile(TEMPLATE_CA_DOCX, "r") as src:
         out_buf = io.BytesIO()
@@ -393,18 +417,16 @@ def generate_ca_docx(data):
                     if mode == "group":
                         children = list(body)
                         p_cert = children[2]
+                        full_act_title = get_full_activity_title(title, theme)
+                        date_clause = format_date_clause(date_str)
+                        venue_clause = format_venue_clause(venue)
                         runs_cert = [
                             create_docx_run("This is to certify that the following employees appeared as "),
                             create_docx_run("Participant/Facilitator", bold=True),
                             create_docx_run(' during the \u201c'),
-                            create_docx_run(title, bold=True),
-                            create_docx_run('\u201d')
+                            create_docx_run(full_act_title, bold=True),
+                            create_docx_run(f",\u201d {date_clause}, {venue_clause}:")
                         ]
-                        if theme:
-                            runs_cert.append(create_docx_run(' with the theme \u201c'))
-                            runs_cert.append(create_docx_run(theme, italic=True))
-                            runs_cert.append(create_docx_run('\u201d'))
-                        runs_cert.append(create_docx_run(f" on {date_str} at the {venue}:"))
                         set_docx_para(p_cert, runs_cert, jc="both", first_line_ind=720)
 
                         p_placeholder = children[3]

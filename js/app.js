@@ -2029,8 +2029,11 @@
         if (storedActs) {
           activitiesList = JSON.parse(storedActs);
           const k2 = activitiesList.find(a => a.id === 'ACT-KITCHEN-2');
-          if (k2 && !k2.shortDescription) {
+          if (k2) {
+            k2.title = 'Men in the Kitchen 2';
             k2.shortDescription = 'Love Served in the Kitchen';
+            k2.date = 'October 20, 2026';
+            k2.venue = 'CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City';
           }
         }
         const storedCustom = localStorage.getItem('move_custom_members');
