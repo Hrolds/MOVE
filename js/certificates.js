@@ -330,92 +330,6 @@
           watermark: { x: 0, y: 0 }
         }
       },
-      'gold_appreciation': {
-        id: 'gold_appreciation',
-        name: 'Executive Gold & Navy (Appreciation)',
-        isBuiltIn: true,
-        theme: {
-          outerBorderColor: '#78350f',
-          innerBorderColor: '#d97706',
-          borderStyle: 'double',
-          borderWidth: 10,
-          backgroundColor: '#fefce8',
-          cornerOrnament: 'none',
-          cornerColor: '#d97706'
-        },
-        header: {
-          republicText: 'Republic of the Philippines',
-          cityText: 'City Government of Baguio',
-          chapterText: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
-          subText: 'City Hall Chapter • Baguio City, Philippines',
-          showLeftLogo: true,
-          leftLogo: 'CITY%20HALL%20LOGO.png',
-          leftLogoWidth: 76,
-          showRightLogo: true,
-          rightLogo: 'MOVE%20BAGUIO%20LOGO.png',
-          rightLogoWidth: 76,
-          watermarkLogo: 'MOVE%20BAGUIO%20LOGO.png',
-          watermarkOpacity: 12,
-          watermarkEnabled: false,
-          goldSeal: false,
-          goldSealPosition: 'bottom-center'
-        },
-        title: {
-          type: 'appreciation',
-          customTitle: 'CERTIFICATE OF APPRECIATION',
-          fontFamily: 'cinzel',
-          color: '#78350f',
-          accentColor: '#d97706',
-          fontSize: 28,
-          introText: 'In grateful recognition and profound appreciation to'
-        },
-        recipient: {
-          fontFamily: 'cinzel',
-          fontSize: 34,
-          color: '#78350f',
-          underline: true,
-          underlineColor: '#d97706',
-          subtitleColor: '#b45309',
-          customName: '',
-          customSubtitle: ''
-        },
-        citation: {
-          leadText: 'for sharing invaluable expertise and unwavering commitment as Resource Speaker during the',
-          customEventTitle: '',
-          detailTemplate: 'Held on {date} at {venue}, inspiring men in public service to champion VAW-free communities ({duration}).',
-          fontSize: 13,
-          color: '#451a03'
-        },
-        signatories: {
-          sig1Enabled: true,
-          sig1Name: 'DAN RICKY M. ONG',
-          sig1Title: 'MOVE Chapter President',
-          sig1Office: '',
-          sig1SignatureImage: '',
-          sig2Enabled: true,
-          sig2Name: 'HON. BENJAMIN B. MAGALONG',
-          sig2Title: 'City Mayor',
-          sig2Office: '',
-          sig2SignatureImage: '',
-          sig3Enabled: false,
-          sig3Name: 'HON. FAUSTINO A. OLOWAN',
-          sig3Title: 'City Vice Mayor',
-          sig3Office: '',
-          sig3SignatureImage: '',
-          showQrSerial: false
-        },
-        offsets: {
-          header: { x: 0, y: 0 },
-          title: { x: 0, y: 0 },
-          recipient: { x: 0, y: 0 },
-          citation: { x: 0, y: 0 },
-          signatories: { x: 0, y: 0 },
-          leftLogo: { x: 0, y: 0 },
-          rightLogo: { x: 0, y: 0 },
-          goldSeal: { x: 0, y: 0 },
-          watermark: { x: 0, y: 0 }
-        }
-      },
       'pine_recognition': {
         id: 'pine_recognition',
         name: 'Baguio Pine & Gold (Recognition)',
@@ -863,6 +777,7 @@
         if (savedRaw) {
           const parsed = JSON.parse(savedRaw);
           Object.keys(parsed).forEach(k => {
+            if (k === 'ca_official_appearance' || k === 'gold_appreciation') return;
             allCertTemplates[k] = normalizeTemplateFields(parsed[k]);
           });
         }
@@ -870,7 +785,7 @@
         console.warn('Could not load saved certificate templates:', err);
       }
 
-      if (!allCertTemplates[currentCertVersionId]) {
+      if (!allCertTemplates[currentCertVersionId] || currentCertVersionId === 'ca_official_appearance' || currentCertVersionId === 'gold_appreciation') {
         currentCertVersionId = 'move_official_2026';
       }
       currentCertTemplate = normalizeTemplateFields(JSON.parse(JSON.stringify(allCertTemplates[currentCertVersionId])));
@@ -927,11 +842,184 @@
       currentCertVersionId = versionId;
       currentCertTemplate = normalizeTemplateFields(JSON.parse(JSON.stringify(allCertTemplates[versionId])));
       updateVersionStatusBadge();
+      if (currentCertTemplate.docCategory) {
+        updateCertDocumentTypeUi(currentCertTemplate.docCategory);
+      }
       syncDesignerInputsFromTemplate();
       renderCertificatePreview();
 
       pushCertHistoryState(`Loaded version "${currentCertTemplate.name}"`);
       showToast(`Loaded version "${currentCertTemplate.name}"`, 'fa-layer-group');
+    }
+
+    let currentCertDocType = 'participation';
+
+    function updateCertDocumentTypeUi(type) {
+      currentCertDocType = type;
+      ['participation', 'appreciation', 'appearance', 'new'].forEach(t => {
+        const btn = document.getElementById(`btnDocType-${t}`);
+        if (btn) {
+          const isActive = (t === type);
+          if (isActive) {
+            btn.className = 'cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/20 border-amber-400 ring-2 ring-amber-400/50 shadow-sm text-white scale-[1.01]';
+          } else {
+            btn.className = 'cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white';
+          }
+        }
+      });
+
+      const paperLbl = document.getElementById('certActivePaperSizeLabel');
+      const paperBadge = document.getElementById('certActivePaperBadge');
+      if (type === 'appearance') {
+        if (paperLbl) paperLbl.innerHTML = 'A5 Landscape (210 &times; 148 mm)';
+        if (paperBadge) paperBadge.className = 'self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-1.5 shadow-2xs';
+      } else {
+        if (paperLbl) paperLbl.innerHTML = 'A4 Landscape (297 &times; 210 mm)';
+        if (paperBadge) paperBadge.className = 'self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1.5 shadow-2xs';
+      }
+
+      const certTypeSel = document.getElementById('certTypeSelect');
+      if (certTypeSel) certTypeSel.value = type;
+    }
+
+    function switchCertDocumentType(type) {
+      if (type === 'appreciation') {
+        if (typeof switchCertStudioMode === 'function') {
+          switchCertStudioMode('appreciation');
+        } else if (typeof switchNav === 'function') {
+          switchNav('appreciation');
+        }
+        return;
+      }
+      if (type === 'appearance') {
+        if (typeof switchCertStudioMode === 'function') {
+          switchCertStudioMode('appearance');
+        } else if (typeof switchNav === 'function') {
+          switchNav('appearance');
+        }
+        return;
+      }
+      if (type === 'new') {
+        openCreateNewCertModal();
+        return;
+      }
+
+      if (typeof switchCertStudioMode === 'function') {
+        switchCertStudioMode('participation');
+      } else if (typeof switchNav === 'function') {
+        switchNav('certificates');
+      }
+    }
+
+    function openCreateNewCertModal() {
+      const modal = document.getElementById('modalCreateNewCertificate');
+      const inp = document.getElementById('inputCreateNewCertName');
+      if (inp) inp.value = '';
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCreateNewCertModal() {
+      const modal = document.getElementById('modalCreateNewCertificate');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleNewCertTypeChange(cat) {
+      const rA4 = document.getElementById('radioNewCertSizeA4');
+      const rA5 = document.getElementById('radioNewCertSizeA5');
+      if (cat === 'appearance') {
+        if (rA5) rA5.checked = true;
+      } else {
+        if (rA4) rA4.checked = true;
+      }
+    }
+
+    function handleConfirmCreateNewCert(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const inp = document.getElementById('inputCreateNewCertName');
+      const name = (inp ? inp.value : '').trim();
+      if (!name) return;
+
+      const catEl = document.querySelector('input[name="newCertDocCategory"]:checked');
+      const cat = catEl ? catEl.value : 'participation';
+
+      const sizeEl = document.querySelector('input[name="newCertPaperSize"]:checked');
+      const size = sizeEl ? sizeEl.value : (cat === 'appearance' ? 'A5 landscape' : 'A4 landscape');
+
+      closeCreateNewCertModal();
+
+      if (cat === 'appreciation') {
+        switchNav('appreciation');
+        setTimeout(() => {
+          if (typeof getSavedApprecVersions === 'function') {
+            const savedList = getSavedApprecVersions();
+            const newId = 'ver_apprec_' + Date.now();
+            const snap = JSON.parse(JSON.stringify(appreciationState));
+            savedList.unshift({
+              id: newId,
+              name: name,
+              createdAt: new Date().toISOString(),
+              isBuiltIn: false,
+              data: snap
+            });
+            if (typeof saveApprecVersionsList === 'function') saveApprecVersionsList(savedList);
+            appreciationState.activeVersionId = newId;
+            if (typeof populateAppreciationVersionsDropdown === 'function') populateAppreciationVersionsDropdown();
+            showToast(`Created Appreciation Certificate template "${name}"!`, 'fa-plus');
+          }
+        }, 120);
+        return;
+      }
+
+      if (cat === 'appearance') {
+        switchNav('appearance');
+        setTimeout(() => {
+          if (typeof getSavedCaVersions === 'function' && typeof saveCaVersionsList === 'function') {
+            const savedList = getSavedCaVersions();
+            const newId = 'ver_ca_' + Date.now();
+            const snap = JSON.parse(JSON.stringify(caState));
+            savedList.unshift({
+              id: newId,
+              name: name,
+              createdAt: new Date().toISOString(),
+              isBuiltIn: false,
+              data: snap
+            });
+            saveCaVersionsList(savedList);
+            caState.activeVersionId = newId;
+            if (typeof populateCaVersionsDropdown === 'function') populateCaVersionsDropdown();
+            showToast(`Created Appearance Certificate template "${name}"!`, 'fa-plus');
+          }
+        }, 120);
+        return;
+      }
+
+      // Default: Participation / Custom in Certificate Studio
+      const baseSelect = document.getElementById('selectNewCertStartingBase');
+      const baseMode = baseSelect ? baseSelect.value : 'clone_current';
+
+      let baseTemplate = null;
+      if (baseMode === 'clone_current') {
+        baseTemplate = JSON.parse(JSON.stringify(currentCertTemplate));
+      } else {
+        baseTemplate = JSON.parse(JSON.stringify(DEFAULT_CERT_TEMPLATES['move_official_2026']));
+      }
+
+      const newId = 'custom_' + Date.now();
+      baseTemplate.id = newId;
+      baseTemplate.name = name;
+      baseTemplate.docCategory = cat;
+      baseTemplate.paperSize = size;
+      baseTemplate.isBuiltIn = false;
+
+      allCertTemplates[newId] = baseTemplate;
+      currentCertVersionId = newId;
+      currentCertTemplate = JSON.parse(JSON.stringify(baseTemplate));
+
+      saveTemplatesToStorage();
+      populateCertVersionDropdown();
+      updateVersionStatusBadge();
+      switchNav('certificates');
+      showToast(`Created new certificate template "${name}"!`, 'fa-plus');
     }
 
     function saveCurrentCertTemplate() {
@@ -2939,6 +3027,128 @@
       const recDisplayName = t.recipient.customName || recipient.name || 'JUAN M. DELA CRUZ';
       const recDisplaySub = t.recipient.customSubtitle || `${recipient.office || 'CBAO'} • ${recipient.position || 'Civil Service Personnel'}`;
 
+      if (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance')) {
+        const gender = (recipient && recipient.gender) ? recipient.gender : 'M';
+        const honorific = gender === 'F' ? 'MS. ' : 'MR. ';
+        const sigName = (t.signatories && t.signatories.sig1Name) || 'BENJAMIN B. MAGALONG';
+        const sigTitle1 = (t.signatories && t.signatories.sig1Title) || 'City Mayor';
+        const sigTitle2 = (t.signatories && t.signatories.sig1Office) || 'LCAT-VAWC Chairperson';
+        const sigImg = (t.signatories && t.signatories.sig1SignatureImage) || 'signature%20(15).png';
+        const initials = (t.citation && t.citation.initials) || '/drmo/ctb';
+        const purposeText = (t.citation && t.citation.purposeText) || 'This certification is issued upon the request of the above-named individual for whatever lawful purpose it may serve.';
+        const issueDateText = (t.citation && t.citation.issueDateText) || `Issued this ${effectiveDate}, Baguio City, Philippines.`;
+        const breathePos = (t.citation && t.citation.breatheBaguioPosition) || 'footer';
+
+        return `
+          ${watermarkHtml}
+
+          <!-- CA Header Section (Logos & Official Subtext) -->
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700 relative z-10 w-full"
+               style="${getOffsetStyle('header')}" ${getDragAttrs('header')}>
+            <div class="cert-removable-item flex items-center justify-center shrink-0 relative"
+                 style="width: ${t.header.leftLogoWidth || 54}px; height: ${t.header.leftLogoWidth || 54}px; ${getOffsetStyle('leftLogo')}"
+                 ${getDragAttrs('leftLogo')}>
+              ${getRemoveBtnHtml('leftLogo', 'City Hall Logo')}
+              <img src="${t.header.leftLogo || 'CITY%20HALL%20LOGO.png'}" alt="City Government of Baguio" class="w-full h-full object-contain pointer-events-none select-none">
+            </div>
+
+            <div class="text-center px-2 flex-1 leading-tight">
+              <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-800" ${getEditableAttrs('header.republicText')}>
+                ${t.header.republicText || 'Republic of the Philippines'}
+              </div>
+              <div class="text-[12px] font-black uppercase tracking-tight text-slate-900 mt-0.5" ${getEditableAttrs('header.cityText')}>
+                ${t.header.cityText || 'CITY GOVERNMENT OF BAGUIO'}
+              </div>
+              <div class="text-[10px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5" ${getEditableAttrs('header.chapterText')}>
+                ${t.header.chapterText || 'Men Opposed to Violence Against Women Everywhere'}
+              </div>
+              <div class="text-[8.5px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5" ${getEditableAttrs('header.subText')}>
+                ${t.header.subText || 'Baguio City Chapter • Local Committee on Anti-VAWC'}
+              </div>
+            </div>
+
+            <div class="cert-removable-item flex items-center justify-center shrink-0 relative"
+                 style="width: ${t.header.rightLogoWidth || 54}px; height: ${t.header.rightLogoWidth || 54}px; ${getOffsetStyle('rightLogo')}"
+                 ${getDragAttrs('rightLogo')}>
+              ${getRemoveBtnHtml('rightLogo', 'MOVE Logo')}
+              <img src="${t.header.rightLogo || 'MOVE%20BAGUIO%20LOGO.png'}" alt="MOVE Baguio Chapter" class="w-full h-full object-contain pointer-events-none select-none">
+            </div>
+          </div>
+
+          <!-- Document Title -->
+          <div class="text-center my-3 relative z-10" style="${getOffsetStyle('title')}" ${getDragAttrs('title')}>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase font-cinzel inline-block"
+                style="letter-spacing: 2px;"
+                ${getEditableAttrs('title.customTitle')}>
+              ${t.title.customTitle || 'CERTIFICATE OF APPEARANCE'}
+            </h1>
+          </div>
+
+          <!-- Certification Body -->
+          <div class="space-y-2.5 px-3 sm:px-6 relative z-10 text-[11.5px] leading-relaxed text-slate-900 font-sans text-justify"
+               style="${getOffsetStyle('citation')}" ${getDragAttrs('citation')}>
+            <p style="text-indent: 28px;">
+              <span ${getEditableAttrs('citation.leadText')}>${t.citation.leadText || 'This is to certify that'}</span>
+              <strong>${honorific}<span ${getEditableAttrs('recipient.customName')}>${recDisplayName}</span></strong>,
+              holding the position of <strong>${recipient.position || 'OFFICIAL POSITION TITLE'}</strong>
+              under <strong>${recipient.office || 'DEPARTMENT / OFFICE'}</strong>,
+              was duly verified to have attended and participated in the activity entitled
+              “<strong><span ${getEditableAttrs('citation.customEventTitle')}>${effectiveEventTitle}</span></strong>,”
+              held on ${effectiveDate}, at ${effectiveVenue}.
+            </p>
+
+            <p style="text-indent: 28px;" ${getEditableAttrs('citation.purposeText')}>
+              ${purposeText}
+            </p>
+
+            <p class="text-left pt-1" ${getEditableAttrs('citation.issueDateText')}>
+              ${issueDateText}
+            </p>
+          </div>
+
+          <!-- Signatory & Municipal Footer -->
+          <div class="pt-3 border-t border-slate-300 relative z-10 flex items-end justify-between px-4 sm:px-8"
+               style="${getOffsetStyle('signatories')}" ${getDragAttrs('signatories')}>
+            <!-- Initials & Campaign Branding -->
+            <div class="flex items-center gap-3">
+              <span class="text-[9.5px] font-mono text-slate-500 lowercase tracking-wider inline-block"
+                    ${getEditableAttrs('citation.initials')}>
+                ${initials}
+              </span>
+              ${(breathePos === 'footer' || breathePos === 'bottom-left') ? `
+                <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" style="width: 85px;" class="object-contain pointer-events-none select-none">
+              ` : ''}
+            </div>
+
+            <!-- Mayor Signatory Block -->
+            <div class="text-center relative min-w-[200px]">
+              ${sigImg ? `
+                <div class="absolute left-1/2 -translate-x-1/2 -top-10 pointer-events-none select-none z-10">
+                  <img src="${sigImg}" alt="Mayor Signature" style="width: 130px; max-height: 48px;" class="object-contain">
+                </div>
+              ` : ''}
+              <div class="font-bold text-xs uppercase text-slate-900 border-b border-slate-900 pb-0.5 inline-block min-w-[190px]"
+                   ${getEditableAttrs('signatories.sig1Name')}>
+                ${sigName}
+              </div>
+              <div class="text-[10px] font-semibold text-slate-700 mt-0.5" ${getEditableAttrs('signatories.sig1Title')}>
+                ${sigTitle1}
+              </div>
+              <div class="text-[9.5px] text-slate-500" ${getEditableAttrs('signatories.sig1Office')}>
+                ${sigTitle2}
+              </div>
+            </div>
+
+            <!-- Optional Right Campaign Emblem -->
+            ${breathePos === 'bottom-right' ? `
+              <div class="flex items-center justify-end">
+                <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" style="width: 85px;" class="object-contain pointer-events-none select-none">
+              </div>
+            ` : '<div class="w-8"></div>'}
+          </div>
+        `;
+      }
+
       // Build Signatories & QR Footer dynamically (Single-line non-wrapping names & customizable sizes)
       const sigNameSize = t.signatories.fontSize || 13;
       const sigTitleSize = t.signatories.titleFontSize || Math.max(9, sigNameSize - 3);
@@ -3156,6 +3366,18 @@
 
       const t = currentCertTemplate;
 
+      // Dynamic Paper Aspect Ratio (A5 Landscape for Appearance, A4 Landscape for Participation & Appreciation)
+      const isAppearance = (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance'));
+      if (isAppearance) {
+        frame.style.aspectRatio = '210/148';
+        frame.style.maxWidth = '48rem';
+        frame.style.padding = '1.25rem 1.75rem';
+      } else {
+        frame.style.aspectRatio = '297/210';
+        frame.style.maxWidth = '56rem';
+        frame.style.padding = '1.5rem 2.5rem';
+      }
+
       // Apply master border and background directly on #certificateFrame
       frame.style.border = (t.theme.borderStyle === 'none') ? 'none' : `${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'}`;
       frame.style.backgroundColor = t.theme.backgroundColor || '#ffffff';
@@ -3234,6 +3456,11 @@
       const serialNo = `MOVE-2026-${act.id.replace('ACT-', '')}-${String(certCurrentRecipientIndex + 1).padStart(4, '0')}`;
 
       const t = currentCertTemplate;
+      const isApp = (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance'));
+      const paperSize = isApp ? 'A5 landscape' : 'A4 landscape';
+      const sheetWidth = isApp ? '210mm' : '297mm';
+      const sheetHeight = isApp ? '148mm' : '210mm';
+      const sheetPad = isApp ? 'p-5' : 'p-8';
       const outerStyle = `${t.theme.borderStyle === 'none' ? 'border: none;' : `border: ${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'};`} background-color: ${t.theme.backgroundColor || '#ffffff'};`;
 
       const printBox = document.getElementById('batchPrintContainer');
@@ -3242,13 +3469,13 @@
       const sheet = document.createElement('div');
       sheet.className = 'cert-print-page flex items-center justify-center bg-white';
       sheet.innerHTML = `
-        <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="width: 297mm; height: 210mm; max-width: 297mm; max-height: 210mm; box-sizing: border-box; overflow: hidden; ${outerStyle}">
+        <div class="w-full h-full ${sheetPad} flex flex-col justify-between relative select-none" style="width: ${sheetWidth}; height: ${sheetHeight}; max-width: ${sheetWidth}; max-height: ${sheetHeight}; box-sizing: border-box; overflow: hidden; ${outerStyle}">
           ${buildCertificateInnerHtml(p, act, serialNo, currentCertTemplate, true)}
         </div>
       `;
       printBox.appendChild(sheet);
 
-      if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
+      if (typeof setPrintPageRule === 'function') setPrintPageRule(paperSize);
       document.body.classList.add('printing-cert');
       showToast(`Printing certificate for ${currentCertTemplate.recipient.customName || p.name}...`, 'fa-print');
       setTimeout(() => {
@@ -3273,6 +3500,11 @@
       }
 
       const t = currentCertTemplate;
+      const isApp = (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance'));
+      const paperSize = isApp ? 'A5 landscape' : 'A4 landscape';
+      const sheetWidth = isApp ? '210mm' : '297mm';
+      const sheetHeight = isApp ? '148mm' : '210mm';
+      const sheetPad = isApp ? 'p-5' : 'p-8';
       const outerStyle = `${t.theme.borderStyle === 'none' ? 'border: none;' : `border: ${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'};`} background-color: ${t.theme.backgroundColor || '#ffffff'};`;
 
       const printBox = document.getElementById('batchPrintContainer');
@@ -3283,14 +3515,14 @@
         const sheet = document.createElement('div');
         sheet.className = 'cert-print-page flex items-center justify-center bg-white';
         sheet.innerHTML = `
-          <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="width: 297mm; height: 210mm; max-width: 297mm; max-height: 210mm; box-sizing: border-box; overflow: hidden; ${outerStyle}">
+          <div class="w-full h-full ${sheetPad} flex flex-col justify-between relative select-none" style="width: ${sheetWidth}; height: ${sheetHeight}; max-width: ${sheetWidth}; max-height: ${sheetHeight}; box-sizing: border-box; overflow: hidden; ${outerStyle}">
             ${buildCertificateInnerHtml(p, act, serialNo, currentCertTemplate, true)}
           </div>
         `;
         printBox.appendChild(sheet);
       });
 
-      if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
+      if (typeof setPrintPageRule === 'function') setPrintPageRule(paperSize);
       document.body.classList.add('printing-cert');
       showToast(`Generating ${presentList.length} customized certificates using "${currentCertTemplate.name}"...`, 'fa-print');
       setTimeout(() => {
@@ -3301,5 +3533,15 @@
         }, 1000);
       }, 350);
     }
+
+    // Global exports for Certificate Studio
+    window.switchCertDocumentType = switchCertDocumentType;
+    window.openCreateNewCertModal = openCreateNewCertModal;
+    window.closeCreateNewCertModal = closeCreateNewCertModal;
+    window.handleNewCertTypeChange = handleNewCertTypeChange;
+    window.handleConfirmCreateNewCert = handleConfirmCreateNewCert;
+    window.handleCertTypeSelectChange = handleCertTypeSelectChange;
+    window.initCertificateStudio = initCertificateStudio;
+    window.renderCertificatePreview = renderCertificatePreview;
 
 

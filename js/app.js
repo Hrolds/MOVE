@@ -221,20 +221,55 @@
         org: ['Organizational Governance', 'MOVE Baguio Chapter Executive Committee & Focal Persons Directory'],
         members: ['Membership Registry', 'Comprehensive employee database with official Google Form intake fields'],
         activities: ['Activities & Trainings', 'Master training logs and live participant attendance tracker'],
-        certificates: ['Certificate Studio', 'Automated certificate generation engine for verified present attendees'],
-        appearance: ['Certificate of Appearance', 'Civil Service DTR attendance accreditation & appearance certification'],
-        appreciation: ['Certificate of Appreciation', 'Honors, guest speaker, facilitator & partner commendation awards'],
+        certificates: ['Certificate Studio — Participation', 'Automated certificate generation engine for verified present attendees (A4 Landscape)'],
+        appearance: ['Certificate of Appearance Studio', 'Official Civil Service DTR attendance accreditation slip (A5 Landscape)'],
+        appreciation: ['Certificate of Appreciation Studio', 'Prestigious honors, guest speaker, facilitator & partner commendations (A4 Landscape)'],
         roster: ['50-Participant Balancing Engine', 'Dynamic candidate pool filter with office quota balancer & auto-arrange']
       };
 
       document.getElementById('topbarTitle').textContent = titles[nav][0];
       document.getElementById('topbarSubtitle').textContent = titles[nav][1];
 
+      if (typeof updateStudioTopSelector === 'function') updateStudioTopSelector(nav);
+
       if (nav === 'certificates') renderCertificatePreview();
       if (nav === 'appearance' && typeof initAppearanceStudio === 'function') initAppearanceStudio();
       if (nav === 'appreciation' && typeof initAppreciationStudio === 'function') initAppreciationStudio();
       if (nav === 'dashboard') renderDashboard();
     }
+    window.switchNav = switchNav;
+
+    function switchCertStudioMode(mode) {
+      if (mode === 'participation') {
+        switchNav('certificates');
+      } else if (mode === 'appreciation') {
+        switchNav('appreciation');
+      } else if (mode === 'appearance') {
+        switchNav('appearance');
+      } else if (mode === 'new') {
+        if (typeof openCreateNewCertModal === 'function') openCreateNewCertModal();
+      }
+    }
+    window.switchCertStudioMode = switchCertStudioMode;
+
+    function updateStudioTopSelector(nav) {
+      let activeMode = 'participation';
+      if (nav === 'appreciation') activeMode = 'appreciation';
+      else if (nav === 'appearance') activeMode = 'appearance';
+      else if (nav === 'certificates') activeMode = 'participation';
+      else return;
+
+      document.querySelectorAll('.cert-doc-type-btn').forEach(btn => {
+        const btnMode = btn.getAttribute('data-cert-mode');
+        if (!btnMode) return;
+        if (btnMode === activeMode) {
+          btn.className = 'cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/20 border-amber-400 ring-2 ring-amber-400/50 shadow-sm text-white scale-[1.01]';
+        } else {
+          btn.className = 'cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white';
+        }
+      });
+    }
+    window.updateStudioTopSelector = updateStudioTopSelector;
 
     function capitalize(s) {
       return s.charAt(0).toUpperCase() + s.slice(1);

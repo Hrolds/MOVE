@@ -955,6 +955,84 @@
         <!-- VIEW 5: CERTIFICATE STUDIO & DESIGNER          -->
         <!-- ============================================== -->
         <div id="pageCertificates" class="space-y-4 hidden">
+          <!-- TIER 0: PRIMARY DOCUMENT SELECTOR — Choose What to Make / Edit -->
+          <div class="bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-move-navy-950 p-3 sm:p-4 rounded-2xl border border-amber-500/30 shadow-md text-white space-y-3 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-base font-bold shadow-xs">
+                  <i class="fa-solid fa-shapes"></i>
+                </span>
+                <div>
+                  <h4 class="text-sm font-black uppercase tracking-wider text-amber-300 font-cinzel">Choose Document to Make &amp; Edit</h4>
+                  <p class="text-[11px] text-slate-300">Unified Certificate Studio: Select document type to design, customize, and print</p>
+                </div>
+              </div>
+              <div id="certActivePaperBadge" class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-file-lines"></i>
+                <span id="certActivePaperSizeLabel">A4 Landscape (297 &times; 210 mm)</span>
+              </div>
+            </div>
+
+            <!-- 4 Interactive Mode Cards / Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left">
+              <!-- 1. Certificate of Participation -->
+              <button type="button" data-cert-mode="participation" onclick="switchCertStudioMode('participation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/20 border-amber-400 ring-2 ring-amber-400/50 shadow-sm text-white scale-[1.01]"
+                      title="For all event attendees & participants">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-award text-amber-400 text-base"></i>
+                    <span>Participation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-200 border border-blue-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-200 leading-tight">For all event attendees &amp; participants</p>
+              </button>
+
+              <!-- 2. Certificate of Appreciation -->
+              <button type="button" data-cert-mode="appreciation" onclick="switchCertStudioMode('appreciation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="For guest speakers, facilitators, partner agencies & VIPs">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-medal text-amber-400 text-base"></i>
+                    <span>Appreciation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">For guest speakers, facilitators, partner agencies &amp; VIPs</p>
+              </button>
+
+              <!-- 3. Certificate of Appearance (CA) -->
+              <button type="button" data-cert-mode="appearance" onclick="switchCertStudioMode('appearance')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="Official attendance certification for employees, DTR & official travel">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-emerald-300">
+                    <i class="fa-solid fa-file-contract text-emerald-400 text-base"></i>
+                    <span>Appearance (CA)</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold uppercase">A5</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Official attendance certification for employees, DTR &amp; travel</p>
+              </button>
+
+              <!-- 4. Or Create New / Custom -->
+              <button type="button" data-cert-mode="new" onclick="switchCertStudioMode('new')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="Start blank or clone active template as a new certificate type">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-sky-300">
+                    <i class="fa-solid fa-plus-circle text-sky-400 text-base"></i>
+                    <span>Create New</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold uppercase">Custom</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Start blank or clone active template as a new certificate type</p>
+              </button>
+            </div>
+          </div>
+
           <!-- Top Controls Bar (Organized 4-Tier Studio Header) -->
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
             <!-- TIER 1: Studio Title & Primary Action Toolbar (Single Cohesive Row) -->
@@ -1074,6 +1152,7 @@
                         class="w-full py-1.5 px-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold truncate focus:ring-1 focus:ring-move-orange-500">
                   <option value="participation">Certificate of Participation</option>
                   <option value="appreciation">Certificate of Appreciation</option>
+                  <option value="appearance">Certificate of Appearance (CA)</option>
                   <option value="recognition">Certificate of Recognition</option>
                   <option value="membership">Certificate of Membership</option>
                   <option value="custom">Custom Title</option>
@@ -2167,6 +2246,108 @@
           </div>
         </div>
 
+        <!-- MODAL: CREATE NEW CERTIFICATE (ALL TYPES)       -->
+        <!-- ============================================== -->
+        <div id="modalCreateNewCertificate" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden no-print">
+          <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-scale-up">
+            <div class="p-5 bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-[#122e5d] text-white flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-base font-bold shadow-xs">
+                  <i class="fa-solid fa-shapes"></i>
+                </span>
+                <div>
+                  <h3 class="font-black text-sm uppercase tracking-wider text-amber-300 font-cinzel">Create New Certificate</h3>
+                  <p class="text-[11px] text-slate-300">Choose document type, paper size, and design mode</p>
+                </div>
+              </div>
+              <button onclick="closeCreateNewCertModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <i class="fa-solid fa-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <form onsubmit="handleConfirmCreateNewCert(event)" class="p-5 sm:p-6 space-y-4 text-xs">
+              <!-- Name -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Certificate / Template Name</label>
+                <input type="text" id="inputCreateNewCertName" required placeholder="e.g. 2026 Special Commendation, Guest Speaker Honors..."
+                       class="w-full py-2 px-3 border border-slate-300 rounded-xl text-sm font-semibold text-move-navy-900 focus:ring-2 focus:ring-move-orange-500">
+              </div>
+
+              <!-- Document Type Selection -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Document Type</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 bg-slate-50 flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" name="newCertDocCategory" value="participation" checked onchange="handleNewCertTypeChange('participation')" class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">🏆 Participation</span>
+                      <span class="text-[10px] text-slate-400 font-normal">A4 Landscape</span>
+                    </div>
+                  </label>
+                  <label class="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 bg-slate-50 flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" name="newCertDocCategory" value="appreciation" onchange="handleNewCertTypeChange('appreciation')" class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">🎖️ Appreciation</span>
+                      <span class="text-[10px] text-slate-400 font-normal">A4 Landscape</span>
+                    </div>
+                  </label>
+                  <label class="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 bg-slate-50 flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" name="newCertDocCategory" value="appearance" onchange="handleNewCertTypeChange('appearance')" class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">📋 Appearance (CA)</span>
+                      <span class="text-[10px] text-slate-400 font-normal">A5 Landscape</span>
+                    </div>
+                  </label>
+                  <label class="p-2.5 rounded-xl border border-slate-200 hover:border-amber-400 bg-slate-50 flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" name="newCertDocCategory" value="custom" onchange="handleNewCertTypeChange('custom')" class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">🎨 Custom Certificate</span>
+                      <span class="text-[10px] text-slate-400 font-normal">Choose size below</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Paper Size Selection -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Paper Size &amp; Orientation</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" id="radioNewCertSizeA4" name="newCertPaperSize" value="A4 landscape" checked class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">A4 Landscape</span>
+                      <span class="text-[10px] text-slate-400 font-normal">297 &times; 210 mm (Standard)</span>
+                    </div>
+                  </label>
+                  <label class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                    <input type="radio" id="radioNewCertSizeA5" name="newCertPaperSize" value="A5 landscape" class="accent-amber-500">
+                    <div>
+                      <span class="text-xs block">A5 Landscape</span>
+                      <span class="text-[10px] text-slate-400 font-normal">210 &times; 148 mm (CA Slip)</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Starting Base -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Starting Layout &amp; Theme</label>
+                <select id="selectNewCertStartingBase" class="w-full py-2 px-3 border border-slate-300 rounded-xl bg-white text-xs font-semibold">
+                  <option value="clone_current">Clone Active Template Design (Recommended)</option>
+                  <option value="clean_default">Clean Standard Built-in Template</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeCreateNewCertModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold transition shadow-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus"></i>Create Certificate
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- ============================================== -->
         <!-- MODAL: SIGNATORIES DATABASE & REGISTRY         -->
         <!-- ============================================== -->
@@ -2286,6 +2467,87 @@
         <!-- Modeled strictly after CA MOVE TEMPLATE.docx                   -->
         <!-- ============================================================== -->
         <div id="pageAppearance" class="space-y-4 hidden">
+          <!-- ============================================================== -->
+          <!-- TIER 0: PRIMARY DOCUMENT SELECTOR BANNER                       -->
+          <!-- Unified Certificate Studio: Participation, Appreciation, CA    -->
+          <!-- ============================================================== -->
+          <div class="bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-[#122e5d] p-4 sm:p-5 rounded-2xl border border-move-navy-800 shadow-md space-y-3 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 text-base font-bold shadow-xs">
+                  <i class="fa-solid fa-shapes"></i>
+                </span>
+                <div>
+                  <h4 class="text-sm font-black uppercase tracking-wider text-amber-300 font-cinzel">Choose Document to Make &amp; Edit</h4>
+                  <p class="text-[11px] text-slate-300">Unified Certificate Studio: Select document type to design, customize, and print</p>
+                </div>
+              </div>
+              <div class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>A5 Landscape Slip (210 &times; 148 mm)</span>
+              </div>
+            </div>
+
+            <!-- 4 Interactive Mode Cards / Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left">
+              <!-- 1. Certificate of Participation -->
+              <button type="button" data-cert-mode="participation" onclick="switchCertStudioMode('participation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="For all event attendees & participants">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-award text-amber-400 text-base"></i>
+                    <span>Participation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-200 border border-blue-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-200 leading-tight">For all event attendees &amp; participants</p>
+              </button>
+
+              <!-- 2. Certificate of Appreciation -->
+              <button type="button" data-cert-mode="appreciation" onclick="switchCertStudioMode('appreciation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="For guest speakers, facilitators, partner agencies & VIPs">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-medal text-amber-400 text-base"></i>
+                    <span>Appreciation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">For guest speakers, facilitators, partner agencies &amp; VIPs</p>
+              </button>
+
+              <!-- 3. Certificate of Appearance (CA) -->
+              <button type="button" data-cert-mode="appearance" onclick="switchCertStudioMode('appearance')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/20 border-amber-400 ring-2 ring-amber-400/50 shadow-sm text-white scale-[1.01]"
+                      title="Official attendance certification for employees, DTR & official travel">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-emerald-300">
+                    <i class="fa-solid fa-file-contract text-emerald-400 text-base"></i>
+                    <span>Appearance (CA)</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold uppercase">A5</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Official attendance certification for employees, DTR &amp; travel</p>
+              </button>
+
+              <!-- 4. Or Create New / Custom -->
+              <button type="button" data-cert-mode="new" onclick="switchCertStudioMode('new')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="Start blank or clone active template as a new certificate type">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-sky-300">
+                    <i class="fa-solid fa-plus-circle text-sky-400 text-base"></i>
+                    <span>Create New</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold uppercase">Custom</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Start blank or clone active template as a new certificate type</p>
+              </button>
+            </div>
+          </div>
+
           <!-- Top Studio Header & Controls Bar -->
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -2915,6 +3177,87 @@
         <!-- Prestigious Honors, Speakers, Facilitators & Partners Engine   -->
         <!-- ============================================================== -->
         <div id="pageAppreciation" class="space-y-4 hidden">
+          <!-- ============================================================== -->
+          <!-- TIER 0: PRIMARY DOCUMENT SELECTOR BANNER                       -->
+          <!-- Unified Certificate Studio: Participation, Appreciation, CA    -->
+          <!-- ============================================================== -->
+          <div class="bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-[#122e5d] p-4 sm:p-5 rounded-2xl border border-move-navy-800 shadow-md space-y-3 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-base font-bold shadow-xs">
+                  <i class="fa-solid fa-shapes"></i>
+                </span>
+                <div>
+                  <h4 class="text-sm font-black uppercase tracking-wider text-amber-300 font-cinzel">Choose Document to Make &amp; Edit</h4>
+                  <p class="text-[11px] text-slate-300">Unified Certificate Studio: Select document type to design, customize, and print</p>
+                </div>
+              </div>
+              <div class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-file-lines"></i>
+                <span>A4 Landscape (297 &times; 210 mm)</span>
+              </div>
+            </div>
+
+            <!-- 4 Interactive Mode Cards / Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left">
+              <!-- 1. Certificate of Participation -->
+              <button type="button" data-cert-mode="participation" onclick="switchCertStudioMode('participation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="For all event attendees & participants">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-award text-amber-400 text-base"></i>
+                    <span>Participation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-blue-500/30 text-blue-200 border border-blue-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-200 leading-tight">For all event attendees &amp; participants</p>
+              </button>
+
+              <!-- 2. Certificate of Appreciation -->
+              <button type="button" data-cert-mode="appreciation" onclick="switchCertStudioMode('appreciation')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/20 border-amber-400 ring-2 ring-amber-400/50 shadow-sm text-white scale-[1.01]"
+                      title="For guest speakers, facilitators, partner agencies & VIPs">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-amber-300">
+                    <i class="fa-solid fa-medal text-amber-400 text-base"></i>
+                    <span>Appreciation</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-400/40 font-bold uppercase">A4</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">For guest speakers, facilitators, partner agencies &amp; VIPs</p>
+              </button>
+
+              <!-- 3. Certificate of Appearance (CA) -->
+              <button type="button" data-cert-mode="appearance" onclick="switchCertStudioMode('appearance')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="Official attendance certification for employees, DTR & official travel">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-emerald-300">
+                    <i class="fa-solid fa-file-contract text-emerald-400 text-base"></i>
+                    <span>Appearance (CA)</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold uppercase">A5</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Official attendance certification for employees, DTR &amp; travel</p>
+              </button>
+
+              <!-- 4. Or Create New / Custom -->
+              <button type="button" data-cert-mode="new" onclick="switchCertStudioMode('new')"
+                      class="cert-doc-type-btn p-3 rounded-xl border transition-all flex flex-col justify-between gap-1.5 bg-white/5 hover:bg-white/15 border-white/10 text-white"
+                      title="Start blank or clone active template as a new certificate type">
+                <div class="flex items-center justify-between w-full">
+                  <div class="flex items-center gap-2 font-bold text-xs font-cinzel text-sky-300">
+                    <i class="fa-solid fa-plus-circle text-sky-400 text-base"></i>
+                    <span>Create New</span>
+                  </div>
+                  <span class="text-[9.5px] px-1.5 py-0.5 rounded bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold uppercase">Custom</span>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-tight">Start blank or clone active template as a new certificate type</p>
+              </button>
+            </div>
+          </div>
+
           <!-- Top Studio Header & Controls Bar -->
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
