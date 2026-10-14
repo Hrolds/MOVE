@@ -6,8 +6,10 @@
 
 const caState = {
   selectedActivityId: 'ACT-KITCHEN-2',
-  mode: 'group', // 'group' (official roster table) or 'individual' (single employee sheet)
+  mode: 'individual', // Default to INDIVIDUAL employee certificate
   currentMemberIndex: 0,
+  honorificMode: 'auto', // 'auto' (Mr./Ms. by gender), 'mr', 'ms', 'none'
+  attendanceBasis: 'based on the verified present attendance on the activity',
   title: 'MEN IN THE KITCHEN 2',
   theme: 'Love Served in the Kitchen',
   date: 'December 9, 2025',
@@ -42,6 +44,7 @@ function initAppearanceStudio() {
 
   // Populate UI inputs from state
   syncCaInputsFromState();
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -63,6 +66,53 @@ function populateCaActivityDropdown() {
   });
 }
 
+// --- POPULATE EMPLOYEE DROPDOWN FOR INDIVIDUAL SELECTION ---
+function populateCaEmployeeDropdown() {
+  const sel = document.getElementById('caEmployeeSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+
+  const list = getActiveCaParticipants();
+  if (list.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = 0;
+    opt.textContent = 'No present attendees';
+    sel.appendChild(opt);
+    return;
+  }
+
+  list.forEach((p, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    const hon = getCaHonorific(p);
+    opt.textContent = `${idx + 1}. ${hon}${p.name || 'Unnamed'} (${p.office || 'N/A'})`;
+    if (idx === caState.currentMemberIndex) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function handleCaEmployeeDropdownChange(val) {
+  const idx = parseInt(val, 10);
+  const list = getActiveCaParticipants();
+  if (!isNaN(idx) && idx >= 0 && idx < list.length) {
+    caState.currentMemberIndex = idx;
+    renderAppearancePreview();
+    renderCaAttendeesList();
+  }
+}
+
+// --- HONORIFIC RESOLUTION (MR. / MS.) ---
+function getCaHonorific(member) {
+  if (caState.honorificMode === 'none') return '';
+  if (caState.honorificMode === 'mr') return 'Mr. ';
+  if (caState.honorificMode === 'ms') return 'Ms. ';
+  
+  // Auto mode based on employee gender
+  const g = (member && member.gender ? String(member.gender) : 'M').toUpperCase();
+  if (g === 'F' || g === 'FEMALE') return 'Ms. ';
+  return 'Mr. ';
+}
+
 // --- APPLY SELECTED ACTIVITY ---
 function applyCaActivity(act) {
   if (!act) return;
@@ -78,6 +128,7 @@ function applyCaActivity(act) {
   
   refreshCaParticipants();
   syncCaInputsFromState();
+  populateCaEmployeeDropdown();
 }
 
 function formatCaDateOrd(dateStr) {
@@ -126,6 +177,8 @@ function syncCaInputsFromState() {
   setVal('caActTheme', caState.theme);
   setVal('caActDate', caState.date);
   setVal('caActVenue', caState.venue);
+  setVal('caAttendanceBasis', caState.attendanceBasis);
+  setVal('caHonorificSelect', caState.honorificMode);
   setVal('caPurposeText', caState.purpose);
   setVal('caIssueDate', caState.issueDate);
   setVal('caSignatoryName', caState.signatoryName);
@@ -146,11 +199,11 @@ function syncCaInputsFromState() {
   const tabInd = document.getElementById('caTabIndividual');
   if (tabGroup && tabInd) {
     if (caState.mode === 'group') {
-      tabGroup.className = 'flex-1 py-2 px-3 text-xs font-bold rounded-xl transition bg-move-navy-900 text-white shadow-sm flex items-center justify-center gap-1.5';
-      tabInd.className = 'flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition text-slate-600 hover:text-move-navy-900 hover:bg-slate-100 flex items-center justify-center gap-1.5';
+      tabGroup.className = 'py-1.5 px-3.5 text-xs font-bold rounded-xl transition bg-move-navy-900 text-white shadow-sm flex items-center gap-1.5';
+      tabInd.className = 'py-1.5 px-3.5 text-xs font-semibold rounded-xl transition text-slate-600 hover:text-move-navy-900 hover:bg-slate-200/60 flex items-center gap-1.5';
     } else {
-      tabGroup.className = 'flex-1 py-2 px-3 text-xs font-semibold rounded-xl transition text-slate-600 hover:text-move-navy-900 hover:bg-slate-100 flex items-center justify-center gap-1.5';
-      tabInd.className = 'flex-1 py-2 px-3 text-xs font-bold rounded-xl transition bg-move-navy-900 text-white shadow-sm flex items-center justify-center gap-1.5';
+      tabGroup.className = 'py-1.5 px-3.5 text-xs font-semibold rounded-xl transition text-slate-600 hover:text-move-navy-900 hover:bg-slate-200/60 flex items-center gap-1.5';
+      tabInd.className = 'py-1.5 px-3.5 text-xs font-bold rounded-xl transition bg-move-navy-900 text-white shadow-sm flex items-center gap-1.5';
     }
   }
 
@@ -165,6 +218,9 @@ function handleCaInputChange(field, val) {
     const wLabel = document.getElementById('caSigWidthVal');
     if (wLabel) wLabel.textContent = `${val}px`;
   }
+  if (field === 'honorificMode') {
+    populateCaEmployeeDropdown();
+  }
   renderAppearancePreview();
 }
 
@@ -172,6 +228,7 @@ function handleCaActivityChange(actId) {
   const act = activitiesList.find(a => a.id === actId);
   if (act) {
     applyCaActivity(act);
+    populateCaEmployeeDropdown();
     renderAppearancePreview();
     renderCaAttendeesList();
   }
@@ -180,6 +237,7 @@ function handleCaActivityChange(actId) {
 function setCaMode(mode) {
   caState.mode = mode;
   syncCaInputsFromState();
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -187,6 +245,7 @@ function setCaMode(mode) {
 function setCaFilterPresentOnly(checked) {
   caState.filterPresentOnly = checked;
   refreshCaParticipants();
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -230,7 +289,7 @@ function renderCaAttendeesList() {
   const countBadge = document.getElementById('caAttendeesCountBadge');
   if (countBadge) {
     const selectedCount = filtered.filter(p => caState.selectedMemberIds.has(p.id)).length;
-    countBadge.textContent = `${selectedCount} of ${filtered.length} selected`;
+    countBadge.textContent = `${selectedCount} of ${filtered.length} present`;
   }
 
   if (filtered.length === 0) {
@@ -243,10 +302,14 @@ function renderCaAttendeesList() {
     return;
   }
 
+  const activeList = getActiveCaParticipants();
+  const currentIndMember = activeList[caState.currentMemberIndex];
+
   container.innerHTML = filtered.map((p, idx) => {
     const isSelected = caState.selectedMemberIds.has(p.id);
     const isPresent = !!p.isPresent;
-    const isCurrentInd = caState.mode === 'individual' && getActiveCaParticipants()[caState.currentMemberIndex]?.id === p.id;
+    const isCurrentInd = caState.mode === 'individual' && currentIndMember && currentIndMember.id === p.id;
+    const hon = getCaHonorific(p);
 
     return `
       <div onclick="selectCaAttendeeRow('${p.id}')"
@@ -263,7 +326,7 @@ function renderCaAttendeesList() {
                  class="rounded text-move-orange-500 focus:ring-move-orange-400 cursor-pointer">
           <div class="min-w-0">
             <div class="text-xs font-bold text-move-navy-900 truncate flex items-center gap-1.5">
-              <span>${p.name || 'Unnamed Attendee'}</span>
+              <span>${hon}${p.name || 'Unnamed Attendee'}</span>
               ${isPresent ? '<span class="text-[9px] px-1 py-0.2 bg-emerald-100 text-emerald-800 rounded font-semibold">Present</span>' : '<span class="text-[9px] px-1 py-0.2 bg-slate-100 text-slate-600 rounded">Abs/Exc</span>'}
             </div>
             <div class="text-[10px] text-slate-500 truncate flex items-center gap-1">
@@ -287,6 +350,7 @@ function toggleCaAttendee(id, isChecked) {
   } else {
     caState.selectedMemberIds.delete(id);
   }
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -297,6 +361,7 @@ function selectCaAttendeeRow(id) {
     const idx = list.findIndex(p => p.id === id);
     if (idx !== -1) {
       caState.currentMemberIndex = idx;
+      populateCaEmployeeDropdown();
       renderAppearancePreview();
       renderCaAttendeesList();
       return;
@@ -315,6 +380,7 @@ function toggleCaSelectAll(selectAll) {
       else caState.selectedMemberIds.delete(p.id);
     }
   });
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -329,6 +395,7 @@ function changeCaIndividualMember(delta) {
   const list = getActiveCaParticipants();
   if (list.length === 0) return;
   caState.currentMemberIndex = (caState.currentMemberIndex + delta + list.length) % list.length;
+  populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
 }
@@ -365,15 +432,18 @@ function renderAppearancePreview() {
         </tr>
       `;
     } else {
-      tableRows = participants.map((p, idx) => `
-        <tr class="${idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white'} border-b border-slate-200">
-          <td class="py-1 px-2 text-center text-[11px] font-mono font-bold text-slate-700">${idx + 1}</td>
-          <td class="py-1 px-2 text-[12px] font-bold text-slate-900">${escapeHtml(p.name || '')}</td>
-          <td class="py-1 px-2 text-[11px] text-slate-800 leading-tight">${escapeHtml(p.position || '')}</td>
-          <td class="py-1 px-2 text-center text-[11px] font-semibold text-slate-800">${escapeHtml(p.office || '')}</td>
-          <td class="py-1 px-2 text-center text-[11px] text-slate-700">${escapeHtml(p.role || 'Participant')}</td>
-        </tr>
-      `).join('');
+      tableRows = participants.map((p, idx) => {
+        const hon = getCaHonorific(p);
+        return `
+          <tr class="${idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white'} border-b border-slate-200">
+            <td class="py-1 px-2 text-center text-[11px] font-mono font-bold text-slate-700">${idx + 1}</td>
+            <td class="py-1 px-2 text-[12px] font-bold text-slate-900">${hon}${escapeHtml(p.name || '')}</td>
+            <td class="py-1 px-2 text-[11px] text-slate-800 leading-tight">${escapeHtml(p.position || '')}</td>
+            <td class="py-1 px-2 text-center text-[11px] font-semibold text-slate-800">${escapeHtml(p.office || '')}</td>
+            <td class="py-1 px-2 text-center text-[11px] text-slate-700">${escapeHtml(p.role || 'Participant')}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     bodyContentHtml = `
@@ -403,32 +473,37 @@ function renderAppearancePreview() {
       </div>
     `;
   } else {
-    // --- INDIVIDUAL CERTIFICATION MODE ---
+    // --- INDIVIDUAL CERTIFICATION MODE (EVERY SINGLE EMPLOYEE) ---
     const currMember = participants[caState.currentMemberIndex] || {
       name: 'EMPLOYEE FULL NAME',
       position: 'Official Position Title',
       office: 'DEPARTMENT / OFFICE',
-      role: 'Participant'
+      role: 'Participant',
+      gender: 'M'
     };
 
+    const hon = getCaHonorific(currMember);
+
     bodyContentHtml = `
-      <div class="space-y-8 my-6">
-        <!-- Main Certification Statement -->
-        <p class="text-justify text-[14px] text-slate-900 leading-loose indent-10">
+      <div class="space-y-6 my-6">
+        <!-- Main Certification Lead Statement -->
+        <p class="text-justify text-[14px] text-slate-900 leading-relaxed indent-10">
           This is to certify that
         </p>
 
-        <div class="text-center py-4 my-2 border-y-2 border-slate-300 bg-slate-50/50">
-          <div class="text-xl font-black uppercase text-move-navy-900 tracking-wide font-cinzel">
-            ${escapeHtml(currMember.name || '')}
+        <!-- Centered Recipient Box (Large Bold Name with Mr./Ms.) -->
+        <div class="text-center py-5 my-3 border-y-2 border-slate-300 bg-slate-50/60 rounded-xl">
+          <div class="text-xl sm:text-2xl font-black uppercase text-move-navy-900 tracking-wider font-cinzel">
+            ${hon}${escapeHtml(currMember.name || '')}
           </div>
           <div class="text-xs font-bold text-move-orange-600 mt-1 uppercase tracking-wider">
             ${escapeHtml(currMember.position || '')} &bull; <span class="text-slate-800">${escapeHtml(currMember.office || '')}</span>
           </div>
         </div>
 
+        <!-- Attendance Accreditation Clause -->
         <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
-          appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
+          ${escapeHtml(caState.attendanceBasis)}, appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
         </p>
       </div>
     `;
@@ -552,7 +627,7 @@ function setCaZoom(zoomLevel) {
   if (badge) badge.textContent = `${zoomLevel}%`;
 }
 
-// --- PRINTING ENGINE (A4 PORTRAIT) ---
+// --- PRINT CURRENT CERTIFICATE (A4 PORTRAIT) ---
 function printCertificateOfAppearance() {
   const container = document.getElementById('caPrintContainer');
   if (!container) return;
@@ -577,11 +652,11 @@ function printCertificateOfAppearance() {
   }, 1000);
 }
 
-// --- BATCH PRINT ALL INDIVIDUAL CAs ---
+// --- BATCH PRINT ALL PRESENT EMPLOYEES (A4 PORTRAIT) ---
 function batchPrintAllAppearance() {
   const participants = getActiveCaParticipants();
   if (participants.length === 0) {
-    showToast('No participants selected for printing', 'fa-triangle-exclamation');
+    showToast('No present participants selected for printing', 'fa-triangle-exclamation');
     return;
   }
 
@@ -599,6 +674,7 @@ function batchPrintAllAppearance() {
   ` : `<div class="h-10"></div>`;
 
   participants.forEach((currMember, idx) => {
+    const hon = getCaHonorific(currMember);
     const pageDiv = document.createElement('div');
     pageDiv.className = 'ca-portrait-sheet ca-print-page bg-white text-slate-900 mx-auto select-text';
     pageDiv.style.cssText = 'width: 210mm; min-height: 297mm; padding: 22mm 22mm 18mm 22mm; font-family: Arial, sans-serif; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between;';
@@ -630,18 +706,18 @@ function batchPrintAllAppearance() {
 
       <!-- BODY -->
       <div class="flex-1 py-1">
-        <div class="space-y-8 my-6">
-          <p class="text-justify text-[14px] text-slate-900 leading-loose indent-10">This is to certify that</p>
-          <div class="text-center py-4 my-2 border-y-2 border-slate-300 bg-slate-50/50">
-            <div class="text-xl font-black uppercase text-move-navy-900 tracking-wide font-cinzel">
-              ${escapeHtml(currMember.name || '')}
+        <div class="space-y-6 my-6">
+          <p class="text-justify text-[14px] text-slate-900 leading-relaxed indent-10">This is to certify that</p>
+          <div class="text-center py-5 my-3 border-y-2 border-slate-300 bg-slate-50/60 rounded-xl">
+            <div class="text-2xl font-black uppercase text-move-navy-900 tracking-wider font-cinzel">
+              ${hon}${escapeHtml(currMember.name || '')}
             </div>
             <div class="text-xs font-bold text-move-orange-600 mt-1 uppercase tracking-wider">
               ${escapeHtml(currMember.position || '')} &bull; <span class="text-slate-800">${escapeHtml(currMember.office || '')}</span>
             </div>
           </div>
           <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
-            appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
+            ${escapeHtml(caState.attendanceBasis)}, appeared as <strong>${escapeHtml(currMember.role || 'Participant')}</strong> during the “<strong>${escapeHtml(caState.title)}</strong>”${themeHtml} on <strong>${escapeHtml(caState.date)}</strong> at the <strong>${escapeHtml(caState.venue)}</strong>.
           </p>
         </div>
 
@@ -686,14 +762,17 @@ function batchPrintAllAppearance() {
 }
 
 // --- EXPORT TO OFFICIAL WORD (.DOCX) ---
-async function exportCertificateOfAppearanceDocx() {
+async function exportCertificateOfAppearanceDocx(exportAll = false) {
   const participants = getActiveCaParticipants();
-  
+  const currentMember = participants[caState.currentMemberIndex] || null;
+
   const payload = {
     activityTitle: caState.title,
     theme: caState.theme,
     date: caState.date,
     venue: caState.venue,
+    attendanceBasis: caState.attendanceBasis,
+    honorificMode: caState.honorificMode,
     purpose: caState.purpose,
     issueDate: caState.issueDate,
     signatoryName: caState.signatoryName,
@@ -701,11 +780,15 @@ async function exportCertificateOfAppearanceDocx() {
     signatoryTitle2: caState.signatoryTitle2,
     initials: caState.initials,
     mode: caState.mode,
+    exportAll: !!exportAll,
     participants: participants,
-    individualMember: caState.mode === 'individual' ? participants[caState.currentMemberIndex] : null
+    individualMember: currentMember
   };
 
-  showToast('Generating official Word document...', 'fa-file-word');
+  const statusMsg = exportAll 
+    ? `Generating official Word document for all ${participants.length} present employees...` 
+    : `Generating official Word document for ${currentMember ? currentMember.name : 'employee'}...`;
+  showToast(statusMsg, 'fa-file-word');
 
   try {
     const res = await fetch('http://127.0.0.1:8765/api/export-ca-docx', {
@@ -716,7 +799,11 @@ async function exportCertificateOfAppearanceDocx() {
 
     if (res.ok) {
       const blob = await res.blob();
-      const filename = `Certificate_of_Appearance_${(caState.title || 'MOVE').replace(/[^a-zA-Z0-9_-]/g, '_')}_${caState.mode}.docx`;
+      const safeTitle = (caState.title || 'MOVE').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = exportAll
+        ? `Certificate_of_Appearance_${safeTitle}_ALL_${participants.length}_EMPLOYEES.docx`
+        : `Certificate_of_Appearance_${(currentMember?.name || 'Employee').replace(/[^a-zA-Z0-9_-]/g, '_')}.docx`;
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -739,7 +826,9 @@ async function exportCertificateOfAppearanceDocx() {
 // Pure Client-side Word-compatible HTML export fallback
 function generateClientSideDocx(data) {
   const safeTitle = (data.activityTitle || 'MOVE').replace(/[^a-zA-Z0-9_-]/g, '_');
-  const filename = `Certificate_of_Appearance_${safeTitle}_${data.mode}.doc`;
+  const filename = data.exportAll 
+    ? `Certificate_of_Appearance_${safeTitle}_ALL_EMPLOYEES.doc`
+    : `Certificate_of_Appearance_${((data.individualMember || {}).name || 'Employee').replace(/[^a-zA-Z0-9_-]/g, '_')}.doc`;
 
   let participantsHtml = '';
   if (data.mode === 'group') {
@@ -758,7 +847,7 @@ function generateClientSideDocx(data) {
           ${(data.participants || []).map((p, i) => `
             <tr>
               <td style="text-align: center;">${i + 1}</td>
-              <td style="font-weight: bold;">${escapeHtml(p.name || '')}</td>
+              <td style="font-weight: bold;">${getCaHonorific(p)}${escapeHtml(p.name || '')}</td>
               <td>${escapeHtml(p.position || '')}</td>
               <td style="text-align: center;">${escapeHtml(p.office || '')}</td>
               <td style="text-align: center;">${escapeHtml(p.role || 'Participant')}</td>
@@ -768,15 +857,22 @@ function generateClientSideDocx(data) {
       </table>
     `;
   } else {
-    const member = data.individualMember || (data.participants && data.participants[0]) || {};
-    participantsHtml = `
-      <div style="text-align: center; margin: 25px 0; padding: 15px 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000;">
-        <h2 style="margin: 0; font-size: 16pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(member.name || '')}</h2>
-        <p style="margin: 5px 0 0 0; font-size: 11pt; color: #ea580c; font-weight: bold;">
-          ${escapeHtml(member.position || '')} &bull; ${escapeHtml(member.office || '')}
+    const listToRender = data.exportAll ? (data.participants || []) : [data.individualMember || (data.participants && data.participants[0]) || {}];
+    participantsHtml = listToRender.map((m, i) => `
+      <div ${i > 0 ? 'style="page-break-before: always; margin-top: 40px;"' : ''}>
+        <div style="text-align: center; margin: 25px 0; padding: 15px 0; border-top: 1.5pt solid #000; border-bottom: 1.5pt solid #000;">
+          <h2 style="margin: 0; font-size: 16pt; font-weight: bold; text-transform: uppercase;">
+            ${getCaHonorific(m)}${escapeHtml(m.name || '')}
+          </h2>
+          <p style="margin: 5px 0 0 0; font-size: 11pt; color: #ea580c; font-weight: bold;">
+            ${escapeHtml(m.position || '')} &bull; ${escapeHtml(m.office || '')}
+          </p>
+        </div>
+        <p class="certify">
+          ${escapeHtml(data.attendanceBasis || 'based on the verified present attendance on the activity')}, appeared as <strong>${escapeHtml(m.role || 'Participant')}</strong> during the “<strong>${escapeHtml(data.activityTitle)}</strong>”${data.theme ? ` with the theme “<em>${escapeHtml(data.theme)}</em>”` : ''} on <strong>${escapeHtml(data.date)}</strong> at the <strong>${escapeHtml(data.venue)}</strong>.
         </p>
       </div>
-    `;
+    `).join('');
   }
 
   const htmlDoc = `
@@ -810,9 +906,7 @@ function generateClientSideDocx(data) {
 
         <h1>CERTIFICATE OF APPEARANCE</h1>
 
-        <p class="certify">
-          This is to certify that ${data.mode === 'group' ? 'the following employees appeared' : `<strong>${escapeHtml((data.individualMember || {}).name || '')}</strong> appeared`} as <strong>Participant/Facilitator</strong> during the “<strong>${escapeHtml(data.activityTitle)}</strong>”${data.theme ? ` with the theme “<em>${escapeHtml(data.theme)}</em>”` : ''} on <strong>${escapeHtml(data.date)}</strong> at the <strong>${escapeHtml(data.venue)}</strong>:
-        </p>
+        <p class="certify">This is to certify that</p>
 
         ${participantsHtml}
 

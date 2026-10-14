@@ -295,15 +295,70 @@ def build_docx_table(participants):
 
     return tbl
 
+def populate_individual_elements(parent, member, title, theme, date_str, venue, purpose, issue_date, signatory, sig_t1, sig_t2, initials, attendance_basis, hon):
+    m_name = member.get("name", "EMPLOYEE NAME")
+    m_pos = member.get("position", "Position Title")
+    m_off = member.get("office", "Office")
+    m_role = member.get("role", "Participant")
+
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+    p_title = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_title, [create_docx_run("CERTIFICATE OF APPEARANCE", bold=True, size=40)], jc="center")
+    p_intro = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_intro, [create_docx_run("This is to certify that")], jc="both", first_line_ind=720)
+    
+    p_name = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_name, [create_docx_run(f"{hon}{m_name}", bold=True, size=32)], jc="center")
+    p_sub = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_sub, [create_docx_run(f"{m_pos} \u2022 {m_off}", bold=True, size=22)], jc="center")
+    
+    p_act = ET.SubElement(parent, f"{{{W_NS}}}p")
+    runs_act = [
+        create_docx_run(f"{attendance_basis}, appeared as "),
+        create_docx_run(m_role, bold=True),
+        create_docx_run(' during the \u201c'),
+        create_docx_run(title, bold=True),
+        create_docx_run('\u201d')
+    ]
+    if theme:
+        runs_act.append(create_docx_run(' with the theme \u201c'))
+        runs_act.append(create_docx_run(theme, italic=True))
+        runs_act.append(create_docx_run('\u201d'))
+    runs_act.append(create_docx_run(f" on {date_str} at the {venue}."))
+    set_docx_para(p_act, runs_act, jc="both", first_line_ind=720)
+    
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+    p_purp = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_purp, [create_docx_run(purpose)], jc="both", first_line_ind=720)
+    
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+    p_iss = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_iss, [create_docx_run(issue_date)], jc="left")
+    
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+    ET.SubElement(parent, f"{{{W_NS}}}p")
+    p_sig_name = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_sig_name, [create_docx_run(signatory, bold=True, size=24)], jc="right")
+    p_sig_t1 = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_sig_t1, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
+    p_sig_t2 = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_sig_t2, [create_docx_run(sig_t2, size=20)], jc="right")
+    
+    p_init = ET.SubElement(parent, f"{{{W_NS}}}p")
+    set_docx_para(p_init, [create_docx_run(initials, size=18)], jc="left")
+
 def generate_ca_docx(data):
     if not os.path.exists(TEMPLATE_CA_DOCX):
         raise FileNotFoundError(f"Template not found at {TEMPLATE_CA_DOCX}")
 
-    mode = data.get("mode", "group")
+    mode = data.get("mode", "individual")
+    export_all = data.get("exportAll", False)
     title = data.get("activityTitle", "Activity")
     theme = data.get("theme", "")
     date_str = data.get("date", "")
     venue = data.get("venue", "")
+    attendance_basis = data.get("attendanceBasis", "based on the verified present attendance on the activity")
+    honorific_mode = data.get("honorificMode", "auto")
     purpose = data.get("purpose", "")
     issue_date = data.get("issueDate", "")
     signatory = data.get("signatoryName", "BENJAMIN B. MAGALONG")
@@ -313,6 +368,18 @@ def generate_ca_docx(data):
     participants = data.get("participants", [])
     ind_member = data.get("individualMember") or (participants[0] if participants else {})
 
+    def resolve_hon(member):
+        if honorific_mode == "none":
+            return ""
+        if honorific_mode == "mr":
+            return "Mr. "
+        if honorific_mode == "ms":
+            return "Ms. "
+        g = str(member.get("gender", "M")).upper()
+        if g in ["F", "FEMALE"]:
+            return "Ms. "
+        return "Mr. "
+
     with zipfile.ZipFile(TEMPLATE_CA_DOCX, "r") as src:
         out_buf = io.BytesIO()
         with zipfile.ZipFile(out_buf, "w", compression=zipfile.ZIP_DEFLATED) as dst:
@@ -321,16 +388,18 @@ def generate_ca_docx(data):
                 if item == "word/document.xml":
                     tree = ET.fromstring(content)
                     body = tree.find(f"{{{W_NS}}}body")
-                    children = list(body)
+                    sectPr = body.find(f"{{{W_NS}}}sectPr")
                     
-                    p_cert = children[2]
-                    runs_cert = []
                     if mode == "group":
-                        runs_cert.append(create_docx_run("This is to certify that the following employees appeared as "))
-                        runs_cert.append(create_docx_run("Participant/Facilitator", bold=True))
-                        runs_cert.append(create_docx_run(' during the \u201c'))
-                        runs_cert.append(create_docx_run(title, bold=True))
-                        runs_cert.append(create_docx_run('\u201d'))
+                        children = list(body)
+                        p_cert = children[2]
+                        runs_cert = [
+                            create_docx_run("This is to certify that the following employees appeared as "),
+                            create_docx_run("Participant/Facilitator", bold=True),
+                            create_docx_run(' during the \u201c'),
+                            create_docx_run(title, bold=True),
+                            create_docx_run('\u201d')
+                        ]
                         if theme:
                             runs_cert.append(create_docx_run(' with the theme \u201c'))
                             runs_cert.append(create_docx_run(theme, italic=True))
@@ -343,40 +412,37 @@ def generate_ca_docx(data):
                         body.remove(p_placeholder)
                         tbl_elem = build_docx_table(participants)
                         body.insert(idx_placeholder, tbl_elem)
+
+                        for p in body.iter(f"{{{W_NS}}}p"):
+                            txt = "".join(p.itertext())
+                            if "daily time records" in txt or "support the non-entry" in txt:
+                                set_docx_para(p, [create_docx_run(purpose)], jc="both", first_line_ind=720)
+                            elif "Issued this" in txt:
+                                set_docx_para(p, [create_docx_run(issue_date)], jc="left")
+                            elif "BENJAMIN B. MAGALONG" in txt:
+                                set_docx_para(p, [create_docx_run(signatory, bold=True, size=24)], jc="right")
+                            elif "City Mayor" in txt:
+                                set_docx_para(p, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
+                            elif "LCAT-VAWC Chairperson" in txt:
+                                set_docx_para(p, [create_docx_run(sig_t2, size=20)], jc="right")
+                            elif "/drmo/ctb" in txt or ("/drmo" in txt and "ctb" in txt):
+                                set_docx_para(p, [create_docx_run(initials, size=18)], jc="left")
                     else:
-                        m_name = ind_member.get("name", "EMPLOYEE NAME")
-                        m_pos = ind_member.get("position", "Position Title")
-                        m_off = ind_member.get("office", "Office")
-                        m_role = ind_member.get("role", "Participant")
+                        body.remove(sectPr)
+                        for elem in list(body):
+                            body.remove(elem)
 
-                        runs_cert.append(create_docx_run("This is to certify that "))
-                        runs_cert.append(create_docx_run(m_name, bold=True))
-                        runs_cert.append(create_docx_run(f", {m_pos} of {m_off}, appeared as "))
-                        runs_cert.append(create_docx_run(m_role, bold=True))
-                        runs_cert.append(create_docx_run(' during the \u201c'))
-                        runs_cert.append(create_docx_run(title, bold=True))
-                        runs_cert.append(create_docx_run('\u201d'))
-                        if theme:
-                            runs_cert.append(create_docx_run(' with the theme \u201c'))
-                            runs_cert.append(create_docx_run(theme, italic=True))
-                            runs_cert.append(create_docx_run('\u201d'))
-                        runs_cert.append(create_docx_run(f" on {date_str} at the {venue}."))
-                        set_docx_para(p_cert, runs_cert, jc="both", first_line_ind=720)
+                        members_to_export = participants if export_all else [ind_member]
+                        for idx, member in enumerate(members_to_export):
+                            if idx > 0:
+                                p_br = ET.SubElement(body, f"{{{W_NS}}}p")
+                                r_br = ET.SubElement(p_br, f"{{{W_NS}}}r")
+                                br = ET.SubElement(r_br, f"{{{W_NS}}}br")
+                                br.set(f"{{{W_NS}}}type", "page")
+                            hon = resolve_hon(member)
+                            populate_individual_elements(body, member, title, theme, date_str, venue, purpose, issue_date, signatory, sig_t1, sig_t2, initials, attendance_basis, hon)
 
-                    for p in body.iter(f"{{{W_NS}}}p"):
-                        txt = "".join(p.itertext())
-                        if "daily time records" in txt or "support the non-entry" in txt:
-                            set_docx_para(p, [create_docx_run(purpose)], jc="both", first_line_ind=720)
-                        elif "Issued this" in txt:
-                            set_docx_para(p, [create_docx_run(issue_date)], jc="left")
-                        elif "BENJAMIN B. MAGALONG" in txt:
-                            set_docx_para(p, [create_docx_run(signatory, bold=True, size=24)], jc="right")
-                        elif "City Mayor" in txt:
-                            set_docx_para(p, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
-                        elif "LCAT-VAWC Chairperson" in txt:
-                            set_docx_para(p, [create_docx_run(sig_t2, size=20)], jc="right")
-                        elif "/drmo/ctb" in txt or ("/drmo" in txt and "ctb" in txt):
-                            set_docx_para(p, [create_docx_run(initials, size=18)], jc="left")
+                        body.append(sectPr)
 
                     content = ET.tostring(tree, encoding="utf-8")
                 dst.writestr(item, content)
