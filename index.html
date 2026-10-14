@@ -248,6 +248,15 @@
           <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-1.5 py-0.5 rounded-full">CA / DTR</span>
         </button>
 
+        <button onclick="switchNav('appreciation')" id="navBtn-appreciation" 
+                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-move-navy-800 transition">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-medal w-4 text-center text-amber-400"></i>
+            <span>Certificate of Appreciation</span>
+          </div>
+          <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold px-1.5 py-0.5 rounded-full">Honors</span>
+        </button>
+
         <div class="pt-3 mt-3 border-t border-move-navy-800">
           <div class="px-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Roster Engine</div>
           <button onclick="switchNav('roster')" id="navBtn-roster" 
@@ -1681,6 +1690,22 @@
               <!-- TAB 4: SIGNATORIES (PICK 1, 2, OR 3 + ROSTER)  -->
               <!-- ============================================== -->
               <div id="paneDesigner-signatories" class="space-y-3.5 text-xs hidden">
+                <!-- Signatory Database Header Banner -->
+                <div class="flex items-center justify-between p-2.5 bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-[#122e5d] rounded-xl text-white shadow-xs">
+                  <div>
+                    <h4 class="font-black text-xs uppercase tracking-wider flex items-center gap-1.5 text-white">
+                      <i class="fa-solid fa-signature text-move-orange-400"></i>
+                      <span>Signatory Database &amp; Officers</span>
+                    </h4>
+                    <p class="text-[10px] text-slate-300">City Leaders, MOVE Officers, Resource Speakers &amp; VIPs</p>
+                  </div>
+                  <button type="button" onclick="openSignatoriesDbModal()" 
+                          class="px-2.5 py-1 text-[11px] font-extrabold bg-gradient-to-r from-move-orange-500 to-move-orange-600 hover:from-move-orange-600 hover:to-move-orange-700 text-white rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Manage Database</span>
+                  </button>
+                </div>
+
                 <!-- How Many Signatures & Size Controls -->
                 <div class="p-3 bg-orange-50/70 rounded-xl border border-move-orange-200 space-y-2">
                   <span class="font-black text-move-navy-900 uppercase text-[10px] tracking-wider block">
@@ -1741,7 +1766,12 @@
                   </div>
                   <div id="sig1InputsContainer" class="space-y-2 pt-1">
                     <div>
-                      <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick Official / Officer:</span>
+                      <div class="flex items-center justify-between mb-0.5">
+                        <span class="text-[10px] text-move-orange-600 font-bold block">Quick-Pick Official / Officer:</span>
+                        <button type="button" onclick="saveCurrentInputsToSignatoriesDb(1)" class="text-[10px] text-move-orange-600 hover:text-move-orange-800 font-bold flex items-center gap-1" title="Save this person to Database">
+                          <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                        </button>
+                      </div>
                       <select id="selectQuickOfficerSig1" onchange="handlePickSignatoryOfficer(1, this.value)"
                               class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
                         <!-- Populated dynamically with MOVE Officers & City Officials -->
@@ -1804,7 +1834,12 @@
                   </div>
                   <div id="sig2InputsContainer" class="space-y-2 pt-1">
                     <div>
-                      <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick Official / Officer:</span>
+                      <div class="flex items-center justify-between mb-0.5">
+                        <span class="text-[10px] text-move-orange-600 font-bold block">Quick-Pick Official / Officer:</span>
+                        <button type="button" onclick="saveCurrentInputsToSignatoriesDb(2)" class="text-[10px] text-move-orange-600 hover:text-move-orange-800 font-bold flex items-center gap-1" title="Save this person to Database">
+                          <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                        </button>
+                      </div>
                       <select id="selectQuickOfficerSig2" onchange="handlePickSignatoryOfficer(2, this.value)"
                               class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
                         <!-- Populated dynamically with MOVE Officers & City Officials -->
@@ -1865,7 +1900,12 @@
                   </label>
                   <div id="sig3InputsContainer" class="space-y-2 hidden pt-1">
                     <div>
-                      <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick Official / Officer:</span>
+                      <div class="flex items-center justify-between mb-0.5">
+                        <span class="text-[10px] text-move-orange-600 font-bold block">Quick-Pick Official / Officer:</span>
+                        <button type="button" onclick="saveCurrentInputsToSignatoriesDb(3)" class="text-[10px] text-move-orange-600 hover:text-move-orange-800 font-bold flex items-center gap-1" title="Save this person to Database">
+                          <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                        </button>
+                      </div>
                       <select id="selectQuickOfficerSig3" onchange="handlePickSignatoryOfficer(3, this.value)"
                               class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
                         <!-- Populated dynamically with MOVE Officers & City Officials -->
@@ -2118,6 +2158,120 @@
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- MODAL: SIGNATORIES DATABASE & REGISTRY         -->
+        <!-- ============================================== -->
+        <div id="modalSignatoriesDb" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden no-print">
+          <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-scale-up">
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-move-navy-950 via-move-navy-900 to-[#122e5d] text-white flex items-center justify-between shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 text-move-orange-400 text-lg">
+                  <i class="fa-solid fa-signature"></i>
+                </div>
+                <div>
+                  <h3 class="font-black text-sm sm:text-base uppercase tracking-wider">Signatories Database &amp; Registry</h3>
+                  <p class="text-[11px] text-slate-300">Register &amp; manage official signatories for Certificate &amp; Appreciation Studios</p>
+                </div>
+              </div>
+              <button onclick="closeSignatoriesDbModal()" class="text-slate-400 hover:text-white p-2 rounded-lg text-lg">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs flex-1">
+              <!-- Form: Add New Signatory to Database -->
+              <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-plus text-move-orange-500"></i>
+                    <span>Register New Signatory to Database</span>
+                  </h4>
+                  <span class="text-[10px] text-slate-400">Reusable across all certificate studios</span>
+                </div>
+
+                <form id="formAddSignatoryDb" onsubmit="handleAddSignatoryToDb(event)" class="space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-[11px] font-bold text-move-navy-900 mb-1">Full Name &amp; Suffix *</label>
+                      <input type="text" id="sigDbName" required placeholder="e.g. HON. BENJAMIN B. MAGALONG"
+                             class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-xs uppercase focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-move-navy-900 mb-1">Title / Designation *</label>
+                      <input type="text" id="sigDbTitle" required placeholder="e.g. City Mayor / Chapter President"
+                             class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-[11px] font-bold text-move-navy-900 mb-1">Agency / Office / Organization</label>
+                      <input type="text" id="sigDbOffice" placeholder="e.g. City Government of Baguio / MOVE Chapter"
+                             class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-move-navy-900 mb-1">Upload Signature PNG (Transparent)</label>
+                      <div class="flex items-center gap-2">
+                        <input type="file" id="sigDbImageFileInput" accept="image/*" onchange="handleSigDbImageUpload(event)" class="hidden">
+                        <button type="button" onclick="document.getElementById('sigDbImageFileInput').click()"
+                                class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-xl text-[11px] font-bold text-slate-700 hover:bg-slate-100 transition flex items-center justify-center gap-1.5">
+                          <i class="fa-solid fa-file-arrow-up text-move-orange-500"></i> Browse PNG...
+                        </button>
+                        <img id="sigDbImgPreview" class="h-8 max-w-[80px] object-contain border border-slate-200 rounded p-0.5 bg-white hidden" alt="Preview">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-end pt-1">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-gradient-to-r from-move-orange-500 to-move-orange-600 hover:from-move-orange-600 hover:to-move-orange-700 text-white font-extrabold rounded-xl shadow-md transition flex items-center gap-2">
+                      <i class="fa-solid fa-floppy-disk"></i>
+                      <span>Save Signatory to Database</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- List of Custom Signatories in Database -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider">Saved Custom Signatories</h4>
+                    <span id="lblCustomSignatoriesCount" class="px-2 py-0.5 rounded-full bg-move-orange-100 text-move-orange-700 text-[10px] font-bold">0</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">Click "Apply Sig" to instantly assign to current certificate</span>
+                </div>
+
+                <div id="signatoriesDbListContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  <!-- Rendered dynamically by renderSignatoriesDbList() -->
+                </div>
+              </div>
+
+              <!-- Reference: Official MOVE & City Leaders -->
+              <div class="p-3 bg-move-navy-50/60 rounded-xl border border-move-navy-200 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-move-navy-800"></i>
+                    <h5 class="font-extrabold text-[11px] text-move-navy-900 uppercase">Built-in Official Leaders &amp; Executive Officers</h5>
+                  </div>
+                  <span id="lblOfficialLeadersCount" class="px-2 py-0.5 rounded-full bg-move-navy-200 text-move-navy-900 text-[10px] font-bold">15</span>
+                </div>
+                <p class="text-[10px] text-slate-600">Official MOVE Chapter Leaders (Dan Ricky M. Ong, Hon. Benjamin B. Magalong, Hon. Faustino A. Olowan, etc.) are built-in and always available in the quick-pick dropdowns.</p>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+              <button type="button" onclick="closeSignatoriesDbModal()" 
+                      class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">
+                Close
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2697,6 +2851,530 @@
               <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[920px]">
                 <div id="caPreviewStage" class="transition-transform duration-200">
                   <!-- The live A4 portrait sheet is rendered here by renderAppearancePreview() -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VIEW: CERTIFICATE OF APPRECIATION STUDIO (A4 LANDSCAPE)        -->
+        <!-- Prestigious Honors, Speakers, Facilitators & Partners Engine   -->
+        <!-- ============================================================== -->
+        <div id="pageAppreciation" class="space-y-4 hidden">
+          <!-- Top Studio Header & Controls Bar -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
+                    <i class="fa-solid fa-medal text-amber-500 text-lg shrink-0"></i>
+                    <span class="truncate">Certificate of Appreciation Studio</span>
+                  </h3>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold border border-amber-300 uppercase">Honors &amp; VIPs</span>
+                </div>
+                <p class="text-xs text-slate-500 truncate">Prestigious commendations for Guest Speakers, Facilitators, Partner Agencies, Donors &amp; Outstanding Officers</p>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button type="button" onclick="printAppreciationCertificate()"
+                        class="px-3.5 py-2 bg-gradient-to-r from-move-navy-900 to-move-navy-800 hover:from-black hover:to-move-navy-900 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-print text-amber-400"></i>
+                  <span>Print / Save PDF</span>
+                </button>
+
+                <button type="button" onclick="exportAppreciationDocx()"
+                        class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                        title="Download official Microsoft Word .docx template with landscape layout">
+                  <i class="fa-solid fa-file-word"></i>
+                  <span>Export Word (.docx)</span>
+                </button>
+
+                <button type="button" onclick="openSignatoriesDbModal()"
+                        class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-300"
+                        title="Open Signatories Database Registry">
+                  <i class="fa-solid fa-database text-move-orange-500"></i>
+                  <span>Signatory DB</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Version Snapshots & Presets Bar (Word Docs Style) -->
+            <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-50/80 -mx-4 -mb-4 p-3 rounded-b-2xl">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-extrabold text-move-navy-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-file-circle-check text-amber-500"></i>
+                  <span>Document Version / Preset:</span>
+                </span>
+                <select id="appreciationVersionSelect" onchange="handleAppreciationVersionChange(this.value)"
+                        class="py-1 px-3 border border-amber-300 rounded-lg bg-white text-xs font-bold text-move-navy-900 shadow-2xs max-w-[280px]">
+                  <!-- Populated dynamically with Built-in & Custom Saved Versions -->
+                </select>
+
+                <button type="button" onclick="saveCurrentAppreciationVersion()"
+                        class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-[11px] shadow-2xs flex items-center gap-1 transition"
+                        title="Save current layout, wording, and signatories as a named version">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Save Version</span>
+                </button>
+
+                <button type="button" id="appreciationBtnDeleteVersion" onclick="deleteCurrentAppreciationVersion()"
+                        class="px-2 py-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-bold rounded-lg text-[11px] transition hidden"
+                        title="Delete selected custom version">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+
+              <!-- Quick Reset -->
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="resetAppreciationToDefault()"
+                        class="text-[11px] text-slate-500 hover:text-move-navy-900 font-semibold flex items-center gap-1">
+                  <i class="fa-solid fa-rotate-left"></i>
+                  <span>Reset to Default Preset</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Appreciation Studio Workspace Grid -->
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+            
+            <!-- LEFT COLUMN: Studio Controls (4 cols on xl) -->
+            <div class="xl:col-span-4 space-y-4 no-print">
+
+              <!-- CARD 0: QUICK PRESET CAROUSEL -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                    <span>Quick Commendation Presets</span>
+                  </h4>
+                  <span class="text-[10px] text-slate-400">1-Click Setup</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 text-[11px] font-bold">
+                  <button type="button" onclick="loadAppreciationPreset('speaker')"
+                          class="p-2 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100/80 text-amber-950 transition text-left flex items-center gap-2">
+                    <i class="fa-solid fa-microphone text-amber-600 text-sm shrink-0"></i>
+                    <div class="min-w-0">
+                      <div class="truncate">Resource Speaker</div>
+                      <div class="text-[9px] text-amber-700 font-normal truncate">Keynote Lecturer</div>
+                    </div>
+                  </button>
+
+                  <button type="button" onclick="loadAppreciationPreset('facilitator')"
+                          class="p-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100/80 text-blue-950 transition text-left flex items-center gap-2">
+                    <i class="fa-solid fa-person-chalkboard text-blue-600 text-sm shrink-0"></i>
+                    <div class="min-w-0">
+                      <div class="truncate">Facilitator / Emcee</div>
+                      <div class="text-[9px] text-blue-700 font-normal truncate">Workshop Moderator</div>
+                    </div>
+                  </button>
+
+                  <button type="button" onclick="loadAppreciationPreset('partner')"
+                          class="p-2 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/80 text-emerald-950 transition text-left flex items-center gap-2">
+                    <i class="fa-solid fa-handshake text-emerald-600 text-sm shrink-0"></i>
+                    <div class="min-w-0">
+                      <div class="truncate">Partner Agency</div>
+                      <div class="text-[9px] text-emerald-700 font-normal truncate">Stakeholder Office</div>
+                    </div>
+                  </button>
+
+                  <button type="button" onclick="loadAppreciationPreset('officer')"
+                          class="p-2 rounded-xl border border-purple-200 bg-purple-50/60 hover:bg-purple-100/80 text-purple-950 transition text-left flex items-center gap-2">
+                    <i class="fa-solid fa-award text-purple-600 text-sm shrink-0"></i>
+                    <div class="min-w-0">
+                      <div class="truncate">MOVE Officer Award</div>
+                      <div class="text-[9px] text-purple-700 font-normal truncate">Exemplary Leadership</div>
+                    </div>
+                  </button>
+
+                  <button type="button" onclick="loadAppreciationPreset('sponsor')"
+                          class="p-2 rounded-xl border border-orange-200 bg-orange-50/60 hover:bg-orange-100/80 text-orange-950 transition text-left flex items-center gap-2 col-span-2">
+                    <i class="fa-solid fa-heart-circle-bolt text-move-orange-500 text-sm shrink-0"></i>
+                    <div class="min-w-0">
+                      <div class="truncate">Generous Donor &amp; Program Sponsor</div>
+                      <div class="text-[9px] text-orange-700 font-normal truncate">Patronage &amp; Support for MOVE Chapter Advocacies</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- CARD 1: RECIPIENT & CITATION DETAILS -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3.5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-graduate text-move-orange-500"></i>
+                    <span>Recipient &amp; Award Details</span>
+                  </h4>
+                  <span class="text-[10px] text-slate-400">Live Synchronized</span>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <!-- Associated Activity Link -->
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Associated Activity / Event:</label>
+                    <select id="appreciationActivitySelect" onchange="handleAppreciationActivityChange(this.value)"
+                            class="w-full p-2 border border-slate-300 rounded-xl bg-slate-50 font-semibold text-move-navy-900 text-xs focus:ring-2 focus:ring-amber-500">
+                      <!-- Populated dynamically with activities -->
+                    </select>
+                  </div>
+
+                  <!-- Award Title -->
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Award Certificate Title:</label>
+                    <input type="text" id="appreciationAwardTitle" oninput="handleAppreciationFieldChange('awardTitle', this.value)"
+                           value="CERTIFICATE OF APPRECIATION"
+                           class="w-full p-2 border border-slate-300 rounded-xl font-cinzel font-black text-move-navy-900 text-xs tracking-wider uppercase focus:ring-2 focus:ring-amber-500">
+                  </div>
+
+                  <!-- Presentation Subtitle -->
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Presentation Subtitle:</label>
+                    <input type="text" id="appreciationSubtitle" oninput="handleAppreciationFieldChange('subtitle', this.value)"
+                           value="is warmly and proudly presented to"
+                           class="w-full p-2 border border-slate-300 rounded-xl italic text-xs text-slate-700 focus:ring-2 focus:ring-amber-500">
+                  </div>
+
+                  <!-- Recipient Honorific & Name -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[11px] font-bold text-slate-700">Recipient Honorific &amp; Full Name *</label>
+                      <button type="button" onclick="formatAppreciationRecipientUppercase()" class="text-[10px] text-move-orange-600 hover:underline font-bold">
+                        UPPERCASE
+                      </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                      <input type="text" id="appreciationHonorific" oninput="handleAppreciationFieldChange('honorific', this.value)"
+                             placeholder="e.g. HON. / DR."
+                             class="p-2 border border-slate-300 rounded-xl font-bold text-move-navy-900 text-xs uppercase focus:ring-2 focus:ring-amber-500">
+                      <input type="text" id="appreciationRecipientName" oninput="handleAppreciationFieldChange('recipientName', this.value)"
+                             placeholder="FULL NAME"
+                             class="col-span-2 p-2 border border-slate-300 rounded-xl font-extrabold text-move-navy-900 text-xs uppercase focus:ring-2 focus:ring-amber-500">
+                    </div>
+                  </div>
+
+                  <!-- Recipient Position & Office -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Position / Designation:</label>
+                      <input type="text" id="appreciationRecipientPosition" oninput="handleAppreciationFieldChange('recipientPosition', this.value)"
+                             placeholder="e.g. Regional Director"
+                             class="w-full p-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Office / Agency / Affiliation:</label>
+                      <input type="text" id="appreciationRecipientOffice" oninput="handleAppreciationFieldChange('recipientOffice', this.value)"
+                             placeholder="e.g. DILG - CAR"
+                             class="w-full p-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500">
+                    </div>
+                  </div>
+
+                  <!-- Citation Paragraph -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[11px] font-bold text-slate-700">Citation Statement / Commendation Body *</label>
+                      <div class="flex items-center gap-1 text-[9px] text-move-orange-600 font-bold">
+                        <button type="button" onclick="insertAppreciationTag('{activity}')" class="px-1 bg-orange-50 border border-orange-200 rounded">+Activity</button>
+                        <button type="button" onclick="insertAppreciationTag('{date}')" class="px-1 bg-orange-50 border border-orange-200 rounded">+Date</button>
+                        <button type="button" onclick="insertAppreciationTag('{venue}')" class="px-1 bg-orange-50 border border-orange-200 rounded">+Venue</button>
+                      </div>
+                    </div>
+                    <textarea id="appreciationCitationText" rows="4" oninput="handleAppreciationFieldChange('citationText', this.value)"
+                              placeholder="for generously sharing his/her invaluable time, exemplary expertise..."
+                              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs leading-relaxed focus:bg-white focus:ring-2 focus:ring-amber-500"></textarea>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Use dynamic tags: <code class="text-amber-700">{activity}</code>, <code class="text-amber-700">{date}</code>, <code class="text-amber-700">{venue}</code>.</p>
+                  </div>
+
+                  <!-- Date & Venue Line -->
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Given &amp; Conferred Date Line:</label>
+                    <input type="text" id="appreciationDateVenueLine" oninput="handleAppreciationFieldChange('dateVenueLine', this.value)"
+                           value="Given this 20th day of October 2026 at the CDRRMO Building, Baguio City, Philippines."
+                           class="w-full p-2 border border-slate-300 rounded-xl text-xs text-slate-700 focus:ring-2 focus:ring-amber-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: SIGNATORIES (UNIFIED SIGNATORIES DATABASE) -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3.5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-signature text-amber-500"></i>
+                    <span>Executive Signatories</span>
+                  </h4>
+                  <button type="button" onclick="openSignatoriesDbModal()" class="text-[11px] font-bold text-move-orange-600 hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Manage DB</span>
+                  </button>
+                </div>
+
+                <!-- Signatory Layout Mode -->
+                <div class="space-y-1.5">
+                  <span class="text-[11px] font-bold text-slate-700 block">Signatory Layout Mode:</span>
+                  <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" id="btnApprecSigMode1" onclick="setAppreciationSigMode(1)"
+                            class="py-1.5 px-2 rounded-lg font-bold text-[11px] border transition bg-white text-slate-700 border-slate-300 hover:bg-move-navy-900 hover:text-white">
+                      1 Centered
+                    </button>
+                    <button type="button" id="btnApprecSigMode2" onclick="setAppreciationSigMode(2)"
+                            class="py-1.5 px-2 rounded-lg font-bold text-[11px] border transition bg-move-navy-900 text-white border-move-navy-900">
+                      2 Dual (L/R)
+                    </button>
+                    <button type="button" id="btnApprecSigMode3" onclick="setAppreciationSigMode(3)"
+                            class="py-1.5 px-2 rounded-lg font-bold text-[11px] border transition bg-white text-slate-700 border-slate-300 hover:bg-move-navy-900 hover:text-white">
+                      3 Triple
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Signatory 1 Card -->
+                <div id="apprecSig1Box" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+                  <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-move-navy-900 text-[11px]" id="lblApprecSig1Role">Signatory 1 (Left / Primary)</span>
+                    <button type="button" onclick="saveApprecInputsToSignatoriesDb(1)" class="text-[10px] text-move-orange-600 font-bold hover:underline flex items-center gap-1">
+                      <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                    </button>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick from Signatory Database:</span>
+                    <select id="apprecSelectOfficerSig1" onchange="handleApprecPickSignatory(1, this.value)"
+                            class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
+                      <!-- Populated dynamically with Unified Database -->
+                    </select>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-slate-400 block">Signatory Name:</span>
+                    <input type="text" id="apprecInputSig1Name" oninput="handleApprecSigUpdate(1)"
+                           class="w-full py-1 px-2 border rounded-lg font-bold bg-white text-xs uppercase">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Title / Position:</span>
+                      <input type="text" id="apprecInputSig1Title" oninput="handleApprecSigUpdate(1)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block">Agency / Office:</span>
+                      <input type="text" id="apprecInputSig1Office" oninput="handleApprecSigUpdate(1)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 pt-1">
+                    <input type="file" id="apprecUploadSig1Input" accept="image/*" onchange="handleApprecSigImageUpload(event, 1)" class="hidden">
+                    <button type="button" onclick="document.getElementById('apprecUploadSig1Input').click()"
+                            class="flex-1 py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1">
+                      <i class="fa-solid fa-upload text-move-orange-500"></i>Upload PNG
+                    </button>
+                    <button type="button" onclick="useOfficialApprecSig(1)"
+                            class="py-1 px-2 bg-orange-50 hover:bg-move-orange-500 hover:text-white text-move-orange-700 border border-move-orange-300 rounded-lg text-[10px] font-bold transition">
+                      Official Sig
+                    </button>
+                    <button type="button" onclick="removeApprecSigImage(1)" class="py-1 px-2 text-[10px] text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-200">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Signatory 2 Card -->
+                <div id="apprecSig2Box" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+                  <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-move-navy-900 text-[11px]" id="lblApprecSig2Role">Signatory 2 (Right Signatory)</span>
+                    <button type="button" onclick="saveApprecInputsToSignatoriesDb(2)" class="text-[10px] text-move-orange-600 font-bold hover:underline flex items-center gap-1">
+                      <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                    </button>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick from Signatory Database:</span>
+                    <select id="apprecSelectOfficerSig2" onchange="handleApprecPickSignatory(2, this.value)"
+                            class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
+                      <!-- Populated dynamically with Unified Database -->
+                    </select>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-slate-400 block">Signatory Name:</span>
+                    <input type="text" id="apprecInputSig2Name" oninput="handleApprecSigUpdate(2)"
+                           class="w-full py-1 px-2 border rounded-lg font-bold bg-white text-xs uppercase">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Title / Position:</span>
+                      <input type="text" id="apprecInputSig2Title" oninput="handleApprecSigUpdate(2)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block">Agency / Office:</span>
+                      <input type="text" id="apprecInputSig2Office" oninput="handleApprecSigUpdate(2)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 pt-1">
+                    <input type="file" id="apprecUploadSig2Input" accept="image/*" onchange="handleApprecSigImageUpload(event, 2)" class="hidden">
+                    <button type="button" onclick="document.getElementById('apprecUploadSig2Input').click()"
+                            class="flex-1 py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1">
+                      <i class="fa-solid fa-upload text-move-orange-500"></i>Upload PNG
+                    </button>
+                    <button type="button" onclick="useOfficialApprecSig(2)"
+                            class="py-1 px-2 bg-orange-50 hover:bg-move-orange-500 hover:text-white text-move-orange-700 border border-move-orange-300 rounded-lg text-[10px] font-bold transition">
+                      Official Sig
+                    </button>
+                    <button type="button" onclick="removeApprecSigImage(2)" class="py-1 px-2 text-[10px] text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-200">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Signatory 3 Card (Optional / Triple Mode) -->
+                <div id="apprecSig3Box" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs hidden">
+                  <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-move-navy-900 text-[11px]">Signatory 3 (Center / Supporting)</span>
+                    <button type="button" onclick="saveApprecInputsToSignatoriesDb(3)" class="text-[10px] text-move-orange-600 font-bold hover:underline flex items-center gap-1">
+                      <i class="fa-solid fa-floppy-disk"></i> Save to DB
+                    </button>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-move-orange-600 font-bold block mb-0.5">Quick-Pick from Signatory Database:</span>
+                    <select id="apprecSelectOfficerSig3" onchange="handleApprecPickSignatory(3, this.value)"
+                            class="w-full py-1 px-2 border border-move-orange-300 rounded-lg bg-white text-[11px] font-semibold text-move-navy-900">
+                      <!-- Populated dynamically with Unified Database -->
+                    </select>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-slate-400 block">Signatory Name:</span>
+                    <input type="text" id="apprecInputSig3Name" oninput="handleApprecSigUpdate(3)"
+                           class="w-full py-1 px-2 border rounded-lg font-bold bg-white text-xs uppercase">
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-[10px]">
+                    <div>
+                      <span class="text-slate-400 block">Title / Position:</span>
+                      <input type="text" id="apprecInputSig3Title" oninput="handleApprecSigUpdate(3)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                    <div>
+                      <span class="text-slate-400 block">Agency / Office:</span>
+                      <input type="text" id="apprecInputSig3Office" oninput="handleApprecSigUpdate(3)"
+                             class="w-full py-1 px-2 border rounded-lg bg-white text-xs">
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 pt-1">
+                    <input type="file" id="apprecUploadSig3Input" accept="image/*" onchange="handleApprecSigImageUpload(event, 3)" class="hidden">
+                    <button type="button" onclick="document.getElementById('apprecUploadSig3Input').click()"
+                            class="flex-1 py-1 px-2 bg-white hover:bg-move-navy-900 hover:text-white border border-slate-300 rounded-lg text-[10px] font-bold transition flex items-center justify-center gap-1">
+                      <i class="fa-solid fa-upload text-move-orange-500"></i>Upload PNG
+                    </button>
+                    <button type="button" onclick="useOfficialApprecSig(3)"
+                            class="py-1 px-2 bg-orange-50 hover:bg-move-orange-500 hover:text-white text-move-orange-700 border border-move-orange-300 rounded-lg text-[10px] font-bold transition">
+                      Official Sig
+                    </button>
+                    <button type="button" onclick="removeApprecSigImage(3)" class="py-1 px-2 text-[10px] text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-200">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 3: EXECUTIVE FRAMING, SEALS & WATERMARK -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h4 class="font-extrabold text-xs text-move-navy-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-palette text-amber-500"></i>
+                    <span>Framing, Gold Seals &amp; Seals</span>
+                  </h4>
+                  <span class="text-[10px] text-slate-400">Prestigious Theme</span>
+                </div>
+
+                <div class="space-y-2.5">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Border &amp; Framing Style:</label>
+                    <select id="apprecBorderStyle" onchange="handleAppreciationStyleChange('borderStyle', this.value)"
+                            class="w-full p-2 border border-slate-300 rounded-xl bg-white font-semibold text-xs">
+                      <option value="double_gold_navy">Double Gold &amp; Midnight Navy (Recommended)</option>
+                      <option value="ornate_gold">Ornate Classic Gold Filigree</option>
+                      <option value="royal_blue_gold">Royal Blue &amp; Radiant Gold</option>
+                      <option value="minimal_navy">Executive Minimalist Navy</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Corner Ornaments:</label>
+                      <select id="apprecCornerStyle" onchange="handleAppreciationStyleChange('cornerStyle', this.value)"
+                              class="w-full p-2 border border-slate-300 rounded-xl bg-white text-xs">
+                        <option value="baroque">Gold Baroque Flourish</option>
+                        <option value="geometric">Art Deco Geometric</option>
+                        <option value="none">Clean (None)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Typography Font:</label>
+                      <select id="apprecFontFamily" onchange="handleAppreciationStyleChange('fontFamily', this.value)"
+                              class="w-full p-2 border border-slate-300 rounded-xl bg-white text-xs font-semibold">
+                        <option value="cinzel">Cinzel (Classic Roman)</option>
+                        <option value="playfair">Playfair Display (Serif)</option>
+                        <option value="montserrat">Montserrat (Modern Clean)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Gold Seal Ribbon & Watermark Toggles -->
+                  <div class="pt-2 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                        <input type="checkbox" id="apprecGoldSealEnabled" onchange="handleAppreciationStyleChange('goldSealEnabled', this.checked)" checked class="rounded accent-amber-500">
+                        <span>Official Gold Medallion Ribbon</span>
+                      </label>
+                      <select id="apprecGoldSealPosition" onchange="handleAppreciationStyleChange('goldSealPosition', this.value)"
+                              class="py-1 px-2 border border-slate-300 rounded-lg text-[10px] font-bold bg-white">
+                        <option value="bottom-left">Position: Bottom Left</option>
+                        <option value="bottom-center">Position: Bottom Center</option>
+                        <option value="bottom-right">Position: Bottom Right</option>
+                      </select>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800">
+                        <input type="checkbox" id="apprecWatermarkEnabled" onchange="handleAppreciationStyleChange('watermarkEnabled', this.checked)" checked class="rounded accent-amber-500">
+                        <span>Background MOVE Watermark</span>
+                      </label>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-[10px] text-slate-500">Opacity:</span>
+                        <input type="range" id="apprecWatermarkOpacity" min="5" max="30" value="12" oninput="handleAppreciationStyleChange('watermarkOpacity', this.value)" class="w-16 accent-amber-500">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: High-Fidelity A4 Landscape Stage (8 cols on xl) -->
+            <div class="xl:col-span-8 space-y-3">
+              <!-- Live Interactive Editing Notification Banner -->
+              <div class="no-print bg-amber-50/90 border border-amber-300/80 text-amber-950 text-xs px-4 py-2.5 rounded-2xl flex items-center justify-between shadow-2xs gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-700">
+                    <i class="fa-solid fa-i-cursor"></i>
+                  </span>
+                  <div class="min-w-0">
+                    <span class="font-extrabold text-move-navy-900">Direct Live Document Editor:</span>
+                    <span class="text-slate-600 ml-1">You can click and type directly on any text (names, titles, citation paragraphs, date) on the certificate sheet below to edit live.</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <!-- Zoom controls -->
+                  <div class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl border border-amber-200 text-[11px] font-bold">
+                    <button type="button" onclick="setAppreciationZoom(75)" class="px-1.5 py-0.5 rounded hover:bg-slate-100">75%</button>
+                    <button type="button" onclick="setAppreciationZoom(100)" class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">100%</button>
+                    <button type="button" onclick="setAppreciationZoom(120)" class="px-1.5 py-0.5 rounded hover:bg-slate-100">120%</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Certificate Landscape Stage Canvas -->
+              <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[700px]">
+                <div id="appreciationPreviewStage" class="transition-transform duration-200">
+                  <!-- The live A4 landscape certificate sheet is rendered here by renderAppreciationPreview() -->
                 </div>
               </div>
             </div>
@@ -3373,6 +4051,11 @@
     <!-- CA sheets rendered here when CA Print is triggered -->
   </div>
 
+  <!-- CERTIFICATE OF APPRECIATION PRINT CONTAINER (A4 LANDSCAPE) -->
+  <div id="appreciationPrintContainer" class="print-only">
+    <!-- Appreciation sheets rendered here when Appreciation Print is triggered -->
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toastNotice" class="fixed bottom-5 right-5 z-50 bg-move-navy-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl border border-move-orange-400/50 opacity-0 pointer-events-none translate-y-3 flex items-center gap-2">
     <i id="toastIcon" class="fa-solid fa-circle-check text-move-orange-400"></i>
@@ -3387,5 +4070,6 @@
   <script src="js/app.js"></script>
   <script src="js/certificates.js"></script>
   <script src="js/appearance.js"></script>
+  <script src="js/appreciation.js"></script>
 </body>
 </html>

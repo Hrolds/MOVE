@@ -110,6 +110,7 @@
       initCertificateStudio();
       initRosterEngine();
       if (typeof initAppearanceStudio === 'function') initAppearanceStudio();
+      if (typeof initAppreciationStudio === 'function') initAppreciationStudio();
       checkLoginSession();
     });
 
@@ -201,7 +202,7 @@
     // --- NAVIGATION SWITCHER ---
     function switchNav(nav) {
       activeNav = nav;
-      const pages = ['dashboard', 'org', 'members', 'activities', 'certificates', 'appearance', 'roster'];
+      const pages = ['dashboard', 'org', 'members', 'activities', 'certificates', 'appearance', 'appreciation', 'roster'];
       pages.forEach(p => {
         const el = document.getElementById('page' + capitalize(p));
         const btn = document.getElementById('navBtn-' + p);
@@ -222,6 +223,7 @@
         activities: ['Activities & Trainings', 'Master training logs and live participant attendance tracker'],
         certificates: ['Certificate Studio', 'Automated certificate generation engine for verified present attendees'],
         appearance: ['Certificate of Appearance', 'Civil Service DTR attendance accreditation & appearance certification'],
+        appreciation: ['Certificate of Appreciation', 'Honors, guest speaker, facilitator & partner commendation awards'],
         roster: ['50-Participant Balancing Engine', 'Dynamic candidate pool filter with office quota balancer & auto-arrange']
       };
 
@@ -230,6 +232,7 @@
 
       if (nav === 'certificates') renderCertificatePreview();
       if (nav === 'appearance' && typeof initAppearanceStudio === 'function') initAppearanceStudio();
+      if (nav === 'appreciation' && typeof initAppreciationStudio === 'function') initAppreciationStudio();
       if (nav === 'dashboard') renderDashboard();
     }
 
@@ -1581,6 +1584,7 @@
       renderDashboard();
       initCertificateStudio();
       if (typeof initAppearanceStudio === 'function') initAppearanceStudio();
+      if (typeof initAppreciationStudio === 'function') initAppreciationStudio();
       saveStateToStorage();
       closeModalAddActivity();
       showToast(`Activity "${title}" created with ${participants.length} participants!`, 'fa-calendar-check');
@@ -1690,6 +1694,9 @@
       // Sync Certificate of Appearance dropdown & preview if active
       if (typeof initAppearanceStudio === 'function') {
         initAppearanceStudio();
+      }
+      if (typeof initAppreciationStudio === 'function') {
+        initAppreciationStudio();
       }
 
       closeModalEditActivity();

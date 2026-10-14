@@ -25,6 +25,224 @@
       { key: 'faustino', label: 'Allan Faustino (Monitoring & Evaluation)', name: 'ALLAN FAUSTINO', title: 'Chairperson, Monitoring & Evaluation', office: '' }
     ];
 
+    const SIGNATORIES_DB_KEY = 'move_signatories_db_v1';
+
+    function getCustomSignatories() {
+      try {
+        const raw = localStorage.getItem(SIGNATORIES_DB_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn('Failed to parse custom signatories:', e);
+      }
+      return [];
+    }
+
+    function saveCustomSignatories(list) {
+      localStorage.setItem(SIGNATORIES_DB_KEY, JSON.stringify(list));
+    }
+
+    function getAllSignatoriesList() {
+      const custom = getCustomSignatories();
+      return [...OFFICIAL_MOVE_SIGNATORIES, ...custom];
+    }
+
+    // --- SIGNATORIES DATABASE MANAGEMENT ---
+    let tempDbSigImageBase64 = '';
+
+    function openSignatoriesDbModal() {
+      const modal = document.getElementById('modalSignatoriesDb');
+      if (modal) {
+        modal.classList.remove('hidden');
+        renderSignatoriesDbList();
+      }
+    }
+
+    function closeSignatoriesDbModal() {
+      const modal = document.getElementById('modalSignatoriesDb');
+      if (modal) modal.classList.add('hidden');
+      resetSignatoryDbForm();
+    }
+
+    function resetSignatoryDbForm() {
+      const form = document.getElementById('formAddSignatoryDb');
+      if (form) form.reset();
+      tempDbSigImageBase64 = '';
+      const prev = document.getElementById('sigDbImgPreview');
+      if (prev) {
+        prev.src = '';
+        prev.classList.add('hidden');
+      }
+    }
+
+    function handleSigDbImageUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        tempDbSigImageBase64 = evt.target.result;
+        const prev = document.getElementById('sigDbImgPreview');
+        if (prev) {
+          prev.src = tempDbSigImageBase64;
+          prev.classList.remove('hidden');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleAddSignatoryToDb(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const nameInput = document.getElementById('sigDbName');
+      const titleInput = document.getElementById('sigDbTitle');
+      const officeInput = document.getElementById('sigDbOffice');
+
+      const name = (nameInput ? nameInput.value : '').trim().toUpperCase();
+      const title = (titleInput ? titleInput.value : '').trim();
+      const office = (officeInput ? officeInput.value : '').trim();
+
+      if (!name) {
+        showToast('Please enter the signatory\'s full name.', 'fa-circle-exclamation');
+        return;
+      }
+
+      const customList = getCustomSignatories();
+      const newKey = 'custom_' + Date.now();
+      const newEntry = {
+        key: newKey,
+        label: `${name} (${title || office || 'Custom Signatory'})`,
+        name: name,
+        title: title,
+        office: office,
+        signatureImage: tempDbSigImageBase64 || '',
+        isCustom: true,
+        createdAt: new Date().toISOString()
+      };
+
+      customList.unshift(newEntry);
+      saveCustomSignatories(customList);
+      populateSignatoryOfficerDropdowns();
+      renderSignatoriesDbList();
+      resetSignatoryDbForm();
+      showToast(`Added "${name}" to Signatories Database!`, 'fa-database');
+    }
+
+    function handleDeleteSignatoryFromDb(key) {
+      const customList = getCustomSignatories();
+      const target = customList.find(c => c.key === key);
+      const name = target ? target.name : 'Signatory';
+      if (!confirm(`Are you sure you want to remove "${name}" from your custom signatories database?`)) return;
+
+      const updated = customList.filter(c => c.key !== key);
+      saveCustomSignatories(updated);
+      populateSignatoryOfficerDropdowns();
+      renderSignatoriesDbList();
+      showToast(`Removed "${name}" from Database.`, 'fa-trash');
+    }
+
+    function applySignatoryFromDbToSlot(key, sigNum) {
+      handlePickSignatoryOfficer(sigNum, key);
+      closeSignatoriesDbModal();
+    }
+
+    function saveCurrentInputsToSignatoriesDb(sigNum) {
+      const t = currentCertTemplate.signatories;
+      const name = (t[`sig${sigNum}Name`] || '').trim().toUpperCase();
+      const title = (t[`sig${sigNum}Title`] || '').trim();
+      const office = (t[`sig${sigNum}Office`] || '').trim();
+      const sigImg = t[`sig${sigNum}SignatureImage`] || '';
+
+      if (!name) {
+        showToast(`Signatory ${sigNum} name is empty. Type a name before saving to DB.`, 'fa-circle-exclamation');
+        return;
+      }
+
+      const customList = getCustomSignatories();
+      const existing = customList.find(c => c.name.toUpperCase() === name);
+      if (existing) {
+        if (!confirm(`"${name}" is already in the database. Update its title, office and signature?`)) return;
+        existing.title = title;
+        existing.office = office;
+        if (sigImg) existing.signatureImage = sigImg;
+        existing.label = `${name} (${title || office || 'Signatory'})`;
+      } else {
+        const newKey = 'custom_' + Date.now();
+        customList.unshift({
+          key: newKey,
+          label: `${name} (${title || office || 'Signatory'})`,
+          name: name,
+          title: title,
+          office: office,
+          signatureImage: sigImg,
+          isCustom: true,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      saveCustomSignatories(customList);
+      populateSignatoryOfficerDropdowns();
+      showToast(`Saved "${name}" to Signatories Database!`, 'fa-database');
+    }
+
+    function renderSignatoriesDbList() {
+      const container = document.getElementById('signatoriesDbListContainer');
+      if (!container) return;
+      const customList = getCustomSignatories();
+
+      if (customList.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <i class="fa-solid fa-folder-open text-2xl text-slate-300 mb-2"></i>
+            <p class="text-xs font-semibold">No custom signatories added yet.</p>
+            <p class="text-[11px] text-slate-400">Use the form above to register guest speakers, department heads, or VIP signatories.</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = customList.map(sig => `
+          <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs hover:border-move-orange-300 transition flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-move-navy-50 text-move-navy-800 flex items-center justify-center font-bold text-sm shrink-0 border border-move-navy-200">
+                <i class="fa-solid fa-signature"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-extrabold text-xs text-move-navy-900">${sig.name}</h4>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">Custom DB</span>
+                </div>
+                <p class="text-[11px] text-slate-600 font-medium">${sig.title || 'Official Signatory'}${sig.office ? ' • ' + sig.office : ''}</p>
+                ${sig.signatureImage ? '<span class="text-[10px] text-move-orange-600 font-semibold flex items-center gap-1 mt-0.5"><i class="fa-solid fa-check"></i> Signature Image Attached</span>' : '<span class="text-[10px] text-slate-400">No signature image</span>'}
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 self-end md:self-auto shrink-0">
+              <button type="button" onclick="applySignatoryFromDbToSlot('${sig.key}', 1)" class="px-2 py-1 rounded bg-slate-100 hover:bg-move-navy-900 hover:text-white text-[10px] font-bold text-slate-700 transition" title="Apply as Signatory 1">Apply Sig 1</button>
+              <button type="button" onclick="applySignatoryFromDbToSlot('${sig.key}', 2)" class="px-2 py-1 rounded bg-slate-100 hover:bg-move-navy-900 hover:text-white text-[10px] font-bold text-slate-700 transition" title="Apply as Signatory 2">Apply Sig 2</button>
+              <button type="button" onclick="applySignatoryFromDbToSlot('${sig.key}', 3)" class="px-2 py-1 rounded bg-slate-100 hover:bg-move-navy-900 hover:text-white text-[10px] font-bold text-slate-700 transition" title="Apply as Signatory 3">Apply Sig 3</button>
+              <button type="button" onclick="handleDeleteSignatoryFromDb('${sig.key}')" class="p-1.5 rounded text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition ml-1" title="Delete from Database">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      const officialBadge = document.getElementById('lblOfficialLeadersCount');
+      if (officialBadge) officialBadge.textContent = OFFICIAL_MOVE_SIGNATORIES.filter(o => o.key !== 'custom').length;
+      const customBadge = document.getElementById('lblCustomSignatoriesCount');
+      if (customBadge) customBadge.textContent = customList.length;
+    }
+
+    // Expose Signatory DB utilities on window
+    window.openSignatoriesDbModal = openSignatoriesDbModal;
+    window.closeSignatoriesDbModal = closeSignatoriesDbModal;
+    window.renderSignatoriesDbList = renderSignatoriesDbList;
+    window.handleAddSignatoryToDb = handleAddSignatoryToDb;
+    window.handleDeleteSignatoryFromDb = handleDeleteSignatoryFromDb;
+    window.handleSigDbImageUpload = handleSigDbImageUpload;
+    window.saveCurrentInputsToSignatoriesDb = saveCurrentInputsToSignatoriesDb;
+    window.applySignatoryFromDbToSlot = applySignatoryFromDbToSlot;
+    window.getAllSignatoriesList = getAllSignatoriesList;
+    window.getCustomSignatories = getCustomSignatories;
+    window.saveCustomSignatories = saveCustomSignatories;
+    window.populateSignatoryOfficerDropdowns = populateSignatoryOfficerDropdowns;
+
     const DEFAULT_CERT_TEMPLATES = {
       'move_official_2026': {
         id: 'move_official_2026',
@@ -504,14 +722,43 @@
       [1, 2, 3].forEach(num => {
         const sel = document.getElementById('selectQuickOfficerSig' + num);
         if (!sel) return;
+        const currentVal = sel.value;
         sel.innerHTML = '';
-        OFFICIAL_MOVE_SIGNATORIES.forEach(off => {
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = 'custom';
+        defaultOpt.textContent = '--- Select Official / Or Custom ---';
+        sel.appendChild(defaultOpt);
+
+        const officialGroup = document.createElement('optgroup');
+        officialGroup.label = 'Official MOVE Officers & City Leaders';
+        OFFICIAL_MOVE_SIGNATORIES.filter(off => off.key !== 'custom').forEach(off => {
           const opt = document.createElement('option');
           opt.value = off.key;
           opt.textContent = off.label;
-          sel.appendChild(opt);
+          officialGroup.appendChild(opt);
         });
+        sel.appendChild(officialGroup);
+
+        const custom = getCustomSignatories();
+        if (custom.length > 0) {
+          const customGroup = document.createElement('optgroup');
+          customGroup.label = `Custom / Saved Database (${custom.length})`;
+          custom.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.key;
+            opt.textContent = c.label || `${c.name} (${c.title || 'Signatory'})`;
+            customGroup.appendChild(opt);
+          });
+          sel.appendChild(customGroup);
+        }
+
+        if (currentVal) sel.value = currentVal;
       });
+
+      if (typeof populateAppreciationSigDropdowns === 'function') {
+        populateAppreciationSigDropdowns();
+      }
     }
 
     function initCertificateStudio() {
@@ -1687,7 +1934,7 @@
 
     function handleQuickSigPresetChange(presetKey) {
       const s = currentCertTemplate.signatories;
-      const findOff = (k) => OFFICIAL_MOVE_SIGNATORIES.find(o => o.key === k);
+      const findOff = (k) => getAllSignatoriesList().find(o => o.key === k);
 
       if (presetKey.startsWith('single_')) {
         const offKey = presetKey.replace('single_', '');
@@ -1699,33 +1946,34 @@
           s.sig1Name = off.name;
           s.sig1Title = off.title;
           s.sig1Office = off.office;
+          if (off.signatureImage) s.sig1SignatureImage = off.signatureImage;
         }
       } else if (presetKey === 'dual_ong_magalong') {
         const o1 = findOff('ong');
         const o2 = findOff('magalong');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
-        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; }
-        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; }
+        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
+        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
       } else if (presetKey === 'dual_ong_olowan') {
         const o1 = findOff('ong');
         const o2 = findOff('olowan');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
-        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; }
-        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; }
+        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
+        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
       } else if (presetKey === 'dual_olowan_magalong') {
         const o1 = findOff('olowan');
         const o2 = findOff('magalong');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
-        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; }
-        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; }
+        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
+        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
       } else if (presetKey === 'triple_all') {
         const o1 = findOff('ong');
         const o3 = findOff('olowan');
         const o2 = findOff('magalong');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = true;
-        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; }
-        if (o3) { s.sig3Name = o3.name; s.sig3Title = o3.title; s.sig3Office = o3.office; }
-        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; }
+        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
+        if (o3) { s.sig3Name = o3.name; s.sig3Title = o3.title; s.sig3Office = o3.office; if (o3.signatureImage) s.sig3SignatureImage = o3.signatureImage; }
+        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
       }
 
       syncDesignerInputsFromTemplate();
@@ -1736,7 +1984,7 @@
 
     function handlePickSignatoryOfficer(sigNum, officerKey) {
       if (!officerKey || officerKey === 'custom') return;
-      const off = OFFICIAL_MOVE_SIGNATORIES.find(o => o.key === officerKey);
+      const off = getAllSignatoriesList().find(o => o.key === officerKey);
       if (!off) return;
 
       const s = currentCertTemplate.signatories;
@@ -1744,17 +1992,20 @@
         s.sig1Enabled = true;
         s.sig1Name = off.name;
         s.sig1Title = off.title;
-        s.sig1Office = off.office;
+        s.sig1Office = off.office || '';
+        if (off.signatureImage) s.sig1SignatureImage = off.signatureImage;
       } else if (sigNum === 2) {
         s.sig2Enabled = true;
         s.sig2Name = off.name;
         s.sig2Title = off.title;
-        s.sig2Office = off.office;
+        s.sig2Office = off.office || '';
+        if (off.signatureImage) s.sig2SignatureImage = off.signatureImage;
       } else if (sigNum === 3) {
         s.sig3Enabled = true;
         s.sig3Name = off.name;
         s.sig3Title = off.title;
-        s.sig3Office = off.office;
+        s.sig3Office = off.office || '';
+        if (off.signatureImage) s.sig3SignatureImage = off.signatureImage;
       }
 
       syncDesignerInputsFromTemplate();
@@ -2156,7 +2407,7 @@
         const selOff = document.getElementById(`selectQuickOfficerSig${n}`);
         if (selOff) {
           const curName = (t.signatories[`sig${n}Name`] || '').trim().toUpperCase();
-          const matchOff = OFFICIAL_MOVE_SIGNATORIES.find(o => o.name.trim().toUpperCase() === curName);
+          const matchOff = getAllSignatoriesList().find(o => o.name.trim().toUpperCase() === curName);
           selOff.value = matchOff ? matchOff.key : 'custom';
         }
       });

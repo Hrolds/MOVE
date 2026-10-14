@@ -138,10 +138,14 @@ To ensure clarity across both administrative reporting and training execution, t
 ### 6. 🎓 Official Certificate Studio & Interactive Designer
 * Dynamic, automated certificate generation & live WYSIWYG design studio:
   * **Attendance-Gated Issuance**: Automatically validates and issues certificates **only** to participants confirmed as `Present`.
+  * **Signatories Database & Registry Integration**:
+    * Unified modal and storage (`localStorage: move_signatories_db_v1`) to register and manage custom signatories (VIP guest speakers, department heads, partner agencies, judges).
+    * Integrated with official leaders (Hon. Benjamin B. Magalong, Hon. Faustino A. Olowan, Dan Ricky M. Ong, etc.) organized in structured `<optgroup>` dropdowns.
+    * 1-Click **"Save to DB"** shortcut on every signatory slot to easily save newly typed signatories for future certificates.
   * **Side-by-Side Responsive Studio Workspace**:
     * Clean two-column layout (`flex-col md:flex-row items-start w-full`):
-      * **Left Column**: Sticky, scrollable **Designer Toolbox** (`w-full md:w-80 lg:w-96`, `sticky top-4 max-h-[calc(100vh-120px)] overflow-y-auto`) housing tabbed toolsets (*Move*, *Images*, *Text*, *Signatures*, *Border*).
-      * **Right Column**: Live **Certificate Stage Canvas** (`flex-1 min-w-0`), rendering the full A4 landscape certificate (`aspect-[1.414/1]`) side-by-side with zero overlap and zero blank margins.
+      * **Left Column**: Sticky, scrollable **Designer Toolbox** housing tabbed toolsets (*Move*, *Images*, *Text*, *Signatures*, *Border*).
+      * **Right Column**: Live **Certificate Stage Canvas**, rendering the full A4 landscape certificate (`aspect-[1.414/1]`) side-by-side with zero overlap and zero blank margins.
     * When Designer Mode is toggled off, the canvas smoothly centers across the full workspace stage.
   * **In-Place Canvas Click-to-Edit (WYSIWYG)**:
     * Click directly on any text element on the certificate canvas to focus and type in place.
@@ -174,7 +178,29 @@ To ensure clarity across both administrative reporting and training execution, t
     * Backend endpoint `POST /api/export-ca-docx` in `sync_server.py` that parses `CA MOVE TEMPLATE.docx`, populates dynamic XML text and formatted Word tables, and streams the `.docx` download.
     * Pure client-side HTML-Word document download fallback if running serverless.
 
-### 8. ⚙️ 50-Participant Balancing & Roster Engine
+### 8. 🏅 Dedicated Certificate of Appreciation Studio (Honors & VIP Awards)
+* Independent navigation panel dedicated to executive commendations, guest speakers, facilitators, donors, and leadership awards:
+  * **Document Versions & Presets Manager (Word Docs Style)**:
+    * **Resource Speaker / Keynote Lecturer Preset**: Specialized citation praising invaluable time, exemplary expertise, and profound insights.
+    * **Event Facilitator & Moderator Preset**: Citation honoring outstanding workshop moderation, energetic facilitation, and service.
+    * **Partner Agency & Stakeholder Preset**: Citation recognizing institutional collaboration, resources, and enduring advocacy partnership.
+    * **Outstanding MOVE Officer Award Preset**: Commendation celebrating exemplary leadership, selfless devotion, and executive service.
+    * **Generous Donor & Program Sponsor Preset**: Recognition of sponsorship and program patronage.
+    * **Named Version Snapshots**: Save, name, load, and manage custom snapshot versions (`localStorage: move_appreciation_versions_v1`).
+  * **Dynamic Recipient & Citation Editor**:
+    * Honorific, Full Name (with 1-click UPPERCASE formatting), Position, and Agency/Office fields.
+    * Live placeholder tags support: `{name}`, `{position}`, `{office}`, `{activity}`, `{date}`, `{venue}`.
+  * **Unified Signatory Database Integration**:
+    * Single Centered VIP, Dual Left/Right, or Triple Signatory layouts.
+    * Quick-pick dropdowns connected to the shared Signatories Database with instant photo signature rendering.
+  * **A4 Landscape Live Canvas & Direct Inline Editing**:
+    * Elegant double gold & midnight navy framing with corner baroque flourishes and official gold medallion ribbon.
+    * Real-time click-and-type editing directly on the certificate canvas.
+  * **Export to Word (.docx) & High-Resolution Print**:
+    * Native Microsoft Word document download with landscape orientation and styled tables.
+    * Print / PDF export with isolated `@media print` CSS (`body.printing-appreciation`).
+
+### 9. ⚙️ 50-Participant Balancing & Roster Engine
 * Multi-parameter algorithmic filter tool:
   * Age range filter (default: 30–40).
   * Training count ceiling (default: < 25 previous seminars).
