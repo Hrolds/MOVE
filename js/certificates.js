@@ -3240,17 +3240,23 @@
       printBox.innerHTML = '';
 
       const sheet = document.createElement('div');
-      sheet.className = 'cert-print-page p-6 flex items-center justify-center bg-white';
+      sheet.className = 'cert-print-page flex items-center justify-center bg-white';
       sheet.innerHTML = `
-        <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="${outerStyle}">
+        <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="width: 297mm; height: 210mm; max-width: 297mm; max-height: 210mm; box-sizing: border-box; overflow: hidden; ${outerStyle}">
           ${buildCertificateInnerHtml(p, act, serialNo, currentCertTemplate, true)}
         </div>
       `;
       printBox.appendChild(sheet);
 
+      if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
+      document.body.classList.add('printing-cert');
       showToast(`Printing certificate for ${currentCertTemplate.recipient.customName || p.name}...`, 'fa-print');
       setTimeout(() => {
         window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-cert');
+          printBox.innerHTML = '';
+        }, 1000);
       }, 250);
     }
 
@@ -3275,18 +3281,24 @@
       presentList.forEach((p, idx) => {
         const serialNo = `MOVE-2026-${act.id.replace('ACT-', '')}-${String(idx + 1).padStart(4, '0')}`;
         const sheet = document.createElement('div');
-        sheet.className = 'cert-print-page p-6 flex items-center justify-center bg-white';
+        sheet.className = 'cert-print-page flex items-center justify-center bg-white';
         sheet.innerHTML = `
-          <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="${outerStyle}">
+          <div class="w-full h-full p-8 flex flex-col justify-between relative select-none" style="width: 297mm; height: 210mm; max-width: 297mm; max-height: 210mm; box-sizing: border-box; overflow: hidden; ${outerStyle}">
             ${buildCertificateInnerHtml(p, act, serialNo, currentCertTemplate, true)}
           </div>
         `;
         printBox.appendChild(sheet);
       });
 
+      if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
+      document.body.classList.add('printing-cert');
       showToast(`Generating ${presentList.length} customized certificates using "${currentCertTemplate.name}"...`, 'fa-print');
       setTimeout(() => {
         window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-cert');
+          printBox.innerHTML = '';
+        }, 1000);
       }, 350);
     }
 

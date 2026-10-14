@@ -711,10 +711,10 @@ function renderAppreciationPreview() {
   const sheetHtml = `
     <div id="appreciationSheetCanvas"
          class="appreciation-landscape-sheet shadow-2xl relative select-text transition-all bg-[#fffdfa] overflow-hidden"
-         style="width: 297mm; min-height: 210mm; ${outerBorderCss}; font-family: ${s.fontFamily === 'cinzel' ? "'Cinzel', serif" : (s.fontFamily === 'playfair' ? "'Playfair Display', serif" : "'Montserrat', sans-serif")}; padding: 14mm 16mm;">
+         style="width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; box-sizing: border-box; ${outerBorderCss}; font-family: ${s.fontFamily === 'cinzel' ? "'Cinzel', serif" : (s.fontFamily === 'playfair' ? "'Playfair Display', serif" : "'Montserrat', sans-serif")}; padding: 10mm 14mm;">
 
       <!-- Inner Decorative Border -->
-      <div class="w-full h-full relative flex flex-col justify-between" style="${innerBorderCss}; padding: 10mm 12mm;">
+      <div class="w-full h-full relative flex flex-col justify-between" style="${innerBorderCss}; padding: 8mm 10mm; box-sizing: border-box;">
         
         <!-- Corner Ornaments -->
         ${s.cornerStyle !== 'none' ? `
@@ -747,7 +747,7 @@ function renderAppreciationPreview() {
         </div>
 
         <!-- 2. TITLE & RECIPIENT HERO SECTION -->
-        <div class="relative z-10 text-center space-y-3 pt-3 flex-1 flex flex-col justify-center">
+        <div class="relative z-10 text-center space-y-2.5 pt-2 flex-1 flex flex-col justify-center">
           <!-- Award Title -->
           <div class="space-y-1">
             <h1 class="text-3xl font-black font-cinzel tracking-wider uppercase inline-edit-apprec drop-shadow-xs"
@@ -761,7 +761,7 @@ function renderAppreciationPreview() {
              data-apprec-field="subtitle" contenteditable="true" spellcheck="false" title="Click to edit subtitle">${s.subtitle}</p>
 
           <!-- Recipient Name Block -->
-          <div class="space-y-1 py-1">
+          <div class="space-y-0.5 py-0.5">
             <h2 class="text-2xl font-black font-cinzel tracking-widest text-move-navy-950 uppercase inline-edit-apprec"
                 data-apprec-field="recipientName" contenteditable="true" spellcheck="false" title="Click to edit recipient name">
               ${s.honorific ? `<span class="text-lg font-bold text-amber-700 mr-1.5">${s.honorific}</span>` : ''}${s.recipientName}
@@ -776,15 +776,15 @@ function renderAppreciationPreview() {
           </div>
 
           <!-- Citation Paragraph -->
-          <div class="max-w-3xl mx-auto px-6 py-2">
-            <p class="text-[12.5px] leading-relaxed text-slate-700 font-sans text-center inline-edit-apprec"
+          <div class="max-w-3xl mx-auto px-6 py-1">
+            <p class="text-[12px] leading-relaxed text-slate-700 font-sans text-center inline-edit-apprec"
                data-apprec-field="citationText" contenteditable="true" spellcheck="false" title="Click to edit citation paragraph">
               ${renderedCitation}
             </p>
           </div>
 
           <!-- Conferred Date Line -->
-          <p class="text-[11px] text-slate-600 italic font-sans inline-edit-apprec"
+          <p class="text-[10.5px] text-slate-600 italic font-sans inline-edit-apprec"
              data-apprec-field="dateVenueLine" contenteditable="true" spellcheck="false" title="Click to edit date line">${s.dateVenueLine}</p>
         </div>
 
@@ -826,7 +826,7 @@ function bindAppreciationInlineEditing() {
       } else if (field === 'dateVenueLine') {
         appreciationState.dateVenueLine = text;
         const input = document.getElementById('appreciationDateVenueLine');
-        if (lineInput) lineInput.value = text;
+        if (input) input.value = text;
       } else if (field === 'citationText') {
         appreciationState.citationText = text;
         const input = document.getElementById('appreciationCitationText');
@@ -865,8 +865,9 @@ function printAppreciationCertificate() {
     </div>
   `;
 
+  if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
   document.body.classList.add('printing-appreciation');
-  showToast(`Preparing print for ${appreciationState.recipientName || 'Award'}...`, 'fa-print');
+  showToast(`Preparing print for ${appreciationState.recipientName || 'Award'} (A4 Landscape)...`, 'fa-print');
 
   setTimeout(() => {
     window.print();

@@ -161,7 +161,12 @@
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* CERTIFICATE PRINT STYLING */
+    /* ============================================================== */
+    /* MASTER PRINT & CERTIFICATE DIMENSION RULES                     */
+    /* Participation: A4 Landscape (297 x 210 mm)                     */
+    /* Appreciation:  A4 Landscape (297 x 210 mm)                     */
+    /* Appearance CA: A5 Landscape (210 x 148 mm)                     */
+    /* ============================================================== */
     @media print {
       .no-print {
         display: none !important;
@@ -175,20 +180,9 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      .certificate-print-sheet {
-        width: 100vw !important;
-        height: 100vh !important;
-        page-break-after: always !important;
-        page-break-inside: avoid !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
       @page {
-        size: landscape;
-        margin: 0.5cm;
+        size: A4 landscape;
+        margin: 0;
       }
     }
     @media screen {
@@ -197,53 +191,62 @@
       }
     }
 
-    /* CERTIFICATE OF APPEARANCE (CA) A4 PORTRAIT STYLING */
-    .ca-portrait-sheet {
-      width: 210mm;
-      min-height: 297mm;
+    /* 1. CERTIFICATE OF PARTICIPATION (A4 LANDSCAPE: 297mm x 210mm) */
+    .cert-landscape-sheet {
+      width: 297mm;
+      height: 210mm;
+      min-height: 210mm;
+      max-height: 210mm;
+      box-sizing: border-box;
       background: white;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    #caPrintContainer {
-      display: none;
+      overflow: hidden;
     }
     @media print {
-      body.printing-ca {
+      body.printing-cert {
         background: white !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      body.printing-ca #appContainer,
-      body.printing-ca #batchPrintContainer,
-      body.printing-ca #sidebar,
-      body.printing-ca #topbar {
+      body.printing-cert #appContainer,
+      body.printing-cert #caPrintContainer,
+      body.printing-cert #appreciationPrintContainer,
+      body.printing-cert #sidebar,
+      body.printing-cert #topbar {
         display: none !important;
       }
-      body.printing-ca #caPrintContainer {
+      body.printing-cert #batchPrintContainer {
         display: block !important;
         margin: 0 !important;
         padding: 0 !important;
       }
-      body.printing-ca .ca-print-page {
-        width: 100% !important;
-        max-width: 210mm !important;
-        min-height: 297mm !important;
-        height: auto !important;
+      body.printing-cert .cert-print-page {
+        width: 297mm !important;
+        height: 210mm !important;
+        max-width: 297mm !important;
+        max-height: 210mm !important;
         page-break-after: always !important;
         page-break-inside: avoid !important;
-        box-shadow: none !important;
-        border: none !important;
+        box-sizing: border-box !important;
         margin: 0 auto !important;
-        padding: 15mm 20mm 15mm 20mm !important;
+        padding: 8mm !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
       }
     }
 
-    /* CERTIFICATE OF APPRECIATION A4 LANDSCAPE STYLING */
+    /* 2. CERTIFICATE OF APPRECIATION (A4 LANDSCAPE: 297mm x 210mm) */
     .appreciation-landscape-sheet {
       width: 297mm;
+      height: 210mm;
       min-height: 210mm;
+      max-height: 210mm;
+      box-sizing: border-box;
       background: white;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
     }
     #appreciationPrintContainer {
       display: none;
@@ -267,19 +270,76 @@
         padding: 0 !important;
       }
       body.printing-appreciation .appreciation-print-page {
-        width: 100% !important;
+        width: 297mm !important;
         max-width: 297mm !important;
+        height: 210mm !important;
+        max-height: 210mm !important;
         min-height: 210mm !important;
-        height: 100vh !important;
         page-break-after: always !important;
         page-break-inside: avoid !important;
         box-shadow: none !important;
         border: none !important;
         margin: 0 auto !important;
-        padding: 10mm 15mm !important;
+        padding: 8mm !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+      }
+    }
+
+    /* 3. CERTIFICATE OF APPEARANCE (CA) (A5 LANDSCAPE: 210mm x 148mm) */
+    .ca-landscape-sheet,
+    .ca-portrait-sheet {
+      width: 210mm;
+      height: 148mm;
+      min-height: 148mm;
+      max-height: 148mm;
+      box-sizing: border-box;
+      background: white;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+    }
+    #caPrintContainer {
+      display: none;
+    }
+    @media print {
+      body.printing-ca {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      body.printing-ca #appContainer,
+      body.printing-ca #batchPrintContainer,
+      body.printing-ca #caPrintContainer,
+      body.printing-ca #appreciationPrintContainer,
+      body.printing-ca #sidebar,
+      body.printing-ca #topbar {
+        display: none !important;
+      }
+      body.printing-ca #caPrintContainer {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      body.printing-ca .ca-print-page {
+        width: 210mm !important;
+        max-width: 210mm !important;
+        height: 148mm !important;
+        min-height: 148mm !important;
+        max-height: 148mm !important;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 auto !important;
+        padding: 6mm 10mm !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        overflow: hidden !important;
       }
     }
   

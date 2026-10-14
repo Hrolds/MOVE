@@ -2071,3 +2071,15 @@
         toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
       }, 3200);
     }
+
+    // --- DYNAMIC PRINT PAGE SIZE RULE ---
+    function setPrintPageRule(sizeRule) {
+      let styleEl = document.getElementById('dynamicPrintPageStyle');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamicPrintPageStyle';
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = `@media print { @page { size: ${sizeRule}; margin: 0; } }`;
+    }
+    window.setPrintPageRule = setPrintPageRule;

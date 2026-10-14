@@ -35,14 +35,14 @@ const caState = {
   mainTemplate: 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.',
   customMemberTexts: {}, // memberId -> custom text/HTML
 
-  // Spacing & Typography controls (compact & formal defaults)
-  lineSpacing: 1.40,       // Line height multiplier (compact & formal, e.g. 1.2 to 2.2)
-  paragraphSpacing: 14,   // Margin bottom in px between main blocks
-  fontSize: 13.5,         // Font size in px
-  textIndent: 36,         // Text indent in px
+  // Spacing & Typography controls (compact & formal defaults for A5 Landscape)
+  lineSpacing: 1.35,       // Line height multiplier
+  paragraphSpacing: 7,    // Margin bottom in px between main blocks
+  fontSize: 11,           // Font size in px (proportional for A5 landscape slip)
+  textIndent: 24,         // Text indent in px
 
   // Word Docs Style Layout, Spacing & Alignments
-  titleSpacingAfter: 20,   // Space after CERTIFICATE OF APPEARANCE title in px (gap below title)
+  titleSpacingAfter: 8,    // Space after CERTIFICATE OF APPEARANCE title in px
   titleAlign: 'center',    // 'center' | 'left' | 'right'
   mainTextAlign: 'both',   // 'both' (justify) | 'left' | 'center'
   signatureAlign: 'center', // 'center' | 'right' | 'left' (Centered by default per user request)
@@ -58,18 +58,18 @@ function getBuiltInCaVersions() {
   return [
     {
       id: 'ver_executive_centered',
-      name: 'Executive Centered Signature (Recommended)',
+      name: 'Executive Centered Signature (A5 Slip)',
       isBuiltIn: true,
       data: {
         documentTitle: 'CERTIFICATE OF APPEARANCE',
-        titleSpacingAfter: 20,
+        titleSpacingAfter: 8,
         titleAlign: 'center',
         mainTextAlign: 'both',
         signatureAlign: 'center',
-        lineSpacing: 1.40,
-        paragraphSpacing: 16,
-        fontSize: 13.5,
-        textIndent: 36
+        lineSpacing: 1.35,
+        paragraphSpacing: 7,
+        fontSize: 11,
+        textIndent: 24
       }
     },
     {
@@ -78,14 +78,14 @@ function getBuiltInCaVersions() {
       isBuiltIn: true,
       data: {
         documentTitle: 'CERTIFICATE OF APPEARANCE',
-        titleSpacingAfter: 16,
+        titleSpacingAfter: 8,
         titleAlign: 'center',
         mainTextAlign: 'both',
         signatureAlign: 'right',
-        lineSpacing: 1.40,
-        paragraphSpacing: 14,
-        fontSize: 13.5,
-        textIndent: 36
+        lineSpacing: 1.35,
+        paragraphSpacing: 7,
+        fontSize: 11,
+        textIndent: 24
       }
     },
     {
@@ -94,14 +94,14 @@ function getBuiltInCaVersions() {
       isBuiltIn: true,
       data: {
         documentTitle: 'CERTIFICATE OF APPEARANCE',
-        titleSpacingAfter: 8,
+        titleSpacingAfter: 5,
         titleAlign: 'center',
         mainTextAlign: 'both',
         signatureAlign: 'center',
         lineSpacing: 1.25,
-        paragraphSpacing: 10,
-        fontSize: 12.5,
-        textIndent: 28
+        paragraphSpacing: 5,
+        fontSize: 10.5,
+        textIndent: 20
       }
     }
   ];
@@ -1036,7 +1036,7 @@ function changeCaIndividualMember(delta) {
   renderCaAttendeesList();
 }
 
-// --- LIVE A4 PORTRAIT PREVIEW RENDERER ---
+// --- LIVE A5 LANDSCAPE PREVIEW RENDERER (210mm x 148mm) ---
 function renderAppearancePreview() {
   const stage = document.getElementById('caPreviewStage');
   if (!stage) return;
@@ -1062,21 +1062,21 @@ function renderAppearancePreview() {
     if (participants.length === 0) {
       tableRows = `
         <tr>
-          <td colspan="5" class="py-8 text-center text-slate-400 italic text-sm">
+          <td colspan="5" class="py-4 text-center text-slate-400 italic text-xs">
             No participants selected. Please select participants from the left attendees panel.
           </td>
         </tr>
       `;
     } else {
-      tableRows = participants.map((p, idx) => {
+      tableRows = participants.slice(0, 15).map((p, idx) => {
         const hon = getCaHonorific(p, false);
         return `
           <tr class="${idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white'} border-b border-slate-200">
-            <td class="py-1 px-2 text-center text-[11px] font-mono font-bold text-slate-700">${idx + 1}</td>
-            <td class="py-1 px-2 text-[12px] font-bold text-slate-900">${hon}${escapeHtml(p.name || '')}</td>
-            <td class="py-1 px-2 text-[11px] text-slate-800 leading-tight">${escapeHtml(p.position || '')}</td>
-            <td class="py-1 px-2 text-center text-[11px] font-semibold text-slate-800">${escapeHtml(p.office || '')}</td>
-            <td class="py-1 px-2 text-center text-[11px] text-slate-700">${escapeHtml(p.role || 'Participant')}</td>
+            <td class="py-0.5 px-2 text-center text-[10px] font-mono font-bold text-slate-700">${idx + 1}</td>
+            <td class="py-0.5 px-2 text-[10.5px] font-bold text-slate-900 truncate max-w-[150px]">${hon}${escapeHtml(p.name || '')}</td>
+            <td class="py-0.5 px-2 text-[10px] text-slate-800 leading-tight truncate max-w-[160px]">${escapeHtml(p.position || '')}</td>
+            <td class="py-0.5 px-2 text-center text-[10px] font-semibold text-slate-800">${escapeHtml(p.office || '')}</td>
+            <td class="py-0.5 px-2 text-center text-[10px] text-slate-700">${escapeHtml(p.role || 'Participant')}</td>
           </tr>
         `;
       }).join('');
@@ -1087,22 +1087,22 @@ function renderAppearancePreview() {
     const venueClause = escapeHtml(formatCaVenueText(caState.venue));
 
     bodyContentHtml = `
-      <div class="space-y-3">
+      <div class="space-y-1.5 flex-1">
         <!-- Certification Clause -->
-        <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
+        <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: 4px;">
           This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
         </p>
 
-        <!-- Official Participants Table -->
-        <div class="border border-slate-300 rounded overflow-hidden shadow-xs my-2">
+        <!-- Official Participants Table (Compact for A5) -->
+        <div class="border border-slate-300 rounded overflow-hidden shadow-xs my-1">
           <table class="w-full border-collapse text-left">
             <thead>
-              <tr class="bg-slate-100 border-b border-slate-300 text-slate-900 text-[11px] uppercase tracking-wider font-extrabold">
-                <th class="py-1.5 px-2 text-center w-10">No.</th>
-                <th class="py-1.5 px-2">Full Name</th>
-                <th class="py-1.5 px-2">Position Title</th>
-                <th class="py-1.5 px-2 text-center w-24">Office</th>
-                <th class="py-1.5 px-2 text-center w-28">Role</th>
+              <tr class="bg-slate-100 border-b border-slate-300 text-slate-900 text-[9.5px] uppercase tracking-wider font-extrabold">
+                <th class="py-1 px-2 text-center w-8">No.</th>
+                <th class="py-1 px-2">Full Name</th>
+                <th class="py-1 px-2">Position Title</th>
+                <th class="py-1 px-2 text-center w-20">Office</th>
+                <th class="py-1 px-2 text-center w-24">Role</th>
               </tr>
             </thead>
             <tbody>
@@ -1123,12 +1123,12 @@ function renderAppearancePreview() {
     };
 
     bodyContentHtml = `
-      <div class="my-4">
+      <div class="mb-1.5">
         <!-- Main Formal Certification Flowing Paragraph (Live Editable) -->
         <p id="caMainTextEl" contenteditable="true" spellcheck="false"
            oninput="handleCaSheetEdit(this, 'mainText')"
            style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
-           class="text-justify text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+           class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-0.5 transition cursor-text select-text"
            title="Click to edit main certification text directly">
           ${buildCaMainHtml(currMember)}
         </p>
@@ -1140,60 +1140,60 @@ function renderAppearancePreview() {
   const sigAlign = caState.signatureAlign || 'center';
   const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
   const sigImgHtml = caState.showSignature ? `
-    <div class="flex ${sigJustify} -mb-7 relative z-10 pointer-events-none select-none">
+    <div class="flex ${sigJustify} -mb-5 relative z-10 pointer-events-none select-none">
       <img src="signature%20(15).png" alt="Signature" 
-           style="width: ${caState.signatureWidth}px; max-height: 80px;" 
+           style="width: ${caState.signatureWidth}px; max-height: 48px;" 
            class="object-contain drop-shadow-xs">
     </div>
-  ` : `<div class="h-10"></div>`;
+  ` : `<div class="h-6"></div>`;
 
   stage.innerHTML = `
-    <!-- A4 PORTRAIT SHEET CONTAINER -->
-    <div id="caActiveSheet" class="ca-portrait-sheet bg-white text-slate-900 shadow-2xl mx-auto relative select-text"
-         style="width: 210mm; min-height: 297mm; padding: 22mm 22mm 18mm 22mm; font-family: 'Arial', sans-serif;">
+    <!-- A5 LANDSCAPE SHEET CONTAINER (210mm x 148mm) -->
+    <div id="caActiveSheet" class="ca-landscape-sheet bg-white text-slate-900 shadow-2xl mx-auto relative select-text"
+         style="width: 210mm; height: 148mm; min-height: 148mm; max-height: 148mm; padding: 6mm 10mm 5mm 10mm; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
       
       <!-- ================= HEADER SECTION ================= -->
-      <div class="flex items-center justify-between pb-3 border-b-2 border-slate-800">
+      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700">
         <!-- Left Logo: City Hall Seal -->
-        <div class="w-20 h-20 flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 flex items-center justify-center shrink-0">
           ${caState.showCityLogo ? `<img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">` : ''}
         </div>
 
         <!-- Center Header Typography -->
-        <div class="text-center px-4 flex-1">
-          <div class="text-[12px] font-bold uppercase tracking-wider text-slate-800">
+        <div class="text-center px-2 flex-1 leading-tight">
+          <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">
             Republic of the Philippines
           </div>
-          <div class="text-[13px] font-black uppercase tracking-tight text-slate-900">
+          <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">
             CITY GOVERNMENT OF BAGUIO
           </div>
-          <div class="text-[11px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">
+          <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">
             Men Opposed to Violence Against Women Everywhere
           </div>
-          <div class="text-[9.5px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5">
+          <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">
             Baguio City Chapter &bull; Local Committee on Anti-VAWC
           </div>
         </div>
 
         <!-- Right Logo: MOVE Baguio Seal -->
-        <div class="w-20 h-20 flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 flex items-center justify-center shrink-0">
           ${caState.showMoveLogo ? `<img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">` : ''}
         </div>
       </div>
 
       <!-- ================= DOCUMENT TITLE ================= -->
-      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'}" style="margin-top: 14px; margin-bottom: ${caState.titleSpacingAfter}px;">
+      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'}" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
         <h1 id="caDocTitleEl" contenteditable="true" spellcheck="false"
             oninput="handleCaSheetEdit(this, 'documentTitle')"
-            class="text-2xl font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
-            style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;"
+            class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+            style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 1.5px;"
             title="Click to edit document title directly">
           ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
       </div>
 
       <!-- ================= BODY CONTENT ================= -->
-      <div class="flex-1 py-1">
+      <div class="flex-1 flex flex-col justify-center py-0.5">
         ${bodyContentHtml}
 
         <!-- Purpose Clause (Live Editable) -->
@@ -1201,7 +1201,7 @@ function renderAppearancePreview() {
           <p id="caPurposeEl" contenteditable="true" spellcheck="false"
              oninput="handleCaSheetEdit(this, 'purpose')"
              style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
-             class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+             class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-0.5 transition cursor-text select-text"
              title="Click to edit lawful purpose clause directly">
             ${escapeHtml(caState.purpose)}
           </p>
@@ -1211,43 +1211,43 @@ function renderAppearancePreview() {
         <div>
           <p id="caIssueDateEl" contenteditable="true" spellcheck="false"
              oninput="handleCaSheetEdit(this, 'issueDate')"
-             style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.5)}px;"
-             class="text-left text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+             style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.2)}px;"
+             class="text-left text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-0.5 transition cursor-text select-text"
              title="Click to edit issuance line directly">
             ${escapeHtml(caState.issueDate)}
           </p>
         </div>
 
         <!-- ================= SIGNATORY BLOCK ================= -->
-        <div class="pt-4 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
+        <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
           <!-- Control Initials (DRMO / CTB) -->
           <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
             <span id="caInitialsEl" contenteditable="true" spellcheck="false"
                   oninput="handleCaSheetEdit(this, 'initials')"
-                  class="text-[11px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                  class="text-[9px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
                   title="Click to edit initials">
               ${escapeHtml(caState.initials)}
             </span>
           </div>
 
           <!-- Official Signatory (Benjamin B. Magalong) -->
-          <div class="text-center w-72">
+          <div class="text-center w-64">
             ${sigImgHtml}
             <div id="caSigNameEl" contenteditable="true" spellcheck="false"
                  oninput="handleCaSheetEdit(this, 'signatoryName')"
-                 class="text-[14px] font-black uppercase text-slate-900 tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 class="text-[12px] font-black uppercase text-slate-900 tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
                  title="Click to edit signatory name">
               ${escapeHtml(caState.signatoryName)}
             </div>
             <div id="caSigT1El" contenteditable="true" spellcheck="false"
                  oninput="handleCaSheetEdit(this, 'signatoryTitle1')"
-                 class="text-[12px] font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 class="text-[10px] font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
                  title="Click to edit title 1">
               ${escapeHtml(caState.signatoryTitle1)}
             </div>
             <div id="caSigT2El" contenteditable="true" spellcheck="false"
                  oninput="handleCaSheetEdit(this, 'signatoryTitle2')"
-                 class="text-[11px] text-slate-600 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 class="text-[9px] text-slate-600 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
                  title="Click to edit title 2">
               ${escapeHtml(caState.signatoryTitle2)}
             </div>
@@ -1256,9 +1256,9 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= FOOTER SECTION ================= -->
-      <div class="pt-6 border-t border-slate-300 mt-6 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+      <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium">
         <div>Tel. No. (074)-442-89-20</div>
-        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[9px]">Official Public Document &bull; MOVE Baguio Chapter</div>
+        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[8px]">Official Public Document &bull; MOVE Baguio Chapter</div>
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
 
@@ -1280,7 +1280,7 @@ function setCaZoom(zoomLevel) {
   if (badge) badge.textContent = `${zoomLevel}%`;
 }
 
-// --- PRINT CURRENT CERTIFICATE (A4 PORTRAIT) ---
+// --- PRINT CURRENT CERTIFICATE (A5 LANDSCAPE) ---
 function printCertificateOfAppearance() {
   const container = document.getElementById('caPrintContainer');
   if (!container) return;
@@ -1288,11 +1288,16 @@ function printCertificateOfAppearance() {
   const sheet = document.getElementById('caActiveSheet');
   if (!sheet) return;
 
+  if (window.setPrintPageRule) {
+    window.setPrintPageRule('A5 landscape');
+  }
+
   // Clone active sheet into dedicated print container
   container.innerHTML = '';
   const clone = sheet.cloneNode(true);
   clone.id = 'caSheetToPrint';
   clone.classList.add('ca-print-page');
+  clone.classList.add('ca-landscape-sheet');
   container.appendChild(clone);
 
   // Set printing class
@@ -1305,7 +1310,7 @@ function printCertificateOfAppearance() {
   }, 1000);
 }
 
-// --- BATCH PRINT ALL PRESENT EMPLOYEES (A4 PORTRAIT) ---
+// --- BATCH PRINT ALL PRESENT EMPLOYEES (A5 LANDSCAPE) ---
 function batchPrintAllAppearance() {
   const participants = getActiveCaParticipants();
   if (participants.length === 0) {
@@ -1317,58 +1322,52 @@ function batchPrintAllAppearance() {
   if (!container) return;
   container.innerHTML = '';
 
-  const themeHtml = caState.theme ? ` with the theme “<strong>${escapeHtml(caState.theme)}</strong>”` : '';
+  if (window.setPrintPageRule) {
+    window.setPrintPageRule('A5 landscape');
+  }
+
   const sigAlign = caState.signatureAlign || 'center';
   const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
   const sigImgHtml = caState.showSignature ? `
-    <div class="flex ${sigJustify} -mb-7 relative z-10 pointer-events-none select-none">
+    <div class="flex ${sigJustify} -mb-5 relative z-10 pointer-events-none select-none">
       <img src="signature%20(15).png" alt="Signature" 
-           style="width: ${caState.signatureWidth}px; max-height: 80px;" 
+           style="width: ${caState.signatureWidth}px; max-height: 48px;" 
            class="object-contain drop-shadow-xs">
     </div>
-  ` : `<div class="h-10"></div>`;
+  ` : `<div class="h-6"></div>`;
 
   participants.forEach((currMember, idx) => {
-    const hon = getCaHonorific(currMember, true);
-    const mName = escapeHtml((currMember.name || 'EMPLOYEE FULL NAME').toUpperCase());
-    const mPos = escapeHtml((currMember.position || 'OFFICIAL POSITION TITLE').toUpperCase());
-    const mOff = escapeHtml((currMember.office || 'DEPARTMENT / OFFICE').toUpperCase());
-    const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
-    const dateClause = escapeHtml(formatCaDateText(caState.date));
-    const venueClause = escapeHtml(formatCaVenueText(caState.venue));
-    const basisClause = escapeHtml(caState.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
-
     const pageDiv = document.createElement('div');
-    pageDiv.className = 'ca-portrait-sheet ca-print-page bg-white text-slate-900 mx-auto select-text';
-    pageDiv.style.cssText = 'width: 210mm; min-height: 297mm; padding: 22mm 22mm 18mm 22mm; font-family: Arial, sans-serif; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between;';
+    pageDiv.className = 'ca-landscape-sheet ca-print-page bg-white text-slate-900 mx-auto select-text';
+    pageDiv.style.cssText = 'width: 210mm; height: 148mm; min-height: 148mm; max-height: 148mm; padding: 6mm 10mm 5mm 10mm; font-family: Arial, sans-serif; page-break-after: always; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;';
 
     pageDiv.innerHTML = `
       <!-- HEADER -->
-      <div class="flex items-center justify-between pb-3 border-b-2 border-slate-800">
-        <div class="w-20 h-20 flex items-center justify-center shrink-0">
+      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700">
+        <div class="w-12 h-12 flex items-center justify-center shrink-0">
           ${caState.showCityLogo ? `<img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">` : ''}
         </div>
-        <div class="text-center px-4 flex-1">
-          <div class="text-[12px] font-bold uppercase tracking-wider text-slate-800">Republic of the Philippines</div>
-          <div class="text-[13px] font-black uppercase tracking-tight text-slate-900">CITY GOVERNMENT OF BAGUIO</div>
-          <div class="text-[11px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">Men Opposed to Violence Against Women Everywhere</div>
-          <div class="text-[9.5px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5">Baguio City Chapter &bull; Local Committee on Anti-VAWC</div>
+        <div class="text-center px-2 flex-1 leading-tight">
+          <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">Republic of the Philippines</div>
+          <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">CITY GOVERNMENT OF BAGUIO</div>
+          <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">Men Opposed to Violence Against Women Everywhere</div>
+          <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">Baguio City Chapter &bull; Local Committee on Anti-VAWC</div>
         </div>
-        <div class="w-20 h-20 flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 flex items-center justify-center shrink-0">
           ${caState.showMoveLogo ? `<img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">` : ''}
         </div>
       </div>
 
-      <!-- TITLE (Without orange line, with dynamic titleSpacingAfter) -->
-      <div class="text-${caState.titleAlign || 'center'}" style="margin-top: 14px; margin-bottom: ${caState.titleSpacingAfter}px;">
-        <h1 class="text-2xl font-black text-slate-900 tracking-wider uppercase" style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;">
+      <!-- TITLE -->
+      <div class="text-${caState.titleAlign || 'center'}" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
+        <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase" style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 1.5px;">
           ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
       </div>
 
       <!-- BODY -->
-      <div class="flex-1 py-1">
-        <div class="my-4">
+      <div class="flex-1 flex flex-col justify-center py-0.5">
+        <div class="mb-1.5">
           <p class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
             ${buildCaMainHtml(currMember)}
           </p>
@@ -1381,29 +1380,29 @@ function batchPrintAllAppearance() {
         </div>
 
         <div>
-          <p class="text-left text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.5)}px;">
+          <p class="text-left text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.2)}px;">
             ${escapeHtml(caState.issueDate)}
           </p>
         </div>
 
         <!-- SIGNATORY BLOCK -->
-        <div class="pt-4 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
+        <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
           <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
-            <span class="text-[11px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
+            <span class="text-[9px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
           </div>
-          <div class="text-center w-72">
+          <div class="text-center w-64">
             ${sigImgHtml}
-            <div class="text-[14px] font-black uppercase text-slate-900 tracking-wider">${escapeHtml(caState.signatoryName)}</div>
-            <div class="text-[12px] font-bold text-slate-800">${escapeHtml(caState.signatoryTitle1)}</div>
-            <div class="text-[11px] text-slate-600 font-semibold">${escapeHtml(caState.signatoryTitle2)}</div>
+            <div class="text-[12px] font-black uppercase text-slate-900 tracking-wider">${escapeHtml(caState.signatoryName)}</div>
+            <div class="text-[10px] font-bold text-slate-800">${escapeHtml(caState.signatoryTitle1)}</div>
+            <div class="text-[9px] text-slate-600 font-semibold">${escapeHtml(caState.signatoryTitle2)}</div>
           </div>
         </div>
       </div>
 
       <!-- FOOTER -->
-      <div class="pt-6 border-t border-slate-300 mt-6 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+      <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium">
         <div>Tel. No. (074)-442-89-20</div>
-        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[9px]">Official Public Document &bull; MOVE Baguio Chapter</div>
+        <div class="text-slate-400 font-cinzel uppercase tracking-wider text-[8px]">Official Public Document &bull; MOVE Baguio Chapter</div>
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
     `;

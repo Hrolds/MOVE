@@ -960,10 +960,15 @@
             <!-- TIER 1: Studio Title & Primary Action Toolbar (Single Cohesive Row) -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
-                  <i class="fa-solid fa-award text-move-orange-500 text-lg shrink-0"></i>
-                  <span class="truncate">Official MOVE Certificate Studio &amp; Designer</span>
-                </h3>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
+                    <i class="fa-solid fa-award text-move-orange-500 text-lg shrink-0"></i>
+                    <span class="truncate">Official MOVE Certificate Studio &amp; Designer</span>
+                  </h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider shrink-0">
+                    <i class="fa-solid fa-file-lines mr-1"></i>A4 Landscape (297 &times; 210 mm)
+                  </span>
+                </div>
                 <p class="text-[11px] text-slate-500">Live template designer, whole-certificate border presets, customizable 1/2/3 signatures, and auto-saved versions</p>
               </div>
 
@@ -2082,6 +2087,7 @@
                   <span class="font-bold text-move-navy-900" id="lblPreviewAttendeeSummary">JUAN M. DELA CRUZ (CBAO)</span>
                   <span class="text-slate-400">&bull;</span>
                   <span class="text-[11px] text-slate-500" id="lblPreviewTemplateName">Official MOVE Standard (2026)</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">A4 Landscape</span>
                 </div>
                 <div class="flex items-center flex-wrap gap-1.5 text-[10px]">
                   <button type="button" onclick="setSignatureCountMode(1)" id="stageBtnSig1"
@@ -2125,8 +2131,8 @@
                 </div>
               </div>
 
-              <!-- Certificate Frame Canvas (Single Master Border, Standard A4 Landscape) -->
-              <div id="certificateFrame" class="w-full max-w-4xl bg-white aspect-[1.414/1] shadow-2xl rounded-sm p-6 sm:p-10 relative flex flex-col justify-between select-none transition-all">
+              <!-- Certificate Frame Canvas (Single Master Border, Standard A4 Landscape: 297mm x 210mm) -->
+              <div id="certificateFrame" class="w-full max-w-4xl bg-white aspect-[297/210] shadow-2xl rounded-sm p-6 sm:p-10 relative flex flex-col justify-between select-none transition-all">
                 <!-- Rendered dynamically by renderCertificatePreview() -->
               </div>
             </div>
@@ -2276,7 +2282,7 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- VIEW 6: CERTIFICATE OF APPEARANCE STUDIO (A4 PORTRAIT)         -->
+        <!-- VIEW 6: CERTIFICATE OF APPEARANCE STUDIO (A5 LANDSCAPE SLIP)   -->
         <!-- Modeled strictly after CA MOVE TEMPLATE.docx                   -->
         <!-- ============================================================== -->
         <div id="pageAppearance" class="space-y-4 hidden">
@@ -2284,11 +2290,16 @@
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div class="min-w-0">
-                <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
-                  <i class="fa-solid fa-file-contract text-emerald-500 text-lg shrink-0"></i>
-                  <span class="truncate">Certificate of Appearance Studio</span>
-                </h3>
-                <p class="text-[11px] text-slate-500">Civil Service / LGU Baguio official DTR appearance accreditation for verified present employees &bull; A4 Portrait layout</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
+                    <i class="fa-solid fa-file-contract text-emerald-500 text-lg shrink-0"></i>
+                    <span class="truncate">Certificate of Appearance Studio</span>
+                  </h3>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider shrink-0">
+                    <i class="fa-solid fa-file-lines mr-1"></i>A5 Landscape Slip (210 &times; 148 mm)
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500">Civil Service / LGU Baguio official DTR appearance accreditation for verified present employees &bull; Standard A5 Landscape slip</p>
               </div>
 
               <!-- Top Primary Actions -->
@@ -2509,7 +2520,7 @@
                     <i class="fa-solid fa-arrows-up-down text-move-orange-500"></i>
                     <span>Line Spacing & Typography</span>
                   </h4>
-                  <span id="caLineSpacingBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200">1.40x Spacing</span>
+                  <span id="caLineSpacingBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200">1.35x Spacing</span>
                 </div>
 
                 <div class="space-y-3 text-xs">
@@ -2518,8 +2529,8 @@
                     <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Line Spacing Presets</label>
                     <div class="grid grid-cols-4 gap-1.5">
                       <button type="button" onclick="setCaLineSpacingPreset(1.20)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">Compact 1.2</button>
-                      <button type="button" onclick="setCaLineSpacingPreset(1.40)" class="py-1 px-1 bg-move-navy-900 text-white rounded-lg text-[10.5px] font-bold transition text-center shadow-xs">Normal 1.4</button>
-                      <button type="button" onclick="setCaLineSpacingPreset(1.60)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">1.6x</button>
+                      <button type="button" onclick="setCaLineSpacingPreset(1.35)" class="py-1 px-1 bg-move-navy-900 text-white rounded-lg text-[10.5px] font-bold transition text-center shadow-xs">Normal 1.35</button>
+                      <button type="button" onclick="setCaLineSpacingPreset(1.50)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">1.50x</button>
                       <button type="button" onclick="setCaLineSpacingPreset(2.00)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">Double 2.0</button>
                     </div>
                   </div>
@@ -2528,9 +2539,9 @@
                   <div>
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
                       <span>Line Spacing Multiplier</span>
-                      <span id="caLineSpacingVal" class="font-mono text-move-orange-600 font-extrabold">1.40x</span>
+                      <span id="caLineSpacingVal" class="font-mono text-move-orange-600 font-extrabold">1.35x</span>
                     </div>
-                    <input type="range" id="caLineSpacingInput" min="1.10" max="2.20" step="0.05" value="1.40"
+                    <input type="range" id="caLineSpacingInput" min="1.10" max="2.00" step="0.05" value="1.35"
                            oninput="handleCaSpacingChange('lineSpacing', parseFloat(this.value))"
                            class="w-full accent-move-orange-500 cursor-pointer">
                   </div>
@@ -2539,15 +2550,15 @@
                   <div class="pt-2 border-t border-slate-100">
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
                       <span>Space After Title (Gap below Title)</span>
-                      <span id="caTitleSpacingVal" class="font-mono text-move-orange-600 font-extrabold">20px</span>
+                      <span id="caTitleSpacingVal" class="font-mono text-move-orange-600 font-extrabold">8px</span>
                     </div>
                     <div class="grid grid-cols-4 gap-1.5 mb-1.5">
-                      <button type="button" onclick="setCaTitleSpacingPreset(6)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Tight 6</button>
-                      <button type="button" onclick="setCaTitleSpacingPreset(16)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Norm 16</button>
-                      <button type="button" onclick="setCaTitleSpacingPreset(20)" class="py-1 px-1 bg-move-navy-900 text-white rounded-lg text-[10px] font-bold transition text-center shadow-xs">Relax 20</button>
-                      <button type="button" onclick="setCaTitleSpacingPreset(36)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Wide 36</button>
+                      <button type="button" onclick="setCaTitleSpacingPreset(4)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Tight 4</button>
+                      <button type="button" onclick="setCaTitleSpacingPreset(8)" class="py-1 px-1 bg-move-navy-900 text-white rounded-lg text-[10px] font-bold transition text-center shadow-xs">Norm 8</button>
+                      <button type="button" onclick="setCaTitleSpacingPreset(14)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Relax 14</button>
+                      <button type="button" onclick="setCaTitleSpacingPreset(20)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10px] font-bold text-slate-700 transition text-center">Wide 20</button>
                     </div>
-                    <input type="range" id="caTitleSpacingInput" min="0" max="60" step="2" value="20"
+                    <input type="range" id="caTitleSpacingInput" min="0" max="30" step="2" value="8"
                            oninput="handleCaSpacingChange('titleSpacingAfter', parseInt(this.value, 10))"
                            class="w-full accent-move-orange-500 cursor-pointer">
                   </div>
@@ -2556,9 +2567,9 @@
                   <div>
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
                       <span>Paragraph Gap / Spacing</span>
-                      <span id="caParagraphSpacingVal" class="font-mono text-move-orange-600 font-extrabold">14px</span>
+                      <span id="caParagraphSpacingVal" class="font-mono text-move-orange-600 font-extrabold">7px</span>
                     </div>
-                    <input type="range" id="caParagraphSpacingInput" min="4" max="32" step="2" value="14"
+                    <input type="range" id="caParagraphSpacingInput" min="2" max="20" step="1" value="7"
                            oninput="handleCaSpacingChange('paragraphSpacing', parseInt(this.value, 10))"
                            class="w-full accent-move-orange-500 cursor-pointer">
                   </div>
@@ -2567,9 +2578,9 @@
                   <div>
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
                       <span>Body Font Size</span>
-                      <span id="caFontSizeVal" class="font-mono text-move-orange-600 font-extrabold">13.5px</span>
+                      <span id="caFontSizeVal" class="font-mono text-move-orange-600 font-extrabold">11px</span>
                     </div>
-                    <input type="range" id="caFontSizeInput" min="11" max="17" step="0.5" value="13.5"
+                    <input type="range" id="caFontSizeInput" min="9" max="16" step="0.5" value="11"
                            oninput="handleCaSpacingChange('fontSize', parseFloat(this.value))"
                            class="w-full accent-move-orange-500 cursor-pointer">
                   </div>
@@ -2578,9 +2589,9 @@
                   <div>
                     <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
                       <span>First Line Indent</span>
-                      <span id="caTextIndentVal" class="font-mono text-move-orange-600 font-extrabold">36px</span>
+                      <span id="caTextIndentVal" class="font-mono text-move-orange-600 font-extrabold">24px</span>
                     </div>
-                    <input type="range" id="caTextIndentInput" min="0" max="60" step="4" value="36"
+                    <input type="range" id="caTextIndentInput" min="0" max="48" step="4" value="24"
                            oninput="handleCaSpacingChange('textIndent', parseInt(this.value, 10))"
                            class="w-full accent-move-orange-500 cursor-pointer">
                   </div>
@@ -2827,7 +2838,7 @@
 
             </div>
 
-            <!-- RIGHT COLUMN: High-Fidelity A4 Portrait Stage (8 cols) -->
+            <!-- RIGHT COLUMN: High-Fidelity A5 Landscape Slip Stage (8 cols) -->
             <div class="xl:col-span-8 space-y-3">
               <!-- Live Interactive Editing Notification Banner -->
               <div class="no-print bg-amber-50 border border-amber-200 text-amber-950 text-xs px-4 py-2.5 rounded-2xl flex items-center justify-between shadow-2xs gap-3">
@@ -2837,10 +2848,13 @@
                   </span>
                   <div class="min-w-0">
                     <span class="font-extrabold text-move-navy-900">Direct Live Document Editor:</span>
-                    <span class="text-slate-600 ml-1">Click and type directly on any text in the certificate sheet below to edit, or adjust using the left controls.</span>
+                    <span class="text-slate-600 ml-1">Click and type directly on any text in the certificate slip below to edit, or adjust using the left controls.</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    A5 Landscape Slip
+                  </span>
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Live Ready</span>
@@ -2848,9 +2862,9 @@
                 </div>
               </div>
 
-              <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[920px]">
+              <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[620px]">
                 <div id="caPreviewStage" class="transition-transform duration-200">
-                  <!-- The live A4 portrait sheet is rendered here by renderAppearancePreview() -->
+                  <!-- The live A5 landscape slip sheet is rendered here by renderAppearancePreview() -->
                 </div>
               </div>
             </div>
@@ -2867,12 +2881,15 @@
           <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div class="min-w-0">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
                     <i class="fa-solid fa-medal text-amber-500 text-lg shrink-0"></i>
                     <span class="truncate">Certificate of Appreciation Studio</span>
                   </h3>
                   <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold border border-amber-300 uppercase">Honors &amp; VIPs</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider shrink-0">
+                    <i class="fa-solid fa-file-lines mr-1"></i>A4 Landscape (297 &times; 210 mm)
+                  </span>
                 </div>
                 <p class="text-xs text-slate-500 truncate">Prestigious commendations for Guest Speakers, Facilitators, Partner Agencies, Donors &amp; Outstanding Officers</p>
               </div>
