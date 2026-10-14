@@ -39,13 +39,300 @@ const caState = {
   lineSpacing: 1.40,       // Line height multiplier (compact & formal, e.g. 1.2 to 2.2)
   paragraphSpacing: 14,   // Margin bottom in px between main blocks
   fontSize: 13.5,         // Font size in px
-  textIndent: 36          // Text indent in px
+  textIndent: 36,         // Text indent in px
+
+  // Word Docs Style Layout, Spacing & Alignments
+  titleSpacingAfter: 20,   // Space after CERTIFICATE OF APPEARANCE title in px (gap below title)
+  titleAlign: 'center',    // 'center' | 'left' | 'right'
+  mainTextAlign: 'both',   // 'both' (justify) | 'left' | 'center'
+  signatureAlign: 'center', // 'center' | 'right' | 'left' (Centered by default per user request)
+  purposeAlign: 'both',
+  activeVersionId: 'ver_executive_centered'
 };
+
+// --- DOCUMENT VERSIONS & PRESETS MANAGER (WORD DOCS STYLE) ---
+const CA_VERSIONS_KEY = 'move_ca_versions_v1';
+const CA_AUTOSAVE_KEY = 'move_ca_autosave_v1';
+
+function getBuiltInCaVersions() {
+  return [
+    {
+      id: 'ver_executive_centered',
+      name: 'Executive Centered Signature (Recommended)',
+      isBuiltIn: true,
+      data: {
+        documentTitle: 'CERTIFICATE OF APPEARANCE',
+        titleSpacingAfter: 20,
+        titleAlign: 'center',
+        mainTextAlign: 'both',
+        signatureAlign: 'center',
+        lineSpacing: 1.40,
+        paragraphSpacing: 16,
+        fontSize: 13.5,
+        textIndent: 36
+      }
+    },
+    {
+      id: 'ver_formal_right',
+      name: 'Formal Baguio LGU (Right Signature)',
+      isBuiltIn: true,
+      data: {
+        documentTitle: 'CERTIFICATE OF APPEARANCE',
+        titleSpacingAfter: 16,
+        titleAlign: 'center',
+        mainTextAlign: 'both',
+        signatureAlign: 'right',
+        lineSpacing: 1.40,
+        paragraphSpacing: 14,
+        fontSize: 13.5,
+        textIndent: 36
+      }
+    },
+    {
+      id: 'ver_compact_formal',
+      name: 'Compact Formal Layout (1.25x)',
+      isBuiltIn: true,
+      data: {
+        documentTitle: 'CERTIFICATE OF APPEARANCE',
+        titleSpacingAfter: 8,
+        titleAlign: 'center',
+        mainTextAlign: 'both',
+        signatureAlign: 'center',
+        lineSpacing: 1.25,
+        paragraphSpacing: 10,
+        fontSize: 12.5,
+        textIndent: 28
+      }
+    }
+  ];
+}
+
+function getSavedCaVersions() {
+  try {
+    const raw = localStorage.getItem(CA_VERSIONS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.warn('Failed to parse saved CA versions:', e);
+  }
+  return [];
+}
+
+function getAllCaVersions() {
+  const builtIn = getBuiltInCaVersions();
+  const saved = getSavedCaVersions();
+  return [...builtIn, ...saved];
+}
+
+function populateCaVersionsDropdown() {
+  const sel = document.getElementById('caVersionSelect');
+  if (!sel) return;
+  sel.innerHTML = '';
+
+  const all = getAllCaVersions();
+  all.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.id;
+    opt.textContent = v.name + (v.isBuiltIn ? ' [Preset]' : '');
+    if (v.id === caState.activeVersionId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+
+  const delBtn = document.getElementById('caBtnDeleteVersion');
+  const curVer = all.find(v => v.id === caState.activeVersionId);
+  if (delBtn) {
+    delBtn.classList.toggle('hidden', !curVer || !!curVer.isBuiltIn);
+  }
+}
+
+function loadCaVersion(versionId) {
+  const all = getAllCaVersions();
+  const ver = all.find(v => v.id === versionId);
+  if (!ver || !ver.data) return;
+
+  caState.activeVersionId = versionId;
+  const d = ver.data;
+  if (d.documentTitle !== undefined) caState.documentTitle = d.documentTitle;
+  if (d.titleSpacingAfter !== undefined) caState.titleSpacingAfter = d.titleSpacingAfter;
+  if (d.titleAlign !== undefined) caState.titleAlign = d.titleAlign;
+  if (d.mainTextAlign !== undefined) caState.mainTextAlign = d.mainTextAlign;
+  if (d.signatureAlign !== undefined) caState.signatureAlign = d.signatureAlign;
+  if (d.lineSpacing !== undefined) caState.lineSpacing = d.lineSpacing;
+  if (d.paragraphSpacing !== undefined) caState.paragraphSpacing = d.paragraphSpacing;
+  if (d.fontSize !== undefined) caState.fontSize = d.fontSize;
+  if (d.textIndent !== undefined) caState.textIndent = d.textIndent;
+  if (d.purpose !== undefined) caState.purpose = d.purpose;
+  if (d.mainTemplate !== undefined) caState.mainTemplate = d.mainTemplate;
+  if (d.signatoryName !== undefined) caState.signatoryName = d.signatoryName;
+  if (d.signatoryTitle1 !== undefined) caState.signatoryTitle1 = d.signatoryTitle1;
+  if (d.signatoryTitle2 !== undefined) caState.signatoryTitle2 = d.signatoryTitle2;
+  if (d.initials !== undefined) caState.initials = d.initials;
+  if (d.showSignature !== undefined) caState.showSignature = d.showSignature;
+  if (d.signatureWidth !== undefined) caState.signatureWidth = d.signatureWidth;
+
+  syncCaInputsFromState();
+  syncCaAlignmentButtons();
+  populateCaVersionsDropdown();
+  renderAppearancePreview();
+  autosaveCaSession();
+  showToast(`Loaded version: ${ver.name}`, 'fa-check');
+}
+
+function promptSaveNewCaVersion() {
+  const defaultTitle = `Version ${new Date().toLocaleDateString()} (${caState.signatureAlign === 'center' ? 'Centered' : 'Right'} Sig)`;
+  const name = prompt('Enter a name for this document version / preset:', defaultTitle);
+  if (!name || !name.trim()) return;
+
+  const newVer = {
+    id: `ver_${Date.now()}`,
+    name: name.trim(),
+    createdAt: new Date().toISOString(),
+    isBuiltIn: false,
+    data: {
+      documentTitle: caState.documentTitle,
+      titleSpacingAfter: caState.titleSpacingAfter,
+      titleAlign: caState.titleAlign,
+      mainTextAlign: caState.mainTextAlign,
+      signatureAlign: caState.signatureAlign,
+      lineSpacing: caState.lineSpacing,
+      paragraphSpacing: caState.paragraphSpacing,
+      fontSize: caState.fontSize,
+      textIndent: caState.textIndent,
+      mainTemplate: caState.mainTemplate,
+      purpose: caState.purpose,
+      issueDate: caState.issueDate,
+      signatoryName: caState.signatoryName,
+      signatoryTitle1: caState.signatoryTitle1,
+      signatoryTitle2: caState.signatoryTitle2,
+      initials: caState.initials,
+      showSignature: caState.showSignature,
+      signatureWidth: caState.signatureWidth
+    }
+  };
+
+  const saved = getSavedCaVersions();
+  saved.push(newVer);
+  localStorage.setItem(CA_VERSIONS_KEY, JSON.stringify(saved));
+  caState.activeVersionId = newVer.id;
+  populateCaVersionsDropdown();
+  showToast(`Saved new version: ${newVer.name}`, 'fa-bookmark');
+}
+
+function updateCurrentCaVersion() {
+  const saved = getSavedCaVersions();
+  const idx = saved.findIndex(v => v.id === caState.activeVersionId);
+  if (idx === -1) {
+    promptSaveNewCaVersion();
+    return;
+  }
+
+  saved[idx].updatedAt = new Date().toISOString();
+  saved[idx].data = {
+    documentTitle: caState.documentTitle,
+    titleSpacingAfter: caState.titleSpacingAfter,
+    titleAlign: caState.titleAlign,
+    mainTextAlign: caState.mainTextAlign,
+    signatureAlign: caState.signatureAlign,
+    lineSpacing: caState.lineSpacing,
+    paragraphSpacing: caState.paragraphSpacing,
+    fontSize: caState.fontSize,
+    textIndent: caState.textIndent,
+    mainTemplate: caState.mainTemplate,
+    purpose: caState.purpose,
+    issueDate: caState.issueDate,
+    signatoryName: caState.signatoryName,
+    signatoryTitle1: caState.signatoryTitle1,
+    signatoryTitle2: caState.signatoryTitle2,
+    initials: caState.initials,
+    showSignature: caState.showSignature,
+    signatureWidth: caState.signatureWidth
+  };
+
+  localStorage.setItem(CA_VERSIONS_KEY, JSON.stringify(saved));
+  showToast(`Updated version: ${saved[idx].name}`, 'fa-floppy-disk');
+}
+
+function deleteCurrentCaVersion() {
+  const saved = getSavedCaVersions();
+  const idx = saved.findIndex(v => v.id === caState.activeVersionId);
+  if (idx === -1) return;
+
+  if (!confirm(`Are you sure you want to delete version "${saved[idx].name}"?`)) return;
+
+  const deletedName = saved[idx].name;
+  saved.splice(idx, 1);
+  localStorage.setItem(CA_VERSIONS_KEY, JSON.stringify(saved));
+  caState.activeVersionId = 'ver_executive_centered';
+  loadCaVersion(caState.activeVersionId);
+  showToast(`Deleted version: ${deletedName}`, 'fa-trash-can');
+}
+
+function autosaveCaSession() {
+  try {
+    const snapshot = {
+      titleSpacingAfter: caState.titleSpacingAfter,
+      signatureAlign: caState.signatureAlign,
+      mainTextAlign: caState.mainTextAlign,
+      titleAlign: caState.titleAlign,
+      lineSpacing: caState.lineSpacing,
+      paragraphSpacing: caState.paragraphSpacing,
+      fontSize: caState.fontSize,
+      textIndent: caState.textIndent,
+      documentTitle: caState.documentTitle,
+      mainTemplate: caState.mainTemplate,
+      customMemberTexts: caState.customMemberTexts,
+      purpose: caState.purpose,
+      issueDate: caState.issueDate,
+      signatoryName: caState.signatoryName,
+      signatoryTitle1: caState.signatoryTitle1,
+      signatoryTitle2: caState.signatoryTitle2,
+      initials: caState.initials,
+      showSignature: caState.showSignature,
+      signatureWidth: caState.signatureWidth,
+      activeVersionId: caState.activeVersionId
+    };
+    localStorage.setItem(CA_AUTOSAVE_KEY, JSON.stringify(snapshot));
+  } catch (e) {
+    // ignore
+  }
+}
+
+function restoreAutosavedCaSession() {
+  try {
+    const raw = localStorage.getItem(CA_AUTOSAVE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s.titleSpacingAfter !== undefined) caState.titleSpacingAfter = s.titleSpacingAfter;
+    if (s.signatureAlign !== undefined) caState.signatureAlign = s.signatureAlign;
+    if (s.mainTextAlign !== undefined) caState.mainTextAlign = s.mainTextAlign;
+    if (s.titleAlign !== undefined) caState.titleAlign = s.titleAlign;
+    if (s.lineSpacing !== undefined) caState.lineSpacing = s.lineSpacing;
+    if (s.paragraphSpacing !== undefined) caState.paragraphSpacing = s.paragraphSpacing;
+    if (s.fontSize !== undefined) caState.fontSize = s.fontSize;
+    if (s.textIndent !== undefined) caState.textIndent = s.textIndent;
+    if (s.documentTitle !== undefined) caState.documentTitle = s.documentTitle;
+    if (s.mainTemplate !== undefined) caState.mainTemplate = s.mainTemplate;
+    if (s.customMemberTexts) caState.customMemberTexts = s.customMemberTexts;
+    if (s.purpose !== undefined) caState.purpose = s.purpose;
+    if (s.issueDate !== undefined) caState.issueDate = s.issueDate;
+    if (s.signatoryName !== undefined) caState.signatoryName = s.signatoryName;
+    if (s.signatoryTitle1 !== undefined) caState.signatoryTitle1 = s.signatoryTitle1;
+    if (s.signatoryTitle2 !== undefined) caState.signatoryTitle2 = s.signatoryTitle2;
+    if (s.initials !== undefined) caState.initials = s.initials;
+    if (s.showSignature !== undefined) caState.showSignature = s.showSignature;
+    if (s.signatureWidth !== undefined) caState.signatureWidth = s.signatureWidth;
+    if (s.activeVersionId !== undefined) caState.activeVersionId = s.activeVersionId;
+  } catch (e) {
+    // ignore
+  }
+}
 
 // --- INITIALIZATION ---
 function initAppearanceStudio() {
   populateCaActivityDropdown();
   
+  // Restore autosaved session if present
+  restoreAutosavedCaSession();
+
   // Set default activity if present
   const defaultAct = activitiesList.find(a => a.id === caState.selectedActivityId) || activitiesList[0];
   if (defaultAct) {
@@ -56,6 +343,8 @@ function initAppearanceStudio() {
 
   // Populate UI inputs from state
   syncCaInputsFromState();
+  syncCaAlignmentButtons();
+  populateCaVersionsDropdown();
   populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
@@ -319,14 +608,75 @@ function handleCaSpacingChange(field, val) {
   } else if (field === 'textIndent') {
     const elVal = document.getElementById('caTextIndentVal');
     if (elVal) elVal.textContent = `${val}px`;
+  } else if (field === 'titleSpacingAfter') {
+    const elVal = document.getElementById('caTitleSpacingVal');
+    if (elVal) elVal.textContent = `${val}px`;
   }
   renderAppearancePreview();
+  autosaveCaSession();
 }
 
 function setCaLineSpacingPreset(val) {
   const input = document.getElementById('caLineSpacingInput');
   if (input) input.value = val;
   handleCaSpacingChange('lineSpacing', val);
+}
+
+function setCaTitleSpacingPreset(val) {
+  const input = document.getElementById('caTitleSpacingInput');
+  if (input) input.value = val;
+  handleCaSpacingChange('titleSpacingAfter', val);
+}
+
+function setCaSignatureAlign(align) {
+  caState.signatureAlign = align;
+  syncCaAlignmentButtons();
+  renderAppearancePreview();
+  autosaveCaSession();
+}
+
+function setCaMainTextAlign(align) {
+  caState.mainTextAlign = align;
+  syncCaAlignmentButtons();
+  renderAppearancePreview();
+  autosaveCaSession();
+}
+
+function setCaTitleAlign(align) {
+  caState.titleAlign = align;
+  renderAppearancePreview();
+  autosaveCaSession();
+}
+
+function syncCaAlignmentButtons() {
+  const sAlign = caState.signatureAlign || 'center';
+  const activeClass = 'py-1 px-2 rounded-lg transition flex items-center justify-center gap-1.5 bg-move-navy-900 text-white shadow-2xs font-extrabold';
+  const inactiveClass = 'py-1 px-2 rounded-lg transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold';
+
+  // Card 2 buttons
+  const bSL = document.getElementById('btnCaSigAlignLeft');
+  const bSC = document.getElementById('btnCaSigAlignCenter');
+  const bSR = document.getElementById('btnCaSigAlignRight');
+  if (bSL) bSL.className = sAlign === 'left' ? activeClass : inactiveClass;
+  if (bSC) bSC.className = sAlign === 'center' ? activeClass : inactiveClass;
+  if (bSR) bSR.className = sAlign === 'right' ? activeClass : inactiveClass;
+
+  // Card 4 buttons
+  const bSL2 = document.getElementById('btnCaSigAlignLeft2');
+  const bSC2 = document.getElementById('btnCaSigAlignCenter2');
+  const bSR2 = document.getElementById('btnCaSigAlignRight2');
+  if (bSL2) bSL2.className = sAlign === 'left' ? activeClass : inactiveClass;
+  if (bSC2) bSC2.className = sAlign === 'center' ? activeClass : inactiveClass;
+  if (bSR2) bSR2.className = sAlign === 'right' ? activeClass : inactiveClass;
+
+  // Text alignment
+  const tAlign = caState.mainTextAlign || 'both';
+  const bTJ = document.getElementById('btnCaAlignJustify');
+  const bTL = document.getElementById('btnCaAlignLeft');
+  const bTC = document.getElementById('btnCaAlignCenter');
+  if (bTJ) bTJ.className = tAlign === 'both' ? activeClass : inactiveClass;
+  if (bTL) bTL.className = tAlign === 'left' ? activeClass : inactiveClass;
+  if (bTC) bTC.className = tAlign === 'center' ? activeClass : inactiveClass;
 }
 
 function handleCaSheetEdit(el, field) {
@@ -466,11 +816,17 @@ function syncCaInputsFromState() {
   const elIndentVal = document.getElementById('caTextIndentVal');
   if (elIndentVal) elIndentVal.textContent = `${caState.textIndent}px`;
 
+  setVal('caTitleSpacingInput', caState.titleSpacingAfter);
+  const elTitleVal = document.getElementById('caTitleSpacingVal');
+  if (elTitleVal) elTitleVal.textContent = `${caState.titleSpacingAfter}px`;
+
   setChecked('caShowSignature', caState.showSignature);
   setChecked('caShowCityLogo', caState.showCityLogo);
   setChecked('caShowMoveLogo', caState.showMoveLogo);
   setChecked('caFilterPresentOnly', caState.filterPresentOnly);
 
+  syncCaAlignmentButtons();
+  populateCaVersionsDropdown();
   syncCaContextInput();
 
   // Update mode tabs
@@ -501,6 +857,7 @@ function handleCaInputChange(field, val) {
     populateCaEmployeeDropdown();
   }
   renderAppearancePreview();
+  autosaveCaSession();
 }
 
 function handleCaActivityChange(actId) {
@@ -779,9 +1136,11 @@ function renderAppearancePreview() {
     `;
   }
 
-  // Signature Block
+  // Signature Block & Alignments
+  const sigAlign = caState.signatureAlign || 'center';
+  const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
   const sigImgHtml = caState.showSignature ? `
-    <div class="flex justify-end -mb-7 relative z-10 pointer-events-none select-none">
+    <div class="flex ${sigJustify} -mb-7 relative z-10 pointer-events-none select-none">
       <img src="signature%20(15).png" alt="Signature" 
            style="width: ${caState.signatureWidth}px; max-height: 80px;" 
            class="object-contain drop-shadow-xs">
@@ -823,7 +1182,7 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= DOCUMENT TITLE ================= -->
-      <div class="text-center py-4">
+      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'}" style="margin-top: 14px; margin-bottom: ${caState.titleSpacingAfter}px;">
         <h1 id="caDocTitleEl" contenteditable="true" spellcheck="false"
             oninput="handleCaSheetEdit(this, 'documentTitle')"
             class="text-2xl font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
@@ -831,7 +1190,6 @@ function renderAppearancePreview() {
             title="Click to edit document title directly">
           ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
-        <div class="w-24 h-0.5 bg-move-orange-500 mx-auto mt-2"></div>
       </div>
 
       <!-- ================= BODY CONTENT ================= -->
@@ -843,7 +1201,7 @@ function renderAppearancePreview() {
           <p id="caPurposeEl" contenteditable="true" spellcheck="false"
              oninput="handleCaSheetEdit(this, 'purpose')"
              style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
-             class="text-justify text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+             class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
              title="Click to edit lawful purpose clause directly">
             ${escapeHtml(caState.purpose)}
           </p>
@@ -861,9 +1219,9 @@ function renderAppearancePreview() {
         </div>
 
         <!-- ================= SIGNATORY BLOCK ================= -->
-        <div class="pt-3 flex items-end justify-between">
+        <div class="pt-4 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
           <!-- Control Initials (DRMO / CTB) -->
-          <div class="text-left">
+          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
             <span id="caInitialsEl" contenteditable="true" spellcheck="false"
                   oninput="handleCaSheetEdit(this, 'initials')"
                   class="text-[11px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
@@ -960,8 +1318,10 @@ function batchPrintAllAppearance() {
   container.innerHTML = '';
 
   const themeHtml = caState.theme ? ` with the theme “<strong>${escapeHtml(caState.theme)}</strong>”` : '';
+  const sigAlign = caState.signatureAlign || 'center';
+  const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
   const sigImgHtml = caState.showSignature ? `
-    <div class="flex justify-end -mb-7 relative z-10 pointer-events-none select-none">
+    <div class="flex ${sigJustify} -mb-7 relative z-10 pointer-events-none select-none">
       <img src="signature%20(15).png" alt="Signature" 
            style="width: ${caState.signatureWidth}px; max-height: 80px;" 
            class="object-contain drop-shadow-xs">
@@ -999,24 +1359,23 @@ function batchPrintAllAppearance() {
         </div>
       </div>
 
-      <!-- TITLE -->
-      <div class="text-center py-4">
+      <!-- TITLE (Without orange line, with dynamic titleSpacingAfter) -->
+      <div class="text-${caState.titleAlign || 'center'}" style="margin-top: 14px; margin-bottom: ${caState.titleSpacingAfter}px;">
         <h1 class="text-2xl font-black text-slate-900 tracking-wider uppercase" style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;">
           ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
-        <div class="w-24 h-0.5 bg-move-orange-500 mx-auto mt-2"></div>
       </div>
 
       <!-- BODY -->
       <div class="flex-1 py-1">
         <div class="my-4">
-          <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
+          <p class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
             ${buildCaMainHtml(currMember)}
           </p>
         </div>
 
         <div>
-          <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
+          <p class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
             ${escapeHtml(caState.purpose)}
           </p>
         </div>
@@ -1027,9 +1386,9 @@ function batchPrintAllAppearance() {
           </p>
         </div>
 
-        <!-- SIGNATORY -->
-        <div class="pt-3 flex items-end justify-between">
-          <div class="text-left">
+        <!-- SIGNATORY BLOCK -->
+        <div class="pt-4 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
+          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left">
             <span class="text-[11px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
           </div>
           <div class="text-center w-72">
@@ -1082,11 +1441,15 @@ async function exportCertificateOfAppearanceDocx(exportAll = false) {
     exportAll: !!exportAll,
     participants: participants,
     individualMember: currentMember,
-    // Spacing & typography parameters
+    // Spacing, layout & typography parameters
     lineSpacing: caState.lineSpacing,
     paragraphSpacing: caState.paragraphSpacing,
     fontSize: caState.fontSize,
     textIndent: caState.textIndent,
+    titleSpacingAfter: caState.titleSpacingAfter,
+    signatureAlign: caState.signatureAlign,
+    mainTextAlign: caState.mainTextAlign,
+    titleAlign: caState.titleAlign,
     mainTemplate: caState.mainTemplate,
     customMemberTexts: caState.customMemberTexts,
     individualMainText: buildCaMainPlainText(currentMember)
@@ -1144,6 +1507,9 @@ function generateClientSideDocx(data) {
   const lSpacing = data.lineSpacing || 1.40;
   const pSpacing = data.paragraphSpacing || 14;
   const fSize = data.fontSize || 13.5;
+  const sigAlign = data.signatureAlign || 'center';
+  const titleSpace = data.titleSpacingAfter || 20;
+  const mainAlign = (data.mainTextAlign === 'both' || !data.mainTextAlign) ? 'justify' : data.mainTextAlign;
 
   let bodyContent = '';
   if (data.mode === 'group') {
@@ -1190,13 +1556,16 @@ function generateClientSideDocx(data) {
 
         <table style="width: 100%; margin-top: 40px; border: none;">
           <tr>
-            <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666;">
-              ${escapeHtml(data.initials)}
+            <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666; width: 25%;">
+              ${sigAlign !== 'left' ? escapeHtml(data.initials) : ''}
             </td>
-            <td style="width: 250px; text-align: center; vertical-align: bottom;">
+            <td style="text-align: ${sigAlign}; vertical-align: bottom; width: 50%;">
               <p style="margin: 0; font-size: 11pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(data.signatoryName)}</p>
               <p style="margin: 0; font-size: 10pt; font-weight: bold;">${escapeHtml(data.signatoryTitle1)}</p>
               <p style="margin: 0; font-size: 9pt; color: #333;">${escapeHtml(data.signatoryTitle2)}</p>
+            </td>
+            <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666; width: 25%; text-align: right;">
+              ${sigAlign === 'left' ? escapeHtml(data.initials) : ''}
             </td>
           </tr>
         </table>
@@ -1232,13 +1601,16 @@ function generateClientSideDocx(data) {
 
           <table style="width: 100%; margin-top: 40px; border: none;">
             <tr>
-              <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666;">
-                ${escapeHtml(data.initials)}
+              <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666; width: 25%;">
+                ${sigAlign !== 'left' ? escapeHtml(data.initials) : ''}
               </td>
-              <td style="width: 250px; text-align: center; vertical-align: bottom;">
+              <td style="text-align: ${sigAlign}; vertical-align: bottom; width: 50%;">
                 <p style="margin: 0; font-size: 11pt; font-weight: bold; text-transform: uppercase;">${escapeHtml(data.signatoryName)}</p>
                 <p style="margin: 0; font-size: 10pt; font-weight: bold;">${escapeHtml(data.signatoryTitle1)}</p>
                 <p style="margin: 0; font-size: 9pt; color: #333;">${escapeHtml(data.signatoryTitle2)}</p>
+              </td>
+              <td style="vertical-align: bottom; font-family: monospace; font-size: 9pt; color: #666; width: 25%; text-align: right;">
+                ${sigAlign === 'left' ? escapeHtml(data.initials) : ''}
               </td>
             </tr>
           </table>
@@ -1267,9 +1639,9 @@ function generateClientSideDocx(data) {
         }
         div.Section1 { page: Section1; }
         body { font-family: 'Arial', sans-serif; font-size: ${fSize}pt; line-height: ${lSpacing}; color: #000; }
-        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 20px; margin-bottom: 20px; letter-spacing: 1.5pt; }
-        p.certify { text-align: justify; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
-        p.purpose { text-align: justify; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
+        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 20px; margin-bottom: ${titleSpace}pt; letter-spacing: 1.5pt; }
+        p.certify { text-align: ${mainAlign}; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
+        p.purpose { text-align: ${mainAlign}; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
         p.issue { margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing * 1.5}pt; line-height: ${lSpacing}; }
       </style>
     </head>

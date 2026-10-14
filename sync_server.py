@@ -362,7 +362,7 @@ def build_custom_text_runs(text, member, hon, full_act_title, sz=27):
         runs.append(create_docx_run(part, bold=is_bold, size=sz))
     return runs
 
-def populate_individual_elements(parent, member, title, theme, date_str, venue, purpose, issue_date, signatory, sig_t1, sig_t2, initials, attendance_basis, hon, line_spacing=1.40, space_after=14, text_indent=720, doc_title="CERTIFICATE OF APPEARANCE", custom_text=None, font_size_pt=13.5):
+def populate_individual_elements(parent, member, title, theme, date_str, venue, purpose, issue_date, signatory, sig_t1, sig_t2, initials, attendance_basis, hon, line_spacing=1.40, space_after=14, text_indent=720, doc_title="CERTIFICATE OF APPEARANCE", custom_text=None, font_size_pt=13.5, title_space_after=300, sig_align="center", main_align="both"):
     m_name = (member.get("name") or "EMPLOYEE FULL NAME").upper()
     m_pos = (member.get("position") or "OFFICIAL POSITION TITLE").upper()
     m_off = (member.get("office") or "DEPARTMENT / OFFICE").upper()
@@ -375,7 +375,7 @@ def populate_individual_elements(parent, member, title, theme, date_str, venue, 
 
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_title = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_title, [create_docx_run(doc_title or "CERTIFICATE OF APPEARANCE", bold=True, size=40, font_name="MS Reference Sans Serif")], jc="center", space_after=space_after)
+    set_docx_para(p_title, [create_docx_run(doc_title or "CERTIFICATE OF APPEARANCE", bold=True, size=40, font_name="MS Reference Sans Serif")], jc="center", space_after=title_space_after)
     
     ET.SubElement(parent, f"{{{W_NS}}}p")
 
@@ -395,11 +395,11 @@ def populate_individual_elements(parent, member, title, theme, date_str, venue, 
             create_docx_run(full_act_title, bold=True, size=sz),
             create_docx_run(f",\u201d {date_clause}, {venue_clause}.", size=sz)
         ]
-    set_docx_para(p_main, runs_main, jc="both", first_line_ind=text_indent, line_spacing=line_spacing, space_after=space_after)
+    set_docx_para(p_main, runs_main, jc=main_align, first_line_ind=text_indent, line_spacing=line_spacing, space_after=space_after)
     
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_purp = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_purp, [create_docx_run(purpose, size=sz)], jc="both", first_line_ind=text_indent, line_spacing=line_spacing, space_after=space_after)
+    set_docx_para(p_purp, [create_docx_run(purpose, size=sz)], jc=main_align, first_line_ind=text_indent, line_spacing=line_spacing, space_after=space_after)
     
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_iss = ET.SubElement(parent, f"{{{W_NS}}}p")
@@ -408,11 +408,11 @@ def populate_individual_elements(parent, member, title, theme, date_str, venue, 
     ET.SubElement(parent, f"{{{W_NS}}}p")
     ET.SubElement(parent, f"{{{W_NS}}}p")
     p_sig_name = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_sig_name, [create_docx_run(signatory, bold=True, size=24)], jc="right")
+    set_docx_para(p_sig_name, [create_docx_run(signatory, bold=True, size=24)], jc=sig_align)
     p_sig_t1 = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_sig_t1, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
+    set_docx_para(p_sig_t1, [create_docx_run(sig_t1, bold=True, size=22)], jc=sig_align)
     p_sig_t2 = ET.SubElement(parent, f"{{{W_NS}}}p")
-    set_docx_para(p_sig_t2, [create_docx_run(sig_t2, size=20)], jc="right")
+    set_docx_para(p_sig_t2, [create_docx_run(sig_t2, size=20)], jc=sig_align)
     
     p_init = ET.SubElement(parent, f"{{{W_NS}}}p")
     set_docx_para(p_init, [create_docx_run(initials, size=18)], jc="left")
@@ -447,6 +447,14 @@ def generate_ca_docx(data):
     custom_member_texts = data.get("customMemberTexts") or {}
     main_template = data.get("mainTemplate") or ""
     individual_main_text = data.get("individualMainText") or ""
+
+    # Signature and text alignments
+    sig_align_raw = str(data.get("signatureAlign", "center")).lower().strip()
+    sig_align = sig_align_raw if sig_align_raw in ["left", "center", "right"] else "center"
+    main_align_raw = str(data.get("mainTextAlign", "both")).lower().strip()
+    main_align = "both" if main_align_raw in ["justify", "both"] else (main_align_raw if main_align_raw in ["left", "center", "right"] else "both")
+    title_spacing_px = float(data.get("titleSpacingAfter", 20))
+    title_space_after = int(title_spacing_px * 15)
 
     def resolve_hon(member):
         if honorific_mode == "none":
@@ -483,7 +491,7 @@ def generate_ca_docx(data):
                             create_docx_run(full_act_title, bold=True),
                             create_docx_run(f",\u201d {date_clause}, {venue_clause}:")
                         ]
-                        set_docx_para(p_cert, runs_cert, jc="both", first_line_ind=ind_dxa, line_spacing=line_spacing, space_after=space_after)
+                        set_docx_para(p_cert, runs_cert, jc=main_align, first_line_ind=ind_dxa, line_spacing=line_spacing, space_after=space_after)
 
                         p_placeholder = children[3]
                         idx_placeholder = list(body).index(p_placeholder)
@@ -494,17 +502,17 @@ def generate_ca_docx(data):
                         for p in body.iter(f"{{{W_NS}}}p"):
                             txt = "".join(p.itertext())
                             if "CERTIFICATE OF APPEARANCE" in txt:
-                                set_docx_para(p, [create_docx_run(doc_title, bold=True, size=40, font_name="MS Reference Sans Serif")], jc="center")
+                                set_docx_para(p, [create_docx_run(doc_title, bold=True, size=40, font_name="MS Reference Sans Serif")], jc="center", space_after=title_space_after)
                             elif "daily time records" in txt or "support the non-entry" in txt:
-                                set_docx_para(p, [create_docx_run(purpose)], jc="both", first_line_ind=ind_dxa, line_spacing=line_spacing, space_after=space_after)
+                                set_docx_para(p, [create_docx_run(purpose)], jc=main_align, first_line_ind=ind_dxa, line_spacing=line_spacing, space_after=space_after)
                             elif "Issued this" in txt:
                                 set_docx_para(p, [create_docx_run(issue_date)], jc="left", line_spacing=line_spacing, space_after=int(space_after * 1.5))
                             elif "BENJAMIN B. MAGALONG" in txt:
-                                set_docx_para(p, [create_docx_run(signatory, bold=True, size=24)], jc="right")
+                                set_docx_para(p, [create_docx_run(signatory, bold=True, size=24)], jc=sig_align)
                             elif "City Mayor" in txt:
-                                set_docx_para(p, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
+                                set_docx_para(p, [create_docx_run(sig_t1, bold=True, size=22)], jc=sig_align)
                             elif "LCAT-VAWC Chairperson" in txt:
-                                set_docx_para(p, [create_docx_run(sig_t2, size=20)], jc="right")
+                                set_docx_para(p, [create_docx_run(sig_t2, size=20)], jc=sig_align)
                             elif "/drmo/ctb" in txt or ("/drmo" in txt and "ctb" in txt):
                                 set_docx_para(p, [create_docx_run(initials, size=18)], jc="left")
                     else:
@@ -548,7 +556,8 @@ def generate_ca_docx(data):
                                 initials, attendance_basis, hon,
                                 line_spacing=line_spacing, space_after=space_after,
                                 text_indent=ind_dxa, doc_title=doc_title,
-                                custom_text=cust_text, font_size_pt=font_size_pt
+                                custom_text=cust_text, font_size_pt=font_size_pt,
+                                title_space_after=title_space_after, sig_align=sig_align, main_align=main_align
                             )
 
                         body.append(sectPr)
