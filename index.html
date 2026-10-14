@@ -2251,7 +2251,128 @@
             <!-- LEFT COLUMN: Customizer Controls & Attendees Panel (4 cols) -->
             <div class="xl:col-span-4 space-y-4 no-print">
               
-              <!-- Accordion Card 1: Event & Activity Details -->
+              <!-- Card 1: Main Certification Context Editor (Live Editable) -->
+              <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-fancy text-move-orange-500"></i>
+                    <span>Main Context Editor</span>
+                  </h4>
+                  <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
+                    <button type="button" id="caBtnContextCurrent" onclick="setCaContextEditMode('current')"
+                            class="px-2 py-0.5 rounded bg-move-navy-900 text-white shadow-2xs font-bold transition">This Employee</button>
+                    <button type="button" id="caBtnContextTemplate" onclick="setCaContextEditMode('template')"
+                            class="px-2 py-0.5 rounded text-slate-600 hover:text-move-navy-900 transition">Template (All)</button>
+                  </div>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label id="caContextLabel" class="text-[11px] font-bold text-slate-700">Certification Statement</label>
+                      <span id="caContextModeBadge" class="text-[9.5px] font-semibold text-move-orange-600">Editing Active Employee</span>
+                    </div>
+                    <textarea id="caMainContextInput" rows="5" oninput="handleCaMainContextInput(this.value)"
+                              class="w-full py-2 px-2.5 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-move-orange-500 text-xs leading-relaxed resize-y shadow-2xs"></textarea>
+                  </div>
+
+                  <!-- Quick Placeholder Insertion Chips -->
+                  <div id="caPlaceholdersRow" class="space-y-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Insert Dynamic Tag:</span>
+                    <div class="flex flex-wrap gap-1">
+                      <button type="button" onclick="insertCaPlaceholder('{honorific}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Mr. or Ms.">{honorific}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{name}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Employee Name">{name}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{position}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Position Title">{position}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{office}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Office / Department">{office}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{activity}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Activity Title + Theme">{activity}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{date}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Date">{date}</button>
+                      <button type="button" onclick="insertCaPlaceholder('{venue}')" class="px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded font-mono text-[10px] text-slate-700 border border-slate-200 transition" title="Insert Venue">{venue}</button>
+                    </div>
+                  </div>
+
+                  <!-- Context Action Buttons -->
+                  <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+                    <button type="button" onclick="applyMainTextToAllAttendees()" class="flex-1 py-1.5 px-2 bg-move-navy-900 hover:bg-move-navy-800 text-white font-bold rounded-xl text-[11px] transition flex items-center justify-center gap-1 shadow-2xs">
+                      <i class="fa-solid fa-arrows-rotate text-move-orange-400"></i>
+                      <span>Apply to All Attendees</span>
+                    </button>
+                    <button type="button" onclick="resetCaContextToDefault()" class="py-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 font-bold rounded-xl text-[11px] transition" title="Reset wording & spacing to standard formal defaults">
+                      <i class="fa-solid fa-undo"></i>
+                      <span>Reset</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Line Spacing & Typography Adjustments -->
+              <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-up-down text-move-orange-500"></i>
+                    <span>Line Spacing & Typography</span>
+                  </h4>
+                  <span id="caLineSpacingBadge" class="text-[10px] font-mono font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200">1.40x Spacing</span>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                  <!-- Quick Preset Buttons -->
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1.5">Line Spacing Presets</label>
+                    <div class="grid grid-cols-4 gap-1.5">
+                      <button type="button" onclick="setCaLineSpacingPreset(1.20)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">Compact 1.2</button>
+                      <button type="button" onclick="setCaLineSpacingPreset(1.40)" class="py-1 px-1 bg-move-navy-900 text-white rounded-lg text-[10.5px] font-bold transition text-center shadow-xs">Normal 1.4</button>
+                      <button type="button" onclick="setCaLineSpacingPreset(1.60)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">1.6x</button>
+                      <button type="button" onclick="setCaLineSpacingPreset(2.00)" class="py-1 px-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white rounded-lg text-[10.5px] font-bold text-slate-700 transition text-center">Double 2.0</button>
+                    </div>
+                  </div>
+
+                  <!-- Fine-tune Line Spacing Slider -->
+                  <div>
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
+                      <span>Line Spacing Multiplier</span>
+                      <span id="caLineSpacingVal" class="font-mono text-move-orange-600 font-extrabold">1.40x</span>
+                    </div>
+                    <input type="range" id="caLineSpacingInput" min="1.10" max="2.20" step="0.05" value="1.40"
+                           oninput="handleCaSpacingChange('lineSpacing', parseFloat(this.value))"
+                           class="w-full accent-move-orange-500 cursor-pointer">
+                  </div>
+
+                  <!-- Paragraph Spacing Slider -->
+                  <div>
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
+                      <span>Paragraph Gap / Spacing</span>
+                      <span id="caParagraphSpacingVal" class="font-mono text-move-orange-600 font-extrabold">14px</span>
+                    </div>
+                    <input type="range" id="caParagraphSpacingInput" min="4" max="32" step="2" value="14"
+                           oninput="handleCaSpacingChange('paragraphSpacing', parseInt(this.value, 10))"
+                           class="w-full accent-move-orange-500 cursor-pointer">
+                  </div>
+
+                  <!-- Font Size Slider -->
+                  <div>
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
+                      <span>Body Font Size</span>
+                      <span id="caFontSizeVal" class="font-mono text-move-orange-600 font-extrabold">13.5px</span>
+                    </div>
+                    <input type="range" id="caFontSizeInput" min="11" max="17" step="0.5" value="13.5"
+                           oninput="handleCaSpacingChange('fontSize', parseFloat(this.value))"
+                           class="w-full accent-move-orange-500 cursor-pointer">
+                  </div>
+
+                  <!-- Text Indent Slider -->
+                  <div>
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1">
+                      <span>First Line Indent</span>
+                      <span id="caTextIndentVal" class="font-mono text-move-orange-600 font-extrabold">36px</span>
+                    </div>
+                    <input type="range" id="caTextIndentInput" min="0" max="60" step="4" value="36"
+                           oninput="handleCaSpacingChange('textIndent', parseInt(this.value, 10))"
+                           class="w-full accent-move-orange-500 cursor-pointer">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion Card 3: Event & Activity Details -->
               <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
                 <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                   <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
@@ -2426,6 +2547,25 @@
 
             <!-- RIGHT COLUMN: High-Fidelity A4 Portrait Stage (8 cols) -->
             <div class="xl:col-span-8 space-y-3">
+              <!-- Live Interactive Editing Notification Banner -->
+              <div class="no-print bg-amber-50 border border-amber-200 text-amber-950 text-xs px-4 py-2.5 rounded-2xl flex items-center justify-between shadow-2xs gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0 text-amber-700">
+                    <i class="fa-solid fa-i-cursor"></i>
+                  </span>
+                  <div class="min-w-0">
+                    <span class="font-extrabold text-move-navy-900">Direct Live Document Editor:</span>
+                    <span class="text-slate-600 ml-1">Click and type directly on any text in the certificate sheet below to edit, or adjust using the left controls.</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Live Ready</span>
+                  </span>
+                </div>
+              </div>
+
               <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[920px]">
                 <div id="caPreviewStage" class="transition-transform duration-200">
                   <!-- The live A4 portrait sheet is rendered here by renderAppearancePreview() -->

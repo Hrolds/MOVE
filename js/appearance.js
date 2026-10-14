@@ -16,6 +16,7 @@ const caState = {
   venue: 'CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City',
   purpose: 'This certification is issued upon the request of the above-named individual for whatever lawful purpose it may serve.',
   issueDate: 'Issued this 20th day of October 2026, Baguio City, Philippines.',
+  documentTitle: 'CERTIFICATE OF APPEARANCE',
   signatoryName: 'BENJAMIN B. MAGALONG',
   signatoryTitle1: 'City Mayor',
   signatoryTitle2: 'LCAT-VAWC Chairperson',
@@ -27,7 +28,18 @@ const caState = {
   filterPresentOnly: true,
   searchTerm: '',
   selectedMemberIds: new Set(),
-  zoom: 100
+  zoom: 100,
+
+  // Editable Context & Template
+  mainContextMode: 'current', // 'current' (single employee) or 'template' (applies to all)
+  mainTemplate: 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.',
+  customMemberTexts: {}, // memberId -> custom text/HTML
+
+  // Spacing & Typography controls (compact & formal defaults)
+  lineSpacing: 1.40,       // Line height multiplier (compact & formal, e.g. 1.2 to 2.2)
+  paragraphSpacing: 14,   // Margin bottom in px between main blocks
+  fontSize: 13.5,         // Font size in px
+  textIndent: 36          // Text indent in px
 };
 
 // --- INITIALIZATION ---
@@ -140,6 +152,225 @@ function getCaHonorific(member, uppercase = false) {
   return uppercase ? hon.toUpperCase() : hon;
 }
 
+// --- CONTEXT BUILDERS & INTERACTIVE EDITING ---
+function buildCaMainHtml(member) {
+  if (!member) {
+    const list = getActiveCaParticipants();
+    member = list[caState.currentMemberIndex] || {
+      name: 'EMPLOYEE FULL NAME',
+      position: 'OFFICIAL POSITION TITLE',
+      office: 'DEPARTMENT / OFFICE',
+      role: 'Participant',
+      gender: 'M'
+    };
+  }
+
+  // If there's an individual text override for this member
+  if (caState.customMemberTexts && member.id && caState.customMemberTexts[member.id]) {
+    return caState.customMemberTexts[member.id];
+  }
+
+  const hon = getCaHonorific(member, true);
+  const mName = escapeHtml((member.name || 'EMPLOYEE FULL NAME').toUpperCase());
+  const mPos = escapeHtml((member.position || 'OFFICIAL POSITION TITLE').toUpperCase());
+  const mOff = escapeHtml((member.office || 'DEPARTMENT / OFFICE').toUpperCase());
+  const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
+  const dateClause = escapeHtml(formatCaDateText(caState.date));
+  const venueClause = escapeHtml(formatCaVenueText(caState.venue));
+  const basisClause = escapeHtml(caState.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
+
+  let tmpl = caState.mainTemplate || 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.';
+
+  return tmpl
+    .replace(/\{honorific\}/gi, hon)
+    .replace(/\{name\}/gi, mName)
+    .replace(/\{position\}/gi, mPos)
+    .replace(/\{office\}/gi, mOff)
+    .replace(/\{basis\}/gi, basisClause)
+    .replace(/\{activity\}/gi, fullActTitle)
+    .replace(/\{date\}/gi, dateClause)
+    .replace(/\{venue\}/gi, venueClause);
+}
+
+function buildCaMainPlainText(member) {
+  const html = buildCaMainHtml(member);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function setCaContextEditMode(mode) {
+  caState.mainContextMode = mode;
+  syncCaContextInput();
+}
+
+function syncCaContextInput() {
+  const input = document.getElementById('caMainContextInput');
+  const btnCurr = document.getElementById('caBtnContextCurrent');
+  const btnTmpl = document.getElementById('caBtnContextTemplate');
+  const badge = document.getElementById('caContextModeBadge');
+  if (!input) return;
+
+  const participants = getActiveCaParticipants();
+  const currMember = participants[caState.currentMemberIndex] || null;
+
+  if (caState.mainContextMode === 'current') {
+    if (btnCurr) btnCurr.className = 'px-2 py-0.5 rounded bg-move-navy-900 text-white shadow-2xs font-bold transition';
+    if (btnTmpl) btnTmpl.className = 'px-2 py-0.5 rounded text-slate-600 hover:text-move-navy-900 transition';
+    if (badge) badge.textContent = `Editing text for ${currMember ? currMember.name : 'Active Employee'}`;
+    input.value = buildCaMainPlainText(currMember);
+  } else {
+    if (btnCurr) btnCurr.className = 'px-2 py-0.5 rounded text-slate-600 hover:text-move-navy-900 transition';
+    if (btnTmpl) btnTmpl.className = 'px-2 py-0.5 rounded bg-move-navy-900 text-white shadow-2xs font-bold transition';
+    if (badge) badge.textContent = 'Editing Master Template (applies to all)';
+    input.value = caState.mainTemplate;
+  }
+}
+
+function handleCaMainContextInput(val) {
+  const participants = getActiveCaParticipants();
+  const currMember = participants[caState.currentMemberIndex] || null;
+
+  if (caState.mainContextMode === 'current') {
+    if (currMember) {
+      caState.customMemberTexts[currMember.id] = val;
+    }
+  } else {
+    caState.mainTemplate = val;
+  }
+  renderAppearancePreview();
+}
+
+function insertCaPlaceholder(tag) {
+  const input = document.getElementById('caMainContextInput');
+  if (!input) return;
+  if (caState.mainContextMode !== 'template') {
+    setCaContextEditMode('template');
+  }
+  const start = input.selectionStart || input.value.length;
+  const end = input.selectionEnd || input.value.length;
+  const oldVal = input.value;
+  input.value = oldVal.substring(0, start) + tag + oldVal.substring(end);
+  input.selectionStart = input.selectionEnd = start + tag.length;
+  input.focus();
+  caState.mainTemplate = input.value;
+  renderAppearancePreview();
+}
+
+function applyMainTextToAllAttendees() {
+  const input = document.getElementById('caMainContextInput');
+  const participants = getActiveCaParticipants();
+  const currMember = participants[caState.currentMemberIndex];
+  
+  if (input && currMember) {
+    let text = input.value;
+    const hon = getCaHonorific(currMember, true);
+    const mName = (currMember.name || '').toUpperCase();
+    const mPos = (currMember.position || '').toUpperCase();
+    const mOff = (currMember.office || '').toUpperCase();
+    
+    if (mName && text.includes(mName)) {
+      text = text.replace(new RegExp(hon + mName, 'g'), '{honorific}{name}');
+      text = text.replace(new RegExp(mName, 'g'), '{name}');
+    }
+    if (mPos && text.includes(mPos)) {
+      text = text.replace(new RegExp(mPos, 'g'), '{position}');
+    }
+    if (mOff && text.includes(mOff)) {
+      text = text.replace(new RegExp(mOff, 'g'), '{office}');
+    }
+    
+    caState.mainTemplate = text;
+    caState.customMemberTexts = {};
+    caState.mainContextMode = 'template';
+    syncCaContextInput();
+    renderAppearancePreview();
+    showToast('Applied wording template to all attendees!', 'fa-check');
+  }
+}
+
+function resetCaContextToDefault() {
+  caState.mainTemplate = 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.';
+  caState.customMemberTexts = {};
+  caState.lineSpacing = 1.40;
+  caState.paragraphSpacing = 14;
+  caState.fontSize = 13.5;
+  caState.textIndent = 36;
+  syncCaInputsFromState();
+  syncCaContextInput();
+  renderAppearancePreview();
+  showToast('Reset to default formal wording & spacing!', 'fa-rotate-left');
+}
+
+function handleCaSpacingChange(field, val) {
+  caState[field] = val;
+  if (field === 'lineSpacing') {
+    const elVal = document.getElementById('caLineSpacingVal');
+    const elBadge = document.getElementById('caLineSpacingBadge');
+    const str = `${Number(val).toFixed(2)}x`;
+    if (elVal) elVal.textContent = str;
+    if (elBadge) elBadge.textContent = `${str} Spacing`;
+  } else if (field === 'paragraphSpacing') {
+    const elVal = document.getElementById('caParagraphSpacingVal');
+    if (elVal) elVal.textContent = `${val}px`;
+  } else if (field === 'fontSize') {
+    const elVal = document.getElementById('caFontSizeVal');
+    if (elVal) elVal.textContent = `${val}px`;
+  } else if (field === 'textIndent') {
+    const elVal = document.getElementById('caTextIndentVal');
+    if (elVal) elVal.textContent = `${val}px`;
+  }
+  renderAppearancePreview();
+}
+
+function setCaLineSpacingPreset(val) {
+  const input = document.getElementById('caLineSpacingInput');
+  if (input) input.value = val;
+  handleCaSpacingChange('lineSpacing', val);
+}
+
+function handleCaSheetEdit(el, field) {
+  if (!el) return;
+  const participants = getActiveCaParticipants();
+  const currMember = participants[caState.currentMemberIndex];
+
+  if (field === 'mainText') {
+    if (currMember) {
+      caState.customMemberTexts[currMember.id] = el.innerHTML;
+      if (caState.mainContextMode === 'current') {
+        const input = document.getElementById('caMainContextInput');
+        if (input) input.value = el.innerText || el.textContent;
+      }
+    }
+  } else if (field === 'purpose') {
+    caState.purpose = el.innerText || el.textContent;
+    const inp = document.getElementById('caPurposeText');
+    if (inp) inp.value = caState.purpose;
+  } else if (field === 'issueDate') {
+    caState.issueDate = el.innerText || el.textContent;
+    const inp = document.getElementById('caIssueDate');
+    if (inp) inp.value = caState.issueDate;
+  } else if (field === 'documentTitle') {
+    caState.documentTitle = el.innerText || el.textContent;
+  } else if (field === 'signatoryName') {
+    caState.signatoryName = el.innerText || el.textContent;
+    const inp = document.getElementById('caSignatoryName');
+    if (inp) inp.value = caState.signatoryName;
+  } else if (field === 'signatoryTitle1') {
+    caState.signatoryTitle1 = el.innerText || el.textContent;
+    const inp = document.getElementById('caSignatoryTitle1');
+    if (inp) inp.value = caState.signatoryTitle1;
+  } else if (field === 'signatoryTitle2') {
+    caState.signatoryTitle2 = el.innerText || el.textContent;
+    const inp = document.getElementById('caSignatoryTitle2');
+    if (inp) inp.value = caState.signatoryTitle2;
+  } else if (field === 'initials') {
+    caState.initials = el.innerText || el.textContent;
+    const inp = document.getElementById('caInitials');
+    if (inp) inp.value = caState.initials;
+  }
+}
+
 // --- APPLY SELECTED ACTIVITY ---
 function applyCaActivity(act) {
   if (!act) return;
@@ -216,10 +447,31 @@ function syncCaInputsFromState() {
   const wLabel = document.getElementById('caSigWidthVal');
   if (wLabel) wLabel.textContent = `${caState.signatureWidth}px`;
 
+  // Spacing and Typography Inputs
+  setVal('caLineSpacingInput', caState.lineSpacing);
+  const elLineVal = document.getElementById('caLineSpacingVal');
+  const elLineBadge = document.getElementById('caLineSpacingBadge');
+  if (elLineVal) elLineVal.textContent = `${Number(caState.lineSpacing).toFixed(2)}x`;
+  if (elLineBadge) elLineBadge.textContent = `${Number(caState.lineSpacing).toFixed(2)}x Spacing`;
+
+  setVal('caParagraphSpacingInput', caState.paragraphSpacing);
+  const elParaVal = document.getElementById('caParagraphSpacingVal');
+  if (elParaVal) elParaVal.textContent = `${caState.paragraphSpacing}px`;
+
+  setVal('caFontSizeInput', caState.fontSize);
+  const elFontVal = document.getElementById('caFontSizeVal');
+  if (elFontVal) elFontVal.textContent = `${caState.fontSize}px`;
+
+  setVal('caTextIndentInput', caState.textIndent);
+  const elIndentVal = document.getElementById('caTextIndentVal');
+  if (elIndentVal) elIndentVal.textContent = `${caState.textIndent}px`;
+
   setChecked('caShowSignature', caState.showSignature);
   setChecked('caShowCityLogo', caState.showCityLogo);
   setChecked('caShowMoveLogo', caState.showMoveLogo);
   setChecked('caFilterPresentOnly', caState.filterPresentOnly);
+
+  syncCaContextInput();
 
   // Update mode tabs
   const tabGroup = document.getElementById('caTabGroup');
@@ -478,9 +730,9 @@ function renderAppearancePreview() {
     const venueClause = escapeHtml(formatCaVenueText(caState.venue));
 
     bodyContentHtml = `
-      <div class="space-y-4">
+      <div class="space-y-3">
         <!-- Certification Clause -->
-        <p class="text-justify text-[13.5px] text-slate-900 leading-relaxed indent-10">
+        <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
           This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
         </p>
 
@@ -513,20 +765,15 @@ function renderAppearancePreview() {
       gender: 'M'
     };
 
-    const hon = getCaHonorific(currMember, true);
-    const mName = escapeHtml((currMember.name || 'EMPLOYEE FULL NAME').toUpperCase());
-    const mPos = escapeHtml((currMember.position || 'OFFICIAL POSITION TITLE').toUpperCase());
-    const mOff = escapeHtml((currMember.office || 'DEPARTMENT / OFFICE').toUpperCase());
-    const fullActTitle = escapeHtml(getCaActivityFullTitle(caState.title, caState.theme));
-    const dateClause = escapeHtml(formatCaDateText(caState.date));
-    const venueClause = escapeHtml(formatCaVenueText(caState.venue));
-    const basisClause = escapeHtml(caState.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
-
     bodyContentHtml = `
-      <div class="my-6 space-y-6">
-        <!-- Main Formal Certification Flowing Paragraph -->
-        <p class="text-justify text-[13.5px] text-slate-900 leading-[2.1] indent-10">
-          This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
+      <div class="my-4">
+        <!-- Main Formal Certification Flowing Paragraph (Live Editable) -->
+        <p id="caMainTextEl" contenteditable="true" spellcheck="false"
+           oninput="handleCaSheetEdit(this, 'mainText')"
+           style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
+           class="text-justify text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+           title="Click to edit main certification text directly">
+          ${buildCaMainHtml(currMember)}
         </p>
       </div>
     `;
@@ -576,10 +823,13 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= DOCUMENT TITLE ================= -->
-      <div class="text-center py-6">
-        <h1 class="text-2xl font-black text-slate-900 tracking-wider uppercase font-cinzel"
-            style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;">
-          CERTIFICATE OF APPEARANCE
+      <div class="text-center py-4">
+        <h1 id="caDocTitleEl" contenteditable="true" spellcheck="false"
+            oninput="handleCaSheetEdit(this, 'documentTitle')"
+            class="text-2xl font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+            style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;"
+            title="Click to edit document title directly">
+          ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
         <div class="w-24 h-0.5 bg-move-orange-500 mx-auto mt-2"></div>
       </div>
@@ -588,25 +838,36 @@ function renderAppearancePreview() {
       <div class="flex-1 py-1">
         ${bodyContentHtml}
 
-        <!-- Purpose Clause -->
-        <div class="pt-2">
-          <p class="text-justify text-[13.5px] text-slate-900 leading-[2] indent-10">
+        <!-- Purpose Clause (Live Editable) -->
+        <div>
+          <p id="caPurposeEl" contenteditable="true" spellcheck="false"
+             oninput="handleCaSheetEdit(this, 'purpose')"
+             style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
+             class="text-justify text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+             title="Click to edit lawful purpose clause directly">
             ${escapeHtml(caState.purpose)}
           </p>
         </div>
 
-        <!-- Issuance Line -->
-        <div class="pt-6 pb-8">
-          <p class="text-[13.5px] text-slate-900 leading-relaxed">
+        <!-- Issuance Line (Live Editable) -->
+        <div>
+          <p id="caIssueDateEl" contenteditable="true" spellcheck="false"
+             oninput="handleCaSheetEdit(this, 'issueDate')"
+             style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.5)}px;"
+             class="text-left text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded p-1 transition cursor-text select-text"
+             title="Click to edit issuance line directly">
             ${escapeHtml(caState.issueDate)}
           </p>
         </div>
 
         <!-- ================= SIGNATORY BLOCK ================= -->
-        <div class="pt-4 flex items-end justify-between">
+        <div class="pt-3 flex items-end justify-between">
           <!-- Control Initials (DRMO / CTB) -->
           <div class="text-left">
-            <span class="text-[11px] font-mono text-slate-500 lowercase tracking-wider">
+            <span id="caInitialsEl" contenteditable="true" spellcheck="false"
+                  oninput="handleCaSheetEdit(this, 'initials')"
+                  class="text-[11px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                  title="Click to edit initials">
               ${escapeHtml(caState.initials)}
             </span>
           </div>
@@ -614,13 +875,22 @@ function renderAppearancePreview() {
           <!-- Official Signatory (Benjamin B. Magalong) -->
           <div class="text-center w-72">
             ${sigImgHtml}
-            <div class="text-[14px] font-black uppercase text-slate-900 tracking-wider">
+            <div id="caSigNameEl" contenteditable="true" spellcheck="false"
+                 oninput="handleCaSheetEdit(this, 'signatoryName')"
+                 class="text-[14px] font-black uppercase text-slate-900 tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 title="Click to edit signatory name">
               ${escapeHtml(caState.signatoryName)}
             </div>
-            <div class="text-[12px] font-bold text-slate-800">
+            <div id="caSigT1El" contenteditable="true" spellcheck="false"
+                 oninput="handleCaSheetEdit(this, 'signatoryTitle1')"
+                 class="text-[12px] font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 title="Click to edit title 1">
               ${escapeHtml(caState.signatoryTitle1)}
             </div>
-            <div class="text-[11px] text-slate-600 font-semibold">
+            <div id="caSigT2El" contenteditable="true" spellcheck="false"
+                 oninput="handleCaSheetEdit(this, 'signatoryTitle2')"
+                 class="text-[11px] text-slate-600 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
+                 title="Click to edit title 2">
               ${escapeHtml(caState.signatoryTitle2)}
             </div>
           </div>
@@ -636,6 +906,8 @@ function renderAppearancePreview() {
 
     </div>
   `;
+
+  syncCaContextInput();
 }
 
 // --- ZOOM CONTROLS ---
@@ -728,31 +1000,35 @@ function batchPrintAllAppearance() {
       </div>
 
       <!-- TITLE -->
-      <div class="text-center py-6">
+      <div class="text-center py-4">
         <h1 class="text-2xl font-black text-slate-900 tracking-wider uppercase" style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 2px;">
-          CERTIFICATE OF APPEARANCE
+          ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
         <div class="w-24 h-0.5 bg-move-orange-500 mx-auto mt-2"></div>
       </div>
 
       <!-- BODY -->
       <div class="flex-1 py-1">
-        <div class="my-6 space-y-6">
-          <p class="text-justify text-[13.5px] text-slate-900 leading-[2.1] indent-10">
-            This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
+        <div class="my-4">
+          <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
+            ${buildCaMainHtml(currMember)}
           </p>
         </div>
 
-        <div class="pt-2">
-          <p class="text-justify text-[13.5px] text-slate-900 leading-[2] indent-10">${escapeHtml(caState.purpose)}</p>
+        <div>
+          <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
+            ${escapeHtml(caState.purpose)}
+          </p>
         </div>
 
-        <div class="pt-6 pb-8">
-          <p class="text-[13.5px] text-slate-900 leading-relaxed">${escapeHtml(caState.issueDate)}</p>
+        <div>
+          <p class="text-left text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.5)}px;">
+            ${escapeHtml(caState.issueDate)}
+          </p>
         </div>
 
         <!-- SIGNATORY -->
-        <div class="pt-4 flex items-end justify-between">
+        <div class="pt-3 flex items-end justify-between">
           <div class="text-left">
             <span class="text-[11px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
           </div>
@@ -797,6 +1073,7 @@ async function exportCertificateOfAppearanceDocx(exportAll = false) {
     honorificMode: caState.honorificMode,
     purpose: caState.purpose,
     issueDate: caState.issueDate,
+    documentTitle: caState.documentTitle || 'CERTIFICATE OF APPEARANCE',
     signatoryName: caState.signatoryName,
     signatoryTitle1: caState.signatoryTitle1,
     signatoryTitle2: caState.signatoryTitle2,
@@ -804,7 +1081,15 @@ async function exportCertificateOfAppearanceDocx(exportAll = false) {
     mode: caState.mode,
     exportAll: !!exportAll,
     participants: participants,
-    individualMember: currentMember
+    individualMember: currentMember,
+    // Spacing & typography parameters
+    lineSpacing: caState.lineSpacing,
+    paragraphSpacing: caState.paragraphSpacing,
+    fontSize: caState.fontSize,
+    textIndent: caState.textIndent,
+    mainTemplate: caState.mainTemplate,
+    customMemberTexts: caState.customMemberTexts,
+    individualMainText: buildCaMainPlainText(currentMember)
   };
 
   const statusMsg = exportAll 
@@ -855,7 +1140,10 @@ function generateClientSideDocx(data) {
   const fullActTitle = escapeHtml(getCaActivityFullTitle(data.activityTitle, data.theme));
   const dateClause = escapeHtml(formatCaDateText(data.date));
   const venueClause = escapeHtml(formatCaVenueText(data.venue));
-  const basisClause = escapeHtml(data.attendanceBasis || 'was duly verified to have attended and participated in the activity entitled');
+  const docTitle = escapeHtml(data.documentTitle || 'CERTIFICATE OF APPEARANCE');
+  const lSpacing = data.lineSpacing || 1.40;
+  const pSpacing = data.paragraphSpacing || 14;
+  const fSize = data.fontSize || 13.5;
 
   let bodyContent = '';
   if (data.mode === 'group') {
@@ -868,7 +1156,7 @@ function generateClientSideDocx(data) {
           <p style="margin: 1px 0 0 0; font-size: 8.5pt; color: #555;">Baguio City Chapter &bull; Local Committee on Anti-VAWC</p>
         </div>
 
-        <h1>CERTIFICATE OF APPEARANCE</h1>
+        <h1>${docTitle}</h1>
 
         <p class="certify">
           This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
@@ -922,10 +1210,7 @@ function generateClientSideDocx(data) {
   } else {
     const listToRender = data.exportAll ? (data.participants || []) : [data.individualMember || (data.participants && data.participants[0]) || {}];
     bodyContent = listToRender.map((m, i) => {
-      const hon = getCaHonorific(m, true);
-      const mName = escapeHtml((m.name || 'EMPLOYEE FULL NAME').toUpperCase());
-      const mPos = escapeHtml((m.position || 'OFFICIAL POSITION TITLE').toUpperCase());
-      const mOff = escapeHtml((m.office || 'DEPARTMENT / OFFICE').toUpperCase());
+      const memberHtml = buildCaMainHtml(m);
 
       return `
         <div class="Section1" ${i > 0 ? 'style="page-break-before: always; margin-top: 30px;"' : ''}>
@@ -936,10 +1221,10 @@ function generateClientSideDocx(data) {
             <p style="margin: 1px 0 0 0; font-size: 8.5pt; color: #555;">Baguio City Chapter &bull; Local Committee on Anti-VAWC</p>
           </div>
 
-          <h1>CERTIFICATE OF APPEARANCE</h1>
+          <h1>${docTitle}</h1>
 
           <p class="certify">
-            This is to certify that <strong>${hon}${mName}</strong>, holding the position of <strong>${mPos}</strong> under <strong>${mOff}</strong>, ${basisClause} “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}.
+            ${memberHtml}
           </p>
 
           <p class="purpose">${escapeHtml(data.purpose)}</p>
@@ -981,11 +1266,11 @@ function generateClientSideDocx(data) {
           mso-paper-source: 0;
         }
         div.Section1 { page: Section1; }
-        body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.6; color: #000; }
-        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 25px; margin-bottom: 25px; letter-spacing: 1.5pt; }
-        p.certify { text-align: justify; text-indent: 36pt; margin-top: 20pt; margin-bottom: 15pt; line-height: 1.8; }
-        p.purpose { text-align: justify; text-indent: 36pt; margin-top: 15pt; margin-bottom: 20pt; line-height: 1.8; }
-        p.issue { margin-top: 15pt; margin-bottom: 30pt; }
+        body { font-family: 'Arial', sans-serif; font-size: ${fSize}pt; line-height: ${lSpacing}; color: #000; }
+        h1 { font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; font-size: 18pt; text-align: center; margin-top: 20px; margin-bottom: 20px; letter-spacing: 1.5pt; }
+        p.certify { text-align: justify; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
+        p.purpose { text-align: justify; text-indent: 36pt; margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing}pt; line-height: ${lSpacing}; }
+        p.issue { margin-top: ${pSpacing}pt; margin-bottom: ${pSpacing * 1.5}pt; line-height: ${lSpacing}; }
       </style>
     </head>
     <body>
