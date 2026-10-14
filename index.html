@@ -239,6 +239,15 @@
           <span class="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold px-1.5 py-0.5 rounded-full">Auto</span>
         </button>
 
+        <button onclick="switchNav('appearance')" id="navBtn-appearance" 
+                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-move-navy-800 transition">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-file-contract w-4 text-center text-emerald-400"></i>
+            <span>Certificate of Appearance</span>
+          </div>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-1.5 py-0.5 rounded-full">CA / DTR</span>
+        </button>
+
         <div class="pt-3 mt-3 border-t border-move-navy-800">
           <div class="px-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Roster Engine</div>
           <button onclick="switchNav('roster')" id="navBtn-roster" 
@@ -2112,7 +2121,279 @@
           </div>
         </div>
 
-        <!-- VIEW 6: 50-PARTICIPANT FILTER ROSTER ENGINE    -->
+        <!-- ============================================================== -->
+        <!-- VIEW 6: CERTIFICATE OF APPEARANCE STUDIO (A4 PORTRAIT)         -->
+        <!-- Modeled strictly after CA MOVE TEMPLATE.docx                   -->
+        <!-- ============================================================== -->
+        <div id="pageAppearance" class="space-y-4 hidden">
+          <!-- Top Studio Header & Controls Bar -->
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3 no-print overflow-hidden">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-base font-bold text-move-navy-900 flex items-center gap-2 font-cinzel">
+                  <i class="fa-solid fa-file-contract text-emerald-500 text-lg shrink-0"></i>
+                  <span class="truncate">Certificate of Appearance Studio</span>
+                </h3>
+                <p class="text-[11px] text-slate-500">Civil Service / LGU Baguio official DTR attendance accreditation &bull; A4 Portrait layout &bull; Direct Word (.docx) export</p>
+              </div>
+
+              <!-- Top Primary Actions -->
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Activity Selector -->
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-2xs">
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Activity:</span>
+                  <select id="caActivitySelect" onchange="handleCaActivityChange(this.value)" 
+                          class="bg-transparent text-xs font-bold text-move-navy-900 focus:outline-none cursor-pointer max-w-[220px] truncate">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+
+                <!-- Export to Word (.docx) -->
+                <button type="button" onclick="exportCertificateOfAppearanceDocx()" 
+                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-file-word"></i>
+                  <span>Export Word (.docx)</span>
+                </button>
+
+                <!-- Print A4 Portrait -->
+                <button type="button" onclick="printCertificateOfAppearance()" 
+                        class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-move-navy-900 to-move-navy-800 hover:from-move-navy-800 hover:to-move-navy-700 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-print text-move-orange-400"></i>
+                  <span>Print Official CA</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode Switcher & Individual Navigator -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100">
+              <!-- Mode Tabs -->
+              <div class="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                <button type="button" id="caTabGroup" onclick="setCaMode('group')"
+                        class="py-1.5 px-3.5 text-xs font-bold rounded-xl transition bg-move-navy-900 text-white shadow-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-table-list"></i>
+                  <span>Consolidated Roster Table</span>
+                </button>
+                <button type="button" id="caTabIndividual" onclick="setCaMode('individual')"
+                        class="py-1.5 px-3.5 text-xs font-semibold rounded-xl transition text-slate-600 hover:text-move-navy-900 hover:bg-slate-200/60 flex items-center gap-1.5">
+                  <i class="fa-solid fa-id-card"></i>
+                  <span>Individual Employee Sheet</span>
+                </button>
+              </div>
+
+              <!-- Individual Navigation Controls (Shown in individual mode) -->
+              <div id="caIndividualNav" class="hidden flex items-center gap-2">
+                <button type="button" onclick="changeCaIndividualMember(-1)" 
+                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition">
+                  <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                </button>
+                <span id="caIndCurrentBadge" class="text-xs font-mono font-bold px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg">
+                  1 of 1
+                </span>
+                <button type="button" onclick="changeCaIndividualMember(1)" 
+                        class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700 transition">
+                  Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+                <button type="button" onclick="batchPrintAllAppearance()" 
+                        class="px-3 py-1.5 bg-move-orange-500 hover:bg-move-orange-600 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-2xs ml-2">
+                  <i class="fa-solid fa-layer-group"></i>
+                  <span>Batch Print All</span>
+                </button>
+              </div>
+
+              <!-- Zoom Controls -->
+              <div class="flex items-center gap-1 text-xs">
+                <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Zoom:</span>
+                <button type="button" onclick="setCaZoom(75)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-mono text-[11px]">75%</button>
+                <button type="button" onclick="setCaZoom(100)" class="px-2 py-1 bg-move-navy-900 text-white rounded font-mono text-[11px] font-bold">100%</button>
+                <button type="button" onclick="setCaZoom(120)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-mono text-[11px]">120%</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Two-Column Studio Layout -->
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+            
+            <!-- LEFT COLUMN: Customizer Controls & Attendees Panel (5 cols) -->
+            <div class="xl:col-span-4 space-y-4 no-print">
+              
+              <!-- Accordion Card 1: Event & Activity Details -->
+              <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-day text-move-orange-500"></i>
+                    <span>Activity Details</span>
+                  </h4>
+                  <span class="text-[10px] font-bold text-slate-400">DTR Accredited</span>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Activity Title (in quotes)</label>
+                    <input type="text" id="caActTitle" oninput="handleCaInputChange('title', this.value)"
+                           class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl font-bold text-move-navy-900 focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Theme / Short Description</label>
+                    <input type="text" id="caActTheme" oninput="handleCaInputChange('theme', this.value)"
+                           placeholder="e.g. Love Served in the Kitchen"
+                           class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl italic text-move-navy-900 focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Date</label>
+                      <input type="text" id="caActDate" oninput="handleCaInputChange('date', this.value)"
+                             class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Control Initials</label>
+                      <input type="text" id="caInitials" oninput="handleCaInputChange('initials', this.value)"
+                             class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl font-mono text-slate-800 focus:ring-2 focus:ring-move-orange-500"
+                             placeholder="/drmo/ctb">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Venue / Location</label>
+                    <input type="text" id="caActVenue" oninput="handleCaInputChange('venue', this.value)"
+                           class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Purpose / DTR Non-Entry Clause</label>
+                    <textarea id="caPurposeText" rows="2" oninput="handleCaInputChange('purpose', this.value)"
+                              class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500 resize-none"></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Issuance Line</label>
+                    <input type="text" id="caIssueDate" oninput="handleCaInputChange('issueDate', this.value)"
+                           class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion Card 2: Official Signatory Block -->
+              <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-signature text-move-orange-500"></i>
+                    <span>Official Signatory</span>
+                  </h4>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Signatory Full Name</label>
+                    <input type="text" id="caSignatoryName" oninput="handleCaInputChange('signatoryName', this.value)"
+                           class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl font-bold uppercase text-move-navy-900 focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Title Line 1</label>
+                      <input type="text" id="caSignatoryTitle1" oninput="handleCaInputChange('signatoryTitle1', this.value)"
+                             class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-bold text-slate-700 mb-1">Title Line 2</label>
+                      <input type="text" id="caSignatoryTitle2" oninput="handleCaInputChange('signatoryTitle2', this.value)"
+                             class="w-full py-1.5 px-2.5 border border-slate-300 rounded-xl text-slate-800 focus:ring-2 focus:ring-move-orange-500">
+                    </div>
+                  </div>
+
+                  <!-- Digital Signature Toggle & Size -->
+                  <div class="pt-2 border-t border-slate-100 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="caShowSignature" onchange="handleCaInputChange('showSignature', this.checked)"
+                               class="rounded text-move-orange-500 focus:ring-move-orange-500 cursor-pointer">
+                        <span class="text-xs font-bold text-slate-700">Include Official Digital Signature</span>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-[11px] text-slate-500 font-semibold">Signature Width:</span>
+                      <input type="range" id="caSigWidth" min="80" max="240" step="5"
+                             oninput="handleCaInputChange('signatureWidth', parseInt(this.value))"
+                             class="flex-1 accent-move-orange-500 cursor-pointer">
+                      <span id="caSigWidthVal" class="text-xs font-mono font-bold text-slate-700 w-12 text-right">150px</span>
+                    </div>
+                  </div>
+
+                  <!-- Seals Toggle -->
+                  <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" id="caShowCityLogo" onchange="handleCaInputChange('showCityLogo', this.checked)"
+                             class="rounded text-move-orange-500 focus:ring-move-orange-500">
+                      <span class="font-semibold text-slate-600">City Hall Seal</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" id="caShowMoveLogo" onchange="handleCaInputChange('showMoveLogo', this.checked)"
+                             class="rounded text-move-orange-500 focus:ring-move-orange-500">
+                      <span class="font-semibold text-slate-600">MOVE Seal</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion Card 3: Participants / Attendees Checklist -->
+              <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h4 class="text-xs font-black uppercase tracking-wider text-move-navy-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users-viewfinder text-move-orange-500"></i>
+                    <span>Attendees Checklist</span>
+                  </h4>
+                  <span id="caAttendeesCountBadge" class="text-[10px] font-bold text-move-orange-600 bg-move-orange-50 px-2 py-0.5 rounded-full border border-move-orange-200">
+                    Loading...
+                  </span>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="space-y-2 text-xs">
+                  <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="caSearchInput" oninput="handleCaSearchInput(this.value)" placeholder="Search employee or office..."
+                           class="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-move-orange-500">
+                  </div>
+
+                  <div class="flex items-center justify-between text-[11px] text-slate-600 px-1">
+                    <label class="flex items-center gap-1.5 cursor-pointer font-bold">
+                      <input type="checkbox" id="caFilterPresentOnly" onchange="setCaFilterPresentOnly(this.checked)"
+                             class="rounded text-emerald-600 focus:ring-emerald-500">
+                      <span>Present Attendees Only</span>
+                    </label>
+
+                    <div class="flex items-center gap-2">
+                      <button type="button" onclick="toggleCaSelectAll(true)" class="text-move-orange-600 hover:underline font-bold">All</button>
+                      <span>&bull;</span>
+                      <button type="button" onclick="toggleCaSelectAll(false)" class="text-slate-400 hover:underline">None</button>
+                    </div>
+                  </div>
+
+                  <!-- Scrollable Attendees Checklist -->
+                  <div id="caAttendeesList" class="space-y-1.5 max-h-72 overflow-y-auto pr-1 pt-1">
+                    <!-- Rendered dynamically -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: High-Fidelity A4 Portrait Stage (8 cols) -->
+            <div class="xl:col-span-8 space-y-3">
+              <div class="bg-slate-300/60 p-4 sm:p-8 rounded-3xl border border-slate-300/80 shadow-inner flex justify-center items-start overflow-x-auto min-h-[920px]">
+                <div id="caPreviewStage" class="transition-transform duration-200">
+                  <!-- The live A4 portrait sheet is rendered here by renderAppearancePreview() -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VIEW 7: 50-PARTICIPANT FILTER ROSTER ENGINE    -->
         <!-- ============================================== -->
         <div id="pageRoster" class="space-y-4 hidden">
           <!-- Banner -->
@@ -2533,21 +2814,20 @@
       <form id="formNewActivity" onsubmit="handleNewActivitySubmit(event)" class="p-5 space-y-3 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Activity Title *</label>
-          <input type="text" id="newActTitle" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500" placeholder="e.g. Seminar on RA 9262 and Safe Spaces">
+          <input type="text" id="newActTitle" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-bold text-move-navy-900" placeholder="e.g. MEN IN THE KITCHEN 2">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Short Description / Theme</label>
+          <input type="text" id="newActShortDesc" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500" placeholder="e.g. Love Served in the Kitchen">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Date *</label>
-            <input type="date" id="newActDate" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500">
+            <input type="date" id="newActDate" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-semibold">
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Activity Type</label>
-            <select id="newActType" class="w-full p-2 border rounded-lg">
-              <option value="Orientation Seminar">Orientation Seminar</option>
-              <option value="Capacity Building Workshop">Capacity Building Workshop</option>
-              <option value="General Assembly">General Assembly</option>
-              <option value="Community Outreach">Community Outreach</option>
-            </select>
+            <label class="block font-semibold text-slate-700 mb-1">Activity Type *</label>
+            <input type="text" id="newActType" required list="listActivityTypes" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-semibold" placeholder="Type or select type...">
           </div>
         </div>
         <div>
@@ -2601,7 +2881,12 @@
 
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Activity / Training Title *</label>
-          <input type="text" id="editActTitle" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-bold text-move-navy-900" placeholder="e.g. Seminar on RA 9262 and Safe Spaces">
+          <input type="text" id="editActTitle" required class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-bold text-move-navy-900" placeholder="e.g. MEN IN THE KITCHEN 2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Short Description / Theme</label>
+          <input type="text" id="editActShortDesc" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500" placeholder="e.g. Love Served in the Kitchen">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -2611,15 +2896,9 @@
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Activity Type *</label>
-            <input type="text" id="editActType" required list="listActivityTypes" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-semibold" placeholder="e.g. Orientation Seminar">
+            <input type="text" id="editActType" required list="listActivityTypes" class="w-full p-2 border rounded-lg focus:ring-1 focus:ring-move-orange-500 font-semibold" placeholder="Type or select type...">
             <datalist id="listActivityTypes">
-              <option value="Orientation Seminar">
-              <option value="Capacity Building Workshop">
-              <option value="General Assembly">
-              <option value="Community Outreach">
-              <option value="Advocacy &amp; Culinary Event">
-              <option value="Leadership Training">
-              <option value="Gender Sensitivity Training">
+              <!-- Dynamically populated from saved history & activities -->
             </datalist>
           </div>
         </div>
@@ -2778,6 +3057,11 @@
     <!-- Multiple certificate sheets rendered here when Batch Print is triggered -->
   </div>
 
+  <!-- CERTIFICATE OF APPEARANCE PRINT CONTAINER (A4 PORTRAIT) -->
+  <div id="caPrintContainer" class="print-only">
+    <!-- CA sheets rendered here when CA Print is triggered -->
+  </div>
+
   <!-- TOAST NOTIFICATION -->
   <div id="toastNotice" class="fixed bottom-5 right-5 z-50 bg-move-navy-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl border border-move-orange-400/50 opacity-0 pointer-events-none translate-y-3 flex items-center gap-2">
     <i id="toastIcon" class="fa-solid fa-circle-check text-move-orange-400"></i>
@@ -2791,5 +3075,6 @@
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script src="js/certificates.js"></script>
+  <script src="js/appearance.js"></script>
 </body>
 </html>

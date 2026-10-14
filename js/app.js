@@ -109,6 +109,7 @@
       renderActivitiesTable();
       initCertificateStudio();
       initRosterEngine();
+      if (typeof initAppearanceStudio === 'function') initAppearanceStudio();
       checkLoginSession();
     });
 
@@ -200,7 +201,7 @@
     // --- NAVIGATION SWITCHER ---
     function switchNav(nav) {
       activeNav = nav;
-      const pages = ['dashboard', 'org', 'members', 'activities', 'certificates', 'roster'];
+      const pages = ['dashboard', 'org', 'members', 'activities', 'certificates', 'appearance', 'roster'];
       pages.forEach(p => {
         const el = document.getElementById('page' + capitalize(p));
         const btn = document.getElementById('navBtn-' + p);
@@ -220,6 +221,7 @@
         members: ['Membership Registry', 'Comprehensive employee database with official Google Form intake fields'],
         activities: ['Activities & Trainings', 'Master training logs and live participant attendance tracker'],
         certificates: ['Certificate Studio', 'Automated certificate generation engine for verified present attendees'],
+        appearance: ['Certificate of Appearance', 'Civil Service DTR attendance accreditation & appearance certification'],
         roster: ['50-Participant Balancing Engine', 'Dynamic candidate pool filter with office quota balancer & auto-arrange']
       };
 
@@ -227,6 +229,7 @@
       document.getElementById('topbarSubtitle').textContent = titles[nav][1];
 
       if (nav === 'certificates') renderCertificatePreview();
+      if (nav === 'appearance' && typeof initAppearanceStudio === 'function') initAppearanceStudio();
       if (nav === 'dashboard') renderDashboard();
     }
 
@@ -1449,8 +1452,82 @@
       handleCertActivityChange();
     }
 
+    // --- ACTIVITY TYPE HISTORY MANAGER ---
+    const DEFAULT_ACTIVITY_TYPES = [
+      "Orientation Seminar",
+      "Capacity Building Workshop",
+      "General Assembly",
+      "Community Outreach",
+      "Advocacy & Culinary Event",
+      "Leadership Training",
+      "Gender Sensitivity Training",
+      "Skills & Livelihood Workshop",
+      "Forum & Panel Discussion"
+    ];
+
+    function getActivityTypeHistory() {
+      try {
+        const saved = localStorage.getItem('move_activity_type_history');
+        if (saved) {
+          const arr = JSON.parse(saved);
+          if (Array.isArray(arr)) return arr;
+        }
+      } catch (e) {}
+      return [...DEFAULT_ACTIVITY_TYPES];
+    }
+
+    function saveActivityTypeToHistory(type) {
+      if (!type || !type.trim()) return;
+      const t = type.trim();
+      const history = getActivityTypeHistory();
+      if (!history.some(x => x.toLowerCase() === t.toLowerCase())) {
+        history.push(t);
+        try {
+          localStorage.setItem('move_activity_type_history', JSON.stringify(history));
+        } catch (e) {}
+      }
+      populateActivityTypeDatalist();
+    }
+
+    function populateActivityTypeDatalist() {
+      const datalist = document.getElementById('listActivityTypes');
+      if (!datalist) return;
+      
+      const typesSet = new Set(DEFAULT_ACTIVITY_TYPES);
+      getActivityTypeHistory().forEach(t => typesSet.add(t));
+      if (typeof activitiesList !== 'undefined' && Array.isArray(activitiesList)) {
+        activitiesList.forEach(a => {
+          if (a.activityType && a.activityType.trim()) typesSet.add(a.activityType.trim());
+        });
+      }
+      
+      datalist.innerHTML = '';
+      typesSet.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        datalist.appendChild(opt);
+      });
+    }
+
     // --- ADD ACTIVITY MODAL ---
     function openModalAddActivity() {
+      populateActivityTypeDatalist();
+      const titleEl = document.getElementById('newActTitle');
+      const shortDescEl = document.getElementById('newActShortDesc');
+      const typeEl = document.getElementById('newActType');
+      const purposeEl = document.getElementById('newActPurpose');
+      const speakerEl = document.getElementById('newActSpeaker');
+      const durationEl = document.getElementById('newActDuration');
+      const venueEl = document.getElementById('newActVenue');
+
+      if (titleEl) titleEl.value = '';
+      if (shortDescEl) shortDescEl.value = '';
+      if (typeEl) typeEl.value = '';
+      if (purposeEl) purposeEl.value = '';
+      if (speakerEl) speakerEl.value = '';
+      if (durationEl) durationEl.value = '8 Hours (1 Day)';
+      if (venueEl) venueEl.value = 'Baguio Convention and Cultural Center';
+
       document.getElementById('newActDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('modalAddActivity').classList.remove('hidden');
     }
@@ -1462,12 +1539,15 @@
     function handleNewActivitySubmit(ev) {
       ev.preventDefault();
       const title = document.getElementById('newActTitle').value.trim();
+      const shortDesc = document.getElementById('newActShortDesc') ? document.getElementById('newActShortDesc').value.trim() : '';
       const date = document.getElementById('newActDate').value;
-      const type = document.getElementById('newActType').value;
+      const type = document.getElementById('newActType').value.trim() || 'Orientation Seminar';
       const purpose = document.getElementById('newActPurpose').value.trim();
       const speaker = document.getElementById('newActSpeaker').value.trim();
       const duration = document.getElementById('newActDuration').value.trim();
       const venue = document.getElementById('newActVenue').value.trim();
+
+      saveActivityTypeToHistory(type);
 
       const participants = rosterSelectedList.map(p => ({
         id: p.id,
@@ -1488,6 +1568,7 @@
         date: date,
         activityType: type,
         title: title,
+        shortDescription: shortDesc,
         purpose: purpose,
         speaker: speaker,
         duration: duration,
@@ -1499,6 +1580,7 @@
       renderActivitiesTable();
       renderDashboard();
       initCertificateStudio();
+      if (typeof initAppearanceStudio === 'function') initAppearanceStudio();
       saveStateToStorage();
       closeModalAddActivity();
       showToast(`Activity "${title}" created with ${participants.length} participants!`, 'fa-calendar-check');
@@ -1510,12 +1592,15 @@
       const act = activitiesList.find(a => a.id === activityId);
       if (!act) return;
 
+      populateActivityTypeDatalist();
+
       if (!keepAttendanceOpen) {
         closeModalAttendance();
       }
 
       const idField = document.getElementById('editActId');
       const titleField = document.getElementById('editActTitle');
+      const shortDescField = document.getElementById('editActShortDesc');
       const dateField = document.getElementById('editActDate');
       const typeField = document.getElementById('editActType');
       const purposeField = document.getElementById('editActPurpose');
@@ -1525,6 +1610,7 @@
 
       if (idField) idField.value = act.id;
       if (titleField) titleField.value = act.title || '';
+      if (shortDescField) shortDescField.value = act.shortDescription || '';
       if (dateField) dateField.value = act.date || '';
       if (typeField) typeField.value = act.activityType || '';
       if (purposeField) purposeField.value = act.purpose || '';
@@ -1547,9 +1633,15 @@
       const act = activitiesList.find(a => a.id === id);
       if (!act) return;
 
+      const type = document.getElementById('editActType').value.trim() || 'Orientation Seminar';
+      saveActivityTypeToHistory(type);
+
       act.title = document.getElementById('editActTitle').value.trim();
+      if (document.getElementById('editActShortDesc')) {
+        act.shortDescription = document.getElementById('editActShortDesc').value.trim();
+      }
       act.date = document.getElementById('editActDate').value.trim();
-      act.activityType = document.getElementById('editActType').value.trim();
+      act.activityType = type;
       act.purpose = document.getElementById('editActPurpose').value.trim();
       act.speaker = document.getElementById('editActSpeaker').value.trim();
       act.duration = document.getElementById('editActDuration').value.trim();
@@ -1593,6 +1685,11 @@
         if (curVal === id && typeof renderCertificatePreview === 'function') {
           renderCertificatePreview();
         }
+      }
+
+      // Sync Certificate of Appearance dropdown & preview if active
+      if (typeof initAppearanceStudio === 'function') {
+        initAppearanceStudio();
       }
 
       closeModalEditActivity();
@@ -1929,7 +2026,13 @@
     function loadStateFromStorage() {
       try {
         const storedActs = localStorage.getItem('move_activities_store');
-        if (storedActs) activitiesList = JSON.parse(storedActs);
+        if (storedActs) {
+          activitiesList = JSON.parse(storedActs);
+          const k2 = activitiesList.find(a => a.id === 'ACT-KITCHEN-2');
+          if (k2 && !k2.shortDescription) {
+            k2.shortDescription = 'Love Served in the Kitchen';
+          }
+        }
         const storedCustom = localStorage.getItem('move_custom_members');
         if (storedCustom) {
           const customList = JSON.parse(storedCustom);

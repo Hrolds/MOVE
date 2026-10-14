@@ -123,6 +123,8 @@ To ensure clarity across both administrative reporting and training execution, t
 ### 5. 📅 Activities & Interactive Attendance Modal
 * **Master Activities Table**:
   * Tracks `#`, `Date`, `Type of Activity`, `Title`, `Purpose`, `Trainer / Speaker`, `Duration`, and `Attendance Ratio`.
+  * **Option Textbox with History for Activity Type**: Activity Type is an autocomplete textbox backed by HTML5 `<datalist>` and saved history (`localStorage: move_activity_types_history`). Any newly typed activity type is automatically remembered and becomes a selectable suggestion for future activities.
+  * **Short Description / Theme**: Dedicated theme field (e.g., *"Love Served in the Kitchen"* for *"MEN IN THE KITCHEN 2"*) displayed across modals, certificates, and official documents.
   * **Double-Click Edit**: Double-clicking any activity row in the Activities Table or Dashboard immediately opens the **Edit Activity / Training Details Modal** (`#modalEditActivity`).
   * **Action Button**: Dedicated **Edit** button (`<button>Edit</button>`) next to `Attendance →` for single-click access.
 * **Drill-Down Participant Attendance Modal**:
@@ -142,49 +144,37 @@ To ensure clarity across both administrative reporting and training execution, t
       * **Right Column**: Live **Certificate Stage Canvas** (`flex-1 min-w-0`), rendering the full A4 landscape certificate (`aspect-[1.414/1]`) side-by-side with zero overlap and zero blank margins.
     * When Designer Mode is toggled off, the canvas smoothly centers across the full workspace stage.
   * **In-Place Canvas Click-to-Edit (WYSIWYG)**:
-    * Click directly on any text element on the certificate canvas to focus and type in place:
-      * **Header Block**: Republic text, City Hall name, MOVE chapter name, and subtitle.
-      * **Award Title & Lead-in**: Main title (`CERTIFICATE OF PARTICIPATION`, etc.) and intro text.
-      * **Recipient Section**: Full attendee name and municipal office/position subtitle.
-      * **Citation Paragraph**: Lead statement, event title, and comprehensive details template (`{date}`, `{venue}`, `{duration}`).
-      * **Signatories Block**: Signatory names, titles, and offices.
-    * Polished typography interaction:
-      * **Hover Outline**: Subtle dashed orange box (`1.5px dashed #f97316`) on hover signaling editability without cluttering unselected elements.
-      * **Focus Ring**: Crisp active focus border (`2px solid #ea580c`) with white focus background and cursor retention.
-      * **Keyboard Controls**: Pressing <kbd>Enter</kbd> commits single-line text; <kbd>Escape</kbd> clears focus.
+    * Click directly on any text element on the certificate canvas to focus and type in place.
   * **Comprehensive Undo & Redo History Engine (`Ctrl+Z` / `Ctrl+Y`)**:
     * 40-step history stack (`certHistoryStack`) tracking all text edits, nudge repositionings, palette tweaks, and version changes.
-    * Dedicated **Undo** (<i class="fa-solid fa-rotate-left"></i>) and **Redo** (<i class="fa-solid fa-rotate-right"></i>) toolbar buttons with live enabled/disabled visual states.
-    * Keyboard shortcuts: <kbd>Ctrl</kbd> + <kbd>Z</kbd> for undo and <kbd>Ctrl</kbd> + <kbd>Y</kbd> (or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd>) for redo.
   * **Live Drag & Precision Repositioning**:
     * Click & drag any element directly on the canvas to freely reposition it.
-    * Precision Nudge D-Pad controls (Up, Down, Left, Right) with numeric X/Y pixel offsets.
   * **Digital Signature Width & Height Sizing Engine**:
-    * **Independent Dimensions**: Complete dual-axis control with dedicated **Width** (`40px`–`320px`) and **Height** (`20px`–`140px`) sliders.
-    * **Top Toolbar Controls**: Quick-adjust **W** and **H** sliders directly above the preview canvas in the Tier 4 toolbar.
-    * **Per-Signatory Sliders**: Individual Width & Height cards for **Signatory 1**, **Signatory 2**, and **Signatory 3**.
-    * **Signature Fit Mode Toggle**:
-      * **Free Stretch (`Fill`)** *(Default)*: Stretches the handwritten signature graphic directly to the exact width and height pixel boundaries to span neatly across the signature line.
-      * **Proportional (`Contain`)**: Constrains scaling to the image's natural aspect ratio.
-    * **Unconstrained CSS Styling**: Uses `max-width: none !important; max-height: none !important;` to bypass Tailwind preflight capping and ensure exact rendered dimensions.
-  * **Image & Logo Attachments**:
-    * Upload/replace custom logos for **Left Seal** (City Hall), **Right Emblem** (MOVE Baguio), and **Event Logo** (*Men in the Kitchen 2*) with live size sliders.
-    * **Center Background Watermark**: Opacity slider, scale slider, and **Layering Selector** (**Behind Text** `z-0` vs **In Front of Text** `z-20`).
-    * Upload **Digital Signature PNGs** for Signatory 1 (President), Signatory 2 (Mayor), and Signatory 3 (Vice Mayor).
-    * Official embossed **Gold Seal / Ribbon Stamp** with bottom-center, bottom-left, or bottom-right placement.
-  * **Custom Framing, Presets & Theming**:
-    * Master border styling (Double, Solid, Ridge, Groove) and color pickers.
-    * **Whole-Certificate Preset Borders**: One-click border overlays around the entire certificate perimeter.
-    * Background tones (Clean White, Royal Ivory, Baguio Pine Tint, Pearl Grey, Amber Parchment).
-    * Corner emblems (Medallion Rosette, Star, Clean).
-  * **Template Version Management**:
-    * **Save Version**: Save modifications directly to the current working template.
-    * **Save As New Version**: Name and save independent custom presets (*e.g., "Anti-VAWC Seminar 2026", "Men in the Kitchen 2", "Leadership Summit v2"*).
-    * Persistent browser storage via `localStorage` (`move_cert_templates_v5`).
+    * Complete dual-axis control with dedicated **Width** (`40px`–`320px`) and **Height** (`20px`–`140px`) sliders.
   * **Batch & Single High-Resolution Printing**:
     * 1-click **"Print Single"** and **"Batch Print All Present"** applying custom templates across standardized A4 landscape pages (`page-break-after: always`).
 
-### 7. ⚙️ 50-Participant Balancing & Roster Engine
+### 7. 📜 Certificate of Appearance (CA) Studio & DTR Accreditation Engine
+* Modeled directly after the City Government of Baguio official template **`CA MOVE TEMPLATE.docx`**:
+  * **Dual Presentation Modes**:
+    * **Consolidated Official Roster Table Mode**: Official A4 portrait sheet certifying attendance with dynamic participants table (`No.`, `Full Name`, `Position Title`, `Office`, `Role`).
+    * **Individual Employee Certification Mode**: Single-employee A4 portrait certificate with navigation between participants and **Batch Print All** capability.
+  * **Live Customizer Sidebar**:
+    * Activity Title, Theme / Short Description (*"Love Served in the Kitchen"*), Date, Venue, Purpose clause, and Issuance line.
+    * Official Signatory (*Hon. Benjamin B. Magalong, City Mayor & LCAT-VAWC Chairperson*).
+    * Digital signature toggle with width slider.
+    * Municipal and Chapter Seals toggle (*City Hall Seal* & *MOVE Baguio Seal*).
+    * Control initials at bottom-left (`/drmo/ctb`).
+    * Live Attendees Filter & Checklist (*Search, Present-only filter, Select/Clear All*).
+  * **High-Fidelity A4 Portrait Stage**:
+    * Scaled live document canvas with zoom presets (75%, 100%, 120%).
+  * **A4 Portrait Printing Engine**:
+    * Dedicated `@media print` rules (`body.printing-ca`) rendering exact 210mm x 297mm pages with clean page breaks.
+  * **Direct Word Export (.docx)**:
+    * Backend endpoint `POST /api/export-ca-docx` in `sync_server.py` that parses `CA MOVE TEMPLATE.docx`, populates dynamic XML text and formatted Word tables, and streams the `.docx` download.
+    * Pure client-side HTML-Word document download fallback if running serverless.
+
+### 8. ⚙️ 50-Participant Balancing & Roster Engine
 * Multi-parameter algorithmic filter tool:
   * Age range filter (default: 30–40).
   * Training count ceiling (default: < 25 previous seminars).
@@ -193,25 +183,30 @@ To ensure clarity across both administrative reporting and training execution, t
   * Alphabetical sorting (A → Z, Z → A).
   * Direct enrollment action: **"Bulk Enroll Roster into Activity"**.
 
-### 8. ⚡ Local Database Synchronization (`sync_server.py`)
+### 9. ⚡ Local Database Synchronization (`sync_server.py`)
 * Lightweight Python HTTP sync server running on port `8765`.
 * Reads and writes directly to `ALL MALES MARIED WITH TRAINING.xls` without modifying source employee sheets.
-* Endpoint: `POST /api/save-sheet` with payload validation and automatic XML SpreadsheetML generation.
+* Endpoints:
+  * `GET /api/status`: Real-time health check and database worksheets inspector.
+  * `POST /api/save-sheet`: Saves participant cohorts and office distribution summaries.
+  * `POST /api/export-ca-docx`: Generates and exports official customized Word documents from `CA MOVE TEMPLATE.docx`.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-├── index.html                                 # Clean Main Application HTML5 Layout & Views
+├── index.html                                 # Main Application HTML5 Layout, Modals & Navigation
 ├── css/
-│   └── styles.css                             # Centralized Styles, Typography, Print & Certificate Canvas Rules
+│   └── styles.css                             # Centralized Styles, A4 Portrait/Landscape Print & Canvas Rules
 ├── js/
 │   ├── data.js                                # Master SpreadsheetML Initial Data (Officers, Committees, Roster, Sheets)
 │   ├── app.js                                 # Application State, Auth, Dashboard, Org Hierarchy, Roster Balancing & Activities
-│   └── certificates.js                        # Dedicated Certificate Studio Engine, WYSIWYG Editor, Signatures & Batch Print
-├── sync_server.py                             # Local Python Database Sync Engine (Port 8765)
+│   ├── certificates.js                        # Dedicated Certificate Studio Engine, WYSIWYG Editor, Signatures & Batch Print
+│   └── appearance.js                          # Certificate of Appearance Engine, A4 Portrait Preview & DOCX Exporter
+├── sync_server.py                             # Local Python Database Sync & CA DOCX Export Engine (Port 8765)
 ├── Start_HRIS_System.bat                      # 1-Click Launcher (Starts Server & Launches Web App)
+├── CA MOVE TEMPLATE.docx                      # Official Certificate of Appearance Master Word Template
 ├── ALL MALES MARIED WITH TRAINING.xls         # Master 7-Sheet Excel Database
 │   ├── Sheet                                  # 506 Permanent Employees Directory
 │   ├── Casual                                 # 275 Casual & Temporary Employees Directory

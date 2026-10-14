@@ -4,12 +4,16 @@ import json
 import os
 import re
 import html
+import io
+import zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 PORT = 8765
 BASE_DIR = r"C:\Users\ALOD\Documents\MOVE"
 TARGET_FILE = os.path.join(BASE_DIR, "ALL MALES MARIED WITH TRAINING.xls")
 BACKUP_FILE = os.path.join(BASE_DIR, "ALL MALES MARIED WITH TRAINING - LastSave_Backup.xls")
+TEMPLATE_CA_DOCX = os.path.join(BASE_DIR, "CA MOVE TEMPLATE.docx")
 
 def escape_xml(val):
     if val is None:
@@ -185,7 +189,202 @@ def save_sheets_to_xls(sheet_name, participants, include_office_summary=True):
 
     return True, f"Successfully saved sheet '{sheet_name}' ({len(participants)} participants) into ALL MALES MARIED WITH TRAINING.xls"
 
+W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+ET.register_namespace("w", W_NS)
+
+def create_docx_run(text, bold=False, italic=False, size=24):
+    r = ET.Element(f"{{{W_NS}}}r")
+    rPr = ET.SubElement(r, f"{{{W_NS}}}rPr")
+    rFonts = ET.SubElement(rPr, f"{{{W_NS}}}rFonts")
+    rFonts.set(f"{{{W_NS}}}ascii", "Arial")
+    rFonts.set(f"{{{W_NS}}}hAnsi", "Arial")
+    rFonts.set(f"{{{W_NS}}}cs", "Arial")
+    if bold:
+        ET.SubElement(rPr, f"{{{W_NS}}}b")
+        ET.SubElement(rPr, f"{{{W_NS}}}bCs")
+    if italic:
+        ET.SubElement(rPr, f"{{{W_NS}}}i")
+        ET.SubElement(rPr, f"{{{W_NS}}}iCs")
+    sz = ET.SubElement(rPr, f"{{{W_NS}}}sz")
+    sz.set(f"{{{W_NS}}}val", str(size))
+    szCs = ET.SubElement(rPr, f"{{{W_NS}}}szCs")
+    szCs.set(f"{{{W_NS}}}val", str(size))
+    t = ET.SubElement(r, f"{{{W_NS}}}t")
+    t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+    t.text = text
+    return r
+
+def set_docx_para(p, runs, jc="both", first_line_ind=None):
+    pPr = p.find(f"{{{W_NS}}}pPr")
+    if pPr is None:
+        pPr = ET.Element(f"{{{W_NS}}}pPr")
+        p.insert(0, pPr)
+    jc_elem = pPr.find(f"{{{W_NS}}}jc")
+    if jc_elem is None:
+        jc_elem = ET.SubElement(pPr, f"{{{W_NS}}}jc")
+    jc_elem.set(f"{{{W_NS}}}val", jc)
+    if first_line_ind:
+        ind_elem = pPr.find(f"{{{W_NS}}}ind")
+        if ind_elem is None:
+            ind_elem = ET.SubElement(pPr, f"{{{W_NS}}}ind")
+        ind_elem.set(f"{{{W_NS}}}firstLine", str(first_line_ind))
+    for old_r in list(p.findall(f"{{{W_NS}}}r")):
+        p.remove(old_r)
+    for r in runs:
+        p.append(r)
+
+def build_docx_table(participants):
+    tbl = ET.Element(f"{{{W_NS}}}tbl")
+    tblPr = ET.SubElement(tbl, f"{{{W_NS}}}tblPr")
+    tblW = ET.SubElement(tblPr, f"{{{W_NS}}}tblW")
+    tblW.set(f"{{{W_NS}}}w", "9026")
+    tblW.set(f"{{{W_NS}}}type", "dxa")
+    tblJc = ET.SubElement(tblPr, f"{{{W_NS}}}jc")
+    tblJc.set(f"{{{W_NS}}}val", "center")
+    tblBorders = ET.SubElement(tblPr, f"{{{W_NS}}}tblBorders")
+    for b_name in ["top", "left", "bottom", "right"]:
+        b = ET.SubElement(tblBorders, f"{{{W_NS}}}{b_name}")
+        b.set(f"{{{W_NS}}}val", "single")
+        b.set(f"{{{W_NS}}}sz", "4")
+        b.set(f"{{{W_NS}}}space", "0")
+        b.set(f"{{{W_NS}}}color", "333333")
+    for b_name in ["insideH", "insideV"]:
+        b = ET.SubElement(tblBorders, f"{{{W_NS}}}{b_name}")
+        b.set(f"{{{W_NS}}}val", "single")
+        b.set(f"{{{W_NS}}}sz", "4")
+        b.set(f"{{{W_NS}}}space", "0")
+        b.set(f"{{{W_NS}}}color", "CCCCCC")
+
+    tr_h = ET.SubElement(tbl, f"{{{W_NS}}}tr")
+    trPr_h = ET.SubElement(tr_h, f"{{{W_NS}}}trPr")
+    ET.SubElement(trPr_h, f"{{{W_NS}}}tblHeader")
+    ET.SubElement(trPr_h, f"{{{W_NS}}}cantSplit")
+    cols = [("No.", "500", "center"), ("Full Name", "2900", "left"), ("Position Title", "2826", "left"), ("Office", "1400", "center"), ("Role", "1400", "center")]
+    for title, width, align in cols:
+        tc = ET.SubElement(tr_h, f"{{{W_NS}}}tc")
+        tcPr = ET.SubElement(tc, f"{{{W_NS}}}tcPr")
+        tcW = ET.SubElement(tcPr, f"{{{W_NS}}}tcW")
+        tcW.set(f"{{{W_NS}}}w", width)
+        tcW.set(f"{{{W_NS}}}type", "dxa")
+        shd = ET.SubElement(tcPr, f"{{{W_NS}}}shd")
+        shd.set(f"{{{W_NS}}}val", "clear")
+        shd.set(f"{{{W_NS}}}color", "auto")
+        shd.set(f"{{{W_NS}}}fill", "F1F5F9")
+        p = ET.SubElement(tc, f"{{{W_NS}}}p")
+        set_docx_para(p, [create_docx_run(title, bold=True, size=18)], jc=align)
+
+    for idx, p in enumerate(participants, 1):
+        tr = ET.SubElement(tbl, f"{{{W_NS}}}tr")
+        trPr = ET.SubElement(tr, f"{{{W_NS}}}trPr")
+        ET.SubElement(trPr, f"{{{W_NS}}}cantSplit")
+        values = [
+            (str(idx), "500", "center", False),
+            (p.get("name", ""), "2900", "left", True),
+            (p.get("position", ""), "2826", "left", False),
+            (p.get("office", ""), "1400", "center", False),
+            (p.get("role", "Participant"), "1400", "center", False)
+        ]
+        for val, width, align, bold in values:
+            tc = ET.SubElement(tr, f"{{{W_NS}}}tc")
+            tcPr = ET.SubElement(tc, f"{{{W_NS}}}tcPr")
+            tcW = ET.SubElement(tcPr, f"{{{W_NS}}}tcW")
+            tcW.set(f"{{{W_NS}}}w", width)
+            tcW.set(f"{{{W_NS}}}type", "dxa")
+            cell_p = ET.SubElement(tc, f"{{{W_NS}}}p")
+            set_docx_para(cell_p, [create_docx_run(val, bold=bold, size=17)], jc=align)
+
+    return tbl
+
+def generate_ca_docx(data):
+    if not os.path.exists(TEMPLATE_CA_DOCX):
+        raise FileNotFoundError(f"Template not found at {TEMPLATE_CA_DOCX}")
+
+    mode = data.get("mode", "group")
+    title = data.get("activityTitle", "Activity")
+    theme = data.get("theme", "")
+    date_str = data.get("date", "")
+    venue = data.get("venue", "")
+    purpose = data.get("purpose", "")
+    issue_date = data.get("issueDate", "")
+    signatory = data.get("signatoryName", "BENJAMIN B. MAGALONG")
+    sig_t1 = data.get("signatoryTitle1", "City Mayor")
+    sig_t2 = data.get("signatoryTitle2", "LCAT-VAWC Chairperson")
+    initials = data.get("initials", "/drmo/ctb")
+    participants = data.get("participants", [])
+    ind_member = data.get("individualMember") or (participants[0] if participants else {})
+
+    with zipfile.ZipFile(TEMPLATE_CA_DOCX, "r") as src:
+        out_buf = io.BytesIO()
+        with zipfile.ZipFile(out_buf, "w", compression=zipfile.ZIP_DEFLATED) as dst:
+            for item in src.namelist():
+                content = src.read(item)
+                if item == "word/document.xml":
+                    tree = ET.fromstring(content)
+                    body = tree.find(f"{{{W_NS}}}body")
+                    children = list(body)
+                    
+                    p_cert = children[2]
+                    runs_cert = []
+                    if mode == "group":
+                        runs_cert.append(create_docx_run("This is to certify that the following employees appeared as "))
+                        runs_cert.append(create_docx_run("Participant/Facilitator", bold=True))
+                        runs_cert.append(create_docx_run(' during the \u201c'))
+                        runs_cert.append(create_docx_run(title, bold=True))
+                        runs_cert.append(create_docx_run('\u201d'))
+                        if theme:
+                            runs_cert.append(create_docx_run(' with the theme \u201c'))
+                            runs_cert.append(create_docx_run(theme, italic=True))
+                            runs_cert.append(create_docx_run('\u201d'))
+                        runs_cert.append(create_docx_run(f" on {date_str} at the {venue}:"))
+                        set_docx_para(p_cert, runs_cert, jc="both", first_line_ind=720)
+
+                        p_placeholder = children[3]
+                        idx_placeholder = list(body).index(p_placeholder)
+                        body.remove(p_placeholder)
+                        tbl_elem = build_docx_table(participants)
+                        body.insert(idx_placeholder, tbl_elem)
+                    else:
+                        m_name = ind_member.get("name", "EMPLOYEE NAME")
+                        m_pos = ind_member.get("position", "Position Title")
+                        m_off = ind_member.get("office", "Office")
+                        m_role = ind_member.get("role", "Participant")
+
+                        runs_cert.append(create_docx_run("This is to certify that "))
+                        runs_cert.append(create_docx_run(m_name, bold=True))
+                        runs_cert.append(create_docx_run(f", {m_pos} of {m_off}, appeared as "))
+                        runs_cert.append(create_docx_run(m_role, bold=True))
+                        runs_cert.append(create_docx_run(' during the \u201c'))
+                        runs_cert.append(create_docx_run(title, bold=True))
+                        runs_cert.append(create_docx_run('\u201d'))
+                        if theme:
+                            runs_cert.append(create_docx_run(' with the theme \u201c'))
+                            runs_cert.append(create_docx_run(theme, italic=True))
+                            runs_cert.append(create_docx_run('\u201d'))
+                        runs_cert.append(create_docx_run(f" on {date_str} at the {venue}."))
+                        set_docx_para(p_cert, runs_cert, jc="both", first_line_ind=720)
+
+                    for p in body.iter(f"{{{W_NS}}}p"):
+                        txt = "".join(p.itertext())
+                        if "daily time records" in txt or "support the non-entry" in txt:
+                            set_docx_para(p, [create_docx_run(purpose)], jc="both", first_line_ind=720)
+                        elif "Issued this" in txt:
+                            set_docx_para(p, [create_docx_run(issue_date)], jc="left")
+                        elif "BENJAMIN B. MAGALONG" in txt:
+                            set_docx_para(p, [create_docx_run(signatory, bold=True, size=24)], jc="right")
+                        elif "City Mayor" in txt:
+                            set_docx_para(p, [create_docx_run(sig_t1, bold=True, size=22)], jc="right")
+                        elif "LCAT-VAWC Chairperson" in txt:
+                            set_docx_para(p, [create_docx_run(sig_t2, size=20)], jc="right")
+                        elif "/drmo/ctb" in txt or ("/drmo" in txt and "ctb" in txt):
+                            set_docx_para(p, [create_docx_run(initials, size=18)], jc="left")
+
+                    content = ET.tostring(tree, encoding="utf-8")
+                dst.writestr(item, content)
+
+        return out_buf.getvalue()
+
 class HRISSyncHandler(http.server.BaseHTTPRequestHandler):
+
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -243,6 +442,24 @@ class HRISSyncHandler(http.server.BaseHTTPRequestHandler):
                     "file": TARGET_FILE
                 }
                 self.wfile.write(json.dumps(resp).encode("utf-8"))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                resp = {"success": False, "message": str(e)}
+                self.wfile.write(json.dumps(resp).encode("utf-8"))
+        elif self.path == "/api/export-ca-docx":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length).decode("utf-8")
+            try:
+                data = json.loads(body)
+                docx_bytes = generate_ca_docx(data)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                self.send_header("Content-Disposition", 'attachment; filename="Certificate_of_Appearance.docx"')
+                self.send_header("Content-Length", str(len(docx_bytes)))
+                self.end_headers()
+                self.wfile.write(docx_bytes)
             except Exception as e:
                 self.send_response(500)
                 self.send_header("Content-Type", "application/json")
