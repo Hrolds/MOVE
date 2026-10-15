@@ -1,0 +1,97 @@
+/* ========================================================================== */
+/* MOVE BAGUIO CHAPTER — MODERN UNIFIED HRIS STYLESHEET                       */
+/* ========================================================================== */
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #0b1329;
+  color: #1e293b;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Certificate Canvas Shadow & Styling */
+.cert-canvas-container {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
+}
+
+/* Interactive editable text fields on certificates */
+.cert-editable {
+  outline: none;
+  border-radius: 4px;
+  padding: 1px 4px;
+  transition: background-color 0.15s, outline 0.15s;
+}
+
+.cert-editable:hover {
+  outline: 1.5px dashed rgba(245, 158, 11, 0.7);
+  background-color: rgba(245, 158, 11, 0.05);
+}
+
+.cert-editable:focus {
+  outline: 2px solid #d97706;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  color: #0f172a;
+}
+
+/* Print Rules for A4 Landscape Certificates */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide entire UI */
+  #appSidebar,
+  #topNavbar,
+  #studioToolbar,
+  #nonPrintableContent,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show only the print container */
+  #printContainer {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-page {
+    width: 297mm !important;
+    height: 210mm !important;
+    min-width: 297mm !important;
+    min-height: 210mm !important;
+    max-width: 297mm !important;
+    max-height: 210mm !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 12mm 15mm !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -1,0 +1,120 @@
+import sqlite3
+import os
+from typing import Optional
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "data", "move_hris.db")
+
+def get_connection():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON;")
+    return conn
+
+def init_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # 1. Separate search pool for municipal employees (747 personnel)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS municipal_employees_search_pool (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        orig_no TEXT,
+        full_name TEXT NOT NULL,
+        position TEXT,
+        gender TEXT DEFAULT 'M',
+        civil_status TEXT DEFAULT 'Married',
+        office TEXT,
+        appointment TEXT DEFAULT 'PERMANENT',
+        contact_number TEXT
+    );
+    """)
+
+    # 2. Dedicated MOVE Chapter Roster with toggleable status flags
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS move_roster (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        position TEXT,
+        gender TEXT DEFAULT 'M',
+        civil_status TEXT DEFAULT 'Married',
+        office TEXT,
+        contact_number TEXT,
+        role_title TEXT DEFAULT 'Member',
+        is_member INTEGER DEFAULT 1,
+        is_officer INTEGER DEFAULT 0,
+        is_committee INTEGER DEFAULT 0,
+        is_participant INTEGER DEFAULT 0,
+        notes TEXT
+    );
+    """)
+
+    # 3. Activities / Seminars table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS activities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        theme TEXT,
+        activity_date TEXT,
+        venue TEXT,
+        duration_hours TEXT DEFAULT '8 Hours',
+        trainer_name TEXT,
+        trainer_position TEXT,
+        target_notes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    # 4. Activity Attendees & Live Attendance checklist
+    # Note: is_present (1 or 0) gates certificate generation!
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS activity_attendees (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        move_roster_id INTEGER REFERENCES move_roster(id) ON DELETE SET NULL,
+        full_name TEXT NOT NULL,
+        position TEXT,
+        gender TEXT DEFAULT 'M',
+        civil_status TEXT DEFAULT 'Married',
+        office TEXT,
+        contact_number TEXT,
+        is_present INTEGER DEFAULT 0,
+        check_in_time TEXT,
+        notes TEXT
+    );
+    """)
+
+    # 5. Signatories registry
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS signatories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        title TEXT NOT NULL,
+        office TEXT,
+        signature_image TEXT,
+        is_default INTEGER DEFAULT 0
+    );
+    """)
+
+    # 6. Issued certificates registry
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS issued_certificates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER REFERENCES activities(id) ON DELETE CASCADE,
+        attendee_id INTEGER REFERENCES activity_attendees(id) ON DELETE CASCADE,
+        cert_type TEXT NOT NULL, -- 'participation', 'appearance', 'appreciation'
+        serial_no TEXT UNIQUE,
+        signatory_1_id INTEGER REFERENCES signatories(id),
+        signatory_2_id INTEGER REFERENCES signatories(id),
+        signatory_3_id INTEGER REFERENCES signatories(id),
+        issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    conn.commit()
+    conn.close()
+    print("SQLite database initialized at:", DB_PATH)
+
+if __name__ == "__main__":
+    init_db()
