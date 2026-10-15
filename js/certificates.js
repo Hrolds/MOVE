@@ -8,21 +8,39 @@
 
     const OFFICIAL_MOVE_SIGNATORIES = [
       { key: 'custom', label: '--- Select Official / Or Type Custom Text ---', name: '', title: '', office: '' },
-      { key: 'ong', label: 'Dan Ricky M. Ong (MOVE President)', name: 'DAN RICKY M. ONG', title: 'MOVE Chapter President', office: '' },
-      { key: 'magalong', label: 'Hon. Benjamin B. Magalong (City Mayor)', name: 'HON. BENJAMIN B. MAGALONG', title: 'City Mayor', office: '' },
-      { key: 'olowan', label: 'Hon. Faustino A. Olowan (City Vice Mayor)', name: 'HON. FAUSTINO A. OLOWAN', title: 'City Vice Mayor', office: '' },
-      { key: 'delacruz', label: 'Florentino N. Dela Cruz Jr. (Vice President)', name: 'FLORENTINO N. DELA CRUZ JR.', title: 'MOVE Vice President', office: '' },
-      { key: 'guadana', label: 'Ruperto D. Guadaña Jr. (Secretary)', name: 'RUPERTO D. GUADAÑA JR.', title: 'MOVE Chapter Secretary', office: '' },
-      { key: 'delmendo', label: 'Rhey J. Delmendo (Treasurer)', name: 'RHEY J. DELMENDO', title: 'MOVE Chapter Treasurer', office: '' },
-      { key: 'ragudo', label: 'Regino G. Ragudo (Auditor)', name: 'REGINO G. RAGUDO', title: 'MOVE Chapter Auditor', office: '' },
-      { key: 'cabading', label: 'Avelino G. Cabading Jr. (PIO)', name: 'AVELINO G. CABADING JR.', title: 'MOVE Public Information Officer', office: '' },
-      { key: 'mallorca', label: 'Harold P. Mallorca (Past President)', name: 'HAROLD P. MALLORCA', title: 'Immediate Past President', office: '' },
-      { key: 'sumcad', label: 'Judah F. Sumcad (Past Vice President)', name: 'JUDAH F. SUMCAD', title: 'Past Vice President', office: '' },
-      { key: 'laguinday', label: 'Wilbert Laguinday (Advocacy & Education)', name: 'WILBERT LAGUINDAY', title: 'Chairperson, Advocacy & Education', office: '' },
-      { key: 'basali', label: 'Isaac S. Basali (Membership & Welfare)', name: 'ISAAC S. BASALI', title: 'Chairperson, Membership & Welfare', office: '' },
-      { key: 'see', label: 'Dexter A. See (Logistics & Operations)', name: 'DEXTER A. SEE', title: 'Chairperson, Logistics & Operations', office: '' },
-      { key: 'cosep', label: 'James C. Cosep (Ways & Means)', name: 'JAMES C. COSEP', title: 'Chairperson, Ways & Means', office: '' },
-      { key: 'faustino', label: 'Allan Faustino (Monitoring & Evaluation)', name: 'ALLAN FAUSTINO', title: 'Chairperson, Monitoring & Evaluation', office: '' }
+
+      // Executive Board 2026 – Present (Current Administration - Excel Sheet 'Officer' Row 10-17)
+      { key: 'ganga', label: 'Mario D. Ganga Jr. (MOVE Chapter President)', name: 'MARIO D. GANGA JR.', title: 'MOVE Chapter President', office: 'CMO - PDAO' },
+      { key: 'delacruz', label: 'Florentino N. Dela Cruz Jr. (Vice President)', name: 'FLORENTINO N. DELA CRUZ JR.', title: 'MOVE Vice President', office: 'CMO - Library' },
+      { key: 'guadana', label: 'Ruperto D. Guadaña Jr. (Secretary)', name: 'RUPERTO D. GUADAÑA JR.', title: 'MOVE Chapter Secretary', office: 'Sangguniang Panlungsod' },
+      { key: 'delmendo', label: 'Rhey J. Delmendo (Assistant Secretary)', name: 'RHEY J. DELMENDO', title: 'MOVE Assistant Secretary', office: 'City Tourism' },
+      { key: 'ragudo', label: 'Regino G. Ragudo (Treasurer)', name: 'REGINO G. RAGUDO', title: 'MOVE Chapter Treasurer', office: 'Sangguniang Panlungsod' },
+      { key: 'cabading', label: 'Avelino G. Cabading Jr. (Assistant Treasurer)', name: 'AVELINO G. CABADING JR.', title: 'MOVE Assistant Treasurer', office: 'City Accounting' },
+      { key: 'mallorca', label: 'Harold P. Mallorca (Public Relations Officer)', name: 'HAROLD P. MALLORCA', title: 'MOVE Public Relations Officer', office: 'CADMO / CMO' },
+      { key: 'sumcad', label: 'Judah F. Sumcad (Assistant P.R.O.)', name: 'JUDAH F. SUMCAD', title: 'MOVE Assistant P.R.O.', office: 'CMO - Library' },
+
+      // City Executive & Advisory Board
+      { key: 'magalong', label: 'Hon. Benjamin B. Magalong (City Mayor)', name: 'HON. BENJAMIN B. MAGALONG', title: 'City Mayor', office: 'City Government of Baguio' },
+      { key: 'olowan', label: 'Hon. Faustino A. Olowan (City Vice Mayor)', name: 'HON. FAUSTINO A. OLOWAN', title: 'City Vice Mayor', office: 'City Government of Baguio' },
+
+      // Standing Committee Leaders (Excel Sheet 'Committees')
+      { key: 'buenavista', label: 'Noriel Anthony Buenavista (Vice-Chair, CMR)', name: 'NORIEL ANTHONY BUENAVISTA', title: 'Vice-Chairperson, Membership & Recruitment', office: 'CMO - Licensing' },
+      { key: 'see', label: 'Dexter A. See (Chairperson, CIA)', name: 'DEXTER A. SEE', title: 'Chairperson, Information & Advocacy', office: 'CMO - PIO' },
+      { key: 'cosep', label: 'James C. Cosep (Vice-Chair, CIA)', name: 'JAMES C. COSEP', title: 'Vice-Chairperson, Information & Advocacy', office: 'City Planning' },
+      { key: 'parillo', label: 'Warren Parillo (CETCB Member)', name: 'WARREN PARILLO', title: 'Member, Education & Training', office: 'City Engineering' },
+      { key: 'basali', label: 'Isaac S. Basali (CETCB Member)', name: 'ISAAC S. BASALI', title: 'Member, Education & Training', office: 'City Treasury' },
+      { key: 'faustino', label: 'Allan Faustino (CIA Member)', name: 'ALLAN FAUSTINO', title: 'Member, Information & Advocacy', office: 'DepEd Baguio' },
+      { key: 'tangalin', label: 'Protacio P. Tangalin Jr. (CIA Member)', name: 'PROTACIO P. TANGALIN JR.', title: 'Member, Information & Advocacy', office: 'Sangguniang Panlungsod' },
+
+      // Term 2025 – 2026 (Previous Administration - Excel Sheet 'Officer' Row 2-9)
+      { key: 'ong', label: 'Dan Ricky M. Ong (Immediate Past President)', name: 'DAN RICKY M. ONG', title: 'Immediate Past President', office: 'Sangguniang Panlungsod' },
+      { key: 'mangayan', label: 'Jay Dee A. Mangayan (Past Vice President)', name: 'JAY DEE A. MANGAYAN', title: 'Past Vice President', office: 'General Services Office' },
+      { key: 'valdez', label: 'Rommel M. Valdez (Past Secretary)', name: 'ROMMEL M. VALDEZ', title: 'Past Secretary', office: 'CEPMO' },
+      { key: 'itliong', label: 'Joseph Mary S. Itliong (Past Assistant Secretary)', name: 'JOSEPH MARY S. ITLIONG', title: 'Past Assistant Secretary', office: 'CHRMO' },
+      { key: 'avena', label: 'Trojan Avena (Past Treasurer)', name: 'TROJAN AVENA', title: 'Past Treasurer', office: 'MOVE Baguio' },
+      { key: 'cortez', label: 'Danny Cortez (Past Assistant Treasurer)', name: 'DANNY CORTEZ', title: 'Past Assistant Treasurer', office: 'CADMO' },
+      { key: 'martin', label: 'Jayson Martin (Past P.R.O.)', name: 'JAYSON MARTIN', title: 'Past Public Relations Officer', office: 'OCSWDO' },
+      { key: 'bulacan', label: 'Cristobal T. Bulacan (Past Assistant P.R.O.)', name: 'CRISTOBAL T. BULACAN', title: 'Past Assistant P.R.O.', office: 'Civil Registry' }
     ];
 
     const SIGNATORIES_DB_KEY = 'move_signatories_db_v1';
@@ -302,7 +320,7 @@
         },
         signatories: {
           sig1Enabled: true,
-          sig1Name: 'DAN RICKY M. ONG',
+          sig1Name: 'MARIO D. GANGA JR.',
           sig1Title: 'MOVE Chapter President',
           sig1Office: '',
           sig1SignatureImage: '',
@@ -388,7 +406,7 @@
         },
         signatories: {
           sig1Enabled: true,
-          sig1Name: 'DAN RICKY M. ONG',
+          sig1Name: 'MARIO D. GANGA JR.',
           sig1Title: 'MOVE Chapter President',
           sig1Office: '',
           sig1SignatureImage: '',
@@ -477,7 +495,7 @@
         },
         signatories: {
           sig1Enabled: true,
-          sig1Name: 'DAN RICKY M. ONG',
+          sig1Name: 'MARIO D. GANGA JR.',
           sig1Title: 'MOVE Chapter President',
           sig1Office: '',
           sig1SignatureImage: '',
@@ -713,7 +731,17 @@
       if (!tpl.header.watermarkLayer) tpl.header.watermarkLayer = 'behind';
       if (!tpl.header.watermarkSize) tpl.header.watermarkSize = 300;
       if (tpl.header.watermarkOpacity === undefined) tpl.header.watermarkOpacity = 12;
-      if (tpl.header.goldSeal === undefined) tpl.header.goldSeal = false;
+      if (tpl.header.republicFontSize === undefined) tpl.header.republicFontSize = 11;
+      if (tpl.header.cityFontSize === undefined) tpl.header.cityFontSize = 13;
+      if (tpl.header.chapterFontSize === undefined) tpl.header.chapterFontSize = 12;
+      if (tpl.header.subFontSize === undefined) tpl.header.subFontSize = 9.5;
+      if (!tpl.title) tpl.title = {};
+      if (tpl.title.introFontSize === undefined) tpl.title.introFontSize = 12;
+      if (!tpl.recipient) tpl.recipient = {};
+      if (tpl.recipient.subtitleFontSize === undefined) tpl.recipient.subtitleFontSize = 12;
+      if (!tpl.citation) tpl.citation = {};
+      if (tpl.citation.eventTitleFontSize === undefined) tpl.citation.eventTitleFontSize = 15;
+      if (tpl.citation.detailFontSize === undefined) tpl.citation.detailFontSize = 11.5;
       if (!tpl.offsets) tpl.offsets = {};
       ['header', 'title', 'recipient', 'citation', 'signatories', 'leftLogo', 'rightLogo', 'eventLogo', 'goldSeal', 'watermark', 'sig1', 'sig2', 'sig3', 'sig1Img', 'sig2Img', 'sig3Img'].forEach(k => {
         if (!tpl.offsets[k]) tpl.offsets[k] = { x: 0, y: 0 };
@@ -1587,11 +1615,17 @@
         dragStartX = e.clientX;
         dragStartY = e.clientY;
 
-        if (!currentCertTemplate.offsets[activeDragElementKey]) {
-          currentCertTemplate.offsets[activeDragElementKey] = { x: 0, y: 0 };
+        if (activeDragElementKey.startsWith('photo_')) {
+          const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeDragElementKey);
+          dragElemInitX = photo ? (photo.x || 0) : 0;
+          dragElemInitY = photo ? (photo.y || 0) : 0;
+        } else {
+          if (!currentCertTemplate.offsets[activeDragElementKey]) {
+            currentCertTemplate.offsets[activeDragElementKey] = { x: 0, y: 0 };
+          }
+          dragElemInitX = currentCertTemplate.offsets[activeDragElementKey].x || 0;
+          dragElemInitY = currentCertTemplate.offsets[activeDragElementKey].y || 0;
         }
-        dragElemInitX = currentCertTemplate.offsets[activeDragElementKey].x || 0;
-        dragElemInitY = currentCertTemplate.offsets[activeDragElementKey].y || 0;
 
         frame.querySelectorAll('[data-cert-element]').forEach(el => el.classList.remove('is-selected-element'));
         targetEl.classList.add('is-selected-element', 'is-dragging');
@@ -1609,12 +1643,24 @@
         const dx = Math.round(e.clientX - dragStartX);
         const dy = Math.round(e.clientY - dragStartY);
 
-        currentCertTemplate.offsets[activeDragElementKey].x = dragElemInitX + dx;
-        currentCertTemplate.offsets[activeDragElementKey].y = dragElemInitY + dy;
+        if (activeDragElementKey.startsWith('photo_')) {
+          const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeDragElementKey);
+          if (photo) {
+            photo.x = dragElemInitX + dx;
+            photo.y = dragElemInitY + dy;
+            const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
+            if (targetEl) {
+              targetEl.style.transform = `translate(${photo.x}px, ${photo.y}px)`;
+            }
+          }
+        } else {
+          currentCertTemplate.offsets[activeDragElementKey].x = dragElemInitX + dx;
+          currentCertTemplate.offsets[activeDragElementKey].y = dragElemInitY + dy;
 
-        const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
-        if (targetEl) {
-          targetEl.style.transform = `translate(${currentCertTemplate.offsets[activeDragElementKey].x}px, ${currentCertTemplate.offsets[activeDragElementKey].y}px)`;
+          const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
+          if (targetEl) {
+            targetEl.style.transform = `translate(${currentCertTemplate.offsets[activeDragElementKey].x}px, ${currentCertTemplate.offsets[activeDragElementKey].y}px)`;
+          }
         }
         updateOffsetLabels();
       });
@@ -1624,8 +1670,16 @@
           const targetEl = frame.querySelector(`[data-cert-element="${activeDragElementKey}"]`);
           if (targetEl) targetEl.classList.remove('is-dragging');
 
-          const finalX = currentCertTemplate.offsets[activeDragElementKey].x;
-          const finalY = currentCertTemplate.offsets[activeDragElementKey].y;
+          let finalX = 0, finalY = 0;
+          if (activeDragElementKey.startsWith('photo_')) {
+            const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeDragElementKey);
+            finalX = photo ? (photo.x || 0) : 0;
+            finalY = photo ? (photo.y || 0) : 0;
+          } else {
+            finalX = currentCertTemplate.offsets[activeDragElementKey].x;
+            finalY = currentCertTemplate.offsets[activeDragElementKey].y;
+          }
+
           if (finalX !== dragElemInitX || finalY !== dragElemInitY) {
             pushCertHistoryState(`Moved ${activeDragElementKey}`);
           }
@@ -1648,17 +1702,53 @@
     }
 
     function updateOffsetLabels() {
-      const offsets = currentCertTemplate.offsets[activeMoveElementKey] || { x: 0, y: 0 };
+      // Keep select populated with photos
+      const sel = document.getElementById('moveElementTargetSelect');
+      if (sel && currentCertTemplate.insertedPhotos && currentCertTemplate.insertedPhotos.length > 0) {
+        currentCertTemplate.insertedPhotos.forEach(p => {
+          if (!sel.querySelector(`option[value="${p.id}"]`)) {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `🖼️ [Photo] ${p.name}`;
+            sel.appendChild(opt);
+          }
+        });
+      }
+
+      let curX = 0, curY = 0;
+      if (activeMoveElementKey && activeMoveElementKey.startsWith('photo_')) {
+        const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeMoveElementKey);
+        if (photo) {
+          curX = photo.x || 0;
+          curY = photo.y || 0;
+        }
+      } else {
+        const offsets = (currentCertTemplate.offsets && currentCertTemplate.offsets[activeMoveElementKey]) || { x: 0, y: 0 };
+        curX = offsets.x || 0;
+        curY = offsets.y || 0;
+      }
+
       const lbl = document.getElementById('lblActiveElementOffset');
       const ix = document.getElementById('inputOffsetX');
       const iy = document.getElementById('inputOffsetY');
 
-      if (lbl) lbl.textContent = `${offsets.x}, ${offsets.y}`;
-      if (ix) ix.value = offsets.x;
-      if (iy) iy.value = offsets.y;
+      if (lbl) lbl.textContent = `${curX}, ${curY}`;
+      if (ix && ix !== document.activeElement) ix.value = curX;
+      if (iy && iy !== document.activeElement) iy.value = curY;
     }
 
     function nudgeActiveElement(dx, dy) {
+      if (activeMoveElementKey && activeMoveElementKey.startsWith('photo_')) {
+        const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeMoveElementKey);
+        if (photo) {
+          photo.x = (photo.x || 0) + dx;
+          photo.y = (photo.y || 0) + dy;
+          renderCertificatePreview();
+          updateOffsetLabels();
+          pushCertHistoryState(`Nudged ${photo.name}`);
+        }
+        return;
+      }
       if (!currentCertTemplate.offsets[activeMoveElementKey]) {
         currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
       }
@@ -1672,6 +1762,17 @@
     function syncOffsetFromInputs() {
       const ix = parseInt(document.getElementById('inputOffsetX').value) || 0;
       const iy = parseInt(document.getElementById('inputOffsetY').value) || 0;
+      if (activeMoveElementKey && activeMoveElementKey.startsWith('photo_')) {
+        const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeMoveElementKey);
+        if (photo) {
+          photo.x = ix;
+          photo.y = iy;
+          renderCertificatePreview();
+          updateOffsetLabels();
+          pushCertHistoryState(`Positioned ${photo.name}`);
+        }
+        return;
+      }
       if (!currentCertTemplate.offsets[activeMoveElementKey]) {
         currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
       }
@@ -1683,6 +1784,18 @@
     }
 
     function resetActiveElementPosition() {
+      if (activeMoveElementKey && activeMoveElementKey.startsWith('photo_')) {
+        const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === activeMoveElementKey);
+        if (photo) {
+          photo.x = 0;
+          photo.y = 0;
+          renderCertificatePreview();
+          updateOffsetLabels();
+          pushCertHistoryState(`Reset ${photo.name} position`);
+          showToast(`Reset photo position to (0,0)`, 'fa-arrows-to-dot');
+        }
+        return;
+      }
       if (!currentCertTemplate.offsets[activeMoveElementKey]) return;
       currentCertTemplate.offsets[activeMoveElementKey] = { x: 0, y: 0 };
       renderCertificatePreview();
@@ -1692,13 +1805,144 @@
     }
 
     function resetAllElementPositions() {
-      Object.keys(currentCertTemplate.offsets).forEach(k => {
-        currentCertTemplate.offsets[k] = { x: 0, y: 0 };
-      });
+      if (currentCertTemplate.offsets) {
+        Object.keys(currentCertTemplate.offsets).forEach(k => {
+          currentCertTemplate.offsets[k] = { x: 0, y: 0 };
+        });
+      }
+      if (currentCertTemplate.insertedPhotos) {
+        currentCertTemplate.insertedPhotos.forEach(p => {
+          p.x = 0;
+          p.y = 0;
+        });
+      }
       renderCertificatePreview();
       updateOffsetLabels();
       pushCertHistoryState('Reset all positions');
       showToast('All element positions reset to (0,0)!', 'fa-rotate-left');
+    }
+
+    // --- ALL-OBJECT CANVAS ALIGNMENT ENGINE (FOR TEXT, LOGOS, PHOTOS & SEALS) ---
+    function alignCertObject(alignType) {
+      const key = activeMoveElementKey || 'title';
+
+      if (key.startsWith('photo_')) {
+        const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === key);
+        if (photo) {
+          if (alignType === 'left') photo.x = -240;
+          else if (alignType === 'center') photo.x = 0;
+          else if (alignType === 'right') photo.x = 240;
+          else if (alignType === 'top') photo.y = -180;
+          else if (alignType === 'middle') photo.y = 0;
+          else if (alignType === 'bottom') photo.y = 160;
+          renderCertificatePreview();
+          updateOffsetLabels();
+          pushCertHistoryState(`Aligned photo to ${alignType}`);
+          showToast(`Aligned photo to ${alignType}`, 'fa-crosshairs');
+          return;
+        }
+      }
+
+      if (!currentCertTemplate.offsets) currentCertTemplate.offsets = {};
+      if (!currentCertTemplate.offsets[key]) currentCertTemplate.offsets[key] = { x: 0, y: 0 };
+      const off = currentCertTemplate.offsets[key];
+
+      if (alignType === 'left') {
+        off.x = -160;
+      } else if (alignType === 'center') {
+        off.x = 0;
+      } else if (alignType === 'right') {
+        off.x = 160;
+      } else if (alignType === 'top') {
+        off.y = -40;
+      } else if (alignType === 'middle') {
+        off.y = 0;
+      } else if (alignType === 'bottom') {
+        off.y = 40;
+      }
+
+      renderCertificatePreview();
+      updateOffsetLabels();
+      pushCertHistoryState(`Aligned ${key} to ${alignType}`);
+      showToast(`Aligned "${key}" to ${alignType}`, 'fa-crosshairs');
+    }
+
+    // --- INSERT CUSTOM PHOTO / BADGE ENGINE ---
+    function openCertPhotoUpload() {
+      const inp = document.getElementById('certInsertPhotoInput');
+      if (inp) inp.click();
+    }
+
+    function handleCertPhotoUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const dataUrl = evt.target.result;
+        const photoId = 'photo_' + Date.now();
+        const photoName = (file.name.replace(/\.[^/.]+$/, '') || 'Photo').slice(0, 20);
+
+        if (!currentCertTemplate.insertedPhotos) currentCertTemplate.insertedPhotos = [];
+        currentCertTemplate.insertedPhotos.push({
+          id: photoId,
+          name: photoName,
+          src: dataUrl,
+          width: 110,
+          height: 110,
+          shape: 'gold_frame',
+          x: 0,
+          y: 0
+        });
+
+        activeMoveElementKey = photoId;
+        renderCertificatePreview();
+        updateOffsetLabels();
+        pushCertHistoryState(`Inserted ${photoName}`);
+        showToast(`Inserted "${photoName}"! Drag it anywhere or use Alignment buttons.`, 'fa-image');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function removeCertPhoto(photoId) {
+      if (!currentCertTemplate.insertedPhotos) return;
+      const idx = currentCertTemplate.insertedPhotos.findIndex(p => p.id === photoId);
+      if (idx !== -1) {
+        const name = currentCertTemplate.insertedPhotos[idx].name;
+        currentCertTemplate.insertedPhotos.splice(idx, 1);
+        activeMoveElementKey = 'title';
+        renderCertificatePreview();
+        updateOffsetLabels();
+        pushCertHistoryState(`Removed ${name}`);
+        showToast(`Removed "${name}" from certificate`, 'fa-trash');
+      }
+    }
+
+    function setCertPhotoShape(shape) {
+      const key = activeMoveElementKey;
+      if (!key || !key.startsWith('photo_')) return;
+      const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === key);
+      if (photo) {
+        photo.shape = shape;
+        renderCertificatePreview();
+        pushCertHistoryState(`Changed photo shape to ${shape}`);
+        showToast(`Photo shape set to ${shape}`, 'fa-shapes');
+      }
+    }
+
+    function setCertPhotoSize(size) {
+      const val = parseInt(size, 10);
+      if (isNaN(val)) return;
+      const key = activeMoveElementKey;
+      if (!key || !key.startsWith('photo_')) return;
+      const photo = (currentCertTemplate.insertedPhotos || []).find(p => p.id === key);
+      if (photo) {
+        photo.width = val;
+        photo.height = val;
+        renderCertificatePreview();
+        pushCertHistoryState(`Changed photo size to ${val}px`);
+      }
     }
 
     // --- IMAGE UPLOAD & ATTACHMENT HANDLERS ---
@@ -1895,10 +2139,38 @@
       scheduleTextHistoryPush('Resized certificate title');
     }
 
+    function handleHeaderLineFontSizeChange(field, val) {
+      if (!currentCertTemplate.header) currentCertTemplate.header = {};
+      const sz = parseFloat(val) || 11;
+      currentCertTemplate.header[field] = sz;
+      const lbl1 = document.getElementById('lbl' + field.charAt(0).toUpperCase() + field.slice(1));
+      if (lbl1) lbl1.textContent = sz + 'px';
+      const shortMap = { republicFontSize: 'lblRepSize', cityFontSize: 'lblCitySize', chapterFontSize: 'lblChapSize', subFontSize: 'lblSubSize' };
+      const lbl2 = document.getElementById(shortMap[field]);
+      if (lbl2) lbl2.textContent = sz + 'px';
+      const sldMap = { republicFontSize: 'sliderRepSize', cityFontSize: 'sliderCitySize', chapterFontSize: 'sliderChapSize', subFontSize: 'sliderSubSize' };
+      const sld = document.getElementById(sldMap[field]);
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush(`Resized header ${field}`);
+    }
+
     function handleAwardIntroInput(val) {
       currentCertTemplate.title.introText = val;
       renderCertificatePreview();
       scheduleTextHistoryPush('Edited award intro line');
+    }
+
+    function handleAwardIntroSizeChange(val) {
+      if (!currentCertTemplate.title) currentCertTemplate.title = {};
+      const sz = parseInt(val, 10) || 12;
+      currentCertTemplate.title.introFontSize = sz;
+      const lbl = document.getElementById('lblAwardIntroSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderAwardIntroSize');
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush('Resized award intro');
     }
 
     function handleRecipientFontChange(val) {
@@ -1912,8 +2184,58 @@
       currentCertTemplate.recipient.fontSize = sz;
       const lbl = document.getElementById('lblRecipientSize');
       if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderRecipientSize');
+      if (sld) sld.value = sz;
       renderCertificatePreview();
       scheduleTextHistoryPush('Resized recipient name');
+    }
+
+    function handleRecipientSubtitleSizeChange(val) {
+      if (!currentCertTemplate.recipient) currentCertTemplate.recipient = {};
+      const sz = parseInt(val, 10) || 12;
+      currentCertTemplate.recipient.subtitleFontSize = sz;
+      const lbl = document.getElementById('lblRecipientSubtitleSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderRecSubtitleSize');
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush('Resized recipient subtitle');
+    }
+
+    function handleEventTitleFontSizeChange(val) {
+      if (!currentCertTemplate.citation) currentCertTemplate.citation = {};
+      const sz = parseInt(val, 10) || 15;
+      currentCertTemplate.citation.eventTitleFontSize = sz;
+      const lbl = document.getElementById('lblEventTitleFontSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderEventTitleSize');
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush('Resized event title');
+    }
+
+    function handleDetailFontSizeChange(val) {
+      if (!currentCertTemplate.citation) currentCertTemplate.citation = {};
+      const sz = parseFloat(val) || 11.5;
+      currentCertTemplate.citation.detailFontSize = sz;
+      const lbl = document.getElementById('lblDetailFontSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderDetailFontSize');
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush('Resized detail text');
+    }
+
+    function handleSignatoryOfficeFontSizeChange(val) {
+      if (!currentCertTemplate.signatories) currentCertTemplate.signatories = {};
+      const sz = parseInt(val, 10) || 9;
+      currentCertTemplate.signatories.officeFontSize = sz;
+      const lbl = document.getElementById('lblSigOfficeFontSize');
+      if (lbl) lbl.textContent = sz + 'px';
+      const sld = document.getElementById('sliderSigOfficeFontSize');
+      if (sld) sld.value = sz;
+      renderCertificatePreview();
+      scheduleTextHistoryPush('Resized signatory office');
     }
 
     function handleRecipientUnderlineChange(val) {
@@ -2036,15 +2358,21 @@
           s.sig1Office = off.office;
           if (off.signatureImage) s.sig1SignatureImage = off.signatureImage;
         }
-      } else if (presetKey === 'dual_ong_magalong') {
-        const o1 = findOff('ong');
+      } else if (presetKey === 'dual_ganga_magalong' || presetKey === 'dual_ong_magalong') {
+        const o1 = findOff('ganga') || findOff('ong');
         const o2 = findOff('magalong');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
         if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
         if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
-      } else if (presetKey === 'dual_ong_olowan') {
-        const o1 = findOff('ong');
+      } else if (presetKey === 'dual_ganga_olowan' || presetKey === 'dual_ong_olowan') {
+        const o1 = findOff('ganga') || findOff('ong');
         const o2 = findOff('olowan');
+        s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
+        if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
+        if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
+      } else if (presetKey === 'dual_delacruz_ganga') {
+        const o1 = findOff('delacruz');
+        const o2 = findOff('ganga');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = false;
         if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
         if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
@@ -2055,7 +2383,7 @@
         if (o1) { s.sig1Name = o1.name; s.sig1Title = o1.title; s.sig1Office = o1.office; if (o1.signatureImage) s.sig1SignatureImage = o1.signatureImage; }
         if (o2) { s.sig2Name = o2.name; s.sig2Title = o2.title; s.sig2Office = o2.office; if (o2.signatureImage) s.sig2SignatureImage = o2.signatureImage; }
       } else if (presetKey === 'triple_all') {
-        const o1 = findOff('ong');
+        const o1 = findOff('ganga') || findOff('ong');
         const o3 = findOff('olowan');
         const o2 = findOff('magalong');
         s.sig1Enabled = true; s.sig2Enabled = true; s.sig3Enabled = true;
@@ -2329,6 +2657,27 @@
       const t = normalizeTemplateFields(currentCertTemplate);
       if (!t) return;
 
+      // Header Lines Font Sizes
+      const sldRep = document.getElementById('sliderRepSize');
+      if (sldRep) sldRep.value = t.header.republicFontSize || 11;
+      const lblRep = document.getElementById('lblRepSize');
+      if (lblRep) lblRep.textContent = (t.header.republicFontSize || 11) + 'px';
+
+      const sldCity = document.getElementById('sliderCitySize');
+      if (sldCity) sldCity.value = t.header.cityFontSize || 13;
+      const lblCity = document.getElementById('lblCitySize');
+      if (lblCity) lblCity.textContent = (t.header.cityFontSize || 13) + 'px';
+
+      const sldChap = document.getElementById('sliderChapSize');
+      if (sldChap) sldChap.value = t.header.chapterFontSize || 12;
+      const lblChap = document.getElementById('lblChapSize');
+      if (lblChap) lblChap.textContent = (t.header.chapterFontSize || 12) + 'px';
+
+      const sldSub = document.getElementById('sliderSubSize');
+      if (sldSub) sldSub.value = t.header.subFontSize || 9.5;
+      const lblSub = document.getElementById('lblSubSize');
+      if (lblSub) lblSub.textContent = (t.header.subFontSize || 9.5) + 'px';
+
       const inpTitle = document.getElementById('inputCertTitle');
       if (inpTitle && inpTitle !== document.activeElement) inpTitle.value = t.title.customTitle !== undefined ? t.title.customTitle : '';
 
@@ -2341,6 +2690,11 @@
       const inpIntro = document.getElementById('inputAwardIntro');
       if (inpIntro && inpIntro !== document.activeElement) inpIntro.value = t.title.introText !== undefined ? t.title.introText : '';
 
+      const sldIntroSize = document.getElementById('sliderAwardIntroSize');
+      if (sldIntroSize) sldIntroSize.value = t.title.introFontSize || 12;
+      const lblIntroSize = document.getElementById('lblAwardIntroSize');
+      if (lblIntroSize) lblIntroSize.textContent = (t.title.introFontSize || 12) + 'px';
+
       const selRecFont = document.getElementById('selectRecipientFont');
       if (selRecFont) selRecFont.value = t.recipient.fontFamily || 'cinzel';
 
@@ -2348,6 +2702,11 @@
       if (sldRecSize) sldRecSize.value = t.recipient.fontSize || 34;
       const lblRecSize = document.getElementById('lblRecipientSize');
       if (lblRecSize) lblRecSize.textContent = (t.recipient.fontSize || 34) + 'px';
+
+      const sldRecSubSize = document.getElementById('sliderRecSubtitleSize');
+      if (sldRecSubSize) sldRecSubSize.value = t.recipient.subtitleFontSize || 12;
+      const lblRecSubSize = document.getElementById('lblRecipientSubtitleSize');
+      if (lblRecSubSize) lblRecSubSize.textContent = (t.recipient.subtitleFontSize || 12) + 'px';
 
       const chkRecUnderline = document.getElementById('chkRecipientUnderline');
       if (chkRecUnderline) chkRecUnderline.checked = !!t.recipient.underline;
@@ -2387,6 +2746,16 @@
         inpDet.value = t.citation.detailTemplate !== undefined ? t.citation.detailTemplate : '';
       }
 
+      const sldEvtTitleSize = document.getElementById('sliderEventTitleSize');
+      if (sldEvtTitleSize) sldEvtTitleSize.value = t.citation.eventTitleFontSize || 15;
+      const lblEvtTitleSize = document.getElementById('lblEventTitleFontSize');
+      if (lblEvtTitleSize) lblEvtTitleSize.textContent = (t.citation.eventTitleFontSize || 15) + 'px';
+
+      const sldDetSize = document.getElementById('sliderDetailFontSize');
+      if (sldDetSize) sldDetSize.value = t.citation.detailFontSize || 11.5;
+      const lblDetSize = document.getElementById('lblDetailFontSize');
+      if (lblDetSize) lblDetSize.textContent = (t.citation.detailFontSize || 11.5) + 'px';
+
       // Signatories checkboxes & inputs
       const chkS1 = document.getElementById('chkSig1Enable');
       if (chkS1) chkS1.checked = t.signatories.sig1Enabled !== false;
@@ -2424,6 +2793,12 @@
       if (sldSigTitleSz) sldSigTitleSz.value = sigTitleSz;
       const lblSigTitleSz = document.getElementById('lblSigTitleFontSize');
       if (lblSigTitleSz) lblSigTitleSz.textContent = sigTitleSz + 'px';
+
+      const sigOfficeSz = t.signatories.officeFontSize || 9;
+      const sldSigOffSz = document.getElementById('sliderSigOfficeFontSize');
+      if (sldSigOffSz) sldSigOffSz.value = sigOfficeSz;
+      const lblSigOffSz = document.getElementById('lblSigOfficeFontSize');
+      if (lblSigOffSz) lblSigOffSz.textContent = sigOfficeSz + 'px';
 
       const sigLineW = t.signatories.lineWidth || 210;
       const sldSigLineW = document.getElementById('sliderSigLineWidth');
@@ -3053,16 +3428,24 @@
             </div>
 
             <div class="text-center px-2 flex-1 leading-tight">
-              <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-800" ${getEditableAttrs('header.republicText')}>
+              <div class="font-bold uppercase tracking-wider text-slate-800"
+                   style="font-size: ${t.header.republicFontSize || 9.5}px;"
+                   ${getEditableAttrs('header.republicText')}>
                 ${t.header.republicText || 'Republic of the Philippines'}
               </div>
-              <div class="text-[12px] font-black uppercase tracking-tight text-slate-900 mt-0.5" ${getEditableAttrs('header.cityText')}>
+              <div class="font-black uppercase tracking-tight text-slate-900 mt-0.5"
+                   style="font-size: ${t.header.cityFontSize || 12}px;"
+                   ${getEditableAttrs('header.cityText')}>
                 ${t.header.cityText || 'CITY GOVERNMENT OF BAGUIO'}
               </div>
-              <div class="text-[10px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5" ${getEditableAttrs('header.chapterText')}>
+              <div class="font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5"
+                   style="font-size: ${t.header.chapterFontSize || 10}px;"
+                   ${getEditableAttrs('header.chapterText')}>
                 ${t.header.chapterText || 'Men Opposed to Violence Against Women Everywhere'}
               </div>
-              <div class="text-[8.5px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5" ${getEditableAttrs('header.subText')}>
+              <div class="text-slate-500 font-semibold tracking-wider uppercase mt-0.5"
+                   style="font-size: ${t.header.subFontSize || 8.5}px;"
+                   ${getEditableAttrs('header.subText')}>
                 ${t.header.subText || 'Baguio City Chapter • Local Committee on Anti-VAWC'}
               </div>
             </div>
@@ -3187,7 +3570,7 @@
               ${sigTitle}
             </div>
             ${hasOffice ? `
-            <div class="text-[9px] text-slate-500 block whitespace-nowrap" ${getEditableAttrs('signatories.sig' + num + 'Office')}>
+            <div class="text-slate-500 block whitespace-nowrap" style="font-size: ${t.signatories.officeFontSize || 9}px;" ${getEditableAttrs('signatories.sig' + num + 'Office')}>
               ${sigOffice}
             </div>` : ''}
           </div>
@@ -3198,7 +3581,7 @@
         footerItems.push(buildSignatoryBlockHtml(
           1,
           t.signatories.sig1SignatureImage,
-          t.signatories.sig1Name !== undefined ? t.signatories.sig1Name : 'DAN RICKY M. ONG',
+          t.signatories.sig1Name !== undefined ? t.signatories.sig1Name : 'MARIO D. GANGA JR.',
           t.signatories.sig1Title !== undefined ? t.signatories.sig1Title : 'MOVE Chapter President',
           t.signatories.sig1Office || ''
         ));
@@ -3264,10 +3647,18 @@
 
             <!-- Header Texts -->
             <div class="text-center">
-              <div class="text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-500 uppercase" ${getEditableAttrs('header.republicText')}>${t.header.republicText !== undefined ? t.header.republicText : 'Republic of the Philippines'}</div>
-              <div class="text-xs sm:text-sm font-black tracking-widest uppercase" style="color: ${t.theme.outerBorderColor || '#091b38'};" ${getEditableAttrs('header.cityText')}>${t.header.cityText !== undefined ? t.header.cityText : 'City Government of Baguio'}</div>
-              <div class="text-[10px] sm:text-xs font-black tracking-wider uppercase mt-0.5" style="color: ${t.theme.innerBorderColor || '#f97316'};" ${getEditableAttrs('header.chapterText')}>${t.header.chapterText !== undefined ? t.header.chapterText : 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</div>
-              <div class="text-[9px] text-slate-400 font-semibold" ${getEditableAttrs('header.subText')}>${t.header.subText !== undefined ? t.header.subText : 'City Hall Chapter • Baguio City, Philippines'}</div>
+              <div class="font-bold tracking-widest text-slate-500 uppercase"
+                   style="font-size: ${t.header.republicFontSize || 11}px;"
+                   ${getEditableAttrs('header.republicText')}>${t.header.republicText !== undefined ? t.header.republicText : 'Republic of the Philippines'}</div>
+              <div class="font-black tracking-widest uppercase"
+                   style="font-size: ${t.header.cityFontSize || 13}px; color: ${t.theme.outerBorderColor || '#091b38'};"
+                   ${getEditableAttrs('header.cityText')}>${t.header.cityText !== undefined ? t.header.cityText : 'City Government of Baguio'}</div>
+              <div class="font-black tracking-wider uppercase mt-0.5"
+                   style="font-size: ${t.header.chapterFontSize || 12}px; color: ${t.theme.innerBorderColor || '#f97316'};"
+                   ${getEditableAttrs('header.chapterText')}>${t.header.chapterText !== undefined ? t.header.chapterText : 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</div>
+              <div class="text-slate-400 font-semibold"
+                   style="font-size: ${t.header.subFontSize || 9.5}px;"
+                   ${getEditableAttrs('header.subText')}>${t.header.subText !== undefined ? t.header.subText : 'City Hall Chapter • Baguio City, Philippines'}</div>
             </div>
 
             <!-- Right Logo (Clean, No Orange Border Box) -->
@@ -3299,7 +3690,9 @@
               ${t.title.customTitle !== undefined ? t.title.customTitle : 'CERTIFICATE OF PARTICIPATION'}
             </h2>
             <div class="w-40 h-1 mx-auto mt-1" style="background: linear-gradient(to right, transparent, ${t.title.accentColor || t.theme.innerBorderColor || '#f97316'}, transparent);"></div>
-            <p class="text-xs italic text-slate-500 mt-1.5 font-serif-title" ${getEditableAttrs('title.introText')}>
+            <p class="italic text-slate-500 mt-1.5 font-serif-title"
+               style="font-size: ${t.title.introFontSize || 12}px;"
+               ${getEditableAttrs('title.introText')}>
               ${t.title.introText !== undefined ? t.title.introText : 'This certificate is proudly awarded to'}
             </p>
           </div>
@@ -3312,7 +3705,8 @@
                ${getEditableAttrs('recipient.customName')}>
             ${recDisplayName}
           </div>
-          <div class="text-xs sm:text-sm font-bold pt-2 uppercase tracking-wider block" style="color: ${t.recipient.subtitleColor || '#ea580c'};"
+          <div class="font-bold pt-2 uppercase tracking-wider block"
+               style="font-size: ${t.recipient.subtitleFontSize || 12}px; color: ${t.recipient.subtitleColor || '#ea580c'};"
                ${getEditableAttrs('recipient.customSubtitle')}>
             ${recDisplaySub}
           </div>
@@ -3325,11 +3719,14 @@
           <p ${getEditableAttrs('citation.leadText')}>
             ${t.citation.leadText !== undefined ? t.citation.leadText : 'for actively participating and successfully completing the capacity-building seminar on'}
           </p>
-          <p class="text-sm sm:text-base font-black uppercase font-sans tracking-tight" style="color: ${t.theme.outerBorderColor || '#091b38'};"
+          <p class="font-black uppercase font-sans tracking-tight"
+             style="font-size: ${t.citation.eventTitleFontSize || 15}px; color: ${t.theme.outerBorderColor || '#091b38'};"
              ${getEditableAttrs('citation.customEventTitle')}>
             "${effectiveEventTitle}"
           </p>
-          <p class="text-[11px] sm:text-xs text-slate-600 leading-normal" ${getEditableAttrs('citation.detailTemplate')}>
+          <p class="text-slate-600 leading-normal"
+             style="font-size: ${t.citation.detailFontSize || 11.5}px;"
+             ${getEditableAttrs('citation.detailTemplate')}>
             ${detailText}
           </p>
         </div>
@@ -3339,6 +3736,25 @@
              style="${getOffsetStyle('signatories')}" ${getDragAttrs('signatories')}>
           ${footerItems.join('')}
         </div>
+
+        <!-- Inserted Custom Photos / Badges -->
+        ${(() => {
+          let html = '';
+          if (t.insertedPhotos && t.insertedPhotos.length > 0) {
+            t.insertedPhotos.forEach(p => {
+              const shapeClass = p.shape === 'circle' ? 'shape-circle' : (p.shape === 'rounded' ? 'shape-rounded' : (p.shape === 'square' ? 'shape-square' : 'shape-gold_frame'));
+              html += `
+                <div class="cert-inserted-photo ${shapeClass} absolute z-25 cursor-move"
+                     data-cert-element="${p.id}"
+                     style="left: calc(50% - ${(p.width || 110) / 2}px); top: calc(50% - ${(p.height || 110) / 2}px); width: ${p.width || 110}px; height: ${p.height || 110}px; transform: translate(${p.x || 0}px, ${p.y || 0}px);">
+                  <img src="${p.src}" alt="${p.name}" class="w-full h-full object-cover pointer-events-none select-none">
+                  ${!isPrint ? `<button type="button" onclick="removeCertPhoto('${p.id}')" title="Delete Photo" class="cert-remove-badge">&times;</button>` : ''}
+                </div>
+              `;
+            });
+          }
+          return html;
+        })()}
       `;
     }
 
@@ -3445,6 +3861,24 @@
       renderCertificatePreview();
     }
 
+    function handleCertPaperSizeChange(size) {
+      currentCertTemplate.paperSize = size || 'a4';
+      const paperLabels = {
+        a4: 'A4 Landscape (297 \u00d7 210 mm)',
+        letter: 'US Letter Landscape (11 \u00d7 8.5 in)',
+        legal: 'US Legal Landscape (14 \u00d7 8.5 in)',
+        a3: 'A3 Landscape (420 \u00d7 297 mm)',
+        a5: 'A5 Landscape (210 \u00d7 148 mm)'
+      };
+      const label = paperLabels[size] || size;
+      const badge = document.getElementById('certActivePaperSizeLabel');
+      if (badge) badge.textContent = label;
+      const sel = document.getElementById('certPrintPaperSizeSelect');
+      if (sel && sel.value !== size) sel.value = size;
+      showToast(`Print paper size set to ${label} (Default is A4)`, 'fa-file-lines');
+      pushCertHistoryState(`Paper size set to ${size}`);
+    }
+
     function printSingleCurrentCertificate() {
       const actSelect = document.getElementById('certActivitySelect');
       const actId = actSelect ? actSelect.value : null;
@@ -3457,10 +3891,19 @@
 
       const t = currentCertTemplate;
       const isApp = (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance'));
-      const paperSize = isApp ? 'A5 landscape' : 'A4 landscape';
-      const sheetWidth = isApp ? '210mm' : '297mm';
-      const sheetHeight = isApp ? '148mm' : '210mm';
-      const sheetPad = isApp ? 'p-5' : 'p-8';
+      const chosenSize = t.paperSize || (document.getElementById('certPrintPaperSizeSelect') ? document.getElementById('certPrintPaperSizeSelect').value : (isApp ? 'a5' : 'a4'));
+      const paperSpecs = {
+        a4: { rule: 'A4 landscape', width: '297mm', height: '210mm' },
+        letter: { rule: 'letter landscape', width: '11in', height: '8.5in' },
+        legal: { rule: 'legal landscape', width: '14in', height: '8.5in' },
+        a3: { rule: 'A3 landscape', width: '420mm', height: '297mm' },
+        a5: { rule: 'A5 landscape', width: '210mm', height: '148mm' }
+      };
+      const spec = paperSpecs[chosenSize] || (isApp ? paperSpecs.a5 : paperSpecs.a4);
+      const paperSize = spec.rule;
+      const sheetWidth = spec.width;
+      const sheetHeight = spec.height;
+      const sheetPad = (chosenSize === 'a5' || isApp) ? 'p-5' : 'p-8';
       const outerStyle = `${t.theme.borderStyle === 'none' ? 'border: none;' : `border: ${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'};`} background-color: ${t.theme.backgroundColor || '#ffffff'};`;
 
       const printBox = document.getElementById('batchPrintContainer');
@@ -3501,10 +3944,19 @@
 
       const t = currentCertTemplate;
       const isApp = (t.docCategory === 'appearance' || (t.title && t.title.type === 'appearance'));
-      const paperSize = isApp ? 'A5 landscape' : 'A4 landscape';
-      const sheetWidth = isApp ? '210mm' : '297mm';
-      const sheetHeight = isApp ? '148mm' : '210mm';
-      const sheetPad = isApp ? 'p-5' : 'p-8';
+      const chosenSize = t.paperSize || (document.getElementById('certPrintPaperSizeSelect') ? document.getElementById('certPrintPaperSizeSelect').value : (isApp ? 'a5' : 'a4'));
+      const paperSpecs = {
+        a4: { rule: 'A4 landscape', width: '297mm', height: '210mm' },
+        letter: { rule: 'letter landscape', width: '11in', height: '8.5in' },
+        legal: { rule: 'legal landscape', width: '14in', height: '8.5in' },
+        a3: { rule: 'A3 landscape', width: '420mm', height: '297mm' },
+        a5: { rule: 'A5 landscape', width: '210mm', height: '148mm' }
+      };
+      const spec = paperSpecs[chosenSize] || (isApp ? paperSpecs.a5 : paperSpecs.a4);
+      const paperSize = spec.rule;
+      const sheetWidth = spec.width;
+      const sheetHeight = spec.height;
+      const sheetPad = (chosenSize === 'a5' || isApp) ? 'p-5' : 'p-8';
       const outerStyle = `${t.theme.borderStyle === 'none' ? 'border: none;' : `border: ${t.theme.borderWidth || 8}px ${t.theme.borderStyle || 'double'} ${t.theme.outerBorderColor || '#091b38'};`} background-color: ${t.theme.backgroundColor || '#ffffff'};`;
 
       const printBox = document.getElementById('batchPrintContainer');
@@ -3536,6 +3988,7 @@
 
     // Global exports for Certificate Studio
     window.switchCertDocumentType = switchCertDocumentType;
+    window.handleCertPaperSizeChange = handleCertPaperSizeChange;
     window.openCreateNewCertModal = openCreateNewCertModal;
     window.closeCreateNewCertModal = closeCreateNewCertModal;
     window.handleNewCertTypeChange = handleNewCertTypeChange;
@@ -3543,5 +3996,17 @@
     window.handleCertTypeSelectChange = handleCertTypeSelectChange;
     window.initCertificateStudio = initCertificateStudio;
     window.renderCertificatePreview = renderCertificatePreview;
+    window.alignCertObject = alignCertObject;
+    window.openCertPhotoUpload = openCertPhotoUpload;
+    window.handleCertPhotoUpload = handleCertPhotoUpload;
+    window.removeCertPhoto = removeCertPhoto;
+    window.setCertPhotoShape = setCertPhotoShape;
+    window.setCertPhotoSize = setCertPhotoSize;
+    window.handleHeaderLineFontSizeChange = handleHeaderLineFontSizeChange;
+    window.handleAwardIntroSizeChange = handleAwardIntroSizeChange;
+    window.handleRecipientSubtitleSizeChange = handleRecipientSubtitleSizeChange;
+    window.handleEventTitleFontSizeChange = handleEventTitleFontSizeChange;
+    window.handleDetailFontSizeChange = handleDetailFontSizeChange;
+    window.handleSignatoryOfficeFontSizeChange = handleSignatoryOfficeFontSizeChange;
 
 

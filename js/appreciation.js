@@ -8,6 +8,10 @@ const APPREC_AUTOSAVE_KEY = 'move_appreciation_autosave_v1';
 
 const appreciationState = {
   activityId: 'ACT-KITCHEN-2',
+  headerRepublic: 'Republic of the Philippines',
+  headerCity: 'City Government of Baguio',
+  headerChapter: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+  headerSub: 'City Hall Chapter • Baguio City, Philippines',
   awardTitle: 'CERTIFICATE OF APPRECIATION',
   subtitle: 'is warmly and proudly presented to',
   honorific: 'HON.',
@@ -22,7 +26,7 @@ const appreciationState = {
   sigMode: 2,
   sig1: {
     enabled: true,
-    name: 'DAN RICKY M. ONG',
+    name: 'MARIO D. GANGA JR.',
     title: 'MOVE Chapter President',
     office: 'City Government of Baguio',
     signatureImage: '',
@@ -49,7 +53,8 @@ const appreciationState = {
   },
 
   // Framing & Visual Design
-  borderStyle: 'double_gold_navy', // double_gold_navy | ornate_gold | royal_blue_gold | minimal_navy
+  borderPreset: 'double_gold_navy',
+  borderStyle: 'double_gold_navy', // double_gold_navy | ornate_gold | royal_blue_gold | emerald_bronze | burgundy_gold | platinum_charcoal | minimal_navy
   cornerStyle: 'baroque',           // baroque | geometric | none
   fontFamily: 'cinzel',             // cinzel | playfair | montserrat
   goldSealEnabled: true,
@@ -60,8 +65,71 @@ const appreciationState = {
   watermarkImage: 'MOVE%20BAGUIO%20LOGO.png',
   watermarkLayer: 'behind', // behind | washout | infront | bottom-behind
   customWatermarkDataUrl: '',
+
+  // Adjustable Typography Font Sizes (px)
+  headerRepublicFontSize: 11,
+  headerCityFontSize: 13,
+  headerChapterFontSize: 14,
+  headerSubFontSize: 10,
+  awardTitleFontSize: 30, // px (20 - 46)
+  subtitleFontSize: 13,   // px (9 - 24)
+  recipientFontSize: 28,  // px (18 - 52)
+  recipientPositionFontSize: 12, // px (8 - 24)
+  citationFontSize: 12,   // px (9 - 20)
+  dateFontSize: 11,       // px (8 - 22)
+  recipientAlign: 'center', // center | left | right
+  citationAlign: 'center',  // center | left | right | justify
+  dateAlign: 'center',
+
+  // Print paper size (A4 default, Letter, Legal, A3, A5 option)
+  paperSize: 'a4',
+
+  // Inserted Custom Photos / Badges
+  insertedPhotos: [], // Array of { id, name, src, width, height, shape: 'gold_frame'|'circle'|'rounded'|'square', x, y }
+
+  // Per-Element Typography & Formatting (Word Docs Style)
+  elementStyles: {
+    headerRepublic: { fontSize: 11, fontFamily: 'inherit', bold: true, italic: false, underline: false, align: 'center' },
+    headerCity: { fontSize: 13, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    headerChapter: { fontSize: 14, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    headerSub: { fontSize: 10, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' },
+    headerText: { fontSize: 12, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' },
+    awardTitle: { fontSize: 30, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    subtitle: { fontSize: 13, fontFamily: 'inherit', bold: false, italic: true, underline: false, align: 'center' },
+    recipient: { fontSize: 28, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    recipientPosition: { fontSize: 12, fontFamily: 'inherit', bold: true, italic: false, underline: false, align: 'center' },
+    citation: { fontSize: 12, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' },
+    dateVenueLine: { fontSize: 11, fontFamily: 'inherit', bold: false, italic: true, underline: false, align: 'center' },
+    sig1_name: { fontSize: 12, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    sig1_title: { fontSize: 10.5, fontFamily: 'inherit', bold: true, italic: false, underline: false, align: 'center' },
+    sig1_office: { fontSize: 9.5, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' },
+    sig2_name: { fontSize: 12, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    sig2_title: { fontSize: 10.5, fontFamily: 'inherit', bold: true, italic: false, underline: false, align: 'center' },
+    sig2_office: { fontSize: 9.5, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' },
+    sig3_name: { fontSize: 12, fontFamily: 'cinzel', bold: true, italic: false, underline: false, align: 'center' },
+    sig3_title: { fontSize: 10.5, fontFamily: 'inherit', bold: true, italic: false, underline: false, align: 'center' },
+    sig3_office: { fontSize: 9.5, fontFamily: 'inherit', bold: false, italic: false, underline: false, align: 'center' }
+  },
+
+  // Movable Elements Offsets (Edit Mode)
+  offsets: {
+    leftLogo: { x: 0, y: 0 },
+    rightLogo: { x: 0, y: 0 },
+    headerText: { x: 0, y: 0 },
+    awardTitle: { x: 0, y: 0 },
+    subtitle: { x: 0, y: 0 },
+    recipient: { x: 0, y: 0 },
+    citation: { x: 0, y: 0 },
+    dateVenueLine: { x: 0, y: 0 },
+    signatories: { x: 0, y: 0 },
+    goldSeal: { x: 0, y: 0 },
+    watermark: { x: 0, y: 0 }
+  },
+  activeMoveElementKey: 'recipient',
+
   isDesignerMode: false,
   zoom: 100,
+  zoomMode: 'fit',
   activeVersionId: 'preset_speaker'
 };
 
@@ -108,6 +176,99 @@ const APPREC_PRESETS = {
     citation: 'in heartfelt gratitude for their generous patronage and invaluable sponsorship in support of the Men Opposed to Violence Against Women Everywhere (MOVE) advocacy program and “{activity},” held on {date} at {venue}.'
   }
 };
+
+// --- 1-CLICK BORDER PRESETS (DEDICATED FOR CERTIFICATE OF APPRECIATION) ---
+const APPREC_BORDER_PRESETS = {
+  double_gold_navy: {
+    key: 'double_gold_navy',
+    name: 'Double Gold & Midnight Navy',
+    desc: 'Official MOVE Baguio Signature Double Frame',
+    outerBorder: 'border: 8px double #d97706;',
+    innerBorder: 'border: 2px solid #091b38;',
+    titleColor: '#091b38',
+    accentColor: '#b45309',
+    cornerStyle: 'baroque',
+    bg: '#fffdfa'
+  },
+  ornate_gold: {
+    key: 'ornate_gold',
+    name: 'Ornate Florentine Gold',
+    desc: 'Prestigious Filigree for Keynote & VIP Honors',
+    outerBorder: 'border: 10px double #b45309;',
+    innerBorder: 'border: 2px dashed #d97706;',
+    titleColor: '#78350f',
+    accentColor: '#d97706',
+    cornerStyle: 'baroque',
+    bg: '#fffef7'
+  },
+  royal_blue_gold: {
+    key: 'royal_blue_gold',
+    name: 'Royal Blue & Radiant Gold',
+    desc: 'Distinguished Executive & Civic Recognition',
+    outerBorder: 'border: 9px solid #1e3a8a;',
+    innerBorder: 'border: 3px double #f59e0b;',
+    titleColor: '#1e3a8a',
+    accentColor: '#d97706',
+    cornerStyle: 'geometric',
+    bg: '#fafcff'
+  },
+  emerald_bronze: {
+    key: 'emerald_bronze',
+    name: 'Emerald Green & Antique Bronze',
+    desc: 'Advocacy, Community Action & Environmental Impact',
+    outerBorder: 'border: 9px double #065f46;',
+    innerBorder: 'border: 2px solid #b45309;',
+    titleColor: '#064e3b',
+    accentColor: '#059669',
+    cornerStyle: 'baroque',
+    bg: '#fbfdfc'
+  },
+  burgundy_gold: {
+    key: 'burgundy_gold',
+    name: 'Imperial Burgundy & Gilded Gold',
+    desc: 'Distinguished Leadership & Outstanding Service',
+    outerBorder: 'border: 9px double #831843;',
+    innerBorder: 'border: 2px solid #d97706;',
+    titleColor: '#701a75',
+    accentColor: '#be185d',
+    cornerStyle: 'baroque',
+    bg: '#fffbfa'
+  },
+  platinum_charcoal: {
+    key: 'platinum_charcoal',
+    name: 'Modern Platinum & Deep Charcoal',
+    desc: 'Contemporary Corporate & Institutional Honors',
+    outerBorder: 'border: 8px solid #334155;',
+    innerBorder: 'border: 2px solid #94a3b8;',
+    titleColor: '#0f172a',
+    accentColor: '#475569',
+    cornerStyle: 'geometric',
+    bg: '#f8fafc'
+  },
+  minimal_navy: {
+    key: 'minimal_navy',
+    name: 'Executive Minimalist Navy',
+    desc: 'Clean Modern Pinstripe Frame',
+    outerBorder: 'border: 6px solid #091b38;',
+    innerBorder: 'border: 1px solid #cbd5e1;',
+    titleColor: '#091b38',
+    accentColor: '#0284c7',
+    cornerStyle: 'none',
+    bg: '#ffffff'
+  }
+};
+
+function setApprecBorderPreset(presetKey) {
+  const p = APPREC_BORDER_PRESETS[presetKey];
+  if (!p) return;
+  appreciationState.borderPreset = presetKey;
+  appreciationState.borderStyle = presetKey;
+  if (p.cornerStyle) appreciationState.cornerStyle = p.cornerStyle;
+  syncAppreciationInputsFromState();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+  showToast(`Applied Border Preset: "${p.name}"`, 'fa-palette');
+}
 
 // --- VERSIONS & PRESETS STORAGE ---
 function getSavedApprecVersions() {
@@ -235,13 +396,13 @@ function loadAppreciationPreset(presetKey) {
   // Tailor default signatories based on preset
   if (presetKey === 'officer') {
     appreciationState.sigMode = 2;
-    appreciationState.sig1.name = 'DAN RICKY M. ONG';
+    appreciationState.sig1.name = 'MARIO D. GANGA JR.';
     appreciationState.sig1.title = 'MOVE Chapter President';
     appreciationState.sig2.name = 'HON. BENJAMIN B. MAGALONG';
     appreciationState.sig2.title = 'City Mayor';
   } else if (presetKey === 'speaker') {
     appreciationState.sigMode = 2;
-    appreciationState.sig1.name = 'DAN RICKY M. ONG';
+    appreciationState.sig1.name = 'MARIO D. GANGA JR.';
     appreciationState.sig1.title = 'MOVE Chapter President';
     appreciationState.sig2.name = 'HON. BENJAMIN B. MAGALONG';
     appreciationState.sig2.title = 'City Mayor';
@@ -478,27 +639,753 @@ function removeApprecSigImage(sigNum) {
 function toggleApprecEditMode() {
   appreciationState.isDesignerMode = !appreciationState.isDesignerMode;
   const btn = document.getElementById('btnToggleApprecEdit');
+  const bannerBtn = document.getElementById('btnApprecBannerEditToggle');
+  const bannerLbl = document.getElementById('lblApprecBannerEditToggle');
   const lbl = document.getElementById('lblApprecEditMode');
   const icon = document.getElementById('iconApprecEditBtn');
   const canvas = document.getElementById('appreciationSheetCanvas');
+  const nudgeBar = document.getElementById('apprecNudgeBar');
 
   if (appreciationState.isDesignerMode) {
     if (canvas) canvas.classList.add('cert-edit-active', 'apprec-edit-active');
+    if (nudgeBar) nudgeBar.classList.remove('hidden');
     if (btn) {
       btn.className = 'px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-move-navy-900 hover:bg-move-navy-950 text-white shadow-sm border border-amber-400 whitespace-nowrap';
     }
     if (lbl) lbl.textContent = 'Exit Designer Mode';
+    if (bannerLbl) bannerLbl.textContent = 'Close Toolbar';
+    if (bannerBtn) {
+      bannerBtn.className = 'px-2.5 py-1 bg-move-navy-900 hover:bg-slate-800 text-amber-300 border border-amber-400 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs';
+    }
     if (icon) icon.className = 'fa-solid fa-check text-emerald-400';
-    showToast('Appreciation Designer Mode Active: Click any text to edit inline, change watermarks, or fine-tune layout!', 'fa-pen-ruler');
+    showToast('Designer Mode Enabled: Drag any logo, text or photo to move freely, or use the Word formatting ribbon!', 'fa-arrows-up-down-left-right');
   } else {
     if (canvas) canvas.classList.remove('cert-edit-active', 'apprec-edit-active');
+    if (nudgeBar) nudgeBar.classList.add('hidden');
     if (btn) {
       btn.className = 'px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-amber-500 hover:bg-amber-600 text-white shadow-sm whitespace-nowrap';
     }
     if (lbl) lbl.textContent = 'Enable Designer / Edit Mode';
+    if (bannerLbl) bannerLbl.textContent = 'Designer & Formatting';
+    if (bannerBtn) {
+      bannerBtn.className = 'px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs';
+    }
     if (icon) icon.className = 'fa-solid fa-pen-ruler';
   }
   renderAppreciationPreview();
+  updateApprecMoveUi();
+}
+
+// --- WORD-STYLE ADJUSTABLE TYPOGRAPHY & FORMATTING ENGINE ---
+function getApprecElementStyle(key) {
+  if (!appreciationState.elementStyles) appreciationState.elementStyles = {};
+  if (!appreciationState.elementStyles[key]) {
+    const defaultSizes = {
+      awardTitle: 30,
+      subtitle: 13,
+      recipient: 28,
+      recipientPosition: 12,
+      citation: 12,
+      dateVenueLine: 11,
+      headerRepublic: 11,
+      headerCity: 13,
+      headerChapter: 14,
+      headerSub: 10,
+      headerText: 12,
+      sig1_name: 12, sig1_title: 10.5, sig1_office: 9.5,
+      sig2_name: 12, sig2_title: 10.5, sig2_office: 9.5,
+      sig3_name: 12, sig3_title: 10.5, sig3_office: 9.5
+    };
+    const defaultFonts = {
+      awardTitle: 'cinzel',
+      headerCity: 'cinzel',
+      headerChapter: 'cinzel',
+      recipient: 'cinzel',
+      sig1_name: 'cinzel',
+      sig2_name: 'cinzel',
+      sig3_name: 'cinzel'
+    };
+    const defaultBolds = {
+      awardTitle: true,
+      recipient: true,
+      recipientPosition: true,
+      headerRepublic: true,
+      headerCity: true,
+      headerChapter: true,
+      sig1_name: true, sig1_title: true,
+      sig2_name: true, sig2_title: true,
+      sig3_name: true, sig3_title: true
+    };
+    const defaultItalics = {
+      subtitle: true,
+      dateVenueLine: true
+    };
+
+    appreciationState.elementStyles[key] = {
+      fontSize: defaultSizes[key] || 14,
+      fontFamily: defaultFonts[key] || 'inherit',
+      bold: defaultBolds[key] !== undefined ? defaultBolds[key] : false,
+      italic: defaultItalics[key] !== undefined ? defaultItalics[key] : false,
+      underline: false,
+      align: 'center'
+    };
+  }
+  return appreciationState.elementStyles[key];
+}
+
+function getApprecInlineTextStyle(key, fallbackFontSize, fallbackAlign, fallbackBold, fallbackItalic) {
+  const st = getApprecElementStyle(key);
+  const size = st.fontSize || fallbackFontSize || 14;
+  const align = st.align || fallbackAlign || 'center';
+  const bold = st.bold !== undefined ? st.bold : fallbackBold;
+  const italic = st.italic !== undefined ? st.italic : fallbackItalic;
+  const underline = !!st.underline;
+
+  let familyCss = '';
+  if (st.fontFamily && st.fontFamily !== 'inherit') {
+    if (st.fontFamily === 'cinzel') familyCss = "font-family: 'Cinzel', serif;";
+    else if (st.fontFamily === 'playfair') familyCss = "font-family: 'Playfair Display', serif;";
+    else if (st.fontFamily === 'montserrat') familyCss = "font-family: 'Montserrat', sans-serif;";
+    else if (st.fontFamily === 'times') familyCss = "font-family: 'Times New Roman', serif;";
+    else if (st.fontFamily === 'arial') familyCss = "font-family: Arial, sans-serif;";
+    else if (st.fontFamily === 'georgia') familyCss = "font-family: 'Georgia', serif;";
+  }
+
+  return `font-size: ${size}px; text-align: ${align}; font-weight: ${bold ? '900' : 'normal'}; font-style: ${italic ? 'italic' : 'normal'}; text-decoration: ${underline ? 'underline' : 'none'}; ${familyCss}`;
+}
+
+function setApprecActiveFontSize(size) {
+  const val = parseInt(size, 10);
+  if (isNaN(val)) return;
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+  st.fontSize = val;
+
+  if (key === 'awardTitle') appreciationState.awardTitleFontSize = val;
+  else if (key === 'recipient') appreciationState.recipientFontSize = val;
+  else if (key === 'citation') appreciationState.citationFontSize = val;
+  else if (key === 'subtitle') appreciationState.subtitleFontSize = val;
+  else if (key === 'recipientPosition') appreciationState.recipientPositionFontSize = val;
+  else if (key === 'dateVenueLine' || key === 'date') appreciationState.dateFontSize = val;
+  else if (key === 'headerRepublic') appreciationState.headerRepublicFontSize = val;
+  else if (key === 'headerCity') appreciationState.headerCityFontSize = val;
+  else if (key === 'headerChapter') appreciationState.headerChapterFontSize = val;
+  else if (key === 'headerSub') appreciationState.headerSubFontSize = val;
+  else if (key === 'headerText') {
+    // Proportional scaling for all 4 header lines
+    const ratio = val / 12;
+    const r1 = Math.round(11 * ratio);
+    const r2 = Math.round(13 * ratio);
+    const r3 = Math.round(14 * ratio);
+    const r4 = Math.round(10 * ratio);
+    getApprecElementStyle('headerRepublic').fontSize = r1;
+    getApprecElementStyle('headerCity').fontSize = r2;
+    getApprecElementStyle('headerChapter').fontSize = r3;
+    getApprecElementStyle('headerSub').fontSize = r4;
+    appreciationState.headerRepublicFontSize = r1;
+    appreciationState.headerCityFontSize = r2;
+    appreciationState.headerChapterFontSize = r3;
+    appreciationState.headerSubFontSize = r4;
+  }
+
+  syncApprecTypographyUi();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+}
+
+function changeApprecActiveFontSize(delta) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+  const cur = st.fontSize || 14;
+  const newVal = Math.max(6, Math.min(72, cur + delta));
+  setApprecActiveFontSize(newVal);
+}
+
+function setApprecActiveFontFamily(ff) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+  st.fontFamily = ff;
+  renderAppreciationPreview();
+  syncApprecTypographyUi();
+  pushApprecHistoryState();
+}
+
+function toggleApprecActiveStyle(styleType) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+  if (styleType === 'bold') st.bold = !st.bold;
+  else if (styleType === 'italic') st.italic = !st.italic;
+  else if (styleType === 'underline') st.underline = !st.underline;
+  renderAppreciationPreview();
+  syncApprecTypographyUi();
+  pushApprecHistoryState();
+}
+
+function setApprecActiveTextAlign(align) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+  st.align = align;
+  if (key === 'recipient') appreciationState.recipientAlign = align;
+  else if (key === 'citation') appreciationState.citationAlign = align;
+  else if (key === 'dateVenueLine' || key === 'date') appreciationState.dateAlign = align;
+
+  renderAppreciationPreview();
+  syncApprecTypographyUi();
+  pushApprecHistoryState();
+}
+
+function setApprecFontSize(field, size) {
+  const val = parseInt(size, 10);
+  if (isNaN(val)) return;
+  const st = getApprecElementStyle(field);
+  st.fontSize = val;
+
+  if (field === 'awardTitle') appreciationState.awardTitleFontSize = val;
+  else if (field === 'recipient') appreciationState.recipientFontSize = val;
+  else if (field === 'citation') appreciationState.citationFontSize = val;
+  else if (field === 'subtitle') appreciationState.subtitleFontSize = val;
+  else if (field === 'recipientPosition') appreciationState.recipientPositionFontSize = val;
+  else if (field === 'dateVenueLine' || field === 'date') appreciationState.dateFontSize = val;
+  else if (field === 'headerRepublic') appreciationState.headerRepublicFontSize = val;
+  else if (field === 'headerCity') appreciationState.headerCityFontSize = val;
+  else if (field === 'headerChapter') appreciationState.headerChapterFontSize = val;
+  else if (field === 'headerSub') appreciationState.headerSubFontSize = val;
+  else if (field === 'headerText') {
+    const ratio = val / 12;
+    getApprecElementStyle('headerRepublic').fontSize = Math.round(11 * ratio);
+    getApprecElementStyle('headerCity').fontSize = Math.round(13 * ratio);
+    getApprecElementStyle('headerChapter').fontSize = Math.round(14 * ratio);
+    getApprecElementStyle('headerSub').fontSize = Math.round(10 * ratio);
+  }
+
+  if (appreciationState.activeMoveElementKey === field) {
+    const wfs = document.getElementById('apprecWordFontSizeSelect');
+    if (wfs) wfs.value = val;
+  }
+
+  syncApprecTypographyUi();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+}
+
+function changeApprecFontSize(field, delta) {
+  const st = getApprecElementStyle(field);
+  const cur = st.fontSize || 14;
+  const newVal = Math.max(6, Math.min(72, cur + delta));
+  setApprecFontSize(field, newVal);
+}
+
+function setApprecTextAlign(field, align) {
+  const st = getApprecElementStyle(field);
+  st.align = align;
+  if (field === 'recipient') appreciationState.recipientAlign = align;
+  else if (field === 'citation') appreciationState.citationAlign = align;
+  else if (field === 'dateVenueLine' || field === 'date') appreciationState.dateAlign = align;
+  syncApprecTypographyUi();
+  renderAppreciationPreview();
+  pushApprecHistoryState();
+}
+
+function syncApprecTypographyUi() {
+  const s = appreciationState;
+  const key = s.activeMoveElementKey || 'recipient';
+  const st = getApprecElementStyle(key);
+
+  const wfs = document.getElementById('apprecWordFontSizeSelect');
+  if (wfs && wfs !== document.activeElement) wfs.value = st.fontSize || 14;
+
+  const wff = document.getElementById('apprecWordFontFamilySelect');
+  if (wff) wff.value = st.fontFamily || 'inherit';
+
+  const btnB = document.getElementById('btnApprecWordBold');
+  if (btnB) {
+    btnB.classList.toggle('bg-amber-500', !!st.bold);
+    btnB.classList.toggle('text-white', !!st.bold);
+  }
+
+  const btnI = document.getElementById('btnApprecWordItalic');
+  if (btnI) {
+    btnI.classList.toggle('bg-amber-500', !!st.italic);
+    btnI.classList.toggle('text-white', !!st.italic);
+  }
+
+  const btnU = document.getElementById('btnApprecWordUnderline');
+  if (btnU) {
+    btnU.classList.toggle('bg-amber-500', !!st.underline);
+    btnU.classList.toggle('text-white', !!st.underline);
+  }
+
+  ['left', 'center', 'right', 'justify'].forEach(a => {
+    const btn = document.getElementById(`btnApprecWordAlign-${a}`);
+    if (btn) {
+      const isMatch = (st.align || 'center') === a;
+      btn.classList.toggle('bg-move-navy-900', isMatch);
+      btn.classList.toggle('text-white', isMatch);
+    }
+  });
+
+  // Sidebar Controls Sync (Card 1.5)
+  const syncRangeAndVal = (inputId, labelId, val, unit = 'px') => {
+    const el = document.getElementById(inputId);
+    const lbl = document.getElementById(labelId);
+    if (el && el !== document.activeElement) el.value = val;
+    if (lbl) lbl.textContent = `${val}${unit}`;
+  };
+
+  syncRangeAndVal('apprecRecipientFontSize', 'apprecRecipientFontSizeVal', getApprecElementStyle('recipient').fontSize || 28);
+  syncRangeAndVal('apprecTitleFontSize', 'apprecTitleFontSizeVal', getApprecElementStyle('awardTitle').fontSize || 30);
+  syncRangeAndVal('apprecCitationFontSize', 'apprecCitationFontSizeVal', getApprecElementStyle('citation').fontSize || 12);
+  syncRangeAndVal('apprecSubtitleFontSize', 'apprecSubtitleFontSizeVal', getApprecElementStyle('subtitle').fontSize || 13);
+  syncRangeAndVal('apprecRecipientPosFontSize', 'apprecRecipientPosFontSizeVal', getApprecElementStyle('recipientPosition').fontSize || 12);
+  syncRangeAndVal('apprecDateFontSize', 'apprecDateFontSizeVal', getApprecElementStyle('dateVenueLine').fontSize || 11);
+  syncRangeAndVal('apprecHeaderRepFontSize', 'apprecHeaderRepFontSizeVal', getApprecElementStyle('headerRepublic').fontSize || 11);
+  syncRangeAndVal('apprecHeaderCityFontSize', 'apprecHeaderCityFontSizeVal', getApprecElementStyle('headerCity').fontSize || 13);
+  syncRangeAndVal('apprecHeaderChapFontSize', 'apprecHeaderChapFontSizeVal', getApprecElementStyle('headerChapter').fontSize || 14);
+  syncRangeAndVal('apprecHeaderSubFontSize', 'apprecHeaderSubFontSizeVal', getApprecElementStyle('headerSub').fontSize || 10);
+}
+
+// --- OBJECT ALIGNMENT ENGINE (FOR ALL OBJECTS: LOGOS, TEXT, PHOTOS, SEALS) ---
+function alignApprecObject(alignType) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+
+  // If it is an inserted photo
+  if (key.startsWith('photo_')) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      if (alignType === 'left') photo.x = -240;
+      else if (alignType === 'center') photo.x = 0;
+      else if (alignType === 'right') photo.x = 240;
+      else if (alignType === 'top') photo.y = -180;
+      else if (alignType === 'middle') photo.y = 0;
+      else if (alignType === 'bottom') photo.y = 160;
+      renderAppreciationPreview();
+      updateApprecMoveUi();
+      pushApprecHistoryState();
+      showToast(`Aligned "${photo.name}" to ${alignType}`, 'fa-crosshairs');
+      return;
+    }
+  }
+
+  // Standard certificate elements
+  const off = getApprecOffset(key);
+  if (alignType === 'left') {
+    off.x = -160;
+  } else if (alignType === 'center') {
+    off.x = 0;
+  } else if (alignType === 'right') {
+    off.x = 160;
+  } else if (alignType === 'top') {
+    off.y = -40;
+  } else if (alignType === 'middle') {
+    off.y = 0;
+  } else if (alignType === 'bottom') {
+    off.y = 40;
+  }
+
+  renderAppreciationPreview();
+  updateApprecMoveUi();
+  pushApprecHistoryState();
+  showToast(`Aligned "${key}" to ${alignType}`, 'fa-crosshairs');
+}
+
+// --- INSERT CUSTOM PHOTO / BADGE ENGINE ---
+function openApprecPhotoUpload() {
+  const inp = document.getElementById('apprecInsertPhotoInput');
+  if (inp) inp.click();
+}
+
+function handleApprecPhotoUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const dataUrl = evt.target.result;
+    const photoId = 'photo_' + Date.now();
+    const photoName = (file.name.replace(/\.[^/.]+$/, '') || 'Photo').slice(0, 20);
+
+    if (!appreciationState.insertedPhotos) appreciationState.insertedPhotos = [];
+    appreciationState.insertedPhotos.push({
+      id: photoId,
+      name: photoName,
+      src: dataUrl,
+      width: 110,
+      height: 110,
+      shape: 'gold_frame',
+      x: 0,
+      y: 0
+    });
+
+    appreciationState.activeMoveElementKey = photoId;
+    renderAppreciationPreview();
+    updateApprecMoveUi();
+    pushApprecHistoryState();
+    showToast(`Inserted "${photoName}"! Drag it anywhere or use Alignment buttons.`, 'fa-image');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function removeApprecPhoto(photoId) {
+  if (!appreciationState.insertedPhotos) return;
+  const idx = appreciationState.insertedPhotos.findIndex(p => p.id === photoId);
+  if (idx !== -1) {
+    const name = appreciationState.insertedPhotos[idx].name;
+    appreciationState.insertedPhotos.splice(idx, 1);
+    appreciationState.activeMoveElementKey = 'recipient';
+    renderAppreciationPreview();
+    updateApprecMoveUi();
+    pushApprecHistoryState();
+    showToast(`Removed "${name}" from certificate`, 'fa-trash');
+  }
+}
+
+function removeApprecActivePhoto() {
+  const key = appreciationState.activeMoveElementKey;
+  if (key && key.startsWith('photo_')) {
+    removeApprecPhoto(key);
+  }
+}
+
+function setApprecPhotoShape(shape) {
+  const key = appreciationState.activeMoveElementKey;
+  if (!key || !key.startsWith('photo_')) return;
+  const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+  if (photo) {
+    photo.shape = shape;
+    renderAppreciationPreview();
+    pushApprecHistoryState();
+    showToast(`Photo shape set to ${shape}`, 'fa-shapes');
+  }
+}
+
+function setApprecPhotoSize(size) {
+  const val = parseInt(size, 10);
+  if (isNaN(val)) return;
+  const key = appreciationState.activeMoveElementKey;
+  if (!key || !key.startsWith('photo_')) return;
+  const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+  if (photo) {
+    photo.width = val;
+    photo.height = val;
+    const lbl = document.getElementById('apprecPhotoSizeVal');
+    if (lbl) lbl.textContent = `${val}px`;
+    renderAppreciationPreview();
+    pushApprecHistoryState();
+  }
+}
+
+// --- MOVABLE ELEMENTS (DRAG & DROP + NUDGING ENGINE) ---
+function getApprecOffset(key) {
+  if (!appreciationState.offsets) appreciationState.offsets = {};
+  if (!appreciationState.offsets[key]) appreciationState.offsets[key] = { x: 0, y: 0 };
+  return appreciationState.offsets[key];
+}
+
+function getApprecOffsetStyle(key) {
+  const off = getApprecOffset(key);
+  if (off.x === 0 && off.y === 0) return '';
+  return `transform: translate(${off.x}px, ${off.y}px);`;
+}
+
+function getApprecDragAttrs(key) {
+  return `data-apprec-element="${key}"`;
+}
+
+let isDraggingApprecElement = false;
+let activeDragApprecKey = null;
+let apprecDragStartX = 0;
+let apprecDragStartY = 0;
+let apprecDragInitX = 0;
+let apprecDragInitY = 0;
+
+function bindAppreciationDragListeners() {
+  const stage = document.getElementById('appreciationPreviewStage');
+  if (!stage || stage._dragBound) return;
+  stage._dragBound = true;
+
+  stage.addEventListener('mousedown', (e) => {
+    if (!appreciationState.isDesignerMode) return;
+    if (e.target.closest('.cert-remove-badge')) return;
+    if (e.target.isContentEditable && document.activeElement === e.target) return;
+
+    const targetEl = e.target.closest('[data-apprec-element]');
+    if (!targetEl) return;
+
+    activeDragApprecKey = targetEl.getAttribute('data-apprec-element');
+    appreciationState.activeMoveElementKey = activeDragApprecKey;
+    isDraggingApprecElement = true;
+    apprecDragStartX = e.clientX;
+    apprecDragStartY = e.clientY;
+
+    if (activeDragApprecKey.startsWith('photo_')) {
+      const photo = (appreciationState.insertedPhotos || []).find(p => p.id === activeDragApprecKey);
+      apprecDragInitX = photo ? (photo.x || 0) : 0;
+      apprecDragInitY = photo ? (photo.y || 0) : 0;
+    } else {
+      const off = getApprecOffset(activeDragApprecKey);
+      apprecDragInitX = off.x || 0;
+      apprecDragInitY = off.y || 0;
+    }
+
+    stage.querySelectorAll('[data-apprec-element]').forEach(el => el.classList.remove('is-selected-element'));
+    targetEl.classList.add('is-selected-element', 'is-dragging');
+
+    updateApprecMoveUi();
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDraggingApprecElement || !activeDragApprecKey || !appreciationState.isDesignerMode) return;
+    const scale = appreciationState.currentScale || 1.0;
+    const dx = Math.round((e.clientX - apprecDragStartX) / scale);
+    const dy = Math.round((e.clientY - apprecDragStartY) / scale);
+
+    if (activeDragApprecKey.startsWith('photo_')) {
+      const photo = (appreciationState.insertedPhotos || []).find(p => p.id === activeDragApprecKey);
+      if (photo) {
+        photo.x = apprecDragInitX + dx;
+        photo.y = apprecDragInitY + dy;
+        const targetEl = stage.querySelector(`[data-apprec-element="${activeDragApprecKey}"]`);
+        if (targetEl) targetEl.style.transform = `translate(${photo.x}px, ${photo.y}px)`;
+      }
+    } else {
+      const off = getApprecOffset(activeDragApprecKey);
+      off.x = apprecDragInitX + dx;
+      off.y = apprecDragInitY + dy;
+      const targetEl = stage.querySelector(`[data-apprec-element="${activeDragApprecKey}"]`);
+      if (targetEl) targetEl.style.transform = `translate(${off.x}px, ${off.y}px)`;
+    }
+    updateApprecMoveUi();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDraggingApprecElement && activeDragApprecKey) {
+      const targetEl = stage.querySelector(`[data-apprec-element="${activeDragApprecKey}"]`);
+      if (targetEl) targetEl.classList.remove('is-dragging');
+
+      pushApprecHistoryState();
+      isDraggingApprecElement = false;
+    }
+  });
+}
+
+function nudgeApprecElement(dx, dy) {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  if (key.startsWith('photo_')) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      photo.x += dx;
+      photo.y += dy;
+    }
+  } else {
+    const off = getApprecOffset(key);
+    off.x += dx;
+    off.y += dy;
+  }
+  renderAppreciationPreview();
+  updateApprecMoveUi();
+  pushApprecHistoryState();
+}
+
+function syncApprecOffsetFromInputs() {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const ix = parseInt(document.getElementById('apprecInputOffsetX')?.value || '0', 10) || 0;
+  const iy = parseInt(document.getElementById('apprecInputOffsetY')?.value || '0', 10) || 0;
+
+  if (key.startsWith('photo_')) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      photo.x = ix;
+      photo.y = iy;
+    }
+  } else {
+    const off = getApprecOffset(key);
+    off.x = ix;
+    off.y = iy;
+  }
+  renderAppreciationPreview();
+  updateApprecMoveUi();
+  pushApprecHistoryState();
+}
+
+function resetApprecElementPosition() {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  if (key.startsWith('photo_')) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      photo.x = 0;
+      photo.y = 0;
+    }
+  } else {
+    const off = getApprecOffset(key);
+    off.x = 0;
+    off.y = 0;
+  }
+  renderAppreciationPreview();
+  updateApprecMoveUi();
+  pushApprecHistoryState();
+  showToast(`Reset ${key} position to (0,0)`, 'fa-arrows-to-dot');
+}
+
+function resetAllApprecPositions() {
+  if (appreciationState.offsets) {
+    Object.keys(appreciationState.offsets).forEach(k => {
+      appreciationState.offsets[k] = { x: 0, y: 0 };
+    });
+  }
+  if (appreciationState.insertedPhotos) {
+    appreciationState.insertedPhotos.forEach(p => {
+      p.x = 0;
+      p.y = 0;
+    });
+  }
+  renderAppreciationPreview();
+  updateApprecMoveUi();
+  pushApprecHistoryState();
+  showToast('All element positions reset to (0,0)', 'fa-rotate-left');
+}
+
+function handleApprecNudgeTargetChange(key) {
+  appreciationState.activeMoveElementKey = key;
+  updateApprecMoveUi();
+  const stage = document.getElementById('appreciationPreviewStage');
+  if (stage) {
+    stage.querySelectorAll('[data-apprec-element]').forEach(el => el.classList.remove('is-selected-element'));
+    const el = stage.querySelector(`[data-apprec-element="${key}"]`);
+    if (el) el.classList.add('is-selected-element');
+  }
+}
+
+function updateApprecMoveUi() {
+  const key = appreciationState.activeMoveElementKey || 'recipient';
+  const sel = document.getElementById('apprecMoveElementTargetSelect');
+
+  if (sel) {
+    const standardOptions = [
+      { val: 'recipient', label: 'Recipient Name' },
+      { val: 'recipientPosition', label: 'Recipient Position & Office' },
+      { val: 'awardTitle', label: 'Award Title' },
+      { val: 'subtitle', label: 'Presentation Subtitle' },
+      { val: 'citation', label: 'Citation Paragraph' },
+      { val: 'dateVenueLine', label: 'Date & Venue Line' },
+      { val: 'headerRepublic', label: 'Header: Republic of the Philippines' },
+      { val: 'headerCity', label: 'Header: City Government of Baguio' },
+      { val: 'headerChapter', label: 'Header: MOVE Chapter Title' },
+      { val: 'headerSub', label: 'Header: Chapter Subline' },
+      { val: 'headerText', label: 'Header Block (All 4 Lines)' },
+      { val: 'leftLogo', label: 'Left Logo (City Hall)' },
+      { val: 'rightLogo', label: 'Right Logo (MOVE Baguio)' },
+      { val: 'signatories', label: 'Signatures Block' },
+      { val: 'sig1_name', label: 'Signatory 1: Name' },
+      { val: 'sig1_title', label: 'Signatory 1: Title' },
+      { val: 'sig2_name', label: 'Signatory 2: Name' },
+      { val: 'sig2_title', label: 'Signatory 2: Title' },
+      { val: 'sig3_name', label: 'Signatory 3: Name' },
+      { val: 'sig3_title', label: 'Signatory 3: Title' },
+      { val: 'goldSeal', label: 'Official Gold Seal' },
+      { val: 'watermark', label: 'Watermark Emblem' }
+    ];
+
+    const photoOptions = (appreciationState.insertedPhotos || []).map(p => ({
+      val: p.id,
+      label: `🖼️ [Photo] ${p.name}`
+    }));
+
+    const allOpts = [...standardOptions, ...photoOptions];
+    sel.innerHTML = allOpts.map(o => `<option value="${o.val}" ${o.val === key ? 'selected' : ''}>${o.label}</option>`).join('');
+  }
+
+  // Update position coordinates
+  let curX = 0, curY = 0;
+  if (key.startsWith('photo_')) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      curX = photo.x || 0;
+      curY = photo.y || 0;
+    }
+  } else {
+    const off = getApprecOffset(key);
+    curX = off.x;
+    curY = off.y;
+  }
+
+  const lbl = document.getElementById('lblApprecActiveOffset');
+  const ix = document.getElementById('apprecInputOffsetX');
+  const iy = document.getElementById('apprecInputOffsetY');
+  if (lbl) lbl.textContent = `${curX}, ${curY}`;
+  if (ix && ix !== document.activeElement) ix.value = curX;
+  if (iy && iy !== document.activeElement) iy.value = curY;
+
+  // Toggle between Word Text Ribbon and Photo Options
+  const isPhoto = key.startsWith('photo_');
+  const photoControls = document.getElementById('apprecRibbonPhotoControls');
+  const textControls = document.getElementById('apprecRibbonTextControls');
+  if (photoControls) photoControls.classList.toggle('hidden', !isPhoto);
+  if (textControls) textControls.classList.toggle('hidden', isPhoto);
+
+  if (isPhoto) {
+    const photo = (appreciationState.insertedPhotos || []).find(p => p.id === key);
+    if (photo) {
+      const ps = document.getElementById('apprecPhotoSize');
+      const psVal = document.getElementById('apprecPhotoSizeVal');
+      if (ps) ps.value = photo.width || 100;
+      if (psVal) psVal.textContent = `${photo.width || 100}px`;
+    }
+  } else {
+    const st = getApprecElementStyle(key);
+    const wfs = document.getElementById('apprecWordFontSizeSelect');
+    if (wfs && wfs !== document.activeElement) wfs.value = st.fontSize || 28;
+
+    const wff = document.getElementById('apprecWordFontFamilySelect');
+    if (wff) wff.value = st.fontFamily || 'inherit';
+
+    const btnB = document.getElementById('btnApprecWordBold');
+    if (btnB) {
+      btnB.classList.toggle('bg-amber-500', !!st.bold);
+      btnB.classList.toggle('text-white', !!st.bold);
+    }
+
+    const btnI = document.getElementById('btnApprecWordItalic');
+    if (btnI) {
+      btnI.classList.toggle('bg-amber-500', !!st.italic);
+      btnI.classList.toggle('text-white', !!st.italic);
+    }
+
+    const btnU = document.getElementById('btnApprecWordUnderline');
+    if (btnU) {
+      btnU.classList.toggle('bg-amber-500', !!st.underline);
+      btnU.classList.toggle('text-white', !!st.underline);
+    }
+
+    ['left', 'center', 'right', 'justify'].forEach(a => {
+      const btn = document.getElementById(`btnApprecWordAlign-${a}`);
+      if (btn) {
+        const isMatch = (st.align || 'center') === a;
+        btn.classList.toggle('bg-move-navy-900', isMatch);
+        btn.classList.toggle('text-white', isMatch);
+      }
+    });
+  }
+
+  syncApprecTypographyUi();
+}
+
+// --- PAPER SIZE HANDLER ---
+function handleApprecPaperSizeChange(size) {
+  appreciationState.paperSize = size || 'a4';
+  const paperLabels = {
+    a4: 'A4 Landscape (297 \u00d7 210 mm)',
+    letter: 'US Letter Landscape (11 \u00d7 8.5 in)',
+    legal: 'US Legal Landscape (14 \u00d7 8.5 in)',
+    a3: 'A3 Landscape (420 \u00d7 297 mm)',
+    a5: 'A5 Landscape (210 \u00d7 148 mm)'
+  };
+  const label = paperLabels[size] || size;
+  const sel = document.getElementById('apprecPrintPaperSizeSelect');
+  if (sel && sel.value !== size) sel.value = size;
+  showToast(`Print paper size set to ${label} (Default is A4)`, 'fa-file-lines');
+  pushApprecHistoryState();
 }
 
 // --- UNDO / REDO HISTORY ENGINE FOR APPRECIATION ---
@@ -667,10 +1554,90 @@ function insertAppreciationTag(tag) {
   pushApprecHistoryState();
 }
 
+// --- STUDIO TAB CONTROLS ---
+function switchApprecControlTab(tab) {
+  const tabs = ['content', 'sigs', 'design'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('tabBtnApprec-' + t);
+    const panel = document.getElementById('tabPanelApprec-' + t);
+    const isActive = (t === tab);
+    if (panel) panel.classList.toggle('hidden', !isActive);
+    if (btn) {
+      if (isActive) {
+        btn.className = 'flex-1 py-2 px-3 rounded-xl font-black text-xs transition flex items-center justify-center gap-1.5 bg-move-navy-900 text-white shadow-sm';
+      } else {
+        btn.className = 'flex-1 py-2 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+      }
+    }
+  });
+}
+
+// --- SMART AUTO-FIT & ZOOM ENGINE ---
+function setApprecZoomMode(mode) {
+  appreciationState.zoomMode = mode;
+  if (typeof mode === 'number') {
+    appreciationState.zoom = mode;
+  }
+  updateApprecZoomUi();
+  updateApprecAutoFit();
+}
+
 function setAppreciationZoom(pct) {
-  appreciationState.zoom = pct;
+  setApprecZoomMode(pct);
+}
+
+function updateApprecZoomUi() {
+  const cur = appreciationState.zoomMode || 'fit';
+  ['fit', '75', '100', '120'].forEach(k => {
+    const btn = document.getElementById('btnApprecZoom' + (k === 'fit' ? 'Fit' : k));
+    if (btn) {
+      const isMatch = (cur === k || (typeof cur === 'number' && String(cur) === k));
+      if (isMatch) {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-black transition flex items-center gap-1 shadow-2xs';
+      } else {
+        btn.className = 'px-2 py-1 rounded-lg text-slate-700 hover:bg-slate-100 transition';
+      }
+    }
+  });
+}
+
+function updateApprecAutoFit() {
   const stage = document.getElementById('appreciationPreviewStage');
-  if (stage) stage.style.transform = `scale(${pct / 100})`;
+  const container = document.getElementById('apprecStageContainer');
+  const sheet = document.getElementById('appreciationSheetCanvas');
+  if (!stage || !container || !sheet) return;
+
+  const mode = appreciationState.zoomMode || 'fit';
+  let scale = 1.0;
+
+  if (mode === 'fit') {
+    // 297mm in pixels at 96 DPI is ~1122.52px
+    const targetWidth = 1122.52;
+    const availWidth = container.clientWidth - 28; // container padding buffer
+    if (availWidth > 150) {
+      scale = Math.min(1.0, availWidth / targetWidth);
+    } else {
+      scale = 0.65;
+    }
+  } else if (typeof mode === 'number') {
+    scale = mode / 100;
+  } else if (mode === '75') {
+    scale = 0.75;
+  } else if (mode === '100') {
+    scale = 1.0;
+  } else if (mode === '120') {
+    scale = 1.2;
+  }
+
+  appreciationState.currentScale = scale;
+  stage.style.transform = `scale(${scale})`;
+  stage.style.transformOrigin = 'top center';
+
+  // Sizing container height to match scaled sheet perfectly with no vertical overflow or dead space
+  const sheetHeight = 793.7; // 210mm in pixels at 96 DPI
+  const scaledHeight = Math.round(sheetHeight * scale);
+  container.style.height = `${scaledHeight + 32}px`;
+  container.style.minHeight = `${scaledHeight + 32}px`;
 }
 
 // --- SYNC INPUT CONTROLS ---
@@ -721,7 +1688,7 @@ function syncAppreciationInputsFromState() {
 
   // Styles
   const bSel = document.getElementById('apprecBorderStyle');
-  if (bSel) bSel.value = s.borderStyle;
+  if (bSel) bSel.value = s.borderPreset || s.borderStyle;
 
   const cSel = document.getElementById('apprecCornerStyle');
   if (cSel) cSel.value = s.cornerStyle;
@@ -734,6 +1701,10 @@ function syncAppreciationInputsFromState() {
 
   const gsPos = document.getElementById('apprecGoldSealPosition');
   if (gsPos) gsPos.value = s.goldSealPosition;
+
+  // Paper Size Select
+  const pSel = document.getElementById('apprecPrintPaperSizeSelect');
+  if (pSel) pSel.value = s.paperSize || 'a4';
 
   // Watermark Inputs
   const wmChk = document.getElementById('apprecWatermarkEnabled');
@@ -768,6 +1739,19 @@ function syncAppreciationInputsFromState() {
     }
   });
 
+  // Highlight active border preset card
+  const curBorder = s.borderPreset || s.borderStyle || 'double_gold_navy';
+  Object.keys(APPREC_BORDER_PRESETS).forEach(k => {
+    const btn = document.getElementById(`btnApprecBorderPreset-${k}`);
+    if (btn) {
+      const isMatch = (curBorder === k);
+      btn.classList.toggle('ring-2', isMatch);
+      btn.classList.toggle('ring-amber-500', isMatch);
+      btn.classList.toggle('border-amber-500', isMatch);
+      btn.classList.toggle('bg-amber-50/60', isMatch);
+    }
+  });
+
   // Highlight signature mode buttons
   [1, 2, 3].forEach(m => {
     const btn = document.getElementById(`stageBtnApprecSig${m}`);
@@ -780,6 +1764,7 @@ function syncAppreciationInputsFromState() {
     }
   });
 
+  syncApprecTypographyUi();
   updateApprecUndoRedoButtons();
 }
 
@@ -803,28 +1788,13 @@ function renderAppreciationPreview() {
     .replace(/{position}/g, s.recipientPosition)
     .replace(/{office}/g, s.recipientOffice);
 
-  // Border & Accent Color Palette
-  let outerBorderCss = 'border: 8px double #d97706;'; // Prestigious Gold & Navy
-  let innerBorderCss = 'border: 2px solid #091b38;';
-  let titleColor = '#091b38';
-  let accentColor = '#b45309';
-
-  if (s.borderStyle === 'ornate_gold') {
-    outerBorderCss = 'border: 10px double #b45309;';
-    innerBorderCss = 'border: 2px dashed #d97706;';
-    titleColor = '#78350f';
-    accentColor = '#d97706';
-  } else if (s.borderStyle === 'royal_blue_gold') {
-    outerBorderCss = 'border: 9px solid #1e3a8a;';
-    innerBorderCss = 'border: 3px double #f59e0b;';
-    titleColor = '#1e3a8a';
-    accentColor = '#d97706';
-  } else if (s.borderStyle === 'minimal_navy') {
-    outerBorderCss = 'border: 6px solid #091b38;';
-    innerBorderCss = 'border: 1px solid #cbd5e1;';
-    titleColor = '#091b38';
-    accentColor = '#0284c7';
-  }
+  // Border & Accent Color Palette from APPREC_BORDER_PRESETS
+  const presetKey = s.borderPreset || s.borderStyle || 'double_gold_navy';
+  const preset = APPREC_BORDER_PRESETS[presetKey] || APPREC_BORDER_PRESETS.double_gold_navy;
+  let outerBorderCss = preset.outerBorder;
+  let innerBorderCss = preset.innerBorder;
+  let titleColor = preset.titleColor;
+  let canvasBg = preset.bg || '#fffdfa';
 
   // Corner Ornaments SVG
   const cornerFlourish = s.cornerStyle === 'baroque' ? `
@@ -837,10 +1807,10 @@ function renderAppreciationPreview() {
 
   // Gold Ribbon Medallion Seal
   const goldMedallion = s.goldSealEnabled ? `
-    <div class="absolute z-10 flex flex-col items-center select-none pointer-events-none drop-shadow-md ${
+    <div class="absolute z-10 flex flex-col items-center select-none drop-shadow-md ${
       s.goldSealPosition === 'bottom-left' ? 'bottom-8 left-12' : 
       (s.goldSealPosition === 'bottom-center' ? 'bottom-8 left-1/2 -translate-x-1/2' : 'bottom-8 right-12')
-    }">
+    }" ${getApprecDragAttrs('goldSeal')} style="${getApprecOffsetStyle('goldSeal')}">
       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 p-0.5 shadow-lg flex items-center justify-center border-2 border-amber-200">
         <div class="w-full h-full rounded-full border border-dashed border-amber-100 flex flex-col items-center justify-center text-center p-1 bg-gradient-to-br from-amber-400 to-amber-600">
           <i class="fa-solid fa-star text-white text-[10px] mb-0.5"></i>
@@ -868,7 +1838,7 @@ function renderAppreciationPreview() {
 
     watermarkHtml = `
       <div class="cert-watermark-overlay ${layerClass} select-none">
-        <div class="cert-watermark-box" style="width: ${wmSize}px; height: ${wmSize}px; opacity: ${wmOpacity};">
+        <div class="cert-watermark-box" ${getApprecDragAttrs('watermark')} style="width: ${wmSize}px; height: ${wmSize}px; opacity: ${wmOpacity}; ${getApprecOffsetStyle('watermark')}">
           <img src="${watermarkImgSrc}" alt="Watermark" class="w-full h-full object-contain pointer-events-none select-none">
         </div>
       </div>
@@ -891,11 +1861,13 @@ function renderAppreciationPreview() {
           `}
         </div>
         <div class="w-52 border-b-2 border-slate-900 mb-1"></div>
-        <h5 class="font-cinzel font-black text-xs text-move-navy-950 tracking-wider uppercase inline-edit-apprec"
-            data-slot="${slotNum}" data-field="name" contenteditable="true" spellcheck="false" title="Click to edit name directly">${sig.name || 'SIGNATORY NAME'}</h5>
-        <p class="text-[10.5px] font-semibold text-slate-700 leading-tight inline-edit-apprec"
-           data-slot="${slotNum}" data-field="title" contenteditable="true" spellcheck="false" title="Click to edit position">${sig.title || 'Official Designation'}</p>
-        ${sig.office ? `<p class="text-[9.5px] text-slate-500 leading-tight inline-edit-apprec" data-slot="${slotNum}" data-field="office" contenteditable="true" spellcheck="false">${sig.office}</p>` : ''}
+        <h5 class="tracking-wider uppercase inline-edit-apprec text-move-navy-950"
+            style="${getApprecInlineTextStyle('sig' + slotNum + '_name', 12, 'center', true, false)}"
+            data-slot="${slotNum}" data-field="name" contenteditable="true" spellcheck="false" title="Click to edit signatory name or adjust font size">${sig.name || 'SIGNATORY NAME'}</h5>
+        <p class="leading-tight inline-edit-apprec text-slate-700"
+           style="${getApprecInlineTextStyle('sig' + slotNum + '_title', 10.5, 'center', true, false)}"
+           data-slot="${slotNum}" data-field="title" contenteditable="true" spellcheck="false" title="Click to edit position or adjust font size">${sig.title || 'Official Designation'}</p>
+        ${sig.office ? `<p class="leading-tight inline-edit-apprec text-slate-500" style="${getApprecInlineTextStyle('sig' + slotNum + '_office', 9.5, 'center', false, false)}" data-slot="${slotNum}" data-field="office" contenteditable="true" spellcheck="false" title="Click to edit agency/office">${sig.office}</p>` : ''}
       </div>
     `;
   };
@@ -926,8 +1898,8 @@ function renderAppreciationPreview() {
   // Full A4 Landscape Frame HTML
   const sheetHtml = `
     <div id="appreciationSheetCanvas"
-         class="appreciation-landscape-sheet shadow-2xl relative select-text transition-all bg-[#fffdfa] overflow-hidden ${s.isDesignerMode ? 'cert-edit-active apprec-edit-active' : ''}"
-         style="width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; box-sizing: border-box; ${outerBorderCss}; font-family: ${s.fontFamily === 'cinzel' ? "'Cinzel', serif" : (s.fontFamily === 'playfair' ? "'Playfair Display', serif" : "'Montserrat', sans-serif")}; padding: 10mm 14mm;">
+         class="appreciation-landscape-sheet shadow-2xl relative select-text transition-all overflow-hidden ${s.isDesignerMode ? 'cert-edit-active apprec-edit-active' : ''}"
+         style="width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; box-sizing: border-box; background-color: ${canvasBg}; ${outerBorderCss}; font-family: ${s.fontFamily === 'cinzel' ? "'Cinzel', serif" : (s.fontFamily === 'playfair' ? "'Playfair Display', serif" : "'Montserrat', sans-serif")}; padding: 10mm 14mm;">
 
       <!-- Inner Decorative Border -->
       <div class="w-full h-full relative flex flex-col justify-between" style="${innerBorderCss}; padding: 8mm 10mm; box-sizing: border-box;">
@@ -946,45 +1918,83 @@ function renderAppreciationPreview() {
         <!-- Gold Ribbon Medallion -->
         ${goldMedallion}
 
+        <!-- Inserted Custom Photos / Badges -->
+        ${(() => {
+          let html = '';
+          if (s.insertedPhotos && s.insertedPhotos.length > 0) {
+            s.insertedPhotos.forEach(p => {
+              const isSelected = (s.activeMoveElementKey === p.id);
+              const shapeClass = p.shape === 'circle' ? 'shape-circle' :
+                                (p.shape === 'rounded' ? 'shape-rounded' :
+                                (p.shape === 'square' ? 'shape-square' : 'shape-gold_frame'));
+              const removeBtn = s.isDesignerMode ? `
+                <button type="button" onclick="event.stopPropagation(); removeApprecPhoto('${p.id}')"
+                        title="Delete ${p.name}"
+                        class="cert-remove-badge absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-black flex items-center justify-center shadow-md z-50 cursor-pointer leading-none">&times;</button>
+              ` : '';
+              html += `
+                <div class="apprec-inserted-photo apprec-removable-item ${shapeClass} ${isSelected ? 'is-selected-element' : ''}"
+                     data-apprec-element="${p.id}"
+                     style="width: ${p.width || 100}px; height: ${p.height || 100}px; left: calc(50% - ${(p.width || 100) / 2}px); top: calc(50% - ${(p.height || 100) / 2}px); transform: translate(${p.x || 0}px, ${p.y || 0}px);"
+                     title="${p.name} (Drag to reposition)">
+                  ${removeBtn}
+                  <img src="${p.src}" alt="${p.name}">
+                </div>
+              `;
+            });
+          }
+          return html;
+        })()}
+
         <!-- 1. HEADER SECTION (Official Seal & Header) -->
         <div class="relative z-10 flex items-center justify-between px-4 pb-2 border-b border-amber-200/50">
-          <div class="w-16 h-16 flex items-center justify-center shrink-0">
-            <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-16 h-16 object-contain drop-shadow-xs">
+          <div class="w-16 h-16 flex items-center justify-center shrink-0" ${getApprecDragAttrs('leftLogo')} style="${getApprecOffsetStyle('leftLogo')}">
+            <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-16 h-16 object-contain drop-shadow-xs pointer-events-none">
           </div>
-          <div class="text-center space-y-0.5 flex-1 px-4">
-            <p class="text-[10.5px] font-semibold text-slate-600 tracking-wider uppercase font-sans">Republic of the Philippines</p>
-            <h4 class="text-xs font-black text-move-navy-950 tracking-wider uppercase font-cinzel">City Government of Baguio</h4>
-            <h3 class="text-sm font-black text-amber-800 tracking-wide uppercase font-cinzel">Men Opposed to Violence Against Women Everywhere (MOVE)</h3>
-            <p class="text-[10px] text-slate-500 font-sans tracking-tight">City Hall Chapter • Baguio City, Philippines</p>
+          <div class="text-center space-y-0.5 flex-1 px-4" ${getApprecDragAttrs('headerText')} style="${getApprecOffsetStyle('headerText')}">
+            <p class="tracking-wider uppercase inline-edit-apprec text-slate-600 drop-shadow-xs"
+               data-apprec-field="headerRepublic" contenteditable="true" spellcheck="false" title="Click to edit or adjust font size for Republic header"
+               style="${getApprecInlineTextStyle('headerRepublic', s.headerRepublicFontSize || 11, 'center', true, false)}">${s.headerRepublic || 'Republic of the Philippines'}</p>
+            <h4 class="tracking-wider uppercase inline-edit-apprec text-move-navy-950 drop-shadow-xs"
+               data-apprec-field="headerCity" contenteditable="true" spellcheck="false" title="Click to edit or adjust font size for City Government header"
+               style="${getApprecInlineTextStyle('headerCity', s.headerCityFontSize || 13, 'center', true, false)}">${s.headerCity || 'City Government of Baguio'}</h4>
+            <h3 class="tracking-wide uppercase inline-edit-apprec text-amber-800 drop-shadow-xs"
+               data-apprec-field="headerChapter" contenteditable="true" spellcheck="false" title="Click to edit or adjust font size for Chapter title"
+               style="${getApprecInlineTextStyle('headerChapter', s.headerChapterFontSize || 14, 'center', true, false)}">${s.headerChapter || 'Men Opposed to Violence Against Women Everywhere (MOVE)'}</h3>
+            <p class="tracking-tight inline-edit-apprec text-slate-500 drop-shadow-xs"
+               data-apprec-field="headerSub" contenteditable="true" spellcheck="false" title="Click to edit or adjust font size for Chapter subline"
+               style="${getApprecInlineTextStyle('headerSub', s.headerSubFontSize || 10, 'center', false, false)}">${s.headerSub || 'City Hall Chapter • Baguio City, Philippines'}</p>
           </div>
-          <div class="w-16 h-16 flex items-center justify-center shrink-0">
-            <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-16 h-16 object-contain drop-shadow-xs">
+          <div class="w-16 h-16 flex items-center justify-center shrink-0" ${getApprecDragAttrs('rightLogo')} style="${getApprecOffsetStyle('rightLogo')}">
+            <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-16 h-16 object-contain drop-shadow-xs pointer-events-none">
           </div>
         </div>
 
         <!-- 2. TITLE & RECIPIENT HERO SECTION -->
         <div class="relative z-10 text-center space-y-2.5 pt-2 flex-1 flex flex-col justify-center">
           <!-- Award Title -->
-          <div class="space-y-1">
-            <h1 class="text-3xl font-black font-cinzel tracking-wider uppercase inline-edit-apprec drop-shadow-xs"
-                style="color: ${titleColor};"
+          <div class="space-y-1" ${getApprecDragAttrs('awardTitle')} style="${getApprecOffsetStyle('awardTitle')}">
+            <h1 class="tracking-wider uppercase inline-edit-apprec drop-shadow-xs"
+                style="color: ${titleColor}; ${getApprecInlineTextStyle('awardTitle', s.awardTitleFontSize || 30, 'center', true, false)}"
                 data-apprec-field="awardTitle" contenteditable="true" spellcheck="false" title="Click to edit award title">${s.awardTitle}</h1>
             <div class="w-48 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto"></div>
           </div>
 
           <!-- Presentation Subtitle -->
-          <p class="text-xs italic text-slate-600 font-sans inline-edit-apprec"
+          <p class="inline-edit-apprec"
+             ${getApprecDragAttrs('subtitle')} style="${getApprecOffsetStyle('subtitle')} ${getApprecInlineTextStyle('subtitle', s.subtitleFontSize || 13, 'center', false, true)}"
              data-apprec-field="subtitle" contenteditable="true" spellcheck="false" title="Click to edit subtitle">${s.subtitle}</p>
 
           <!-- Recipient Name Block -->
-          <div class="space-y-0.5 py-0.5">
-            <h2 class="text-2xl font-black font-cinzel tracking-widest text-move-navy-950 uppercase inline-edit-apprec"
+          <div class="space-y-0.5 py-0.5" ${getApprecDragAttrs('recipient')} style="${getApprecOffsetStyle('recipient')} ${getApprecInlineTextStyle('recipient', s.recipientFontSize || 28, s.recipientAlign || 'center', true, false)}">
+            <h2 class="tracking-widest text-move-navy-950 uppercase inline-edit-apprec"
                 data-apprec-field="recipientName" contenteditable="true" spellcheck="false" title="Click to edit recipient name">
               ${s.honorific ? `<span class="text-lg font-bold text-amber-700 mr-1.5">${s.honorific}</span>` : ''}${s.recipientName}
             </h2>
             <div class="w-80 h-0.5 bg-gradient-to-r from-amber-400 via-amber-600 to-amber-400 mx-auto"></div>
             ${(s.recipientPosition || s.recipientOffice) ? `
-              <p class="text-xs font-semibold text-slate-700 inline-edit-apprec"
+              <p class="inline-edit-apprec text-slate-700"
+                 style="${getApprecInlineTextStyle('recipientPosition', s.recipientPositionFontSize || 12, s.recipientAlign || 'center', true, false)}"
                  data-apprec-field="recipientPosition" contenteditable="true" spellcheck="false" title="Click to edit position & office">
                 ${s.recipientPosition}${s.recipientOffice ? ' • ' + s.recipientOffice : ''}
               </p>
@@ -992,20 +2002,22 @@ function renderAppreciationPreview() {
           </div>
 
           <!-- Citation Paragraph -->
-          <div class="max-w-3xl mx-auto px-6 py-1">
-            <p class="text-[12px] leading-relaxed text-slate-700 font-sans text-center inline-edit-apprec"
+          <div class="max-w-3xl mx-auto px-6 py-1" ${getApprecDragAttrs('citation')} style="${getApprecOffsetStyle('citation')}">
+            <p class="leading-relaxed text-slate-700 inline-edit-apprec"
+               style="${getApprecInlineTextStyle('citation', s.citationFontSize || 12, s.citationAlign || 'center', false, false)}"
                data-apprec-field="citationText" contenteditable="true" spellcheck="false" title="Click to edit citation paragraph">
               ${renderedCitation}
             </p>
           </div>
 
           <!-- Conferred Date Line -->
-          <p class="text-[10.5px] text-slate-600 italic font-sans inline-edit-apprec"
+          <p class="inline-edit-apprec"
+             ${getApprecDragAttrs('dateVenueLine')} style="${getApprecOffsetStyle('dateVenueLine')} ${getApprecInlineTextStyle('dateVenueLine', s.dateFontSize || 11, s.dateAlign || 'center', false, true)}"
              data-apprec-field="dateVenueLine" contenteditable="true" spellcheck="false" title="Click to edit date line">${s.dateVenueLine}</p>
         </div>
 
         <!-- 3. EXECUTIVE SIGNATURES SECTION -->
-        <div class="relative z-10 pt-2 border-t border-amber-200/40">
+        <div class="relative z-10 pt-2 border-t border-amber-200/40" ${getApprecDragAttrs('signatories')} style="${getApprecOffsetStyle('signatories')}">
           ${signaturesBlock}
         </div>
 
@@ -1015,6 +2027,9 @@ function renderAppreciationPreview() {
 
   stage.innerHTML = sheetHtml;
   bindAppreciationInlineEditing();
+  bindAppreciationDragListeners();
+  updateApprecMoveUi();
+  requestAnimationFrame(() => updateApprecAutoFit());
 }
 
 // --- DIRECT INLINE EDITING BINDINGS ---
@@ -1022,7 +2037,36 @@ function bindAppreciationInlineEditing() {
   const stage = document.getElementById('appreciationPreviewStage');
   if (!stage) return;
 
-  // Global field inline edits
+  // Global field inline edits & automatic Ribbon targeting on focus/click
+  stage.querySelectorAll('.inline-edit-apprec').forEach(el => {
+    // When clicked or focused, immediately select as active move element to sync Word Ribbon
+    el.addEventListener('focus', function() {
+      const field = this.getAttribute('data-apprec-field');
+      const slotNum = this.getAttribute('data-slot');
+      const sigField = this.getAttribute('data-field');
+      const targetKey = field || (slotNum ? `sig${slotNum}_${sigField}` : null);
+      if (targetKey) {
+        appreciationState.activeMoveElementKey = targetKey;
+        updateApprecMoveUi();
+        syncApprecTypographyUi();
+      }
+    });
+
+    el.addEventListener('click', function(e) {
+      if (!appreciationState.isDesignerMode) return;
+      const field = this.getAttribute('data-apprec-field');
+      const slotNum = this.getAttribute('data-slot');
+      const sigField = this.getAttribute('data-field');
+      const targetKey = field || (slotNum ? `sig${slotNum}_${sigField}` : null);
+      if (targetKey) {
+        appreciationState.activeMoveElementKey = targetKey;
+        updateApprecMoveUi();
+        syncApprecTypographyUi();
+      }
+    });
+  });
+
+  // Global field inline blur saves
   stage.querySelectorAll('[data-apprec-field]').forEach(el => {
     el.addEventListener('blur', function() {
       const field = this.getAttribute('data-apprec-field');
@@ -1047,6 +2091,26 @@ function bindAppreciationInlineEditing() {
         appreciationState.citationText = text;
         const input = document.getElementById('appreciationCitationText');
         if (input) input.value = text;
+      } else if (field === 'headerRepublic') {
+        appreciationState.headerRepublic = text;
+      } else if (field === 'headerCity') {
+        appreciationState.headerCity = text;
+      } else if (field === 'headerChapter') {
+        appreciationState.headerChapter = text;
+      } else if (field === 'headerSub') {
+        appreciationState.headerSub = text;
+      } else if (field === 'recipientPosition') {
+        if (text.includes('•')) {
+          const parts = text.split('•');
+          appreciationState.recipientPosition = parts[0].trim();
+          appreciationState.recipientOffice = parts[1].trim();
+        } else {
+          appreciationState.recipientPosition = text;
+        }
+        const pInp = document.getElementById('appreciationRecipientPosition');
+        const oInp = document.getElementById('appreciationRecipientOffice');
+        if (pInp) pInp.value = appreciationState.recipientPosition;
+        if (oInp) oInp.value = appreciationState.recipientOffice;
       }
     });
   });
@@ -1067,7 +2131,7 @@ function bindAppreciationInlineEditing() {
   });
 }
 
-// --- PRINTING ENGINE (ISOLATED A4 LANDSCAPE) ---
+// --- PRINTING ENGINE (DYNAMIC PAPER SIZE SELECTION) ---
 function printAppreciationCertificate() {
   const printBox = document.getElementById('appreciationPrintContainer');
   if (!printBox) return;
@@ -1078,16 +2142,32 @@ function printAppreciationCertificate() {
   const clone = canvas.cloneNode(true);
   clone.classList.remove('cert-edit-active', 'apprec-edit-active');
   clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('.is-selected-element').forEach(el => el.classList.remove('is-selected-element'));
+
+  const size = appreciationState.paperSize || 'a4';
+  const paperSpecs = {
+    a4: { rule: 'A4 landscape', width: '297mm', height: '210mm' },
+    letter: { rule: 'letter landscape', width: '11in', height: '8.5in' },
+    legal: { rule: 'legal landscape', width: '14in', height: '8.5in' },
+    a3: { rule: 'A3 landscape', width: '420mm', height: '297mm' },
+    a5: { rule: 'A5 landscape', width: '210mm', height: '148mm' }
+  };
+  const spec = paperSpecs[size] || paperSpecs.a4;
+
+  clone.style.width = spec.width;
+  clone.style.height = spec.height;
+  clone.style.maxWidth = spec.width;
+  clone.style.maxHeight = spec.height;
 
   printBox.innerHTML = `
-    <div class="appreciation-print-page">
+    <div class="appreciation-print-page" style="width: ${spec.width}; height: ${spec.height};">
       ${clone.outerHTML}
     </div>
   `;
 
-  if (typeof setPrintPageRule === 'function') setPrintPageRule('A4 landscape');
+  if (typeof setPrintPageRule === 'function') setPrintPageRule(spec.rule);
   document.body.classList.add('printing-appreciation');
-  showToast(`Preparing print for ${appreciationState.recipientName || 'Award'} (A4 Landscape)...`, 'fa-print');
+  showToast(`Preparing print for ${appreciationState.recipientName || 'Award'} (${spec.rule})...`, 'fa-print');
 
   setTimeout(() => {
     window.print();
@@ -1369,6 +2449,15 @@ function initAppreciationStudio() {
   syncAppreciationInputsFromState();
   renderAppreciationPreview();
   if (apprecHistory.length === 0) pushApprecHistoryState();
+
+  if (!window._apprecResizeAttached) {
+    window.addEventListener('resize', () => {
+      const p = document.getElementById('pageAppreciation');
+      if (p && !p.classList.contains('hidden')) updateApprecAutoFit();
+    });
+    window._apprecResizeAttached = true;
+  }
+  requestAnimationFrame(() => updateApprecAutoFit());
 }
 
 // Global Keyboard listener for Appreciation Studio Undo (Ctrl+Z) and Redo (Ctrl+Y or Ctrl+Shift+Z)
@@ -1413,6 +2502,9 @@ window.handleAppreciationStyleChange = handleAppreciationStyleChange;
 window.formatAppreciationRecipientUppercase = formatAppreciationRecipientUppercase;
 window.insertAppreciationTag = insertAppreciationTag;
 window.setAppreciationZoom = setAppreciationZoom;
+window.setApprecZoomMode = setApprecZoomMode;
+window.updateApprecAutoFit = updateApprecAutoFit;
+window.switchApprecControlTab = switchApprecControlTab;
 window.printAppreciationCertificate = printAppreciationCertificate;
 window.exportAppreciationDocx = exportAppreciationDocx;
 window.resetAppreciationToDefault = resetAppreciationToDefault;
@@ -1423,3 +2515,27 @@ window.setApprecWatermarkPreset = setApprecWatermarkPreset;
 window.setApprecWatermarkLayer = setApprecWatermarkLayer;
 window.handleApprecWatermarkUpload = handleApprecWatermarkUpload;
 window.resetApprecWatermark = resetApprecWatermark;
+window.setApprecBorderPreset = setApprecBorderPreset;
+window.setApprecFontSize = setApprecFontSize;
+window.changeApprecFontSize = changeApprecFontSize;
+window.setApprecTextAlign = setApprecTextAlign;
+window.syncApprecTypographyUi = syncApprecTypographyUi;
+window.nudgeApprecElement = nudgeApprecElement;
+window.syncApprecOffsetFromInputs = syncApprecOffsetFromInputs;
+window.resetApprecElementPosition = resetApprecElementPosition;
+window.resetAllApprecPositions = resetAllApprecPositions;
+window.handleApprecNudgeTargetChange = handleApprecNudgeTargetChange;
+window.updateApprecMoveUi = updateApprecMoveUi;
+window.handleApprecPaperSizeChange = handleApprecPaperSizeChange;
+window.setApprecActiveFontSize = setApprecActiveFontSize;
+window.changeApprecActiveFontSize = changeApprecActiveFontSize;
+window.setApprecActiveFontFamily = setApprecActiveFontFamily;
+window.toggleApprecActiveStyle = toggleApprecActiveStyle;
+window.setApprecActiveTextAlign = setApprecActiveTextAlign;
+window.alignApprecObject = alignApprecObject;
+window.openApprecPhotoUpload = openApprecPhotoUpload;
+window.handleApprecPhotoUpload = handleApprecPhotoUpload;
+window.removeApprecPhoto = removeApprecPhoto;
+window.removeApprecActivePhoto = removeApprecActivePhoto;
+window.setApprecPhotoShape = setApprecPhotoShape;
+window.setApprecPhotoSize = setApprecPhotoSize;

@@ -147,7 +147,286 @@ def build_office_summary_xml(participants):
   </Worksheet>
 """
 
-def save_sheets_to_xls(sheet_name, participants, include_office_summary=True):
+def build_primary_db_xml(members):
+    headers = [
+        "No.", "Orig #", "Full Name", "Surname", "First Name", "Middle Name", "EXT.",
+        "Gender", "Civil Status", "Office", "Position Title", "Appointment", "Level #",
+        "Start Date", "Nature", "Status", "S.G.", "Step #", "Age", "CELL #", "No. of Trainings", "Update Date"
+    ]
+    header_cells = "".join([f'<Cell ss:StyleID="s67"><Data ss:Type="String">{escape_xml(h)}</Data></Cell>' for h in headers])
+    rows_xml = [f'    <Row ss:Height="22">{header_cells}</Row>']
+
+    for idx, m in enumerate(members, 1):
+        age_val = m.get("age", "")
+        tr_val = m.get("trainings", 0)
+        c_idx = f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{idx}</Data></Cell>'
+        c_orig = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("origNo", idx))}</Data></Cell>'
+        c_name = f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(m.get("name", ""))}</Data></Cell>'
+        c_sur = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("surname", ""))}</Data></Cell>'
+        c_first = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("firstName", ""))}</Data></Cell>'
+        c_mid = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("middleName", ""))}</Data></Cell>'
+        c_ext = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("ext", ""))}</Data></Cell>'
+        c_gen = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("gender", "M"))}</Data></Cell>'
+        c_civ = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("civilStatus", "Married"))}</Data></Cell>'
+        c_off = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("office", ""))}</Data></Cell>'
+        c_pos = f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(m.get("position", ""))}</Data></Cell>'
+        c_app = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("appointment", "PERMANENT"))}</Data></Cell>'
+        c_lvl = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("level", "1"))}</Data></Cell>'
+        c_start = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("startDate", ""))}</Data></Cell>'
+        c_nat = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("nature", ""))}</Data></Cell>'
+        c_stat = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("status", "ACTIVE"))}</Data></Cell>'
+        c_sg = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("sg", ""))}</Data></Cell>'
+        c_step = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("step", ""))}</Data></Cell>'
+        c_age = f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{age_val}</Data></Cell>' if str(age_val).isdigit() else f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(age_val)}</Data></Cell>'
+        c_cell = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("cell", ""))}</Data></Cell>'
+        c_tr = f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{tr_val}</Data></Cell>' if str(tr_val).isdigit() else f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(tr_val)}</Data></Cell>'
+        c_upd = f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(m.get("updateDate", ""))}</Data></Cell>'
+
+        row = (
+            f'    <Row ss:Height="18">'
+            f'{c_idx}{c_orig}{c_name}{c_sur}{c_first}{c_mid}{c_ext}{c_gen}{c_civ}{c_off}'
+            f'{c_pos}{c_app}{c_lvl}{c_start}{c_nat}{c_stat}{c_sg}{c_step}{c_age}{c_cell}{c_tr}{c_upd}'
+            f'</Row>'
+        )
+        rows_xml.append(row)
+
+    rows_str = "\n".join(rows_xml)
+    return f"""  <Worksheet ss:Name="PRIMARY_DB">
+   <Table ss:DefaultRowHeight="16">
+    <Column ss:Width="35"/>
+    <Column ss:Width="45"/>
+    <Column ss:Width="190"/>
+    <Column ss:Width="95"/>
+    <Column ss:Width="95"/>
+    <Column ss:Width="90"/>
+    <Column ss:Width="35"/>
+    <Column ss:Width="45"/>
+    <Column ss:Width="75"/>
+    <Column ss:Width="75"/>
+    <Column ss:Width="230"/>
+    <Column ss:Width="95"/>
+    <Column ss:Width="45"/>
+    <Column ss:Width="80"/>
+    <Column ss:Width="75"/>
+    <Column ss:Width="65"/>
+    <Column ss:Width="40"/>
+    <Column ss:Width="45"/>
+    <Column ss:Width="40"/>
+    <Column ss:Width="95"/>
+    <Column ss:Width="60"/>
+    <Column ss:Width="90"/>
+{rows_str}
+   </Table>
+   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+    <ProtectObjects>False</ProtectObjects>
+    <ProtectScenarios>False</ProtectScenarios>
+   </WorksheetOptions>
+  </Worksheet>
+"""
+
+def build_participation_sheet_xml(participants, meta=None):
+    meta = meta or {}
+    act_title = meta.get("activityTitle", "Men in the Kitchen 2")
+    act_theme = meta.get("theme", "Love Served in the Kitchen")
+    act_date = meta.get("date", "October 20, 2026")
+    act_venue = meta.get("venue", "CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City")
+    act_dur = meta.get("duration", "8 Hours")
+    sig1_name = meta.get("sig1Name", "HAROLD C. MALLORCA")
+    sig1_title = meta.get("sig1Title", "MOVE Baguio Chapter President")
+    sig2_name = meta.get("sig2Name", "HON. BENJAMIN B. MAGALONG")
+    sig2_title = meta.get("sig2Title", "City Mayor, Baguio City")
+
+    headers = [
+        "No.", "Serial Number", "Activity ID", "Activity Title", "Theme", 
+        "Event Date", "Venue", "Duration", "Participant Full Name", 
+        "Office / Department", "Position Title", "Signatory 1", "Signatory 1 Title",
+        "Signatory 2", "Signatory 2 Title", "Issue Status"
+    ]
+    h_cells = "".join([f'<Cell ss:StyleID="s67"><Data ss:Type="String">{escape_xml(h)}</Data></Cell>' for h in headers])
+    rows_xml = [f'    <Row ss:Height="22">{h_cells}</Row>']
+
+    for idx, p in enumerate(participants, 1):
+        ser = meta.get("serialPrefix", "MOVE-2026-KITCHEN-2-") + f"{idx:04d}"
+        row = (
+            f'    <Row ss:Height="18">'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{idx}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(p.get("serialNo", ser))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(meta.get("activityId", "ACT-KITCHEN-2"))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_title)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_theme)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(act_date)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_venue)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(act_dur)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(p.get("name", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(p.get("office", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(p.get("position", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(sig1_name)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(sig1_title)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(sig2_name)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(sig2_title)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml("Verified & Certified" if p.get("isPresent", True) else "Absent")}</Data></Cell>'
+            f'</Row>'
+        )
+        rows_xml.append(row)
+
+    rows_str = "\n".join(rows_xml)
+    return f"""  <Worksheet ss:Name="Cert_Participation">
+   <Table ss:DefaultRowHeight="16">
+    <Column ss:Width="35"/>
+    <Column ss:Width="130"/>
+    <Column ss:Width="70"/>
+    <Column ss:Width="200"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="85"/>
+    <Column ss:Width="200"/>
+    <Column ss:Width="65"/>
+    <Column ss:Width="190"/>
+    <Column ss:Width="75"/>
+    <Column ss:Width="220"/>
+    <Column ss:Width="140"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="140"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="110"/>
+{rows_str}
+   </Table>
+   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+    <ProtectObjects>False</ProtectObjects>
+    <ProtectScenarios>False</ProtectScenarios>
+   </WorksheetOptions>
+  </Worksheet>
+"""
+
+def build_ca_sheet_xml(attendees, meta=None):
+    meta = meta or {}
+    act_title = meta.get("activityTitle", "Men in the Kitchen 2")
+    act_theme = meta.get("theme", "Love Served in the Kitchen")
+    act_date = meta.get("date", "October 20, 2026")
+    act_venue = meta.get("venue", "CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City")
+    cert_official = meta.get("signatoryName", "BENJAMIN B. MAGALONG")
+    pos1 = meta.get("signatoryTitle1", "City Mayor")
+    pos2 = meta.get("signatoryTitle2", "LCAT-VAWC Chairperson")
+    issue_date = meta.get("issueDate", "October 20, 2026")
+
+    headers = [
+        "No.", "Serial Number", "Activity Title", "Theme", "Date of Appearance / Attendance", 
+        "Venue / Station", "Attendee Full Name", "Office / Department", "Position Title", 
+        "Purpose of Certification", "Certifying Official", "Position 1", "Position 2", 
+        "Date Issued", "Verification Status"
+    ]
+    h_cells = "".join([f'<Cell ss:StyleID="s67"><Data ss:Type="String">{escape_xml(h)}</Data></Cell>' for h in headers])
+    rows_xml = [f'    <Row ss:Height="22">{h_cells}</Row>']
+
+    for idx, a in enumerate(attendees, 1):
+        ser = meta.get("serialPrefix", "CA-2026-KITCHEN-2-") + f"{idx:04d}"
+        row = (
+            f'    <Row ss:Height="18">'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{idx}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(a.get("serialNo", ser))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_title)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_theme)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(act_date)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(act_venue)}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(a.get("name", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(a.get("office", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(a.get("position", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">Civil Service Commission / HR Certification for Official Appearance &amp; Participation</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(cert_official)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(pos1)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(pos2)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(issue_date)}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">Duly Verified</Data></Cell>'
+            f'</Row>'
+        )
+        rows_xml.append(row)
+
+    rows_str = "\n".join(rows_xml)
+    return f"""  <Worksheet ss:Name="Cert_Attendance_CA">
+   <Table ss:DefaultRowHeight="16">
+    <Column ss:Width="35"/>
+    <Column ss:Width="130"/>
+    <Column ss:Width="170"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="95"/>
+    <Column ss:Width="200"/>
+    <Column ss:Width="190"/>
+    <Column ss:Width="75"/>
+    <Column ss:Width="220"/>
+    <Column ss:Width="240"/>
+    <Column ss:Width="140"/>
+    <Column ss:Width="110"/>
+    <Column ss:Width="130"/>
+    <Column ss:Width="85"/>
+    <Column ss:Width="95"/>
+{rows_str}
+   </Table>
+   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+    <ProtectObjects>False</ProtectObjects>
+    <ProtectScenarios>False</ProtectScenarios>
+   </WorksheetOptions>
+  </Worksheet>
+"""
+
+def build_appreciation_sheet_xml(recipients, meta=None):
+    meta = meta or {}
+    headers = [
+        "No.", "Serial Number", "Awardee / Recipient Name", "Title / Honorific", 
+        "Office / Organization", "Position / Designation", "Activity / Event Title", 
+        "Award Title", "Citation Lead & Text", "Date Awarded", "Venue", 
+        "Signatory 1", "Signatory 2", "Signatory 3"
+    ]
+    h_cells = "".join([f'<Cell ss:StyleID="s67"><Data ss:Type="String">{escape_xml(h)}</Data></Cell>' for h in headers])
+    rows_xml = [f'    <Row ss:Height="22">{h_cells}</Row>']
+
+    for idx, r in enumerate(recipients, 1):
+        ser = meta.get("serialPrefix", "APPREC-2026-") + f"{idx:04d}"
+        row = (
+            f'    <Row ss:Height="18">'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="Number">{idx}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(r.get("serialNo", ser))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(r.get("name", r.get("recipientName", "")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(r.get("honorific", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(r.get("office", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(r.get("position", r.get("recipientPosition", "")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(r.get("activity", meta.get("activityTitle", "Men in the Kitchen 2")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s67"><Data ss:Type="String">{escape_xml(r.get("award", r.get("awardTitle", "CERTIFICATE OF APPRECIATION")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(r.get("citation", ""))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(r.get("date", meta.get("date", "October 20, 2026")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s64"><Data ss:Type="String">{escape_xml(r.get("venue", meta.get("venue", "Baguio City")))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(meta.get("sig1", "HAROLD C. MALLORCA (President)"))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(meta.get("sig2", "HON. BENJAMIN B. MAGALONG (City Mayor)"))}</Data></Cell>'
+            f'<Cell ss:StyleID="s66"><Data ss:Type="String">{escape_xml(meta.get("sig3", "LIZA R. BULAN (CSWDO Head)"))}</Data></Cell>'
+            f'</Row>'
+        )
+        rows_xml.append(row)
+
+    rows_str = "\n".join(rows_xml)
+    return f"""  <Worksheet ss:Name="Cert_Appreciation">
+   <Table ss:DefaultRowHeight="16">
+    <Column ss:Width="35"/>
+    <Column ss:Width="110"/>
+    <Column ss:Width="190"/>
+    <Column ss:Width="60"/>
+    <Column ss:Width="140"/>
+    <Column ss:Width="190"/>
+    <Column ss:Width="200"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="280"/>
+    <Column ss:Width="85"/>
+    <Column ss:Width="200"/>
+    <Column ss:Width="150"/>
+    <Column ss:Width="160"/>
+    <Column ss:Width="140"/>
+{rows_str}
+   </Table>
+   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+    <ProtectObjects>False</ProtectObjects>
+    <ProtectScenarios>False</ProtectScenarios>
+   </WorksheetOptions>
+  </Worksheet>
+"""
+
+def save_sheets_to_xls(sheet_name, data_list, include_office_summary=False, meta=None):
     if not os.path.exists(TARGET_FILE):
         return False, f"Target file not found at: {TARGET_FILE}"
 
@@ -172,10 +451,20 @@ def save_sheets_to_xls(sheet_name, participants, include_office_summary=True):
         )
         xml_content = pattern_summary.sub("", xml_content)
 
-    # Generate new sheet xml
-    new_sheets_xml = build_worksheet_xml(sheet_name, participants)
-    if include_office_summary:
-        new_sheets_xml += "\n" + build_office_summary_xml(participants)
+    # Generate appropriate sheet xml
+    if sheet_name == "Cert_Participation":
+        new_sheets_xml = build_participation_sheet_xml(data_list, meta)
+    elif sheet_name == "Cert_Attendance_CA":
+        new_sheets_xml = build_ca_sheet_xml(data_list, meta)
+    elif sheet_name == "Cert_Appreciation":
+        new_sheets_xml = build_appreciation_sheet_xml(data_list, meta)
+    elif sheet_name == "PRIMARY_DB":
+        new_sheets_xml = build_primary_db_xml(data_list)
+    else:
+        new_sheets_xml = build_worksheet_xml(sheet_name, data_list)
+
+    if include_office_summary and sheet_name == "Selected_Participants":
+        new_sheets_xml += "\n" + build_office_summary_xml(data_list)
 
     # Insert before </Workbook>
     idx = xml_content.rfind("</Workbook>")
@@ -187,7 +476,7 @@ def save_sheets_to_xls(sheet_name, participants, include_office_summary=True):
     with open(TARGET_FILE, "w", encoding="utf-8") as f:
         f.write(updated_xml)
 
-    return True, f"Successfully saved sheet '{sheet_name}' ({len(participants)} participants) into ALL MALES MARIED WITH TRAINING.xls"
+    return True, f"Successfully saved sheet '{sheet_name}' ({len(data_list)} records) into ALL MALES MARIED WITH TRAINING.xls"
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 ET.register_namespace("w", W_NS)
@@ -613,7 +902,8 @@ class HRISSyncHandler(http.server.BaseHTTPRequestHandler):
                 participants = data.get("participants", [])
                 include_summary = data.get("includeOfficeSummary", True)
 
-                success, msg = save_sheets_to_xls(sheet_name, participants, include_summary)
+                meta = data.get("meta") or data
+                success, msg = save_sheets_to_xls(sheet_name, participants, include_summary, meta=meta)
 
                 self.send_response(200 if success else 500)
                 self.send_header("Content-Type", "application/json")

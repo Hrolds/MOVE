@@ -247,6 +247,19 @@
       background: white;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       overflow: hidden;
+      margin: 0 auto;
+    }
+    #appreciationPreviewStage {
+      width: 297mm;
+      max-width: 297mm;
+      margin: 0 auto;
+      transform-origin: top center;
+      transition: transform 0.15s ease-out;
+    }
+    #apprecStageContainer {
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     #appreciationPrintContainer {
       display: none;
@@ -270,17 +283,16 @@
         padding: 0 !important;
       }
       body.printing-appreciation .appreciation-print-page {
-        width: 297mm !important;
-        max-width: 297mm !important;
-        height: 210mm !important;
-        max-height: 210mm !important;
-        min-height: 210mm !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
         page-break-after: always !important;
         page-break-inside: avoid !important;
         box-shadow: none !important;
         border: none !important;
         margin: 0 auto !important;
-        padding: 8mm !important;
+        padding: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -300,6 +312,24 @@
       background: white;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       overflow: hidden;
+    }
+    #caControlsScrollContainer::-webkit-scrollbar {
+      width: 5px;
+    }
+    #caControlsScrollContainer::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #caControlsScrollContainer::-webkit-scrollbar-thumb {
+      background-color: rgba(148, 163, 184, 0.4);
+      border-radius: 9999px;
+    }
+    #caControlsScrollContainer::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(100, 116, 139, 0.7);
+    }
+    #caPreviewStageWrapper {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      transition: width 0.15s ease, height 0.15s ease;
     }
     #caPrintContainer {
       display: none;
@@ -345,34 +375,60 @@
   
     /* CERTIFICATE STUDIO & DESIGNER STYLES (CLEAN & PROFESSIONAL) */
     .cert-edit-active,
-    .apprec-edit-active {
+    .apprec-edit-active,
+    .ca-edit-active {
       box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3), 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     }
     .cert-edit-active [data-cert-element]:not(.cert-watermark-overlay):not(.cert-watermark-box):not(.absolute),
     .apprec-edit-active [data-apprec-field],
-    .apprec-edit-active [data-slot] {
+    .apprec-edit-active [data-slot],
+    .ca-edit-active [data-ca-element] {
       position: relative;
     }
     .cert-edit-active [data-cert-element],
     .apprec-edit-active [data-apprec-field],
-    .apprec-edit-active [data-slot] {
+    .apprec-edit-active [data-slot],
+    .ca-edit-active [data-ca-element] {
       transition: background-color 0.15s, outline 0.15s;
     }
     .cert-edit-active [data-cert-element]:hover,
     .apprec-edit-active [data-apprec-field]:hover,
-    .apprec-edit-active [data-slot]:hover {
+    .apprec-edit-active [data-slot]:hover,
+    .ca-edit-active [data-ca-element]:hover {
       outline: 1.5px dashed rgba(245, 158, 11, 0.7) !important;
       outline-offset: 3px;
       background-color: rgba(245, 158, 11, 0.04);
     }
     .cert-edit-active [data-cert-element].is-selected-element,
-    .apprec-edit-active [data-apprec-field].is-selected-element {
+    .apprec-edit-active [data-apprec-field].is-selected-element,
+    .apprec-edit-active [data-apprec-element].is-selected-element,
+    .ca-edit-active [data-ca-element].is-selected-element {
       outline: 2px solid #d97706 !important;
       outline-offset: 4px;
       background-color: rgba(245, 158, 11, 0.05);
     }
+    .apprec-edit-active [data-apprec-element],
+    .ca-edit-active [data-ca-element] {
+      cursor: grab;
+      position: relative;
+      transition: background-color 0.15s, outline 0.15s;
+    }
+    .apprec-edit-active [data-apprec-element]:hover,
+    .ca-edit-active [data-ca-element]:hover {
+      outline: 1.5px dashed rgba(245, 158, 11, 0.8) !important;
+      outline-offset: 3px;
+      background-color: rgba(245, 158, 11, 0.04);
+    }
+    .apprec-edit-active [data-apprec-element].is-dragging,
+    .ca-edit-active [data-ca-element].is-dragging {
+      cursor: grabbing !important;
+      opacity: 0.85;
+      z-index: 50 !important;
+    }
     .cert-inline-editable,
-    .inline-edit-apprec {
+    .inline-edit-apprec,
+    .ca-edit-active [contenteditable="true"],
+    .ca-edit-active [contenteditable="true"] * {
       cursor: text !important;
       border-radius: 4px;
       transition: background-color 0.15s, outline 0.15s;
@@ -446,9 +502,65 @@
     .cert-remove-badge {
       display: none;
     }
-    .cert-edit-active .cert-removable-item {
+    .cert-edit-active .cert-removable-item,
+    .apprec-edit-active .apprec-removable-item {
       pointer-events: auto !important;
     }
-    .cert-edit-active .cert-removable-item:hover > .cert-remove-badge {
+    .cert-edit-active .cert-removable-item:hover > .cert-remove-badge,
+    .apprec-edit-active .apprec-removable-item:hover > .cert-remove-badge {
       display: flex !important;
+    }
+
+    /* Inserted Custom Photos & Badges */
+    .apprec-inserted-photo,
+    .cert-inserted-photo {
+      position: absolute;
+      z-index: 28;
+      transition: box-shadow 0.15s, outline 0.15s;
+    }
+    .apprec-inserted-photo.shape-circle,
+    .cert-inserted-photo.shape-circle {
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .apprec-inserted-photo.shape-rounded,
+    .cert-inserted-photo.shape-rounded {
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .apprec-inserted-photo.shape-square,
+    .cert-inserted-photo.shape-square {
+      border-radius: 0;
+    }
+    .apprec-inserted-photo.shape-gold_frame,
+    .cert-inserted-photo.shape-gold_frame {
+      border-radius: 10px;
+      border: 3.5px double #d97706;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      background: #ffffff;
+      padding: 3px;
+    }
+    .apprec-inserted-photo img,
+    .cert-inserted-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      user-select: none;
+    }
+    .apprec-edit-active .apprec-inserted-photo,
+    .cert-edit-active .cert-inserted-photo {
+      cursor: grab;
+      pointer-events: auto !important;
+    }
+    .apprec-edit-active .apprec-inserted-photo:hover,
+    .cert-edit-active .cert-inserted-photo:hover {
+      outline: 2px dashed #f59e0b !important;
+      outline-offset: 3px;
+    }
+    .apprec-edit-active .apprec-inserted-photo.is-dragging,
+    .cert-edit-active .cert-inserted-photo.is-dragging {
+      cursor: grabbing !important;
+      opacity: 0.85;
+      z-index: 55 !important;
     }

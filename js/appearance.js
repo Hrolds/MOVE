@@ -22,6 +22,7 @@ const caState = {
   signatoryTitle2: 'LCAT-VAWC Chairperson',
   initials: '/drmo/ctb',
   showSignature: true,
+  signatureImage: 'signature%20(15).png',
   signatureWidth: 150,
   showCityLogo: true,
   showMoveLogo: true,
@@ -32,6 +33,10 @@ const caState = {
   searchTerm: '',
   selectedMemberIds: new Set(),
   zoom: 100,
+  zoomMode: 'fit', // 'fit' | 75 | 100 | 120 | custom
+  activeControlTab: 'content', // 'content' | 'typography' | 'signatory' | 'attendees' | 'presets' | 'all'
+  viewMode: 'split', // 'split' | 'focus'
+  bannerCollapsed: false,
 
   // Editable Context & Template
   mainContextMode: 'current', // 'current' (single employee) or 'template' (applies to all)
@@ -44,11 +49,32 @@ const caState = {
   fontSize: 11,           // Font size in px (proportional for A5 landscape slip)
   textIndent: 24,         // Text indent in px
 
+  // Movable Elements Offsets (Edit Mode)
+  offsets: {
+    header: { x: 0, y: 0 },
+    leftLogo: { x: 0, y: 0 },
+    rightLogo: { x: 0, y: 0 },
+    headerText: { x: 0, y: 0 },
+    title: { x: 0, y: 0 },
+    body: { x: 0, y: 0 },
+    purpose: { x: 0, y: 0 },
+    issueDate: { x: 0, y: 0 },
+    signatory: { x: 0, y: 0 },
+    initials: { x: 0, y: 0 }
+  },
+  activeMoveElementKey: 'header',
+  isDesignerMode: false,
+
   // Word Docs Style Layout, Spacing & Alignments
   titleSpacingAfter: 8,    // Space after CERTIFICATE OF APPEARANCE title in px
   titleAlign: 'center',    // 'center' | 'left' | 'right'
   mainTextAlign: 'both',   // 'both' (justify) | 'left' | 'center'
   signatureAlign: 'center', // 'center' | 'right' | 'left' (Centered by default per user request)
+  showHeaderLine: false,   // User requested: remove line on the top
+  showFooter: false,       // User requested: remove footer for now
+  headerLayout: 'centered',// User requested: logos too far from title -> centered layout brings logos right beside header text & title
+  headerSpacingAfter: 4,   // Gap between header and title in px
+  logoSize: 48,            // Logo size in px (w-12 h-12)
   purposeAlign: 'both',
   activeVersionId: 'ver_executive_centered'
 };
@@ -170,12 +196,20 @@ function loadCaVersion(versionId) {
   if (d.signatoryTitle2 !== undefined) caState.signatoryTitle2 = d.signatoryTitle2;
   if (d.initials !== undefined) caState.initials = d.initials;
   if (d.showSignature !== undefined) caState.showSignature = d.showSignature;
+  if (d.signatureImage !== undefined) caState.signatureImage = d.signatureImage;
   if (d.signatureWidth !== undefined) caState.signatureWidth = d.signatureWidth;
+  if (d.showHeaderLine !== undefined) caState.showHeaderLine = d.showHeaderLine;
+  if (d.showFooter !== undefined) caState.showFooter = d.showFooter;
+  if (d.headerLayout !== undefined) caState.headerLayout = d.headerLayout;
+  if (d.headerSpacingAfter !== undefined) caState.headerSpacingAfter = d.headerSpacingAfter;
+  if (d.logoSize !== undefined) caState.logoSize = d.logoSize;
+  if (d.offsets) caState.offsets = JSON.parse(JSON.stringify(d.offsets));
 
   syncCaInputsFromState();
   syncCaAlignmentButtons();
   populateCaVersionsDropdown();
   renderAppearancePreview();
+  updateCaMoveUi();
   autosaveCaSession();
   showToast(`Loaded version: ${ver.name}`, 'fa-check');
 }
@@ -208,7 +242,14 @@ function promptSaveNewCaVersion() {
       signatoryTitle2: caState.signatoryTitle2,
       initials: caState.initials,
       showSignature: caState.showSignature,
-      signatureWidth: caState.signatureWidth
+      signatureImage: caState.signatureImage !== undefined ? caState.signatureImage : 'signature%20(15).png',
+      signatureWidth: caState.signatureWidth,
+      showHeaderLine: caState.showHeaderLine,
+      showFooter: caState.showFooter,
+      headerLayout: caState.headerLayout,
+      headerSpacingAfter: caState.headerSpacingAfter,
+      logoSize: caState.logoSize,
+      offsets: caState.offsets ? JSON.parse(JSON.stringify(caState.offsets)) : {}
     }
   };
 
@@ -247,7 +288,14 @@ function updateCurrentCaVersion() {
     signatoryTitle2: caState.signatoryTitle2,
     initials: caState.initials,
     showSignature: caState.showSignature,
-    signatureWidth: caState.signatureWidth
+    signatureImage: caState.signatureImage !== undefined ? caState.signatureImage : 'signature%20(15).png',
+    signatureWidth: caState.signatureWidth,
+    showHeaderLine: caState.showHeaderLine,
+    showFooter: caState.showFooter,
+    headerLayout: caState.headerLayout,
+    headerSpacingAfter: caState.headerSpacingAfter,
+    logoSize: caState.logoSize,
+    offsets: caState.offsets ? JSON.parse(JSON.stringify(caState.offsets)) : {}
   };
 
   localStorage.setItem(CA_VERSIONS_KEY, JSON.stringify(saved));
@@ -290,8 +338,15 @@ function autosaveCaSession() {
       signatoryTitle2: caState.signatoryTitle2,
       initials: caState.initials,
       showSignature: caState.showSignature,
+      signatureImage: caState.signatureImage !== undefined ? caState.signatureImage : 'signature%20(15).png',
       signatureWidth: caState.signatureWidth,
-      activeVersionId: caState.activeVersionId
+      showHeaderLine: caState.showHeaderLine,
+      showFooter: caState.showFooter,
+      headerLayout: caState.headerLayout,
+      headerSpacingAfter: caState.headerSpacingAfter,
+      logoSize: caState.logoSize,
+      activeVersionId: caState.activeVersionId,
+      offsets: caState.offsets ? JSON.parse(JSON.stringify(caState.offsets)) : {}
     };
     localStorage.setItem(CA_AUTOSAVE_KEY, JSON.stringify(snapshot));
   } catch (e) {
@@ -322,8 +377,17 @@ function restoreAutosavedCaSession() {
     if (s.signatoryTitle2 !== undefined) caState.signatoryTitle2 = s.signatoryTitle2;
     if (s.initials !== undefined) caState.initials = s.initials;
     if (s.showSignature !== undefined) caState.showSignature = s.showSignature;
+    if (s.signatureImage !== undefined) caState.signatureImage = s.signatureImage;
     if (s.signatureWidth !== undefined) caState.signatureWidth = s.signatureWidth;
+    if (s.showHeaderLine !== undefined) caState.showHeaderLine = s.showHeaderLine;
+    if (s.showFooter !== undefined) caState.showFooter = s.showFooter;
+    if (s.headerLayout !== undefined) caState.headerLayout = s.headerLayout;
+    if (s.headerSpacingAfter !== undefined) caState.headerSpacingAfter = s.headerSpacingAfter;
+    if (s.logoSize !== undefined) caState.logoSize = s.logoSize;
     if (s.activeVersionId !== undefined) caState.activeVersionId = s.activeVersionId;
+    if (s.offsets && typeof s.offsets === 'object') {
+      caState.offsets = Object.assign({}, caState.offsets, s.offsets);
+    }
   } catch (e) {
     // ignore
   }
@@ -351,6 +415,19 @@ function initAppearanceStudio() {
   populateCaEmployeeDropdown();
   renderAppearancePreview();
   renderCaAttendeesList();
+  bindAppearanceDragListeners();
+  updateCaMoveUi();
+
+  switchCaControlTab(caState.activeControlTab || 'content');
+
+  if (!window._caResizeAttached) {
+    window.addEventListener('resize', () => {
+      const p = document.getElementById('pageAppearance');
+      if (p && !p.classList.contains('hidden')) updateCaAutoFit();
+    });
+    window._caResizeAttached = true;
+  }
+  requestAnimationFrame(() => updateCaAutoFit());
 }
 
 // --- POPULATE ACTIVITY DROPDOWN ---
@@ -445,10 +522,24 @@ function getCaHonorific(member, uppercase = false) {
 }
 
 // --- CONTEXT BUILDERS & INTERACTIVE EDITING ---
+let caAutosaveTimer = null;
+function debouncedAutosaveCaSession(delayMs = 350) {
+  if (caAutosaveTimer) clearTimeout(caAutosaveTimer);
+  caAutosaveTimer = setTimeout(() => {
+    autosaveCaSession();
+  }, delayMs);
+}
+
+function escapeRegExp(string) {
+  if (string === null || string === undefined) return '';
+  return String(string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function buildCaMainHtml(member) {
   if (!member) {
     const list = getActiveCaParticipants();
     member = list[caState.currentMemberIndex] || {
+      id: '_active_fallback',
       name: 'EMPLOYEE FULL NAME',
       position: 'OFFICIAL POSITION TITLE',
       office: 'DEPARTMENT / OFFICE',
@@ -458,8 +549,9 @@ function buildCaMainHtml(member) {
   }
 
   // If there's an individual text override for this member
-  if (caState.customMemberTexts && member.id && caState.customMemberTexts[member.id]) {
-    return caState.customMemberTexts[member.id];
+  const memberKey = member.id || '_active_fallback';
+  if (caState.customMemberTexts && caState.customMemberTexts[memberKey]) {
+    return caState.customMemberTexts[memberKey];
   }
 
   const hon = getCaHonorific(member, true);
@@ -473,13 +565,22 @@ function buildCaMainHtml(member) {
 
   let tmpl = caState.mainTemplate || 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.';
 
+  // If the template has NO bold tags at all, auto-wrap the key dynamic variables in <strong>
+  const hasFormatting = /<\/?(strong|b)\b/i.test(tmpl);
+  const rName = hasFormatting ? mName : `<strong>${mName}</strong>`;
+  const rPos = hasFormatting ? mPos : `<strong>${mPos}</strong>`;
+  const rOff = hasFormatting ? mOff : `<strong>${mOff}</strong>`;
+  const rAct = hasFormatting ? fullActTitle : `<strong>${fullActTitle}</strong>`;
+
   return tmpl
+    .replace(/\{honorific\}\{name\}/gi, `${hon}${rName}`)
+    .replace(/\{honorific\}\s*\{name\}/gi, `${hon}${rName}`)
     .replace(/\{honorific\}/gi, hon)
-    .replace(/\{name\}/gi, mName)
-    .replace(/\{position\}/gi, mPos)
-    .replace(/\{office\}/gi, mOff)
+    .replace(/\{name\}/gi, rName)
+    .replace(/\{position\}/gi, rPos)
+    .replace(/\{office\}/gi, rOff)
     .replace(/\{basis\}/gi, basisClause)
-    .replace(/\{activity\}/gi, fullActTitle)
+    .replace(/\{activity\}/gi, rAct)
     .replace(/\{date\}/gi, dateClause)
     .replace(/\{venue\}/gi, venueClause);
 }
@@ -509,28 +610,42 @@ function syncCaContextInput() {
   if (caState.mainContextMode === 'current') {
     if (btnCurr) btnCurr.className = 'px-2 py-0.5 rounded bg-move-navy-900 text-white shadow-2xs font-bold transition';
     if (btnTmpl) btnTmpl.className = 'px-2 py-0.5 rounded text-slate-600 hover:text-move-navy-900 transition';
-    if (badge) badge.textContent = `Editing text for ${currMember ? currMember.name : 'Active Employee'}`;
-    input.value = buildCaMainPlainText(currMember);
+    if (badge) badge.textContent = `Live Text (${currMember ? currMember.name : 'Active Employee'})`;
+    // Only update value if user is not actively typing or focused inside this textarea
+    if (document.activeElement !== input) {
+      input.value = buildCaMainPlainText(currMember);
+    }
   } else {
     if (btnCurr) btnCurr.className = 'px-2 py-0.5 rounded text-slate-600 hover:text-move-navy-900 transition';
     if (btnTmpl) btnTmpl.className = 'px-2 py-0.5 rounded bg-move-navy-900 text-white shadow-2xs font-bold transition';
-    if (badge) badge.textContent = 'Editing Master Template (applies to all)';
-    input.value = caState.mainTemplate;
+    if (badge) badge.textContent = 'Master Template ({tags})';
+    if (document.activeElement !== input) {
+      input.value = caState.mainTemplate;
+    }
   }
 }
 
 function handleCaMainContextInput(val) {
   const participants = getActiveCaParticipants();
   const currMember = participants[caState.currentMemberIndex] || null;
+  const memberKey = currMember ? currMember.id : '_active_fallback';
 
   if (caState.mainContextMode === 'current') {
-    if (currMember) {
-      caState.customMemberTexts[currMember.id] = val;
-    }
+    caState.customMemberTexts[memberKey] = val;
   } else {
     caState.mainTemplate = val;
   }
-  renderAppearancePreview();
+
+  // Smoothly update the live preview paragraph without recreating the full DOM canvas
+  const mainEl = document.getElementById('caMainTextEl');
+  if (mainEl && document.activeElement !== mainEl) {
+    if (caState.mainContextMode === 'current') {
+      mainEl.innerText = val;
+    } else {
+      mainEl.innerHTML = buildCaMainHtml(currMember);
+    }
+  }
+  debouncedAutosaveCaSession();
 }
 
 function insertCaPlaceholder(tag) {
@@ -546,51 +661,269 @@ function insertCaPlaceholder(tag) {
   input.selectionStart = input.selectionEnd = start + tag.length;
   input.focus();
   caState.mainTemplate = input.value;
+  
+  const mainEl = document.getElementById('caMainTextEl');
+  if (mainEl) {
+    mainEl.innerHTML = buildCaMainHtml();
+  }
+  debouncedAutosaveCaSession();
+}
+
+// --- HEURISTIC ATTENDEE EXTRACTOR FOR CERTIFICATION TEXT ---
+function extractAttendeeFieldsFromText(text) {
+  if (!text) return null;
+  const certPrefix = /(?:This is to certify that|certify that)\s+/i;
+  const matchPrefix = text.match(certPrefix);
+  if (!matchPrefix) return null;
+
+  let rest = text.slice(matchPrefix.index + matchPrefix[0].length);
+
+  let hon = '';
+  const honMatch = rest.match(/^(MR\.|MS\.|DR\.|ATTY\.|ENGR\.|HON\.)\s+/i);
+  if (honMatch) {
+    hon = honMatch[1].toUpperCase();
+    rest = rest.slice(honMatch[0].length);
+  }
+
+  const basisDelimiter = /,\s*(?:was duly verified|who has participated|was verified|is duly verified|has attended|duly attended|participated in)/i;
+  const basisIdx = rest.search(basisDelimiter);
+  let employeeClause = (basisIdx !== -1) ? rest.slice(0, basisIdx) : rest;
+
+  let office = '';
+  let beforeOffice = employeeClause;
+  const officeMatches = [...employeeClause.matchAll(/\s+(?:of|under)\s+/gi)];
+  if (officeMatches.length > 0) {
+    const lastOfficeMatch = officeMatches[officeMatches.length - 1];
+    office = employeeClause.slice(lastOfficeMatch.index + lastOfficeMatch[0].length).trim();
+    beforeOffice = employeeClause.slice(0, lastOfficeMatch.index).trim();
+  }
+
+  let name = '';
+  let position = '';
+
+  const holdingPosMatch = beforeOffice.match(/(?:,\s*)?(?:holding the position of|as)\s+(.+)$/i);
+  if (holdingPosMatch) {
+    position = holdingPosMatch[1].trim();
+    name = beforeOffice.slice(0, holdingPosMatch.index).trim().replace(/,\s*$/, '');
+  } else {
+    const lastComma = beforeOffice.lastIndexOf(',');
+    if (lastComma !== -1) {
+      position = beforeOffice.slice(lastComma + 1).trim();
+      name = beforeOffice.slice(0, lastComma).trim();
+    } else {
+      name = beforeOffice;
+    }
+  }
+
+  return { hon, name, position, office };
+}
+
+// --- SMART TEMPLATE CONVERTER (REVERSE TEMPLATING) ---
+function convertTextToCaTemplate(rawText, member) {
+  if (!rawText || !rawText.trim()) {
+    return 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.';
+  }
+
+  let text = rawText.trim();
+
+  // 0. Replace generic placeholder tokens if they exist in the raw text
+  text = text
+    .replace(/(?:(?:MR|MS|DR|ATTY|ENGR|HON)\.?\s+)?EMPLOYEE FULL NAME/gi, '<strong>{honorific}{name}</strong>')
+    .replace(/OFFICIAL POSITION TITLE/gi, '<strong>{position}</strong>')
+    .replace(/DEPARTMENT \s*\/\s* OFFICE/gi, '<strong>{office}</strong>');
+
+  // If member is not supplied, use current active attendee
+  if (!member) {
+    const participants = getActiveCaParticipants();
+    member = participants[caState.currentMemberIndex] || null;
+  }
+
+  // If the provided member's name is not in the text, attempt to find a matching participant or extract from text
+  if (member && member.name && !text.toLowerCase().includes(member.name.toLowerCase())) {
+    member = null;
+  }
+
+  if (!member) {
+    const allParticipants = getActiveCaParticipants();
+    const matched = allParticipants.find(p => p.name && text.toLowerCase().includes(p.name.toLowerCase()));
+    if (matched) {
+      member = matched;
+    } else if (typeof members !== 'undefined' && Array.isArray(members)) {
+      const dbMatch = members.find(m => m.name && text.toLowerCase().includes(m.name.toLowerCase()));
+      if (dbMatch) member = dbMatch;
+    }
+  }
+
+  // If still no member matched, try heuristic extraction from certification clause
+  if (!member) {
+    const extracted = extractAttendeeFieldsFromText(text);
+    if (extracted && extracted.name) {
+      member = {
+        name: extracted.name,
+        position: extracted.position,
+        office: extracted.office,
+        gender: extracted.hon === 'MS.' ? 'F' : 'M'
+      };
+    }
+  }
+
+  if (member) {
+    const hon = (getCaHonorific(member, true) || '').trim(); // e.g. "MR." or "MS."
+    const mName = (member.name || '').trim(); // e.g. "DIAZEN, MICHAEL M."
+    const mPos = (member.position || '').trim(); // e.g. "ENGINEER II (SANITARY ENGINEER)"
+    const mOff = (member.office || '').trim(); // e.g. "CEPMO"
+
+    // Activity title and clauses
+    const fullActTitle = (getCaActivityFullTitle(caState.title, caState.theme) || '').trim();
+    const actTitle = (caState.title || '').trim();
+    const dateClause = (formatCaDateText(caState.date) || '').trim(); // "held on October 20, 2026"
+    const rawDate = (caState.date || '').trim(); // "October 20, 2026"
+    const venueClause = (formatCaVenueText(caState.venue) || '').trim(); // "at the CDRRMO Building..."
+    const rawVenue = (caState.venue || '').trim(); // "CDRRMO Building..."
+    const basisClause = (caState.attendanceBasis || '').trim(); // "was duly verified to have attended..."
+
+    // 1. Replace Honorific + Name, or Name alone
+    if (mName) {
+      const honPattern = new RegExp('(?:(?:MR|MS|DR|ATTY|ENGR|HON)\\.?\\s+)?' + escapeRegExp(mName), 'gi');
+      text = text.replace(honPattern, '<strong>{honorific}{name}</strong>');
+      text = text.replace(new RegExp(escapeRegExp(mName), 'gi'), '<strong>{name}</strong>');
+    }
+
+    // 2. Replace Position (handling parentheses, slashes, roman numerals safely via escapeRegExp)
+    if (mPos) {
+      text = text.replace(new RegExp(escapeRegExp(mPos), 'gi'), '<strong>{position}</strong>');
+    }
+
+    // 3. Replace Office (e.g. "CEPMO")
+    if (mOff) {
+      text = text.replace(new RegExp(escapeRegExp(mOff), 'gi'), '<strong>{office}</strong>');
+    }
+
+    // 4. Replace Activity Title (with curved quotes, straight quotes, or standalone)
+    if (fullActTitle) {
+      text = text.replace(new RegExp('[“"\'«]' + escapeRegExp(fullActTitle) + '[”"\'»]', 'gi'), '“<strong>{activity}</strong>”');
+      text = text.replace(new RegExp(escapeRegExp(fullActTitle), 'gi'), '<strong>{activity}</strong>');
+    }
+    if (actTitle && actTitle !== fullActTitle) {
+      text = text.replace(new RegExp('[“"\'«]' + escapeRegExp(actTitle) + '[”"\'»]', 'gi'), '“<strong>{activity}</strong>”');
+      text = text.replace(new RegExp(escapeRegExp(actTitle), 'gi'), '<strong>{activity}</strong>');
+    }
+
+    // 5. Replace Date Clause / Raw Date
+    if (dateClause) {
+      text = text.replace(new RegExp(escapeRegExp(dateClause), 'gi'), '{date}');
+    }
+    if (rawDate) {
+      text = text.replace(new RegExp('(?:held\\s+on\\s+)?' + escapeRegExp(rawDate), 'gi'), '{date}');
+    }
+
+    // 6. Replace Venue Clause / Raw Venue
+    if (venueClause) {
+      text = text.replace(new RegExp(escapeRegExp(venueClause), 'gi'), '{venue}');
+    }
+    if (rawVenue) {
+      text = text.replace(new RegExp('(?:at\\s+(?:the\\s+)?|in\\s+(?:the\\s+)?)?' + escapeRegExp(rawVenue), 'gi'), '{venue}');
+    }
+
+    // 7. Replace Basis clause if present
+    if (basisClause && basisClause.length > 8) {
+      text = text.replace(new RegExp(escapeRegExp(basisClause), 'gi'), '{basis}');
+    }
+  }
+
+  // Deduplicate any accidental double-wrapping like <strong><strong>...</strong></strong>
+  text = text.replace(/<strong>\s*<strong>/gi, '<strong>').replace(/<\/strong>\s*<\/strong>/gi, '</strong>');
+
+  return text;
+}
+
+function saveAndApplyCaTemplate() {
+  const input = document.getElementById('caMainContextInput');
+  if (!input) return;
+
+  const participants = getActiveCaParticipants();
+  const currMember = participants[caState.currentMemberIndex] || null;
+  let rawText = input.value;
+
+  const sheetEl = document.getElementById('caMainTextEl');
+  if ((!rawText || !rawText.trim()) && sheetEl) {
+    rawText = sheetEl.innerText || sheetEl.textContent || '';
+    input.value = rawText;
+  }
+
+  if (!rawText || !rawText.trim()) {
+    showToast('Context text cannot be empty.', 'fa-circle-exclamation');
+    return;
+  }
+
+  // Smart convert whatever is in the input to a master template
+  const newTmpl = convertTextToCaTemplate(rawText, currMember);
+  caState.mainTemplate = newTmpl;
+
+  // Clear single-employee overrides so that all attendees receive this new master template
+  caState.customMemberTexts = {};
+  
+  // Update UI and preview
+  syncCaContextInput();
   renderAppearancePreview();
+  autosaveCaSession();
+
+  // If a preset/version is currently active, also update its saved template
+  if (caState.activeVersionId) {
+    try {
+      const saved = getSavedCaVersions();
+      const idx = saved.findIndex(v => v.id === caState.activeVersionId);
+      if (idx !== -1) {
+        saved[idx].data.mainTemplate = caState.mainTemplate;
+        localStorage.setItem(CA_VERSIONS_KEY, JSON.stringify(saved));
+      }
+    } catch(e) {}
+  }
+
+  showToast('Saved & applied as template for all attendees!', 'fa-circle-check');
 }
 
 function applyMainTextToAllAttendees() {
+  saveAndApplyCaTemplate();
+}
+
+function saveCurrentEmployeeOnlyText() {
   const input = document.getElementById('caMainContextInput');
+  if (!input) return;
+
   const participants = getActiveCaParticipants();
-  const currMember = participants[caState.currentMemberIndex];
-  
-  if (input && currMember) {
-    let text = input.value;
-    const hon = getCaHonorific(currMember, true);
-    const mName = (currMember.name || '').toUpperCase();
-    const mPos = (currMember.position || '').toUpperCase();
-    const mOff = (currMember.office || '').toUpperCase();
-    
-    if (mName && text.includes(mName)) {
-      text = text.replace(new RegExp(hon + mName, 'g'), '{honorific}{name}');
-      text = text.replace(new RegExp(mName, 'g'), '{name}');
-    }
-    if (mPos && text.includes(mPos)) {
-      text = text.replace(new RegExp(mPos, 'g'), '{position}');
-    }
-    if (mOff && text.includes(mOff)) {
-      text = text.replace(new RegExp(mOff, 'g'), '{office}');
-    }
-    
-    caState.mainTemplate = text;
-    caState.customMemberTexts = {};
-    caState.mainContextMode = 'template';
-    syncCaContextInput();
-    renderAppearancePreview();
-    showToast('Applied wording template to all attendees!', 'fa-check');
+  const currMember = participants[caState.currentMemberIndex] || null;
+  if (!currMember) {
+    showToast('No active employee selected', 'fa-circle-exclamation');
+    return;
   }
+
+  const val = input.value.trim();
+  if (!val) {
+    delete caState.customMemberTexts[currMember.id];
+    showToast(`Removed custom text override for ${currMember.name}`, 'fa-rotate-left');
+  } else {
+    caState.customMemberTexts[currMember.id] = val;
+    showToast(`Saved custom text override for ${currMember.name}!`, 'fa-user-pen');
+  }
+
+  caState.mainContextMode = 'current';
+  syncCaContextInput();
+  renderAppearancePreview();
+  autosaveCaSession();
 }
 
 function resetCaContextToDefault() {
   caState.mainTemplate = 'This is to certify that <strong>{honorific}{name}</strong>, holding the position of <strong>{position}</strong> under <strong>{office}</strong>, was duly verified to have attended and participated in the activity entitled “<strong>{activity}</strong>,” {date}, {venue}.';
   caState.customMemberTexts = {};
-  caState.lineSpacing = 1.40;
-  caState.paragraphSpacing = 14;
-  caState.fontSize = 13.5;
-  caState.textIndent = 36;
+  caState.lineSpacing = 1.35;
+  caState.paragraphSpacing = 7;
+  caState.fontSize = 11;
+  caState.textIndent = 24;
   syncCaInputsFromState();
   syncCaContextInput();
   renderAppearancePreview();
+  autosaveCaSession();
   showToast('Reset to default formal wording & spacing!', 'fa-rotate-left');
 }
 
@@ -613,6 +946,9 @@ function handleCaSpacingChange(field, val) {
     if (elVal) elVal.textContent = `${val}px`;
   } else if (field === 'titleSpacingAfter') {
     const elVal = document.getElementById('caTitleSpacingVal');
+    if (elVal) elVal.textContent = `${val}px`;
+  } else if (field === 'headerSpacingAfter') {
+    const elVal = document.getElementById('caHeaderSpacingVal');
     if (elVal) elVal.textContent = `${val}px`;
   }
   renderAppearancePreview();
@@ -685,43 +1021,45 @@ function syncCaAlignmentButtons() {
 function handleCaSheetEdit(el, field) {
   if (!el) return;
   const participants = getActiveCaParticipants();
-  const currMember = participants[caState.currentMemberIndex];
+  const currMember = participants[caState.currentMemberIndex] || null;
+  const memberKey = (currMember && currMember.id) ? currMember.id : '_active_fallback';
 
   if (field === 'mainText') {
-    if (currMember) {
-      caState.customMemberTexts[currMember.id] = el.innerHTML;
-      if (caState.mainContextMode === 'current') {
-        const input = document.getElementById('caMainContextInput');
-        if (input) input.value = el.innerText || el.textContent;
+    caState.customMemberTexts[memberKey] = el.innerHTML;
+    if (caState.mainContextMode === 'current') {
+      const input = document.getElementById('caMainContextInput');
+      if (input && document.activeElement !== input) {
+        input.value = el.innerText || el.textContent;
       }
     }
   } else if (field === 'purpose') {
     caState.purpose = el.innerText || el.textContent;
     const inp = document.getElementById('caPurposeText');
-    if (inp) inp.value = caState.purpose;
+    if (inp && document.activeElement !== inp) inp.value = caState.purpose;
   } else if (field === 'issueDate') {
     caState.issueDate = el.innerText || el.textContent;
     const inp = document.getElementById('caIssueDate');
-    if (inp) inp.value = caState.issueDate;
+    if (inp && document.activeElement !== inp) inp.value = caState.issueDate;
   } else if (field === 'documentTitle') {
     caState.documentTitle = el.innerText || el.textContent;
   } else if (field === 'signatoryName') {
     caState.signatoryName = el.innerText || el.textContent;
     const inp = document.getElementById('caSignatoryName');
-    if (inp) inp.value = caState.signatoryName;
+    if (inp && document.activeElement !== inp) inp.value = caState.signatoryName;
   } else if (field === 'signatoryTitle1') {
     caState.signatoryTitle1 = el.innerText || el.textContent;
     const inp = document.getElementById('caSignatoryTitle1');
-    if (inp) inp.value = caState.signatoryTitle1;
+    if (inp && document.activeElement !== inp) inp.value = caState.signatoryTitle1;
   } else if (field === 'signatoryTitle2') {
     caState.signatoryTitle2 = el.innerText || el.textContent;
     const inp = document.getElementById('caSignatoryTitle2');
-    if (inp) inp.value = caState.signatoryTitle2;
+    if (inp && document.activeElement !== inp) inp.value = caState.signatoryTitle2;
   } else if (field === 'initials') {
     caState.initials = el.innerText || el.textContent;
     const inp = document.getElementById('caInitials');
-    if (inp) inp.value = caState.initials;
+    if (inp && document.activeElement !== inp) inp.value = caState.initials;
   }
+  debouncedAutosaveCaSession();
 }
 
 // --- APPLY SELECTED ACTIVITY ---
@@ -773,7 +1111,186 @@ function refreshCaParticipants() {
   caState.currentMemberIndex = 0;
 }
 
+// --- SIGNATORY & SIGNATURE MANAGEMENT FOR CERTIFICATE OF APPEARANCE ---
+
+function populateCaSignatoryDropdown() {
+  const sel = document.getElementById('caSelectOfficerSig');
+  if (!sel) return;
+
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = 'custom';
+  defaultOpt.textContent = '--- Select Official / Or Type Custom Text ---';
+  sel.appendChild(defaultOpt);
+
+  let list = [];
+  if (typeof getAllSignatoriesList === 'function') {
+    list = getAllSignatoriesList();
+  } else if (typeof OFFICIAL_MOVE_SIGNATORIES !== 'undefined') {
+    list = OFFICIAL_MOVE_SIGNATORIES;
+  }
+
+  list.forEach(item => {
+    if (!item || item.key === 'custom') return;
+    const opt = document.createElement('option');
+    opt.value = item.key;
+    opt.textContent = item.label || item.name;
+    sel.appendChild(opt);
+  });
+
+  if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) {
+    sel.value = currentVal;
+  }
+}
+
+function handleCaPickSignatory(key) {
+  if (!key || key === 'custom') return;
+
+  let list = [];
+  if (typeof getAllSignatoriesList === 'function') {
+    list = getAllSignatoriesList();
+  } else if (typeof OFFICIAL_MOVE_SIGNATORIES !== 'undefined') {
+    list = OFFICIAL_MOVE_SIGNATORIES;
+  }
+
+  const sig = list.find(s => s.key === key);
+  if (!sig) return;
+
+  if (sig.name) caState.signatoryName = sig.name.toUpperCase();
+  if (sig.title) caState.signatoryTitle1 = sig.title;
+  if (sig.office) caState.signatoryTitle2 = sig.office;
+
+  // Specific signature mappings
+  if (key === 'magalong' || (sig.name && sig.name.includes('MAGALONG'))) {
+    caState.signatureImage = 'signature%20(15).png';
+    caState.showSignature = true;
+    if (!sig.title) caState.signatoryTitle1 = 'City Mayor';
+    if (!caState.signatoryTitle2) caState.signatoryTitle2 = 'LCAT-VAWC Chairperson';
+  } else if (sig.signatureImage) {
+    caState.signatureImage = sig.signatureImage;
+    caState.showSignature = true;
+  }
+
+  syncCaInputsFromState();
+  renderAppearancePreview();
+  autosaveCaSession();
+  showToast(`Applied signatory: ${sig.name}`, 'fa-signature');
+}
+
+function handleCaSigImageUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select a valid image file (.png, .jpg, etc.)', 'fa-triangle-exclamation');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    caState.signatureImage = evt.target.result;
+    caState.showSignature = true;
+    syncCaInputsFromState();
+    renderAppearancePreview();
+    autosaveCaSession();
+    showToast('Signature image uploaded and applied!', 'fa-circle-check');
+  };
+  reader.readAsDataURL(file);
+}
+
+function useOfficialCaSig() {
+  caState.signatureImage = 'signature%20(15).png';
+  caState.showSignature = true;
+  syncCaInputsFromState();
+  renderAppearancePreview();
+  autosaveCaSession();
+  showToast('Restored official Mayor Magalong signature!', 'fa-signature');
+}
+
+function removeCaSigImage() {
+  caState.signatureImage = '';
+  syncCaInputsFromState();
+  renderAppearancePreview();
+  autosaveCaSession();
+  showToast('Signature image cleared (space left for manual signing).', 'fa-eraser');
+}
+
+function saveCaInputsToSignatoriesDb() {
+  const name = (caState.signatoryName || '').trim().toUpperCase();
+  const title = (caState.signatoryTitle1 || '').trim();
+  const office = (caState.signatoryTitle2 || '').trim();
+  const sigImg = caState.signatureImage || '';
+
+  if (!name) {
+    showToast('Signatory name is empty. Please enter a name first.', 'fa-circle-exclamation');
+    return;
+  }
+
+  let customList = [];
+  if (typeof getCustomSignatories === 'function') {
+    customList = getCustomSignatories();
+  } else {
+    try {
+      const raw = localStorage.getItem('move_signatories_db_v1');
+      if (raw) customList = JSON.parse(raw);
+    } catch(e) {}
+  }
+
+  const existing = customList.find(c => c.name.toUpperCase() === name);
+  if (existing) {
+    if (!confirm(`"${name}" is already in the database. Update its title, office and signature?`)) return;
+    existing.title = title;
+    existing.office = office;
+    if (sigImg) existing.signatureImage = sigImg;
+    existing.label = `${name} (${title || office || 'Signatory'})`;
+  } else {
+    const newKey = 'custom_' + Date.now();
+    customList.unshift({
+      key: newKey,
+      label: `${name} (${title || office || 'Signatory'})`,
+      name: name,
+      title: title,
+      office: office,
+      signatureImage: sigImg,
+      isCustom: true,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  if (typeof saveCustomSignatories === 'function') {
+    saveCustomSignatories(customList);
+  } else {
+    localStorage.setItem('move_signatories_db_v1', JSON.stringify(customList));
+  }
+
+  populateCaSignatoryDropdown();
+  if (typeof populateSignatoryOfficerDropdowns === 'function') {
+    populateSignatoryOfficerDropdowns();
+  }
+  showToast(`Saved "${name}" to Signatories Database!`, 'fa-database');
+}
+
 // --- SYNC STATE TO/FROM INPUTS ---
+
+function syncCaHeaderLayoutButtons() {
+  const isCentered = (caState.headerLayout !== 'spread');
+  const bCent = document.getElementById('btnCaHeaderCentered');
+  const bSpread = document.getElementById('btnCaHeaderSpread');
+  const activeClass = 'py-1 px-2 rounded-lg transition flex items-center justify-center gap-1.5 bg-move-navy-900 text-white shadow-2xs font-extrabold text-[11px]';
+  const inactiveClass = 'py-1 px-2 rounded-lg transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 font-semibold text-[11px]';
+  if (bCent) bCent.className = isCentered ? activeClass : inactiveClass;
+  if (bSpread) bSpread.className = !isCentered ? activeClass : inactiveClass;
+}
+
+function setCaHeaderLayout(layout) {
+  caState.headerLayout = layout;
+  syncCaHeaderLayoutButtons();
+  renderAppearancePreview();
+  autosaveCaSession();
+}
+
 function syncCaInputsFromState() {
   const setVal = (id, val) => {
     const el = document.getElementById(id);
@@ -799,6 +1316,37 @@ function syncCaInputsFromState() {
   setVal('caSigWidth', caState.signatureWidth);
   const wLabel = document.getElementById('caSigWidthVal');
   if (wLabel) wLabel.textContent = `${caState.signatureWidth}px`;
+
+  // Signature Image & Status Sync
+  const prevImg = document.getElementById('caSigPreviewImg');
+  const emptyPlaceholder = document.getElementById('caSigEmptyPlaceholder');
+  const badge = document.getElementById('caSigStatusBadge');
+  const btnClear = document.getElementById('caBtnClearSig');
+
+  if (caState.signatureImage) {
+    if (prevImg) {
+      prevImg.src = caState.signatureImage;
+      prevImg.classList.remove('hidden');
+    }
+    if (emptyPlaceholder) emptyPlaceholder.classList.add('hidden');
+    if (badge) {
+      const isCustom = typeof caState.signatureImage === 'string' && (caState.signatureImage.startsWith('data:') || caState.signatureImage.startsWith('blob:'));
+      badge.textContent = isCustom ? 'Custom Upload' : 'Official Sig';
+      badge.className = 'text-[9.5px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+    }
+    if (btnClear) btnClear.classList.remove('hidden');
+  } else {
+    if (prevImg) {
+      prevImg.src = '';
+      prevImg.classList.add('hidden');
+    }
+    if (emptyPlaceholder) emptyPlaceholder.classList.remove('hidden');
+    if (badge) {
+      badge.textContent = 'Blank (Wet Sign)';
+      badge.className = 'text-[9.5px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300';
+    }
+    if (btnClear) btnClear.classList.add('hidden');
+  }
 
   // Spacing and Typography Inputs
   setVal('caLineSpacingInput', caState.lineSpacing);
@@ -832,9 +1380,16 @@ function syncCaInputsFromState() {
   if (bbLabel) bbLabel.textContent = `${caState.breatheBaguioWidth || 95}px`;
   setVal('caBreatheBaguioPosition', caState.breatheBaguioPosition || 'footer');
   setChecked('caFilterPresentOnly', caState.filterPresentOnly);
+  setChecked('caShowHeaderLine', caState.showHeaderLine);
+  setChecked('caShowFooter', caState.showFooter);
+  setVal('caHeaderSpacingInput', caState.headerSpacingAfter !== undefined ? caState.headerSpacingAfter : 4);
+  const elHdrSpaceVal = document.getElementById('caHeaderSpacingVal');
+  if (elHdrSpaceVal) elHdrSpaceVal.textContent = `${caState.headerSpacingAfter !== undefined ? caState.headerSpacingAfter : 4}px`;
+  syncCaHeaderLayoutButtons();
 
   syncCaAlignmentButtons();
   populateCaVersionsDropdown();
+  populateCaSignatoryDropdown();
   syncCaContextInput();
 
   // Update mode tabs
@@ -1048,6 +1603,202 @@ function changeCaIndividualMember(delta) {
   renderCaAttendeesList();
 }
 
+// --- MOVABLE ELEMENTS (DRAG & DROP + NUDGING ENGINE) ---
+function getCaOffset(key) {
+  if (!caState.offsets) caState.offsets = {};
+  if (!caState.offsets[key]) caState.offsets[key] = { x: 0, y: 0 };
+  return caState.offsets[key];
+}
+
+function getCaOffsetStyle(key) {
+  const off = getCaOffset(key);
+  if (off.x === 0 && off.y === 0) return '';
+  return `transform: translate(${off.x}px, ${off.y}px);`;
+}
+
+function toggleCaEditMode() {
+  caState.isDesignerMode = !caState.isDesignerMode;
+  const btn = document.getElementById('btnToggleCaEdit');
+  const lbl = document.getElementById('lblCaEditMode');
+  const icon = document.getElementById('iconCaEditBtn');
+  const sheet = document.getElementById('caActiveSheet');
+  const nudgeBar = document.getElementById('caNudgeBar');
+
+  if (caState.isDesignerMode) {
+    if (sheet) sheet.classList.add('ca-edit-active');
+    if (nudgeBar) nudgeBar.classList.remove('hidden');
+    if (btn) {
+      btn.className = 'px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-move-navy-900 hover:bg-move-navy-950 text-white shadow-sm border border-amber-400 whitespace-nowrap';
+    }
+    if (lbl) lbl.textContent = 'Exit Designer Mode';
+    if (icon) icon.className = 'fa-solid fa-check text-emerald-400';
+    showToast('Designer Mode Enabled: Drag elements or use the Nudge Bar to move Up, Down, Left, and Right!', 'fa-arrows-up-down-left-right');
+  } else {
+    if (sheet) sheet.classList.remove('ca-edit-active');
+    if (nudgeBar) nudgeBar.classList.add('hidden');
+    if (btn) {
+      btn.className = 'px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition bg-amber-500 hover:bg-amber-600 text-white shadow-sm whitespace-nowrap';
+    }
+    if (lbl) lbl.textContent = 'Enable Designer / Edit Mode';
+    if (icon) icon.className = 'fa-solid fa-pen-ruler';
+  }
+  renderAppearancePreview();
+  updateCaMoveUi();
+}
+
+function nudgeCaElement(dx, dy) {
+  const key = caState.activeMoveElementKey || 'header';
+  const off = getCaOffset(key);
+  off.x += dx;
+  off.y += dy;
+  renderAppearancePreview();
+  updateCaMoveUi();
+  autosaveCaSession();
+}
+
+function syncCaOffsetFromInputs() {
+  const key = caState.activeMoveElementKey || 'header';
+  const ix = parseInt(document.getElementById('caInputOffsetX')?.value || '0', 10) || 0;
+  const iy = parseInt(document.getElementById('caInputOffsetY')?.value || '0', 10) || 0;
+  const off = getCaOffset(key);
+  off.x = ix;
+  off.y = iy;
+  renderAppearancePreview();
+  updateCaMoveUi();
+  autosaveCaSession();
+}
+
+function resetCaElementOffset(resetAll = false) {
+  if (resetAll) {
+    if (caState.offsets) {
+      Object.keys(caState.offsets).forEach(k => {
+        caState.offsets[k] = { x: 0, y: 0 };
+      });
+    }
+    showToast('All element positions reset to (0,0)', 'fa-rotate-left');
+  } else {
+    const key = caState.activeMoveElementKey || 'header';
+    const off = getCaOffset(key);
+    off.x = 0;
+    off.y = 0;
+    showToast(`Reset ${key} position to (0,0)`, 'fa-arrows-to-dot');
+  }
+  renderAppearancePreview();
+  updateCaMoveUi();
+  autosaveCaSession();
+}
+
+function handleCaNudgeTargetChange(key) {
+  caState.activeMoveElementKey = key;
+  updateCaMoveUi();
+  const stage = document.getElementById('caPreviewStage');
+  if (stage) {
+    stage.querySelectorAll('[data-ca-element]').forEach(el => el.classList.remove('is-selected-element'));
+    const el = stage.querySelector(`[data-ca-element="${key}"]`);
+    if (el) el.classList.add('is-selected-element');
+  }
+}
+
+function updateCaMoveUi() {
+  const key = caState.activeMoveElementKey || 'header';
+  const sel = document.getElementById('caMoveElementTargetSelect');
+  if (sel && sel.value !== key) {
+    sel.value = key;
+  }
+
+  const off = getCaOffset(key);
+  const curX = off.x || 0;
+  const curY = off.y || 0;
+
+  const lbl = document.getElementById('lblCaActiveOffset');
+  const ix = document.getElementById('caInputOffsetX');
+  const iy = document.getElementById('caInputOffsetY');
+  if (lbl) lbl.textContent = `${curX}, ${curY}`;
+  if (ix && ix !== document.activeElement) ix.value = curX;
+  if (iy && iy !== document.activeElement) iy.value = curY;
+
+  // Sync Header position badge in Typography panel
+  const hdrBadge = document.getElementById('caHeaderOffsetBadge');
+  if (hdrBadge) {
+    const hOff = getCaOffset('header');
+    hdrBadge.textContent = `X: ${hOff.x}px, Y: ${hOff.y}px`;
+  }
+}
+
+let isDraggingCaElement = false;
+let activeDragCaKey = null;
+let caDragStartX = 0;
+let caDragStartY = 0;
+let caDragInitX = 0;
+let caDragInitY = 0;
+
+function bindAppearanceDragListeners() {
+  const stage = document.getElementById('caPreviewStage');
+  if (!stage || stage._dragBound) return;
+  stage._dragBound = true;
+
+  stage.addEventListener('mousedown', (e) => {
+    if (!caState.isDesignerMode) return;
+
+    // Check if the user clicked inside an editable element or interactive control
+    const editableEl = e.target.isContentEditable ? e.target : e.target.closest('[contenteditable="true"]');
+    const formCtrl = e.target.closest('input, textarea, select, button, a');
+
+    const targetEl = e.target.closest('[data-ca-element]');
+    if (targetEl) {
+      activeDragCaKey = targetEl.getAttribute('data-ca-element');
+      caState.activeMoveElementKey = activeDragCaKey;
+      stage.querySelectorAll('[data-ca-element]').forEach(el => el.classList.remove('is-selected-element'));
+      targetEl.classList.add('is-selected-element');
+      updateCaMoveUi();
+    }
+
+    if (editableEl || formCtrl) {
+      // Do not prevent default or initiate drag so user can focus, select text, and type freely!
+      return;
+    }
+
+    if (!targetEl) return;
+
+    isDraggingCaElement = true;
+    caDragStartX = e.clientX;
+    caDragStartY = e.clientY;
+
+    const off = getCaOffset(activeDragCaKey);
+    caDragInitX = off.x || 0;
+    caDragInitY = off.y || 0;
+
+    targetEl.classList.add('is-dragging');
+
+    updateCaMoveUi();
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDraggingCaElement || !activeDragCaKey || !caState.isDesignerMode) return;
+    const scale = caState.currentScale || 1.0;
+    const dx = Math.round((e.clientX - caDragStartX) / scale);
+    const dy = Math.round((e.clientY - caDragStartY) / scale);
+
+    const off = getCaOffset(activeDragCaKey);
+    off.x = caDragInitX + dx;
+    off.y = caDragInitY + dy;
+    const targetEl = stage.querySelector(`[data-ca-element="${activeDragCaKey}"]`);
+    if (targetEl) targetEl.style.transform = `translate(${off.x}px, ${off.y}px)`;
+
+    updateCaMoveUi();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDraggingCaElement && activeDragCaKey) {
+      const targetEl = stage.querySelector(`[data-ca-element="${activeDragCaKey}"]`);
+      if (targetEl) targetEl.classList.remove('is-dragging');
+      isDraggingCaElement = false;
+      autosaveCaSession();
+    }
+  });
+}
+
 // --- LIVE A5 LANDSCAPE PREVIEW RENDERER (210mm x 148mm) ---
 function renderAppearancePreview() {
   const stage = document.getElementById('caPreviewStage');
@@ -1099,7 +1850,7 @@ function renderAppearancePreview() {
     const venueClause = escapeHtml(formatCaVenueText(caState.venue));
 
     bodyContentHtml = `
-      <div class="space-y-1.5 flex-1">
+      <div data-ca-element="body" class="space-y-1.5 flex-1" style="${getCaOffsetStyle('body')}">
         <!-- Certification Clause -->
         <p class="text-justify text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: 4px;">
           This is to certify that the following employees appeared as <strong>Participant/Facilitator</strong> during the “<strong>${fullActTitle}</strong>,” ${dateClause}, ${venueClause}:
@@ -1135,7 +1886,7 @@ function renderAppearancePreview() {
     };
 
     bodyContentHtml = `
-      <div class="mb-1.5">
+      <div data-ca-element="body" class="mb-1.5" style="${getCaOffsetStyle('body')}">
         <!-- Main Formal Certification Flowing Paragraph (Live Editable) -->
         <p id="caMainTextEl" contenteditable="true" spellcheck="false"
            oninput="handleCaSheetEdit(this, 'mainText')"
@@ -1151,17 +1902,18 @@ function renderAppearancePreview() {
   // Signature Block & Alignments
   const sigAlign = caState.signatureAlign || 'center';
   const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
-  const sigImgHtml = caState.showSignature ? `
-    <div class="flex ${sigJustify} -mb-5 relative z-10 pointer-events-none select-none">
-      <img src="signature%20(15).png" alt="Signature" 
+  const hasSigImage = caState.showSignature && !!caState.signatureImage;
+  const sigImgHtml = hasSigImage ? `
+    <div class="flex ${sigJustify} -mb-5 relative z-10 select-none group cursor-pointer" onclick="document.getElementById('caUploadSigInput')?.click()" title="Click on signature to replace / upload new image">
+      <img src="${caState.signatureImage}" alt="Signature" 
            style="width: ${caState.signatureWidth}px; max-height: 48px;" 
-           class="object-contain drop-shadow-xs">
+           class="object-contain drop-shadow-xs group-hover:scale-105 group-hover:drop-shadow-md transition-all duration-150">
     </div>
-  ` : `<div class="h-6"></div>`;
+  ` : `<div class="h-6 cursor-pointer flex ${sigJustify} items-center group" onclick="document.getElementById('caUploadSigInput')?.click()" title="Click to upload / attach signature"><span class="text-[9px] text-slate-300 group-hover:text-move-orange-500 transition border border-dashed border-transparent group-hover:border-move-orange-300 px-2 py-0.5 rounded italic opacity-0 group-hover:opacity-100">[Click to attach signature]</span></div>`;
 
   stage.innerHTML = `
     <!-- A5 LANDSCAPE SHEET CONTAINER (210mm x 148mm) -->
-    <div id="caActiveSheet" class="ca-landscape-sheet bg-white text-slate-900 shadow-2xl mx-auto relative select-text"
+    <div id="caActiveSheet" class="ca-landscape-sheet ${caState.isDesignerMode ? 'ca-edit-active' : ''} bg-white text-slate-900 shadow-2xl mx-auto relative select-text"
          style="width: 210mm; height: 148mm; min-height: 148mm; max-height: 148mm; padding: 6mm 10mm 5mm 10mm; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-sizing: border-box;">
       
       <!-- Optional Background Watermark Mode -->
@@ -1173,36 +1925,43 @@ function renderAppearancePreview() {
       ` : ''}
 
       <!-- ================= HEADER SECTION ================= -->
-      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700 relative z-10">
-        <!-- Left Logo: City Hall Seal -->
-        <div class="w-12 h-12 flex items-center justify-center shrink-0">
-          ${caState.showCityLogo ? `<img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">` : ''}
-        </div>
+      <div data-ca-element="header" class="relative z-10 ${caState.showHeaderLine ? 'border-b border-slate-700 pb-1.5 mb-1.5' : 'pb-0 mb-0.5'}"
+           style="${getCaOffsetStyle('header')}">
+        <div class="flex items-center ${caState.headerLayout === 'spread' ? 'justify-between w-full' : 'justify-center gap-3.5 mx-auto max-w-xl'}">
+          <!-- Left Logo: City Hall Seal -->
+          ${caState.showCityLogo ? `
+            <div data-ca-element="leftLogo" class="flex items-center justify-center shrink-0" style="width: ${caState.logoSize || 48}px; height: ${caState.logoSize || 48}px; ${getCaOffsetStyle('leftLogo')}">
+              <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain drop-shadow-2xs">
+            </div>
+          ` : ''}
 
-        <!-- Center Header Typography -->
-        <div class="text-center px-2 flex-1 leading-tight">
-          <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">
-            Republic of the Philippines
+          <!-- Center Header Typography -->
+          <div data-ca-element="headerText" class="text-center px-1 leading-tight shrink-0" style="${getCaOffsetStyle('headerText')}">
+            <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">
+              Republic of the Philippines
+            </div>
+            <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">
+              CITY GOVERNMENT OF BAGUIO
+            </div>
+            <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">
+              Men Opposed to Violence Against Women Everywhere
+            </div>
+            <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">
+              Baguio City Chapter &bull; Local Committee on Anti-VAWC
+            </div>
           </div>
-          <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">
-            CITY GOVERNMENT OF BAGUIO
-          </div>
-          <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">
-            Men Opposed to Violence Against Women Everywhere
-          </div>
-          <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">
-            Baguio City Chapter &bull; Local Committee on Anti-VAWC
-          </div>
-        </div>
 
-        <!-- Right Logo: MOVE Baguio Seal -->
-        <div class="w-12 h-12 flex items-center justify-center shrink-0">
-          ${caState.showMoveLogo ? `<img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">` : ''}
+          <!-- Right Logo: MOVE Baguio Seal -->
+          ${caState.showMoveLogo ? `
+            <div data-ca-element="rightLogo" class="flex items-center justify-center shrink-0" style="width: ${caState.logoSize || 48}px; height: ${caState.logoSize || 48}px; ${getCaOffsetStyle('rightLogo')}">
+              <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain drop-shadow-2xs">
+            </div>
+          ` : ''}
         </div>
       </div>
 
       <!-- ================= DOCUMENT TITLE ================= -->
-      <div id="caTitleBlock" class="text-${caState.titleAlign || 'center'} relative z-10" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
+      <div id="caTitleBlock" data-ca-element="title" class="text-${caState.titleAlign || 'center'} relative z-10" style="margin-top: ${caState.headerSpacingAfter !== undefined ? caState.headerSpacingAfter : 4}px; margin-bottom: ${caState.titleSpacingAfter}px; ${getCaOffsetStyle('title')}">
         <h1 id="caDocTitleEl" contenteditable="true" spellcheck="false"
             oninput="handleCaSheetEdit(this, 'documentTitle')"
             class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase font-cinzel focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
@@ -1217,7 +1976,7 @@ function renderAppearancePreview() {
         ${bodyContentHtml}
 
         <!-- Purpose Clause (Live Editable) -->
-        <div>
+        <div data-ca-element="purpose" style="${getCaOffsetStyle('purpose')}">
           <p id="caPurposeEl" contenteditable="true" spellcheck="false"
              oninput="handleCaSheetEdit(this, 'purpose')"
              style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;"
@@ -1228,7 +1987,7 @@ function renderAppearancePreview() {
         </div>
 
         <!-- Issuance Line (Live Editable) -->
-        <div>
+        <div data-ca-element="issueDate" style="${getCaOffsetStyle('issueDate')}">
           <p id="caIssueDateEl" contenteditable="true" spellcheck="false"
              oninput="handleCaSheetEdit(this, 'issueDate')"
              style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.2)}px;"
@@ -1241,7 +2000,7 @@ function renderAppearancePreview() {
         <!-- ================= SIGNATORY BLOCK ================= -->
         <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
           <!-- Control Initials (DRMO / CTB) -->
-          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2">
+          <div data-ca-element="initials" class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2" style="${getCaOffsetStyle('initials')}">
             <span id="caInitialsEl" contenteditable="true" spellcheck="false"
                   oninput="handleCaSheetEdit(this, 'initials')"
                   class="text-[9px] font-mono text-slate-500 lowercase tracking-wider focus:outline-none focus:ring-1 focus:ring-blue-400 hover:ring-1 hover:ring-amber-300 rounded transition cursor-text"
@@ -1256,7 +2015,7 @@ function renderAppearancePreview() {
           </div>
 
           <!-- Official Signatory (Benjamin B. Magalong) -->
-          <div class="text-center w-64">
+          <div data-ca-element="signatory" class="text-center w-64" style="${getCaOffsetStyle('signatory')}">
             ${sigImgHtml}
             <div id="caSigNameEl" contenteditable="true" spellcheck="false"
                  oninput="handleCaSheetEdit(this, 'signatoryName')"
@@ -1289,6 +2048,7 @@ function renderAppearancePreview() {
       </div>
 
       <!-- ================= FOOTER SECTION ================= -->
+      ${caState.showFooter ? `
       <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium relative z-10">
         <div class="flex items-center gap-2">
           <div>Tel. No. (074)-442-89-20</div>
@@ -1304,23 +2064,207 @@ function renderAppearancePreview() {
         ` : ''}
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
+      ` : ''}
 
     </div>
   `;
 
+  if (caState.isDesignerMode) {
+    const activeKey = caState.activeMoveElementKey || 'header';
+    const activeEl = stage.querySelector(`[data-ca-element="${activeKey}"]`);
+    if (activeEl) activeEl.classList.add('is-selected-element');
+  }
+
   syncCaContextInput();
+  requestAnimationFrame(() => updateCaAutoFit());
 }
 
-// --- ZOOM CONTROLS ---
+// --- ZOOM & AUTO-FIT ENGINE (A5 LANDSCAPE 210mm x 148mm) ---
+function setCaZoomMode(mode) {
+  caState.zoomMode = mode;
+  if (typeof mode === 'number') {
+    caState.zoom = mode;
+  }
+  updateCaZoomUi();
+  updateCaAutoFit();
+}
+
 function setCaZoom(zoomLevel) {
-  caState.zoom = zoomLevel;
+  setCaZoomMode(zoomLevel);
+}
+
+function stepCaZoom(delta) {
+  let cur = caState.zoom || 100;
+  cur = Math.max(40, Math.min(180, cur + delta));
+  setCaZoomMode(cur);
+}
+
+function updateCaZoomUi() {
+  const cur = caState.zoomMode || 'fit';
+  const pct = caState.zoom || Math.round((caState.currentScale || 1.0) * 100);
+
+  const badge = document.getElementById('caZoomBadge');
+  if (badge) {
+    badge.textContent = (cur === 'fit') ? `Auto (${pct}%)` : `${pct}%`;
+  }
+
+  const btnFit = document.getElementById('btnCaZoomFit');
+  if (btnFit) {
+    if (cur === 'fit') {
+      btnFit.className = 'px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold transition flex items-center gap-1 shadow-2xs text-[11px]';
+    } else {
+      btnFit.className = 'px-2.5 py-1 rounded-lg text-slate-700 hover:bg-slate-100 transition flex items-center gap-1 text-[11px] font-semibold';
+    }
+  }
+
+  ['75', '100', '120'].forEach(k => {
+    const btn = document.getElementById('btnCaZoom' + k);
+    if (btn) {
+      const isMatch = (cur === k || (typeof cur === 'number' && String(cur) === k));
+      if (isMatch) {
+        btn.className = 'px-2 py-1 rounded-lg bg-move-navy-900 text-white font-mono text-[11px] font-bold shadow-2xs';
+      } else {
+        btn.className = 'px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-[11px] transition';
+      }
+    }
+  });
+}
+
+function updateCaAutoFit() {
+  const container = document.getElementById('caStageContainer');
   const stage = document.getElementById('caPreviewStage');
-  if (stage) {
-    stage.style.transform = `scale(${zoomLevel / 100})`;
+  const wrapper = document.getElementById('caPreviewStageWrapper');
+  const page = document.getElementById('pageAppearance');
+  if (!container || !stage || !page || page.classList.contains('hidden')) return;
+  if (container.clientWidth <= 0) return;
+
+  const mode = caState.zoomMode || 'fit';
+  let scale = 1.0;
+
+  // A5 Landscape Slip: 210mm x 148mm (at 96 DPI: width = 793.7px, height = 559.37px)
+  const targetWidth = 793.7;
+  const targetHeight = 559.37;
+
+  if (mode === 'fit') {
+    const availWidth = container.clientWidth - 28; // padding buffer
+    const rect = container.getBoundingClientRect();
+    const availHeight = Math.max(280, window.innerHeight - rect.top - 36);
+
+    if (availWidth > 150) {
+      const scaleX = availWidth / targetWidth;
+      const scaleY = availHeight / targetHeight;
+      // Fit both width and height cleanly with a comfortable ceiling
+      scale = Math.min(1.05, scaleX, scaleY);
+      scale = Math.max(0.40, scale);
+    } else {
+      scale = 0.65;
+    }
+  } else if (typeof mode === 'number') {
+    scale = mode / 100;
+  } else if (mode === '75') {
+    scale = 0.75;
+  } else if (mode === '100') {
+    scale = 1.0;
+  } else if (mode === '120') {
+    scale = 1.2;
+  }
+
+  caState.currentScale = scale;
+  caState.zoom = Math.round(scale * 100);
+
+  const scaledWidth = Math.round(targetWidth * scale);
+  const scaledHeight = Math.round(targetHeight * scale);
+
+  if (wrapper) {
+    wrapper.style.width = `${scaledWidth}px`;
+    wrapper.style.height = `${scaledHeight}px`;
+    wrapper.style.position = 'relative';
+    wrapper.style.margin = '0 auto';
+    wrapper.style.overflow = 'hidden';
+
+    stage.style.position = 'absolute';
+    stage.style.top = '0';
+    stage.style.left = '0';
+    stage.style.width = `${targetWidth}px`;
+    stage.style.height = `${targetHeight}px`;
+    stage.style.transform = `scale(${scale})`;
+    stage.style.transformOrigin = 'top left';
+  } else {
+    stage.style.transform = `scale(${scale})`;
     stage.style.transformOrigin = 'top center';
   }
-  const badge = document.getElementById('caZoomVal');
-  if (badge) badge.textContent = `${zoomLevel}%`;
+
+  // Sizing container height to match scaled sheet perfectly
+  container.style.height = `${scaledHeight + 36}px`;
+  container.style.minHeight = `${scaledHeight + 36}px`;
+
+  updateCaZoomUi();
+}
+
+// --- TAB SWITCHER FOR CONTROLS ---
+function switchCaControlTab(tabKey) {
+  caState.activeControlTab = tabKey;
+  const tabs = ['content', 'typography', 'signatory', 'attendees', 'presets', 'all'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('caTabBtn-' + t);
+    const panel = document.getElementById('caPanel-' + t);
+    if (btn) {
+      if (t === tabKey) {
+        btn.className = 'flex-1 py-1.5 px-2 rounded-xl font-bold transition flex items-center justify-center gap-1 bg-move-navy-900 text-white shadow-2xs whitespace-nowrap text-xs';
+      } else {
+        btn.className = 'flex-1 py-1.5 px-2 rounded-xl font-bold transition flex items-center justify-center gap-1 text-slate-600 hover:text-move-navy-900 hover:bg-slate-100 whitespace-nowrap text-xs';
+      }
+    }
+    if (panel) {
+      if (tabKey === 'all') {
+        panel.classList.remove('hidden');
+      } else {
+        if (t === tabKey) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+    }
+  });
+
+  requestAnimationFrame(() => updateCaAutoFit());
+}
+
+// --- VIEW MODE SWITCHER (SPLIT VS PREVIEW FOCUS) ---
+function setCaViewMode(viewMode) {
+  caState.viewMode = viewMode;
+  const controls = document.getElementById('caControlsColumn');
+  const preview = document.getElementById('caPreviewColumn');
+  const btnSplit = document.getElementById('btnCaViewSplit');
+  const btnFocus = document.getElementById('btnCaViewFocus');
+  if (!controls || !preview) return;
+
+  if (viewMode === 'focus') {
+    controls.classList.add('hidden');
+    if (btnFocus) btnFocus.className = 'px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+    if (btnSplit) btnSplit.className = 'px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1';
+  } else {
+    controls.classList.remove('hidden');
+    if (btnSplit) btnSplit.className = 'px-2.5 py-1 bg-move-navy-900 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs';
+    if (btnFocus) btnFocus.className = 'px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition flex items-center gap-1';
+  }
+  requestAnimationFrame(() => updateCaAutoFit());
+}
+
+// --- COLLAPSE/EXPAND TIER 0 DOCUMENT BANNER ---
+function toggleCaBanner() {
+  const cards = document.getElementById('caBannerCards');
+  const btn = document.getElementById('btnToggleCaBanner');
+  if (!cards) return;
+  const isHidden = cards.classList.toggle('hidden');
+  caState.bannerCollapsed = isHidden;
+  if (btn) {
+    btn.innerHTML = isHidden
+      ? '<i class="fa-solid fa-chevron-down text-[10px]"></i> <span>Doc Types</span>'
+      : '<i class="fa-solid fa-chevron-up text-[10px]"></i> <span>Compact</span>';
+  }
+  requestAnimationFrame(() => updateCaAutoFit());
 }
 
 // --- PRINT CURRENT CERTIFICATE (A5 LANDSCAPE) ---
@@ -1371,9 +2315,10 @@ function batchPrintAllAppearance() {
 
   const sigAlign = caState.signatureAlign || 'center';
   const sigJustify = (sigAlign === 'center') ? 'justify-center' : ((sigAlign === 'left') ? 'justify-start' : 'justify-end');
-  const sigImgHtml = caState.showSignature ? `
+  const hasSigImage = caState.showSignature && !!caState.signatureImage;
+  const sigImgHtml = hasSigImage ? `
     <div class="flex ${sigJustify} -mb-5 relative z-10 pointer-events-none select-none">
-      <img src="signature%20(15).png" alt="Signature" 
+      <img src="${caState.signatureImage}" alt="Signature" 
            style="width: ${caState.signatureWidth}px; max-height: 48px;" 
            class="object-contain drop-shadow-xs">
     </div>
@@ -1386,23 +2331,29 @@ function batchPrintAllAppearance() {
 
     pageDiv.innerHTML = `
       <!-- HEADER -->
-      <div class="flex items-center justify-between pb-1.5 border-b border-slate-700">
-        <div class="w-12 h-12 flex items-center justify-center shrink-0">
-          ${caState.showCityLogo ? `<img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">` : ''}
-        </div>
-        <div class="text-center px-2 flex-1 leading-tight">
-          <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">Republic of the Philippines</div>
-          <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">CITY GOVERNMENT OF BAGUIO</div>
-          <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">Men Opposed to Violence Against Women Everywhere</div>
-          <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">Baguio City Chapter &bull; Local Committee on Anti-VAWC</div>
-        </div>
-        <div class="w-12 h-12 flex items-center justify-center shrink-0">
-          ${caState.showMoveLogo ? `<img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">` : ''}
+      <div class="relative z-10 ${caState.showHeaderLine ? 'border-b border-slate-700 pb-1.5 mb-1.5' : 'pb-0 mb-0.5'}" style="${getCaOffsetStyle('header')}">
+        <div class="flex items-center ${caState.headerLayout === 'spread' ? 'justify-between w-full' : 'justify-center gap-3.5 mx-auto max-w-xl'}">
+          ${caState.showCityLogo ? `
+            <div class="flex items-center justify-center shrink-0" style="width: ${caState.logoSize || 48}px; height: ${caState.logoSize || 48}px; ${getCaOffsetStyle('leftLogo')}">
+              <img src="CITY%20HALL%20LOGO.png" alt="City Government of Baguio" class="w-full h-full object-contain">
+            </div>
+          ` : ''}
+          <div class="text-center px-1 leading-tight shrink-0" style="${getCaOffsetStyle('headerText')}">
+            <div class="text-[9px] font-bold uppercase tracking-wider text-slate-800">Republic of the Philippines</div>
+            <div class="text-[11px] font-black uppercase tracking-tight text-slate-900">CITY GOVERNMENT OF BAGUIO</div>
+            <div class="text-[9.5px] font-extrabold uppercase tracking-wide text-move-orange-600 mt-0.5">Men Opposed to Violence Against Women Everywhere</div>
+            <div class="text-[8px] text-slate-500 font-semibold tracking-wider uppercase">Baguio City Chapter &bull; Local Committee on Anti-VAWC</div>
+          </div>
+          ${caState.showMoveLogo ? `
+            <div class="flex items-center justify-center shrink-0" style="width: ${caState.logoSize || 48}px; height: ${caState.logoSize || 48}px; ${getCaOffsetStyle('rightLogo')}">
+              <img src="MOVE%20BAGUIO%20LOGO.png" alt="MOVE Baguio Chapter" class="w-full h-full object-contain">
+            </div>
+          ` : ''}
         </div>
       </div>
 
       <!-- TITLE -->
-      <div class="text-${caState.titleAlign || 'center'}" style="margin-top: 6px; margin-bottom: ${caState.titleSpacingAfter}px;">
+      <div class="text-${caState.titleAlign || 'center'}" style="margin-top: ${caState.headerSpacingAfter !== undefined ? caState.headerSpacingAfter : 4}px; margin-bottom: ${caState.titleSpacingAfter}px; ${getCaOffsetStyle('title')}">
         <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase" style="font-family: 'MS Reference Sans Serif', 'Arial', sans-serif; letter-spacing: 1.5px;">
           ${escapeHtml(caState.documentTitle || 'CERTIFICATE OF APPEARANCE')}
         </h1>
@@ -1410,19 +2361,19 @@ function batchPrintAllAppearance() {
 
       <!-- BODY -->
       <div class="flex-1 flex flex-col justify-center py-0.5">
-        <div class="mb-1.5">
+        <div class="mb-1.5" style="${getCaOffsetStyle('body')}">
           <p class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
             ${buildCaMainHtml(currMember)}
           </p>
         </div>
 
-        <div>
+        <div style="${getCaOffsetStyle('purpose')}">
           <p class="text-${caState.mainTextAlign === 'both' ? 'justify' : (caState.mainTextAlign || 'justify')} text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; text-indent: ${caState.textIndent}px; margin-bottom: ${caState.paragraphSpacing}px;">
             ${escapeHtml(caState.purpose)}
           </p>
         </div>
 
-        <div>
+        <div style="${getCaOffsetStyle('issueDate')}">
           <p class="text-left text-slate-900" style="line-height: ${caState.lineSpacing}; font-size: ${caState.fontSize}px; margin-bottom: ${Math.round(caState.paragraphSpacing * 1.2)}px;">
             ${escapeHtml(caState.issueDate)}
           </p>
@@ -1430,7 +2381,7 @@ function batchPrintAllAppearance() {
 
         <!-- SIGNATORY BLOCK -->
         <div class="pt-1 relative flex ${sigAlign === 'center' ? 'justify-center' : (sigAlign === 'left' ? 'justify-between flex-row-reverse' : 'justify-between')} items-end">
-          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2">
+          <div class="${sigAlign === 'center' ? 'absolute left-0 bottom-0' : ''} text-left flex items-center gap-2" style="${getCaOffsetStyle('initials')}">
             <span class="text-[9px] font-mono text-slate-500 lowercase tracking-wider">${escapeHtml(caState.initials)}</span>
             ${caState.showBreatheBaguio && caState.breatheBaguioPosition === 'bottom-left' ? `
               <img src="BREATHE_BAGUIO.png" alt="#breathe BAGUIO" 
@@ -1438,7 +2389,7 @@ function batchPrintAllAppearance() {
                    class="object-contain drop-shadow-2xs">
             ` : ''}
           </div>
-          <div class="text-center w-64">
+          <div class="text-center w-64" style="${getCaOffsetStyle('signatory')}">
             ${sigImgHtml}
             <div class="text-[12px] font-black uppercase text-slate-900 tracking-wider">${escapeHtml(caState.signatoryName)}</div>
             <div class="text-[10px] font-bold text-slate-800">${escapeHtml(caState.signatoryTitle1)}</div>
@@ -1455,6 +2406,7 @@ function batchPrintAllAppearance() {
       </div>
 
       <!-- FOOTER -->
+      ${caState.showFooter ? `
       <div class="pt-1.5 border-t border-slate-300 mt-1.5 flex items-center justify-between text-[8px] text-slate-500 font-medium">
         <div class="flex items-center gap-2">
           <div>Tel. No. (074)-442-89-20</div>
@@ -1470,6 +2422,7 @@ function batchPrintAllAppearance() {
         ` : ''}
         <div>website: <a href="http://www.baguio.gov.ph" target="_blank" class="text-move-orange-600 hover:underline">http://www.baguio.gov.ph</a></div>
       </div>
+      ` : ''}
     `;
 
     container.appendChild(pageDiv);
@@ -1647,7 +2600,7 @@ function generateClientSideDocx(data) {
 
       return `
         <div class="Section1" ${i > 0 ? 'style="page-break-before: always; margin-top: 30px;"' : ''}>
-          <div style="text-align: center; border-bottom: 2pt solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+          <div style="text-align: center; ${caState.showHeaderLine ? 'border-bottom: 2pt solid #000; padding-bottom: 10px;' : 'padding-bottom: 4px;'} margin-bottom: ${caState.headerSpacingAfter ? caState.headerSpacingAfter * 3 : 15}px;">
             <p style="margin: 0; font-size: 10pt; font-weight: bold;">REPUBLIC OF THE PHILIPPINES</p>
             <p style="margin: 0; font-size: 11pt; font-weight: bold;">CITY GOVERNMENT OF BAGUIO</p>
             <p style="margin: 2px 0 0 0; font-size: 9.5pt; font-weight: bold; color: #ea580c;">MEN OPPOSED TO VIOLENCE AGAINST WOMEN EVERYWHERE</p>
@@ -1679,10 +2632,12 @@ function generateClientSideDocx(data) {
             </tr>
           </table>
 
+          ${caState.showFooter ? `
           <div style="margin-top: 40px; border-top: 1pt solid #ccc; padding-top: 8px; font-size: 8.5pt; color: #666;">
             <span>Tel. No. (074)-442-89-20</span>
             <span style="float: right;">website: http://www.baguio.gov.ph</span>
           </div>
+          ` : ''}
         </div>
       `;
     }).join('');
@@ -1737,3 +2692,41 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// Window Exports for Certificate of Appearance Studio
+window.setCaZoomMode = setCaZoomMode;
+window.updateCaAutoFit = updateCaAutoFit;
+window.stepCaZoom = stepCaZoom;
+window.setCaZoom = setCaZoom;
+window.switchCaControlTab = switchCaControlTab;
+window.setCaViewMode = setCaViewMode;
+window.toggleCaBanner = toggleCaBanner;
+window.printCertificateOfAppearance = printCertificateOfAppearance;
+window.batchPrintAllAppearance = batchPrintAllAppearance;
+window.exportCertificateOfAppearanceDocx = exportCertificateOfAppearanceDocx;
+window.initAppearanceStudio = initAppearanceStudio;
+window.renderAppearancePreview = renderAppearancePreview;
+window.setCaHeaderLayout = setCaHeaderLayout;
+window.syncCaHeaderLayoutButtons = syncCaHeaderLayoutButtons;
+window.toggleCaEditMode = toggleCaEditMode;
+window.nudgeCaElement = nudgeCaElement;
+window.syncCaOffsetFromInputs = syncCaOffsetFromInputs;
+window.resetCaElementOffset = resetCaElementOffset;
+window.handleCaNudgeTargetChange = handleCaNudgeTargetChange;
+window.updateCaMoveUi = updateCaMoveUi;
+window.bindAppearanceDragListeners = bindAppearanceDragListeners;
+window.populateCaSignatoryDropdown = populateCaSignatoryDropdown;
+window.handleCaPickSignatory = handleCaPickSignatory;
+window.handleCaSigImageUpload = handleCaSigImageUpload;
+window.useOfficialCaSig = useOfficialCaSig;
+window.removeCaSigImage = removeCaSigImage;
+window.saveCaInputsToSignatoriesDb = saveCaInputsToSignatoriesDb;
+window.saveAndApplyCaTemplate = saveAndApplyCaTemplate;
+window.saveCurrentEmployeeOnlyText = saveCurrentEmployeeOnlyText;
+window.convertTextToCaTemplate = convertTextToCaTemplate;
+window.applyMainTextToAllAttendees = applyMainTextToAllAttendees;
+window.resetCaContextToDefault = resetCaContextToDefault;
+window.insertCaPlaceholder = insertCaPlaceholder;
+window.setCaContextEditMode = setCaContextEditMode;
+window.handleCaMainContextInput = handleCaMainContextInput;
+window.buildCaMainHtml = buildCaMainHtml;

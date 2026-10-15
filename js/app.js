@@ -17,6 +17,7 @@
     // Registry Mode: 'move' (50 registered members) or 'pool' (748 generic personnel)
     let currentMemberRegistryMode = 'move';
     let allMembers = [...moveMembersList];
+    window.PRIMARY_DB = RAW_MEMBERS.permanent.concat(RAW_MEMBERS.casual);
 
     function setMemberRegistryMode(mode) {
       currentMemberRegistryMode = mode;
@@ -39,6 +40,7 @@
         showToast("Switched to Official MOVE Members Registry (50)", "fa-users-gear");
       } else {
         allMembers = RAW_MEMBERS.permanent.concat(RAW_MEMBERS.casual);
+        window.PRIMARY_DB = allMembers;
         if (btnPool) {
           btnPool.className = 'px-3.5 py-1.5 rounded-lg bg-move-navy-900 text-white shadow-xs flex items-center gap-2 transition';
         }
@@ -47,9 +49,9 @@
           btnMove.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-300"></span><span>MOVE Registered Members &amp; Officers (50)</span>';
         }
         if (badge) {
-          badge.textContent = "Active: Personnel Pool (748 Candidates)";
+          badge.textContent = "Active: PRIMARY_DB Combined Roster (748 Members)";
         }
-        showToast("Switched to City Hall Personnel Pool (748)", "fa-database");
+        showToast("Switched to PRIMARY_DB Master Roster (748)", "fa-database");
       }
 
       // Re-populate offices for the active list
@@ -199,6 +201,23 @@
       sb.classList.toggle('hidden');
     }
 
+    function toggleDesktopSidebar() {
+      const sb = document.getElementById('sidebar');
+      if (!sb) return;
+      const isCollapsed = sb.classList.toggle('lg:hidden');
+      const btn = document.getElementById('btnToggleSidebar');
+      if (btn) {
+        btn.innerHTML = isCollapsed
+          ? '<i class="fa-solid fa-angles-right"></i> <span class="hidden md:inline">Show Sidebar</span>'
+          : '<i class="fa-solid fa-bars-staggered"></i> <span class="hidden md:inline">Sidebar</span>';
+      }
+      setTimeout(() => {
+        if (typeof updateCaAutoFit === 'function') updateCaAutoFit();
+        if (typeof updateApprecAutoFit === 'function') updateApprecAutoFit();
+      }, 100);
+    }
+    window.toggleDesktopSidebar = toggleDesktopSidebar;
+
     // --- NAVIGATION SWITCHER ---
     function switchNav(nav) {
       activeNav = nav;
@@ -233,7 +252,12 @@
       if (typeof updateStudioTopSelector === 'function') updateStudioTopSelector(nav);
 
       if (nav === 'certificates') renderCertificatePreview();
-      if (nav === 'appearance' && typeof initAppearanceStudio === 'function') initAppearanceStudio();
+      if (nav === 'appearance' && typeof initAppearanceStudio === 'function') {
+        initAppearanceStudio();
+        requestAnimationFrame(() => {
+          if (typeof updateCaAutoFit === 'function') updateCaAutoFit();
+        });
+      }
       if (nav === 'appreciation' && typeof initAppreciationStudio === 'function') initAppreciationStudio();
       if (nav === 'dashboard') renderDashboard();
     }
@@ -1361,7 +1385,10 @@
           <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-move-orange-50 text-move-orange-600 border border-move-orange-200">${act.activityType}</span></td>
           <td class="py-3 px-3 font-bold text-move-navy-900 max-w-xs truncate" title="${act.title}">${act.title}</td>
           <td class="py-3 px-3 text-slate-600 max-w-xs truncate" title="${act.purpose}">${act.purpose}</td>
-          <td class="py-3 px-3 text-slate-700 font-medium truncate max-w-xs">${act.speaker}</td>
+          <td class="py-3 px-3 text-slate-700 font-medium truncate max-w-xs" title="${act.speaker}${act.speakerPosition ? ' (' + act.speakerPosition + ')' : ''}">
+            <div class="truncate font-semibold">${act.speaker}</div>
+            ${act.speakerPosition ? `<div class="text-[10px] text-slate-500 font-normal truncate">${act.speakerPosition}</div>` : ''}
+          </td>
           <td class="py-3 px-3 text-center text-slate-600">${act.duration}</td>
           <td class="py-3 px-3 text-center">
             <span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${pres === tot ? 'bg-emerald-100 text-emerald-800' : 'bg-move-navy-100 text-move-navy-800'}">
@@ -1392,9 +1419,10 @@
       document.getElementById('modalAttTitle').textContent = act.title;
       document.getElementById('modalAttDate').textContent = act.date;
       document.getElementById('modalAttTypeBadge').textContent = act.activityType;
+      const spkPos = act.speakerPosition ? ` (${act.speakerPosition})` : '';
       document.getElementById('modalAttSpeaker').innerHTML = `
         <i class="fa-solid fa-microphone text-move-orange-400"></i>
-        <span>${act.speaker} &bull; ${act.duration} &bull; ${act.venue}</span>
+        <span>${act.speaker}${spkPos} &bull; ${act.duration} &bull; ${act.venue}</span>
       `;
 
       attendanceFilterMode = 'all';
@@ -1406,6 +1434,13 @@
       document.getElementById('modalAttendance').classList.add('hidden');
       renderActivitiesTable();
       renderDashboard();
+    }
+
+    let attendanceSearchQuery = '';
+
+    function handleAttendanceSearch(val) {
+      attendanceSearchQuery = val || '';
+      renderModalAttendanceTable();
     }
 
     function setAttendanceFilter(mode) {
@@ -1431,12 +1466,22 @@
       const tbody = document.getElementById('modalAttendanceTableBody');
       tbody.innerHTML = '';
 
-      let list = act.participants;
+      let list = act.participants || [];
       if (attendanceFilterMode === 'present') list = list.filter(p => p.isPresent);
       if (attendanceFilterMode === 'absent') list = list.filter(p => !p.isPresent);
 
+      if (attendanceSearchQuery && attendanceSearchQuery.trim()) {
+        const q = attendanceSearchQuery.trim().toLowerCase();
+        list = list.filter(p => 
+          (p.name && p.name.toLowerCase().includes(q)) ||
+          (p.office && p.office.toLowerCase().includes(q)) ||
+          (p.position && p.position.toLowerCase().includes(q)) ||
+          (p.civilStatus && p.civilStatus.toLowerCase().includes(q))
+        );
+      }
+
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">No participants match this attendance filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-slate-400">No participants match this attendance filter or search query.</td></tr>`;
         return;
       }
 
@@ -1455,6 +1500,14 @@
             <button onclick="toggleParticipantPresence('${p.id}')"
                     class="w-28 py-1 rounded-lg text-xs font-black transition shadow-2xs ${p.isPresent ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200' : 'bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-600'}">
               ${p.isPresent ? '✓ YES (Present)' : '✗ NO (Absent)'}
+            </button>
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <button onclick="event.stopPropagation(); openModalEditAttendee('${p.id}')"
+                    class="px-2.5 py-1 bg-slate-100 hover:bg-move-navy-900 hover:text-white text-slate-700 font-bold rounded-lg text-xs transition flex items-center gap-1 mx-auto shadow-2xs"
+                    title="Edit Attendee Information">
+              <i class="fa-solid fa-pen-to-square text-move-orange-500"></i>
+              <span>Edit</span>
             </button>
           </td>
         `;
@@ -1488,6 +1541,329 @@
       switchNav('certificates');
       document.getElementById('certActivitySelect').value = actId;
       handleCertActivityChange();
+    }
+
+    // --- ATTENDEE EDITING LOGIC ---
+    let activeEditingParticipantId = null;
+
+    function openModalEditAttendee(participantId) {
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      if (!act) return;
+      const p = act.participants.find(x => x.id === participantId);
+      if (!p) return;
+
+      activeEditingParticipantId = participantId;
+      document.getElementById('editAttendeeId').value = p.id;
+      document.getElementById('editAttName').value = p.name || '';
+      document.getElementById('editAttOffice').value = p.office || '';
+      document.getElementById('editAttPosition').value = p.position || '';
+      document.getElementById('editAttAge').value = p.age || '';
+      document.getElementById('editAttGender').value = p.gender || 'M';
+      document.getElementById('editAttCivilStatus').value = p.civilStatus || 'Married';
+      document.getElementById('editAttCell').value = p.cell || '';
+      document.getElementById('editAttIsPresent').checked = !!p.isPresent;
+
+      document.getElementById('modalEditAttendee').classList.remove('hidden');
+    }
+
+    function closeModalEditAttendee() {
+      const m = document.getElementById('modalEditAttendee');
+      if (m) m.classList.add('hidden');
+      activeEditingParticipantId = null;
+    }
+
+    function handleEditAttendeeSubmit(ev) {
+      ev.preventDefault();
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      if (!act || !activeEditingParticipantId) return;
+      const p = act.participants.find(x => x.id === activeEditingParticipantId);
+      if (!p) return;
+
+      p.name = document.getElementById('editAttName').value.trim();
+      p.office = document.getElementById('editAttOffice').value.trim();
+      p.position = document.getElementById('editAttPosition').value.trim();
+      const ageVal = parseInt(document.getElementById('editAttAge').value);
+      p.age = isNaN(ageVal) ? '' : ageVal;
+      p.gender = document.getElementById('editAttGender').value;
+      p.civilStatus = document.getElementById('editAttCivilStatus').value;
+      p.cell = document.getElementById('editAttCell').value.trim();
+      p.isPresent = document.getElementById('editAttIsPresent').checked;
+
+      // Update in PRIMARY_DB if matching ID or name
+      const masterMem = (window.PRIMARY_DB || allMembers).find(m => m.id === p.id || (m.name && m.name.toUpperCase() === p.name.toUpperCase()));
+      if (masterMem) {
+        masterMem.name = p.name;
+        masterMem.office = p.office;
+        masterMem.position = p.position;
+        masterMem.age = p.age;
+        masterMem.gender = p.gender;
+        masterMem.civilStatus = p.civilStatus;
+        masterMem.cell = p.cell;
+      }
+
+      closeModalEditAttendee();
+      renderModalAttendanceTable();
+      renderActivitiesTable();
+      saveStateToStorage();
+      showToast(`Attendee "${p.name}" updated successfully!`, 'fa-user-check');
+    }
+
+    function handleRemoveAttendeeFromActivity() {
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      if (!act || !activeEditingParticipantId) return;
+      const p = act.participants.find(x => x.id === activeEditingParticipantId);
+      if (!p) return;
+
+      if (!confirm(`Are you sure you want to remove "${p.name}" from this activity?`)) return;
+
+      act.participants = act.participants.filter(x => x.id !== activeEditingParticipantId);
+      closeModalEditAttendee();
+      renderModalAttendanceTable();
+      renderActivitiesTable();
+      saveStateToStorage();
+      showToast(`Removed "${p.name}" from attendance list`, 'fa-trash-can');
+    }
+
+    // --- ADD ATTENDEE FROM PRIMARY_DB LOGIC ---
+    function openModalAddFromPrimaryDb() {
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      if (!act) return;
+
+      const offSelect = document.getElementById('selectPrimaryDbOfficeFilter');
+      if (offSelect && allUniqueOffices) {
+        const cur = offSelect.value;
+        offSelect.innerHTML = '<option value="ALL">All Offices</option>';
+        allUniqueOffices.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o;
+          opt.textContent = o;
+          if (o === cur) opt.selected = true;
+          offSelect.appendChild(opt);
+        });
+      }
+
+      const dbList = window.PRIMARY_DB || allMembers || [];
+      const cntEl = document.getElementById('lblPrimaryDbCount');
+      if (cntEl) cntEl.textContent = dbList.length;
+      const inp = document.getElementById('inputPrimaryDbSearch');
+      if (inp) inp.value = '';
+      handlePrimaryDbSearchInput('');
+
+      document.getElementById('modalAddFromPrimaryDb').classList.remove('hidden');
+    }
+
+    function closeModalAddFromPrimaryDb() {
+      const m = document.getElementById('modalAddFromPrimaryDb');
+      if (m) m.classList.add('hidden');
+    }
+
+    function handlePrimaryDbSearchInput(q) {
+      if (q === undefined) {
+        q = document.getElementById('inputPrimaryDbSearch') ? document.getElementById('inputPrimaryDbSearch').value : '';
+      }
+      const query = (q || '').trim().toLowerCase();
+      const offFilter = document.getElementById('selectPrimaryDbOfficeFilter') ? document.getElementById('selectPrimaryDbOfficeFilter').value : 'ALL';
+      const srcFilter = document.getElementById('selectPrimaryDbSourceFilter') ? document.getElementById('selectPrimaryDbSourceFilter').value : 'ALL';
+
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      const existingIds = new Set((act ? act.participants : []).map(p => p.id));
+      const existingNames = new Set((act ? act.participants : []).map(p => (p.name || '').trim().toUpperCase()));
+
+      let pool = window.PRIMARY_DB || allMembers || [];
+      if (offFilter !== 'ALL') {
+        pool = pool.filter(m => m.office === offFilter);
+      }
+      if (srcFilter !== 'ALL') {
+        pool = pool.filter(m => (m.appointment || '').toUpperCase().includes(srcFilter) || (m.type || '').toUpperCase().includes(srcFilter));
+      }
+      if (query) {
+        pool = pool.filter(m => 
+          (m.name && m.name.toLowerCase().includes(query)) ||
+          (m.office && m.office.toLowerCase().includes(query)) ||
+          (m.position && m.position.toLowerCase().includes(query)) ||
+          (m.cell && m.cell.includes(query))
+        );
+      }
+
+      const tbody = document.getElementById('tblBodyPrimaryDbResults');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const maxShow = 50;
+      const results = pool.slice(0, maxShow);
+      const sumEl = document.getElementById('lblPrimaryDbResultsSummary');
+      if (sumEl) sumEl.textContent = `Showing ${results.length} of ${pool.length} candidates in PRIMARY_DB`;
+
+      if (results.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">No members found in PRIMARY_DB matching filters.</td></tr>';
+        return;
+      }
+
+      results.forEach(m => {
+        const isAlreadyAdded = existingIds.has(m.id) || existingNames.has((m.name || '').trim().toUpperCase());
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="py-2 px-3 font-bold text-move-navy-900">${m.name}</td>
+          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${m.office}</span></td>
+          <td class="py-2 px-3 text-slate-600 truncate max-w-xs">${m.position}</td>
+          <td class="py-2 px-3 text-center"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${m.appointment === 'PERMANENT' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">${m.appointment || 'PERM'}</span></td>
+          <td class="py-2 px-3 text-center font-semibold text-slate-600">${m.age || '-'}</td>
+          <td class="py-2 px-3 text-center">
+            ${isAlreadyAdded ? `
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                <i class="fa-solid fa-check mr-1"></i>In Attendance
+              </span>
+            ` : `
+              <button onclick="addAttendeeFromPrimaryDb('${m.id}')"
+                      class="px-2.5 py-1 bg-move-orange-500 hover:bg-move-orange-600 text-white font-bold rounded-lg text-xs shadow-2xs transition flex items-center gap-1 mx-auto">
+                <i class="fa-solid fa-plus"></i> Add
+              </button>
+            `}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addAttendeeFromPrimaryDb(memberId) {
+      const act = activitiesList.find(a => a.id === activeAttendanceActivityId);
+      if (!act) return;
+      const mem = (window.PRIMARY_DB || allMembers).find(m => m.id === memberId);
+      if (!mem) return;
+
+      const newAttendee = {
+        id: 'ATT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        origNo: mem.origNo || '',
+        name: mem.name,
+        office: mem.office,
+        position: mem.position,
+        age: mem.age,
+        gender: mem.gender || 'M',
+        civilStatus: mem.civilStatus || 'Married',
+        cell: mem.cell || '',
+        appointment: mem.appointment || 'PERMANENT',
+        trainings: mem.trainings || 0,
+        isPresent: true
+      };
+
+      act.participants.push(newAttendee);
+      renderModalAttendanceTable();
+      renderActivitiesTable();
+      saveStateToStorage();
+      handlePrimaryDbSearchInput();
+      showToast(`Added "${mem.name}" (${mem.office}) to Attendance!`, 'fa-user-plus');
+    }
+
+    async function saveCertSheetToExcel(sheetType) {
+      const actId = (typeof activeAttendanceActivityId !== 'undefined' && activeAttendanceActivityId) 
+        ? activeAttendanceActivityId 
+        : (document.getElementById('certActivitySelect') ? document.getElementById('certActivitySelect').value : 'ACT-KITCHEN-2');
+      const act = activitiesList.find(a => a.id === actId) || activitiesList[0];
+
+      let sheetName = sheetType;
+      let dataList = [];
+      let meta = {};
+
+      if (sheetType === 'Cert_Participation') {
+        const pres = (act.participants || []).filter(p => p.isPresent);
+        dataList = (pres.length > 0 ? pres : act.participants).map((p, idx) => ({
+          serialNo: `MOVE-2026-${act.id.replace('ACT-', '')}-${String(idx + 1).padStart(4, '0')}`,
+          name: p.name,
+          office: p.office,
+          position: p.position,
+          isPresent: p.isPresent
+        }));
+        meta = {
+          activityId: act.id,
+          activityTitle: act.title,
+          theme: act.shortDescription || '',
+          date: act.date,
+          venue: act.venue,
+          duration: act.duration,
+          sig1Name: 'HAROLD C. MALLORCA',
+          sig1Title: 'MOVE Baguio Chapter President',
+          sig2Name: 'HON. BENJAMIN B. MAGALONG',
+          sig2Title: 'City Mayor, Baguio City'
+        };
+      } else if (sheetType === 'Cert_Attendance_CA') {
+        const pres = (act.participants || []).filter(p => p.isPresent);
+        dataList = (pres.length > 0 ? pres : act.participants).map((p, idx) => ({
+          serialNo: `CA-2026-${act.id.replace('ACT-', '')}-${String(idx + 1).padStart(4, '0')}`,
+          name: p.name,
+          office: p.office,
+          position: p.position
+        }));
+        meta = {
+          activityTitle: act.title,
+          theme: act.shortDescription || '',
+          date: act.date,
+          venue: act.venue,
+          signatoryName: 'BENJAMIN B. MAGALONG',
+          signatoryTitle1: 'City Mayor',
+          signatoryTitle2: 'LCAT-VAWC Chairperson',
+          issueDate: act.date
+        };
+      } else if (sheetType === 'Cert_Appreciation') {
+        dataList = [
+          {
+            name: act.speaker || 'MOVE Baguio Chapter & CSWDO',
+            honorific: act.speakerHonorific !== 'none' ? (act.speakerHonorific || '') : '',
+            office: 'CSWDO / MOVE Baguio',
+            position: act.speakerPosition || 'Resource Training Partner',
+            activity: act.title,
+            award: 'CERTIFICATE OF APPRECIATION',
+            citation: `In grateful recognition of invaluable support, dedicated commitment, and meritorious service rendered during ${act.title}.`
+          },
+          {
+            name: 'MARIA ELENA G. SANTOS',
+            honorific: 'Atty.',
+            office: 'CHR-CAR',
+            position: 'Legal Consultant & Speaker',
+            activity: act.title,
+            award: 'CERTIFICATE OF APPRECIATION',
+            citation: 'In sincere appreciation of expert sharing of knowledge on violence prevention.'
+          },
+          {
+            name: 'BENJAMIN B. MAGALONG',
+            honorific: 'Hon.',
+            office: 'City Government of Baguio',
+            position: 'City Mayor',
+            activity: act.title,
+            award: 'PLAQUE OF APPRECIATION',
+            citation: 'For championing gender-transformative governance in the Summer Capital.'
+          }
+        ];
+        meta = {
+          activityTitle: act.title,
+          date: act.date,
+          venue: act.venue
+        };
+      } else if (sheetType === 'PRIMARY_DB') {
+        dataList = window.PRIMARY_DB || allMembers;
+      }
+
+      showToast(`Syncing sheet '${sheetName}' into ALL MALES MARIED WITH TRAINING.xls...`, 'fa-spinner fa-spin');
+
+      try {
+        const res = await fetch(`${LOCAL_SYNC_URL}/api/save-sheet`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sheetName: sheetName,
+            participants: dataList,
+            includeOfficeSummary: false,
+            meta: meta
+          })
+        });
+        if (res.ok) {
+          showToast(`Sheet '${sheetName}' (${dataList.length} records) updated in ALL MALES MARIED WITH TRAINING.xls!`, 'fa-circle-check');
+          return;
+        }
+      } catch (err) {
+        console.warn('Sync server offline, updated locally:', err);
+      }
+      showToast(`Sheet '${sheetName}' generated with ${dataList.length} records!`, 'fa-circle-check');
     }
 
     // --- ACTIVITY TYPE HISTORY MANAGER ---
@@ -1657,6 +2033,37 @@
       if (durationField) durationField.value = act.duration || '';
       if (venueField) venueField.value = act.venue || '';
 
+      // Populate Trainer structured details & position
+      const honSelect = document.getElementById('editSpeakerHonorific');
+      const custHonContainer = document.getElementById('containerCustomSpeakerHonorific');
+      const custHonInput = document.getElementById('editSpeakerCustomHonorific');
+      const fnInput = document.getElementById('editSpeakerFirstName');
+      const mnInput = document.getElementById('editSpeakerMiddleName');
+      const lnInput = document.getElementById('editSpeakerLastName');
+      const posInput = document.getElementById('editActSpeakerPosition');
+      const optFirst = document.getElementById('optSpeakerOrderFirst');
+      const optFamily = document.getElementById('optSpeakerOrderFamily');
+
+      if (posInput) posInput.value = act.speakerPosition || '';
+
+      const honorific = act.speakerHonorific || 'none';
+      if (honSelect) honSelect.value = honorific;
+      if (custHonContainer) {
+        if (honorific === 'custom') custHonContainer.classList.remove('hidden');
+        else custHonContainer.classList.add('hidden');
+      }
+      if (custHonInput) custHonInput.value = act.speakerCustomHonorific || '';
+
+      if (fnInput) fnInput.value = act.speakerFirstName || '';
+      if (mnInput) mnInput.value = act.speakerMiddleName || '';
+      if (lnInput) lnInput.value = act.speakerLastName || '';
+
+      const order = act.speakerNameOrder || 'first_first';
+      if (optFirst && optFamily) {
+        if (order === 'family_first') optFamily.checked = true;
+        else optFirst.checked = true;
+      }
+
       const modal = document.getElementById('modalEditActivity');
       if (modal) modal.classList.remove('hidden');
     }
@@ -1664,6 +2071,61 @@
     function closeModalEditActivity() {
       const modal = document.getElementById('modalEditActivity');
       if (modal) modal.classList.add('hidden');
+    }
+
+    function handleTrainerHonorificChange(val) {
+      const custContainer = document.getElementById('containerCustomSpeakerHonorific');
+      if (custContainer) {
+        if (val === 'custom') custContainer.classList.remove('hidden');
+        else custContainer.classList.add('hidden');
+      }
+      updateTrainerFormattedPreview();
+    }
+
+    function handleTrainerNameOrderChange(order) {
+      updateTrainerFormattedPreview();
+    }
+
+    function updateTrainerFormattedPreview() {
+      const honSelect = document.getElementById('editSpeakerHonorific');
+      const custHonInput = document.getElementById('editSpeakerCustomHonorific');
+      const fnInput = document.getElementById('editSpeakerFirstName');
+      const mnInput = document.getElementById('editSpeakerMiddleName');
+      const lnInput = document.getElementById('editSpeakerLastName');
+      const optFamily = document.getElementById('optSpeakerOrderFamily');
+      const speakerField = document.getElementById('editActSpeaker');
+      if (!speakerField) return;
+
+      const honVal = honSelect ? honSelect.value : 'none';
+      let prefix = '';
+      if (honVal === 'custom') {
+        prefix = (custHonInput ? custHonInput.value.trim() : '');
+      } else if (honVal !== 'none') {
+        prefix = honVal;
+      }
+
+      const fn = (fnInput ? fnInput.value.trim() : '');
+      const mn = (mnInput ? mnInput.value.trim() : '');
+      const ln = (lnInput ? lnInput.value.trim() : '');
+      const isFamilyFirst = optFamily ? optFamily.checked : false;
+
+      if (!fn && !ln) return;
+
+      let formatted = '';
+      if (isFamilyFirst) {
+        const pfx = prefix ? prefix + ' ' : '';
+        const surname = ln ? ln.toUpperCase() : '';
+        const comma = (surname && fn) ? ', ' : '';
+        const mid = mn ? ' ' + mn : '';
+        formatted = `${pfx}${surname}${comma}${fn}${mid}`.trim();
+      } else {
+        const pfx = prefix ? prefix + ' ' : '';
+        const mid = mn ? ' ' + mn : '';
+        const surname = ln ? ' ' + ln : '';
+        formatted = `${pfx}${fn}${mid}${surname}`.trim();
+      }
+
+      if (formatted) speakerField.value = formatted;
     }
 
     function handleEditActivitySubmit(ev) {
@@ -1683,6 +2145,22 @@
       act.activityType = type;
       act.purpose = document.getElementById('editActPurpose').value.trim();
       act.speaker = document.getElementById('editActSpeaker').value.trim();
+
+      const posField = document.getElementById('editActSpeakerPosition');
+      if (posField) act.speakerPosition = posField.value.trim();
+      const honField = document.getElementById('editSpeakerHonorific');
+      if (honField) act.speakerHonorific = honField.value;
+      const custHon = document.getElementById('editSpeakerCustomHonorific');
+      if (custHon) act.speakerCustomHonorific = custHon.value.trim();
+      const fnF = document.getElementById('editSpeakerFirstName');
+      if (fnF) act.speakerFirstName = fnF.value.trim();
+      const mnF = document.getElementById('editSpeakerMiddleName');
+      if (mnF) act.speakerMiddleName = mnF.value.trim();
+      const lnF = document.getElementById('editSpeakerLastName');
+      if (lnF) act.speakerLastName = lnF.value.trim();
+      const optFam = document.getElementById('optSpeakerOrderFamily');
+      act.speakerNameOrder = (optFam && optFam.checked) ? 'family_first' : 'first_first';
+
       act.duration = document.getElementById('editActDuration').value.trim();
       act.venue = document.getElementById('editActVenue').value.trim();
 
@@ -1701,9 +2179,10 @@
         if (dateEl) dateEl.textContent = act.date;
         if (typeEl) typeEl.textContent = act.activityType;
         if (speakerEl) {
+          const spkPos = act.speakerPosition ? ` (${act.speakerPosition})` : '';
           speakerEl.innerHTML = `
             <i class="fa-solid fa-microphone text-move-orange-400"></i>
-            <span>${act.speaker} &bull; ${act.duration} &bull; ${act.venue}</span>
+            <span>${act.speaker}${spkPos} &bull; ${act.duration} &bull; ${act.venue}</span>
           `;
         }
       }
@@ -2118,3 +2597,19 @@
       styleEl.textContent = `@media print { @page { size: ${sizeRule}; margin: 0; } }`;
     }
     window.setPrintPageRule = setPrintPageRule;
+
+    // Window Exports for Attendees, Trainer, and Excel Sync
+    window.saveCertSheetToExcel = saveCertSheetToExcel;
+    window.openModalEditAttendee = openModalEditAttendee;
+    window.closeModalEditAttendee = closeModalEditAttendee;
+    window.handleEditAttendeeSubmit = handleEditAttendeeSubmit;
+    window.handleRemoveAttendeeFromActivity = handleRemoveAttendeeFromActivity;
+    window.openModalAddFromPrimaryDb = openModalAddFromPrimaryDb;
+    window.closeModalAddFromPrimaryDb = closeModalAddFromPrimaryDb;
+    window.handlePrimaryDbSearchInput = handlePrimaryDbSearchInput;
+    window.addAttendeeFromPrimaryDb = addAttendeeFromPrimaryDb;
+    window.handleTrainerHonorificChange = handleTrainerHonorificChange;
+    window.handleTrainerNameOrderChange = handleTrainerNameOrderChange;
+    window.updateTrainerFormattedPreview = updateTrainerFormattedPreview;
+    window.handleAttendanceSearch = handleAttendanceSearch;
+
