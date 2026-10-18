@@ -456,23 +456,29 @@ async function openActivityAttendance(activityId) {
 }
 
 async function loadAttendance(activityId) {
+  const actId = activityId || appState.currentActivityId || 1;
+  appState.currentActivityId = actId;
   try {
-    const res = await fetch(`${API_BASE}/api/activities/${activityId}/attendees`);
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/attendees`);
     const data = await res.json();
     if (data.success) {
       appState.attendees = data.attendees;
       
-      const act = appState.activities.find(a => a.id === activityId) || {
+      const act = appState.activities.find(a => a.id === actId) || {
         title: "Men in the Kitchen 2",
         activity_date: "October 20, 2026",
         venue: "CDRRMO Building, Lower Rock Quarry"
       };
 
-      document.getElementById("attendanceActivityTitle").textContent = act.title;
-      document.getElementById("attendanceActivityMeta").innerHTML = `
-        <i class="fa-regular fa-calendar mr-1"></i> ${escapeHtml(act.activity_date || '')} &bull; 
-        <i class="fa-solid fa-location-dot mr-1"></i> ${escapeHtml(act.venue || 'Baguio City')}
-      `;
+      const titleEl = document.getElementById("attendanceActivityTitle");
+      const metaEl = document.getElementById("attendanceActivityMeta");
+      if (titleEl) titleEl.textContent = act.title;
+      if (metaEl) {
+        metaEl.innerHTML = `
+          <i class="fa-regular fa-calendar mr-1"></i> ${escapeHtml(act.activity_date || '')} &bull; 
+          <i class="fa-solid fa-location-dot mr-1"></i> ${escapeHtml(act.venue || 'Baguio City')}
+        `;
+      }
 
       renderAttendanceTable();
     }
@@ -661,29 +667,37 @@ async function toggleCurrentRecipientAttendance() {
 }
 
 async function loadEligibleCertificates(activityId) {
+  const actId = activityId || appState.currentActivityId || 1;
+  appState.currentActivityId = actId;
   try {
-    const res = await fetch(`${API_BASE}/api/activities/${activityId}/eligible-certificates`);
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/eligible-certificates`);
     const data = await res.json();
     if (data.success) {
-      appState.currentActivity = data.activity;
-      appState.eligibleAttendees = data.eligible_attendees; // STRICTLY WHERE IS_PRESENT = 1!
+      const act = data.activity || {};
+      appState.currentActivity = act;
+      appState.eligibleAttendees = data.eligible_attendees || []; // STRICTLY WHERE IS_PRESENT = 1!
       if (appState.currentCertIndex >= appState.eligibleAttendees.length) {
         appState.currentCertIndex = Math.max(0, appState.eligibleAttendees.length - 1);
       }
 
       // Populate Inputs with Activity Details
-      document.getElementById("certInputTitle").value = data.activity.title || "";
-      document.getElementById("certInputTheme").value = data.activity.theme || "";
-      document.getElementById("certInputDate").value = data.activity.activity_date || "";
-      document.getElementById("certInputHours").value = data.activity.duration_hours || "8 Hours";
-      document.getElementById("certInputVenue").value = data.activity.venue || "";
+      const titleInput = document.getElementById("certInputTitle");
+      const themeInput = document.getElementById("certInputTheme");
+      const dateInput = document.getElementById("certInputDate");
+      const hoursInput = document.getElementById("certInputHours");
+      const venueInput = document.getElementById("certInputVenue");
+      if (titleInput) titleInput.value = act.title || "";
+      if (themeInput) themeInput.value = act.theme || "";
+      if (dateInput) dateInput.value = act.activity_date || "";
+      if (hoursInput) hoursInput.value = act.duration_hours || "8 Hours";
+      if (venueInput) venueInput.value = act.venue || "";
 
       appState.customCertFields = {
-        title: data.activity.title || "",
-        theme: data.activity.theme || "",
-        date: data.activity.activity_date || "",
-        hours: data.activity.duration_hours || "8 Hours",
-        venue: data.activity.venue || ""
+        title: act.title || "",
+        theme: act.theme || "",
+        date: act.activity_date || "",
+        hours: act.duration_hours || "8 Hours",
+        venue: act.venue || ""
       };
 
       renderRecipientDropdown();
