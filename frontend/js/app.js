@@ -3,7 +3,9 @@
 // SQLite REST API Integration & Component Controller
 // ==========================================================================
 
-const API_BASE = "http://127.0.0.1:8765";
+const API_BASE = (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http'))
+  ? window.location.origin
+  : "http://127.0.0.1:8765";
 
 // --- GLOBAL APPLICATION STATE ---
 const appState = {
@@ -43,6 +45,7 @@ const appState = {
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
+  await checkServerHealth();
   await loadSignatories();
   await loadActivities();
   await loadRoster();
@@ -54,6 +57,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAttendance(appState.currentActivityId);
   }
 });
+
+// --- SERVER HEALTH CHECK ---
+async function checkServerHealth() {
+  const banner = document.getElementById("serverOfflineBanner");
+  try {
+    const res = await fetch(`${API_BASE}/api/status`, { signal: AbortSignal.timeout(3000) });
+    const data = await res.json();
+    if (data.status === 'online') {
+      if (banner) banner.classList.add("hidden");
+      return true;
+    }
+  } catch (e) {
+    if (banner) banner.classList.remove("hidden");
+    return false;
+  }
+}
 
 // --- NAVIGATION CONTROLLER ---
 function switchView(viewName) {
@@ -76,7 +95,7 @@ function switchView(viewName) {
   if (viewName === 'roster') loadRoster();
   if (viewName === 'activities') loadActivities();
   if (viewName === 'attendance') loadAttendance(appState.currentActivityId);
-  if (viewName === 'studio') launchStudioForActivity();
+  if (viewName === 'studio') loadEligibleCertificates(appState.currentActivityId);
 }
 
 // ==========================================================================
@@ -608,14 +627,37 @@ async function removeAttendee(attendeeId) {
 // ==========================================================================
 
 async function launchStudioForActivity() {
-  await loadEligibleCertificates(appState.currentActivityId);
   switchView('studio');
 }
 
 async function launchStudioForSpecificActivity(activityId) {
   appState.currentActivityId = activityId;
-  await loadEligibleCertificates(activityId);
   switchView('studio');
+}
+
+async function toggleCurrentRecipientAttendance() {
+  if (appState.eligibleAttendees.length === 0) return;
+  const att = appState.eligibleAttendees[appState.currentCertIndex];
+  if (!att) return;
+
+  const confirmChange = confirm(`Do you want to change attendance for ${att.full_name} to ABSENT?\n\nThis will immediately remove them from the certificate list.`);
+  if (!confirmChange) return;
+
+  try {
+    const actId = appState.currentActivityId || att.activity_id || 1;
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/attendees/${att.id}/present`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_present: 0 })
+    });
+    const data = await res.json();
+    if (data.success) {
+      await loadEligibleCertificates(actId);
+      loadAttendance(actId);
+    }
+  } catch (err) {
+    alert("Error updating attendance: " + err);
+  }
 }
 
 async function loadEligibleCertificates(activityId) {
@@ -625,7 +667,9 @@ async function loadEligibleCertificates(activityId) {
     if (data.success) {
       appState.currentActivity = data.activity;
       appState.eligibleAttendees = data.eligible_attendees; // STRICTLY WHERE IS_PRESENT = 1!
-      appState.currentCertIndex = 0;
+      if (appState.currentCertIndex >= appState.eligibleAttendees.length) {
+        appState.currentCertIndex = Math.max(0, appState.eligibleAttendees.length - 1);
+      }
 
       // Populate Inputs with Activity Details
       document.getElementById("certInputTitle").value = data.activity.title || "";
@@ -655,11 +699,13 @@ function renderRecipientDropdown() {
   const currentSpan = document.getElementById("studioRecipientCurrent");
   const totalSpan = document.getElementById("studioRecipientTotal");
   const batchCount = document.getElementById("batchPrintBtnCount");
+  const sidebarCount = document.getElementById("sidebarPresentCount");
 
   const count = appState.eligibleAttendees.length;
   currentSpan.textContent = count > 0 ? appState.currentCertIndex + 1 : 0;
   totalSpan.textContent = count;
   batchCount.textContent = count;
+  if (sidebarCount) sidebarCount.textContent = count;
 
   if (count === 0) {
     select.innerHTML = `<option value="">No Present Attendees Found</option>`;

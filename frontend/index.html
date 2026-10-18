@@ -55,7 +55,7 @@
       </div>
 
       <!-- Main Navigation Tabs -->
-      <nav class="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
         <button id="navTab-roster" onclick="switchView('roster')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow">
           <i class="fa-solid fa-users"></i> MOVE Roster
         </button>
@@ -78,6 +78,14 @@
       </div>
     </div>
   </header>
+
+  <!-- SERVER OFFLINE WARNING BANNER -->
+  <div id="serverOfflineBanner" class="hidden bg-rose-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-3 shadow-md">
+    <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Backend Server is Offline! Changes cannot be saved until the server is running.</span>
+    <button onclick="checkServerHealth()" class="px-2.5 py-1 rounded bg-white text-rose-700 font-extrabold hover:bg-slate-100 transition shadow">
+      <i class="fa-solid fa-rotate-right mr-1"></i> Retry Connection
+    </button>
+  </div>
 
   <!-- MAIN APP CONTAINER -->
   <main id="nonPrintableContent" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
@@ -282,25 +290,31 @@
         </div>
 
         <!-- Recipient Navigator (STRICTLY PRESENT ATTENDEES ONLY) -->
-        <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
-          <button onclick="prevCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+        <div class="flex flex-wrap items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+          <button onclick="prevCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Previous Recipient">
             <i class="fa-solid fa-chevron-left text-xs"></i>
           </button>
           <div class="text-center px-2">
             <span class="text-[11px] font-bold text-white block">
               Recipient <span id="studioRecipientCurrent">1</span> of <span id="studioRecipientTotal">47</span>
             </span>
-            <span class="text-[9px] font-semibold text-emerald-400 flex items-center justify-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified Present
-            </span>
+            <!-- Interactive Attendance Toggle Button -->
+            <button onclick="toggleCurrentRecipientAttendance()" id="btnStudioAttendeeAttendance" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 transition flex items-center justify-center gap-1 mx-auto cursor-pointer" title="Click to change this person's attendance to Absent">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified Present (Click to mark Absent)
+            </button>
           </div>
-          <button onclick="nextCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+          <button onclick="nextCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Next Recipient">
             <i class="fa-solid fa-chevron-right text-xs"></i>
           </button>
           
-          <select id="studioRecipientSelect" onchange="onSelectRecipientDropdown(this.value)" class="ml-2 bg-slate-900 border border-slate-700 rounded-lg text-xs py-1 px-2 text-white font-medium focus:outline-none focus:border-move-gold-500 max-w-[200px]">
+          <select id="studioRecipientSelect" onchange="onSelectRecipientDropdown(this.value)" class="ml-1 bg-slate-900 border border-slate-700 rounded-lg text-xs py-1 px-2 text-white font-medium focus:outline-none focus:border-move-gold-500 max-w-[200px]">
             <!-- Populated via JS -->
           </select>
+
+          <!-- Direct Shortcut Button to Full Attendance Checklist -->
+          <button onclick="switchView('attendance')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow" title="Open full attendance checklist to view and change attendance for all participants">
+            <i class="fa-solid fa-clipboard-user text-move-gold-400"></i> Change Attendance
+          </button>
         </div>
 
         <!-- Studio Print & Output Actions -->
@@ -324,6 +338,17 @@
               <i class="fa-solid fa-sliders text-move-gold-500"></i> Certificate Customizer
             </h3>
             <p class="text-[11px] text-slate-400 mt-0.5">Adjust text, signatories, or click any word on the certificate canvas to edit.</p>
+          </div>
+
+          <!-- Attendance Quick Summary Card in Studio Sidebar -->
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] uppercase font-bold text-slate-400">Attendance Gating</div>
+              <div class="text-xs font-bold text-emerald-400"><span id="sidebarPresentCount">47</span> Present (Eligible)</div>
+            </div>
+            <button onclick="switchView('attendance')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-white border border-slate-700 transition flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-user-pen text-move-gold-400"></i> Change Attendance
+            </button>
           </div>
 
           <!-- Activity & Event Information -->
