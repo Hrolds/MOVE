@@ -31,17 +31,21 @@ The system is built on a clean, decoupled architecture:
 ┌────────────────────────────────────────────────────────┐
 │          Activities & Live Attendance Checklist        │
 │          • Event details & simple target notes         │
+│          • Attendees Tab vs. Facilitators Sub-Tab      │
 │          • Live check-in toggle: PRESENT vs ABSENT     │
 └──────────────────────────┬─────────────────────────────┘
                            │ Gating Rule: WHERE is_present = 1
                            ▼
 ┌────────────────────────────────────────────────────────┐
 │          ONE Unified Certificate Studio                │
-│          • 1. Certificate of Participation (A4)        │
-│          • 2. Certificate of Appearance (CA / DTR)     │
-│          • 3. Certificate of Appreciation (VIP Honors) │
-│          • In-Studio Attendance Toggling & Shortcuts   │
-│          • Single & Batch Print with Clean Page Breaks │
+│          • 1. Certificate of Participation (A4 Full)   │
+│          • 2. Certificate of Appearance (A5 Dual/Single)│
+│          • 3. Certificate of Appreciation (A4 Full)    │
+│          • Live Canvas Inline Editing (Click-to-Type)  │
+│          • Signatory Chooser & Detail Visibility Checks│
+│          • Dual Mode (2 A5 slips Top & Bottom on A4)   │
+│          • Typography Scaling & E-Signature Controls   │
+│          • High-Resolution Single & Batch A4/A5 Print  │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -57,6 +61,8 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
 | **`municipal_employees_search_pool`** | **Municipal Workforce Search Pool**: 748 Permanent and Casual employees stored in an isolated table. Ready to be queried or synchronized with an external HRIS API. | `id`, `employee_number`, `full_name`, `position`, `gender`, `civil_status`, `office`, `employment_type` |
 | **`activities`** | **Training Seminars & Events**: Activity title, theme, date, duration, venue, trainer, and target participants notes. | `id`, `title`, `theme`, `activity_date`, `venue`, `duration_hours`, `trainer_name`, `trainer_position`, `target_notes` |
 | **`activity_attendees`** | **Attendance Roster**: Links attendees to an activity with the strict `is_present` gate. | `id`, `activity_id`, `move_roster_id`, `full_name`, `position`, `gender`, `civil_status`, `office`, `contact_number`, `is_present`, `check_in_time`, `notes` |
+| **`activity_facilitators`** | **Event Facilitators & Speakers**: Resource speakers, trainers, and committee facilitators assigned to an activity. | `id`, `activity_id`, `move_roster_id`, `full_name`, `role_title`, `position`, `gender`, `civil_status`, `office`, `contact_number`, `is_present`, `check_in_time`, `notes` |
+| **`certificate_settings`** | **Global Certificate Customization**: Persistent headers, titles, presentation intro lines, and dynamic citation texts. | `id`, `header_line_1`, `header_line_2`, `header_line_3`, `participation_title`, `participation_intro`, `appreciation_title`, `appreciation_intro`, `appearance_title`, `appearance_intro`, `participation_citation`, `appearance_citation` |
 | **`signatories`** | **Executive Signatories**: Official leadership and custom signatories with digital signatures (`signature (15).png`, `GANGA.png`). | `id`, `name`, `title`, `office`, `signature_image`, `is_default` |
 | **`issued_certificates`** | **Registry of Issued Certificates**: Serial numbers, issuance timestamps, and certificate types. | `id`, `activity_id`, `attendee_id`, `certificate_type`, `serial_number`, `issued_at` |
 
@@ -100,71 +106,100 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
   * **Facilitators Checklist**: Dedicated table with live search, presence verification toggle (`PRESENT` / `ABSENT`), and 1-click **"Cert"** button to jump straight to the Certificate Studio to issue a Certificate of Appreciation for that facilitator.
   * **Certificate Studio Integration**: Certificate Studio allows switching between **Attendees** and **Facilitators** recipient pools with 1-click, enabling generation and batch-printing of Appreciation and Appearance certificates for facilitators.
 
+---
+
 ### 4. 🎓 ONE Unified Certificate Studio
-Replaced 3 separate studios with a single, elegant studio featuring a **Template Switcher**:
-1. **Certificate of Participation**: A4 Landscape with Baguio Gold double frame, chapter seal, City Hall seal, and dual executive signatures.
-2. **Certificate of Appearance (CA / DTR Slip)**: Official attendance slip certifying presence for Civil Service DTR non-entry accreditation.
-3. **Certificate of Appreciation**: Prestigious honors certificate for VIPs, guest speakers, trainers, and partner agencies.
 
-#### In-Studio Attendance Management:
-* **Interactive Attendance Badge**: Click the `Verified Present` badge on the recipient card to instantly toggle that person to `Absent` directly from the studio.
-* **Direct Navigation Ribbon**: `[ 📋 Change Attendance ]` button lets you switch back to the attendance checklist at any moment.
-* **Sidebar Attendance Card**: Displays real-time eligible attendee counts with a quick return shortcut.
-* **Save Event Details Directly to Database**: Edit activity title, theme, date, duration, or venue directly in the studio sidebar and save them instantly to SQLite.
+Replaced 3 separate studios with a single, unified studio featuring a **Template Switcher**:
+1. **Certificate of Participation**: A4 Landscape with Baguio Gold double frame, chapter seal, City Hall seal, dynamic gender-aware `{his/her}` citation, and dual executive signatures.
+2. **Certificate of Appearance (CA / DTR Slip)**: Official attendance slip certifying presence for Civil Service DTR non-entry accreditation. Sized as **A5 Landscape (`210mm × 148.5mm`)** with Single or Dual-slip printing on A4 paper.
+3. **Certificate of Appreciation**: Prestigious honors certificate with Navy/Gold double border for VIPs, guest speakers, trainers, and partner agencies.
 
-#### Printing & Customization:
+---
+
+### 5. 🖨️ A5 Landscape on A4 Paper Printing (Single Mode vs. Dual Mode)
+
+Designed specifically for the **Certificate of Appearance (CA)**:
+* **A5 Landscape Dimensions**: Exact standard `210mm × 148.5mm`.
+* **Standard A4 Sheet (`210mm × 297mm`)**: An A4 Portrait sheet cleanly holds two A5 Landscape slips stacked vertically Top & Bottom.
+* **Interactive Mode Switcher on Stage Toolbar**:
+  * **Single Mode (1 A5)**: Formats and prints 1 A5 slip centered per sheet.
+  * **Dual Mode: Top & Bottom (2 on A4)**: Formats and prints 2 A5 landscape slips stacked vertically on a single A4 sheet with an optional center cut guide (`148.5mm`), cutting paper and printing costs by 50%.
+* **Dual Mode Distribution Strategies**:
+  * **Pair Mode (`pair`)**: Slip #1 (Top) = Recipient $N$, Slip #2 (Bottom) = Recipient $N+1$. Automatically pairs consecutive attendees during single preview and batch printing.
+  * **Duplicate Mode (`duplicate`)**: Slip #1 (Top) = Recipient $N$, Slip #2 (Bottom) = Duplicate Copy of Recipient $N$. Generates two official copies of the same person on one sheet.
+* **Live Dual Preview**: Stage displays both Slip #1 (`#certStageCanvas`) and Slip #2 (`#certStageCanvasBottom`) with recipient badges and a dashed cut line indicator before printing.
+
+---
+
+### 6. ✍️ Full Live Canvas Inline Editing (Click-to-Edit & Auto-Save)
+
+Every critical element across all 3 certificate templates can be clicked and edited directly on the canvas without leaving the studio:
+* **Headers & Subtitles**:
+  * Line 1: `"Republic of the Philippines • City Government of Baguio"`
+  * Line 2: `"Men Opposed to Violence Against Women Everywhere (MOVE)"`
+  * Line 3: `"Baguio City, Philippines"`
+* **Certificate Titles**:
+  * Click to edit `"CERTIFICATE OF PARTICIPATION"`, `"CERTIFICATE OF APPEARANCE"`, or `"CERTIFICATE OF APPRECIATION"`.
+* **Presentation & Intro Lines**:
+  * Participation/Appreciation: `"is presented to"`
+  * Appearance: `"This is to certify that"`
+* **Recipient Record Fields (Certificate of Appearance)**:
+  * **Full Name** (e.g. `CRISTOBAL T. BULACAN`): Click to type; automatically capitalizes and commits to SQLite.
+  * **Position / Role Assignment** (e.g. `Assistant P.R.O. / Facilitator`): Click to edit position.
+  * **Office / Department** (e.g. `Health Services Office (HSO)`): Click to edit office.
+  * **Verification / Accreditation Statement**: Click to customize the reason phrase (e.g. `"rendered invaluable service as Resource Speaker / Facilitator in"` or `"attended and actively participated in"`).
+* **Activity & Event Information**:
+  * Title, Theme, Date, and Venue are all directly contenteditable on the preview canvas with immediate database synchronization.
+* **Non-Destructive Auto-Save**: Changes trigger an immediate debounced save to the SQLite database on blur, displaying an inline `"✓ Saved to Database"` badge.
+
+---
+
+### 7. 🖋️ Executive Signatory Chooser & Detail Visibility Controls
+
+Comprehensive signatory customization available via both the **Quick Bar** above the canvas and the **Executive Signatories** sidebar:
+* **Choose Who Signs (Signatory 1 & Signatory 2)**:
+  * Select from **Official Signatories** (with e-signature graphic support: Mayor Magalong, President Ganga).
+  * Select any **MOVE Chapter Officer** or **MOVE Roster Member** from the directory.
+  * Type custom **Printed Name**, **Position / Role Title**, and **Office / Department** with 1-click **`[ 💾 Save ]`** to SQLite.
+* **Choose Which Signatory Layout Appears**:
+  * **👥 Dual Signatories**: Signatory 1 (Left) & Signatory 2 (Right) side-by-side.
+  * **👤 Single: Signatory 2 — Right-Aligned** (e.g. City Mayor on bottom-right).
+  * **👤 Single: Signatory 2 — Centered**.
+  * **👤 Single: Signatory 1 — Right-Aligned** (e.g. Chapter President on bottom-right).
+  * **👤 Single: Signatory 1 — Centered**.
+* **Choose What Details Appear on the Signatory Block**:
+  * `[✓] Full Name`: Show or hide the printed name.
+  * `[✓] Position Title`: Show or hide the role/position title.
+  * `[ ] Office / Agency`: Optionally display the signatory's office underneath.
+  * `[✓] Signature Line`: Show or hide the horizontal rule above the name.
+  * `[✓] E-Sig Graphic`: Show or hide the electronic signature image.
+
+---
+
+### 8. 🎚️ Typography, E-Signature & Layout Sizing Controls
+
+* **Body & Citation Text Size**:
+  * Slider ranging from **`8px` to `26px`** with dedicated `A-` and `A+` nudge buttons.
+  * 1-Click Presets: `Small (11px)`, `Normal (12px)`, `Medium (14px)`, `Large (16px)`, `XL (18px)`.
+* **On-Canvas Quick Hover Toolbar**:
+  * Hovering over the body block reveals:
+    * **Position**: `↑` and `↓` vertical nudgers (-80px to +80px) with `✕` reset.
+    * **Body Font**: `A-` and `A+` buttons with live pixel readout.
+    * **Name Font**: `A-` and `A+` buttons with live pixel readout.
+    * **Edit Details**: Direct shortcut button opening the full attendee/facilitator modal.
+* **Stage Quick Bar Above Canvas**:
+  * Instant **Body: `[A-] 12px [A+]`** and **Name: `[A-] 26px [A+]`** buttons accessible without hovering.
 * **Adjustable E-Signature Sizing & Scaling**:
-  * **Interactive Size Slider**: Smoothly scale e-signatures from 20px to 96px in real time (default: 44px).
-  * **Quick Size Presets**: 1-click buttons for `Small (32px)`, `Medium (44px)`, `Large (56px)`, and `XL (72px)`.
-  * **Independent Signatory Tuning**: Check *"Tune Separately"* to set independent heights for Signatory 1 (President Ganga) and Signatory 2 (Mayor Magalong) to visually balance different image paddings.
-  * **Vertical Baseline Nudge (`↑` / `↓`)**: Fine-tune how the signatures rest or overlap onto the printed signature lines.
-  * **On-Canvas Hover Resize Controls**: Hover over any signature on the certificate stage to reveal quick `[-]` and `[+]` resize buttons (automatically hidden during printing).
-  * **Saved Preferences**: Size and scaling preferences automatically persist in local storage.
-* **Adjustable Watermark Position & Sizing (Up / Down)**:
-  * **Vertical Position Slider**: Shift the background watermark higher or lower (-120px to +120px, default: 0px) to prevent clashing with participant names.
-  * **Watermark Size Slider**: Dynamically resize watermark dimensions from 180px to 480px (default: 320px).
-  * **On-Canvas Hover Nudge**: Hover over the watermark on the certificate canvas to click `↑ Up` / `↓ Down` directly.
-  * **Watermark Seal & Opacity**: Select from MOVE Chapter Seal, City Hall Seal, Men in the Kitchen 2 Logo, or Breathe Baguio Logo with 4% to 30% opacity.
-* **Typography & Dynamic Font Sizing (Participant Name, Citation Text, Certificate Title)**:
-  * **Participant Name Font Sizer**: Dynamically scale recipient names from 18px to 44px (default: 26px) with 1-click presets (`Small 22px`, `Med 26px`, `Large 32px`, `XL 38px`).
-  * **On-Canvas Quick Font Controls (`A-` / `A+`)**: Hover over the recipient block on the canvas to click `A-` or `A+` directly next to the vertical position arrows (`↑` / `↓`).
-  * **Citation & Body Text Size Slider**: Fine-tune seminar citation text from 10px to 17px with dedicated `A-` and `A+` fine-tuning buttons.
-  * **Certificate Title Size Slider**: Adjust main certificate heading font size from 22px to 38px (default: 28px).
-  * **Dynamic Layout Accommodation**: When names or citations are enlarged, the vertical alignment nudger (-60px to +60px) allows the user to raise or lower the text block so the certificate layout remains perfectly balanced without overflowing the signatures or A4 landscape boundary.
-  * **Saved Preferences**: Font sizes automatically persist in `localStorage` across page refreshes.
-* **Editable & Persistent Certificate Headers, Titles & Presentation Lines**:
-  * **Persistent Customization**: Full database persistence for all 5 certificate header and intro fields:
-    1. *Header Line 1*: `"Republic of the Philippines • City Government of Baguio"`
-    2. *Header Line 2*: `"Men Opposed to Violence Against Women Everywhere (MOVE)"`
-    3. *Header Line 3*: `"City Hall Chapter • Baguio City, Philippines"`
-    4. *Certificate Title*: `"CERTIFICATE OF PARTICIPATION"` / `"CERTIFICATE OF APPRECIATION"` / `"CERTIFICATE OF APPEARANCE"`
-    5. *Presentation Intro*: `"This certification is proudly presented to"` / `"is proudly and warmly presented to"`
-  * **Dual Editing Experience**:
-    * **On-Canvas Click-to-Edit & Auto-Save**: Click directly on any header line, title, or intro phrase on the certificate stage to edit in real time; changes automatically save to SQLite via `PUT /api/certificate-settings` when clicking away (blur).
-    * **Sidebar Customizer Card**: Dedicated inputs for all header lines, title, and intro text with a 1-click **`[ 💾 Save Header & Intro to Database ]`** button and **Reset to Defaults** button.
-  * **SQLite Database Backed**: Stored in the new `certificate_settings` table so all customizations persist permanently across browser sessions, page reloads, and batch printing.
-* **Certificate of Appreciation Header & Template Enhancements**:
-  * **Official 3-Line Header**: Updated to the standard format requested:
-    ```text
-    Republic of the Philippines • City Government of Baguio
-    Men Opposed to Violence Against Women Everywhere (MOVE)
-    City Hall Chapter • Baguio City, Philippines
-    ```
-  * **Full Template Availability**: Unrestricted switching between *Certificate of Participation*, *Certificate of Appreciation*, and *Certificate of Appearance* for all attendees and facilitators.
-  * **Full Feature Parity**: Certificate of Appreciation now includes e-signature sizing, vertical position nudging, typography scaling, and signatory position title database saving.
-* **Adjustable Recipient Text Vertical Alignment (Up / Down)**:
-  * **Vertical Text Slider**: Smoothly nudge the participant's name, designation, office, and citations up or down (-60px to +60px) for optimal vertical centering.
-  * **On-Canvas Hover Nudge**: Hover over the recipient block on the certificate stage to click `↑ Up` / `↓ Down` for instant visual feedback.
-* **Editable Signatory Position Titles & Database Persistence**:
-  * **Sidebar Inputs & Direct Save**: Dedicated title text inputs in the sidebar with 1-click **Save** buttons that commit position titles directly to the `signatories` SQLite table via `PUT /api/signatories/{id}`.
-  * **On-Canvas Click-to-Edit & Auto-Save**: Click directly on any signatory's title (e.g. *"City Mayor & Honorary Chapter Adviser"*) on the certificate stage to edit, with automatic saving to the database upon clicking away (blur).
-  * **Universal Sync Across All Templates**: Persists across Participation, Appearance/CA, and Appreciation templates.
-* **Flexible Appearance Certificate Signatories**: Choose which signature appears on the Certificate of Appearance — Signatory 2 (Mayor Magalong - Right/Center), Signatory 1 (President Ganga - Right/Center), or Dual Signatories (both side-by-side).
-* **Digital E-Signature Visibility**: Choose whether to display all digital signatures, Mayor only, President only, or blank signature lines for physical wet-ink signing.
-* **Recipient Navigator**: `< Recipient 1 of 47 (Verified Present) >` with a searchable dropdown.
-* **Inline Click-to-Edit**: Click directly on any text on the certificate canvas to customize.
-* **Print Single**: Standardized A4 landscape printing.
-* **Batch Print All Present**: Automatically generates clean page breaks (`page-break-after: always`) to print all verified attendees in one batch.
+  * Scale e-signatures from 20px to 96px in real time (default: 44px).
+  * Quick size presets: `Small (32px)`, `Medium (44px)`, `Large (56px)`, `XL (72px)`.
+  * Independent height controls for Signatory 1 and Signatory 2 (*"Tune Separately"*).
+  * Vertical baseline nudger (`↑` / `↓`) to fine-tune signature overlap onto lines.
+* **Adjustable Watermark Position & Opacity**:
+  * Shift watermark vertically (-150px to +150px) to prevent clashing with text.
+  * Resize watermark dimensions from 180px to 480px.
+  * Select from MOVE Chapter Seal, City Hall Seal, Men in the Kitchen 2 Logo, or Breathe Baguio Logo with 4% to 30% opacity.
+* **Persistent Preferences**: All font sizes, layout offsets, and signatory preferences persist in `localStorage` across refreshes.
 
 ---
 
@@ -194,15 +229,20 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 | `PUT` | `/api/activities/{id}/facilitators/{fac_id}/present` | Verify facilitator attendance (`is_present`: `0`\|`1`) |
 | `DELETE` | `/api/activities/{id}/facilitators/{fac_id}` | Remove a facilitator from an activity |
 | `GET` | `/api/activities/{id}/eligible-certificates` | Gated list of eligible attendees and facilitators (`is_present = 1`) |
+| `GET` | `/api/certificate-settings` | Get persistent certificate headers, titles, intros, and citation clauses |
+| `PUT` | `/api/certificate-settings` | Update certificate headers, titles, intros, and citations in SQLite |
+| `POST` | `/api/certificate-settings/reset` | Reset certificate headers, titles, intros, and citations to official defaults |
 | `GET` | `/api/signatories` | Get list of available executive signatories |
 | `PUT` | `/api/signatories/{id}` | Update signatory position title, name, or office in SQLite |
+
+---
 
 ### 🎓 Role-Based Certificate Matrix
 
 | Recipient Role | Eligible Certificates | Ineligible Certificates | Gating Condition |
 | :--- | :--- | :--- | :--- |
-| **Attendees (Participants)** | • **Certificate of Participation** (A4 Landscape)<br>• **Certificate of Appearance (CA)** (DTR / Accreditation) | • Certificate of Appreciation *(Hidden)* | Strictly gated: `is_present = 1` in Attendance Checklist |
-| **Facilitators (Speakers / Trainers)** | • **Certificate of Appreciation** (Honorary / VIP)<br>• **Certificate of Appearance (CA)** (Travel / DTR) | • Certificate of Participation *(Hidden)* | Strictly gated: `is_present = 1` in Facilitator Checklist |
+| **Attendees (Participants)** | • **Certificate of Participation** (A4 Landscape)<br>• **Certificate of Appearance (CA)** (A5 Dual/Single) | • Certificate of Appreciation *(Hidden)* | Strictly gated: `is_present = 1` in Attendance Checklist |
+| **Facilitators (Speakers / Trainers)** | • **Certificate of Appreciation** (A4 VIP Honors)<br>• **Certificate of Appearance (CA)** (A5 Dual/Single) | • Certificate of Participation *(Hidden)* | Strictly gated: `is_present = 1` in Facilitator Checklist |
 
 ---
 
@@ -214,12 +254,12 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 │   ├── import_excel.py     # Data migration script
 │   └── server.py           # Clean REST API server (Port 8765)
 ├── data/
-│   ├── move_hris.db        # Primary SQLite database (50 Attendees + 13 Facilitators)
+│   ├── move_hris.db        # Primary SQLite database (Attendees, Facilitators, Settings)
 │   └── move_hris_dump.sql  # Complete SQL text dump for cross-machine database sync
 ├── frontend/
-│   ├── index.html          # Clean Single-Page Application
-│   ├── css/styles.css      # Modern stylesheet & A4 landscape print rules
-│   └── js/app.js           # Frontend state controller & API client
+│   ├── index.html          # Clean Single-Page Application (Studio & HRIS)
+│   ├── css/styles.css      # Modern stylesheet & high-resolution A4/A5 print rules
+│   └── js/app.js           # Frontend state controller, studio engine & API client
 ├── index.html              # Root auto-redirect to local server
 ├── CITY HALL LOGO.png      # Official City of Baguio Seal
 ├── MOVE BAGUIO LOGO.png    # Official Chapter Emblem
@@ -234,24 +274,24 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 
 ## 💻 Quick Start & Cross-Machine Sync Guide
 
-### On This Machine (Changes Already Saved):
-1. Both `data/move_hris.db` and `data/move_hris_dump.sql` contain the complete official roster:
+### On This Machine:
+1. Double-click **`Start_HRIS.bat`** to start the backend server and open the browser interface.
+2. Both `data/move_hris.db` and `data/move_hris_dump.sql` contain the complete official records:
    - **50 Attendees** for *Men in the Kitchen 2* (with positions, offices, contact numbers, and verified attendance).
    - **13 Facilitators** (12 committee facilitators + Chef Ramon Dela Rosa).
-   - Interactive **`[ ✏️ Edit ]`** buttons for modifying position titles and details in real time.
+   - Saved custom certificate headers, titles, appearance citations, and signatory configurations.
 
 ### On Another Computer (After You Pull):
 1. Open your terminal in the cloned repository and run:
    ```bash
    git pull origin main
    ```
-2. Git will pull the updated `data/move_hris.db`, `data/move_hris_dump.sql`, frontend, and backend files.
+2. Git pulls the updated `data/move_hris.db`, `data/move_hris_dump.sql`, frontend, and backend files.
 3. Double-click **`Start_HRIS.bat`** to start the application.
-4. Your browser will automatically open `http://127.0.0.1:8765` with all 50 attendees, 13 facilitators, and edit controls immediately accessible.
+4. Your browser will automatically open `http://127.0.0.1:8765` with all records, certificate templates, and controls immediately accessible.
 
 *(Optional Fallback)*: If SQLite on another computer requires a fresh rebuild from text SQL, simply run:
 ```bash
 sqlite3 data/move_hris.db < data/move_hris_dump.sql
 ```
 This guarantees 100% data portability across any operating system or device.
-
