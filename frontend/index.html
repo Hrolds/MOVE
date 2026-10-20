@@ -678,65 +678,106 @@
               <span class="text-[9px] text-move-gold-400 font-bold uppercase">Editable</span>
             </div>
 
+            <!-- Choose Which Signatory & Layout Appears on Certificate -->
+            <div id="caSignatorySelectorWrapper" class="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-move-gold-500/40 shadow-md">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-black text-move-gold-400 uppercase flex items-center gap-1.5">
+                  <i class="fa-solid fa-user-check text-[11px]"></i> 1. Choose Who Appears on Signatory
+                </label>
+                <span class="text-[9px] font-mono text-emerald-400 font-bold">Active Template</span>
+              </div>
+              <select id="caSignatoryChoice" onchange="onCaSignatoryChoiceChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold focus:outline-none focus:border-move-gold-500">
+                <option value="both">Dual Signatories: Signatory 1 (Left) &amp; Signatory 2 (Right)</option>
+                <option value="sig1_center">Single Signatory: Signatory 1 Only (Centered)</option>
+                <option value="sig1_right">Single Signatory: Signatory 1 Only (Right-Aligned)</option>
+                <option value="sig2_center">Single Signatory: Signatory 2 Only (Centered)</option>
+                <option value="sig2_right">Single Signatory: Signatory 2 Only (Right-Aligned)</option>
+              </select>
+
+              <!-- Choose What Elements Appear Inside the Signatory Block -->
+              <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-300 uppercase block">2. Choose What Details to Show on Signatory:</label>
+                <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300">
+                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                    <input type="checkbox" id="chkShowSigName" onchange="toggleSigDetail('showSigName', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                    <span>Full Name</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                    <input type="checkbox" id="chkShowSigTitle" onchange="toggleSigDetail('showSigTitle', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                    <span>Position Title</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                    <input type="checkbox" id="chkShowSigOffice" onchange="toggleSigDetail('showSigOffice', this.checked)" class="rounded text-move-gold-500 focus:ring-0">
+                    <span>Office / Agency</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                    <input type="checkbox" id="chkShowSigLine" onchange="toggleSigDetail('showSigLine', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                    <span>Signature Line</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <!-- Signatory 1 Card -->
             <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 1 (Left or Single)</label>
+                <span id="sig1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+              </div>
               <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 1 (Left / Chapter Head)</label>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
                 <select id="certSigSelect1" onchange="onSigSelect(1, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
                   <!-- Populated via JS -->
                 </select>
               </div>
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[9px] font-bold text-slate-400 uppercase">Position Title</label>
-                  <span id="sig1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
+                <input type="text" id="certSig1NameInput" oninput="onSigNameInputChange(1, this.value)" placeholder="e.g. MARIO D. GANGA JR." class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
+              </div>
+              <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
                 <div class="flex items-center gap-1.5">
                   <input type="text" id="certSig1TitleInput" oninput="onSigTitleInputChange(1, this.value)" placeholder="e.g. MOVE Baguio Chapter President" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
-                  <button type="button" onclick="saveSignatoryTitle(1)" id="btnSaveSig1Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 1 title directly to SQLite database">
+                  <button type="button" onclick="saveSignatoryTitle(1)" id="btnSaveSig1Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 1 Name & Title to SQLite database">
                     <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
                   </button>
                 </div>
+              </div>
+              <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
+                <input type="text" id="certSig1OfficeInput" oninput="onSigOfficeInputChange(1, this.value)" placeholder="e.g. CMO - PDAO / Baguio City" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
               </div>
             </div>
 
             <!-- Signatory 2 Card -->
             <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 2 (Right or Single)</label>
+                <span id="sig2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+              </div>
               <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 2 (Right / City Mayor)</label>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
                 <select id="certSigSelect2" onchange="onSigSelect(2, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
                   <!-- Populated via JS -->
                 </select>
               </div>
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[9px] font-bold text-slate-400 uppercase">Position Title</label>
-                  <span id="sig2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
+                <input type="text" id="certSig2NameInput" oninput="onSigNameInputChange(2, this.value)" placeholder="e.g. HON. BENJAMIN B. MAGALONG" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
+              </div>
+              <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
                 <div class="flex items-center gap-1.5">
                   <input type="text" id="certSig2TitleInput" oninput="onSigTitleInputChange(2, this.value)" placeholder="e.g. City Mayor & Honorary Chapter Adviser" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
-                  <button type="button" onclick="saveSignatoryTitle(2)" id="btnSaveSig2Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 2 title directly to SQLite database">
+                  <button type="button" onclick="saveSignatoryTitle(2)" id="btnSaveSig2Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 2 Name & Title to SQLite database">
                     <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
                   </button>
                 </div>
               </div>
-            </div>
-
-            <!-- Appearance Certificate Specific Signatory Selector -->
-            <div id="caSignatorySelectorWrapper" class="space-y-1 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-              <div class="flex items-center justify-between">
-                <label class="text-[10px] font-bold text-move-gold-400 uppercase flex items-center gap-1">
-                  <i class="fa-solid fa-stamp text-[10px]"></i> Certificate of Appearance Signatory
-                </label>
+              <div>
+                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
+                <input type="text" id="certSig2OfficeInput" oninput="onSigOfficeInputChange(2, this.value)" placeholder="e.g. City Government of Baguio" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
               </div>
-              <select id="caSignatoryChoice" onchange="onCaSignatoryChoiceChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                <option value="sig2_right">Signatory 2: Mayor Magalong (Right)</option>
-                <option value="sig1_right">Signatory 1: President Ganga (Right)</option>
-                <option value="both">Dual Signatories: President & Mayor (Left & Right)</option>
-                <option value="sig2_center">Signatory 2: Mayor Magalong (Centered)</option>
-                <option value="sig1_center">Signatory 1: President Ganga (Centered)</option>
-              </select>
-              <p class="text-[10px] text-slate-500">Choose which signature appears on the Certificate of Appearance.</p>
             </div>
 
             <!-- Digital Signature Image Display Mode -->
@@ -1027,6 +1068,40 @@
                 <option value="pair">Bottom Half: Next Recipient (Pair 2 People)</option>
                 <option value="duplicate">Bottom Half: Same Recipient (2 Copies)</option>
               </select>
+            </div>
+          </div>
+
+          <!-- Quick Signatory Selector Bar above Canvas -->
+          <div class="w-full max-w-[850px] mb-3 bg-slate-900/90 border border-slate-800 rounded-2xl px-3.5 py-2.5 shadow-lg flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-[11px] font-black text-move-gold-400 uppercase flex items-center gap-1.5">
+                <i class="fa-solid fa-signature"></i> Signatory on Certificate:
+              </span>
+              <select id="stageQuickSigLayout" onchange="onCaSignatoryChoiceChange(this.value)" class="bg-slate-950 border border-slate-700 rounded-lg text-xs py-1 px-2.5 text-white font-bold focus:outline-none focus:border-move-gold-500">
+                <option value="both">Dual: Signatory 1 (Left) &amp; Signatory 2 (Right)</option>
+                <option value="sig1_center">Single: Signatory 1 Only (Centered)</option>
+                <option value="sig1_right">Single: Signatory 1 Only (Right-Aligned)</option>
+                <option value="sig2_center">Single: Signatory 2 Only (Centered)</option>
+                <option value="sig2_right">Single: Signatory 2 Only (Right-Aligned)</option>
+              </select>
+              <select id="stageQuickSig1Person" onchange="onSigSelect(1, this.value)" class="bg-slate-950 border border-slate-700 rounded-lg text-[11px] py-1 px-2 text-slate-200 font-medium focus:outline-none focus:border-move-gold-500 max-w-[190px]" title="Choose Signatory 1 Person">
+              </select>
+              <select id="stageQuickSig2Person" onchange="onSigSelect(2, this.value)" class="bg-slate-950 border border-slate-700 rounded-lg text-[11px] py-1 px-2 text-slate-200 font-medium focus:outline-none focus:border-move-gold-500 max-w-[190px]" title="Choose Signatory 2 Person">
+              </select>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] text-slate-300">
+              <label class="flex items-center gap-1 cursor-pointer bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Show or hide E-Signature image">
+                <input type="checkbox" id="stageQuickChkEsig" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                <span>E-Sig</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Show or hide Position Title">
+                <input type="checkbox" id="stageQuickChkTitle" onchange="toggleSigDetail('showSigTitle', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                <span>Title</span>
+              </label>
+              <label class="flex items-center gap-1 cursor-pointer bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Show or hide Office / Department">
+                <input type="checkbox" id="stageQuickChkOffice" onchange="toggleSigDetail('showSigOffice', this.checked)" class="rounded text-move-gold-500 focus:ring-0">
+                <span>Office</span>
+              </label>
             </div>
           </div>
 
@@ -1835,6 +1910,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=1792470525"></script>
+  <script src="/frontend/js/app.js?v=1792472201"></script>
 </body>
 </html>

@@ -67,6 +67,17 @@ const appState = {
     participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled'
   },
   caSignatoryChoice: 'sig2_right',
+  templateSigLayout: {
+    participation: 'both',
+    appreciation: 'both',
+    appearance: 'sig2_right'
+  },
+  showSigName: true,
+  showSigTitle: true,
+  showSigOffice: false,
+  showSigLine: true,
+  customSig1: null,
+  customSig2: null,
   caPrintMode: 'dual', // 'dual' (2x A5 Landscape Top & Bottom on A4) or 'single' (1x A5 Landscape on A4)
   caDualBehavior: 'pair', // 'pair' (Current + Next Person) or 'duplicate' (2 Copies of Same Person)
   sigDisplayMode: 'both',
@@ -170,6 +181,7 @@ async function updateRosterCounts() {
     if (data.success) {
       const all = data.roster;
       appState.fullRoster = all;
+      populateSignatorySelects();
       document.getElementById("count-all").textContent = all.length;
       document.getElementById("count-member").textContent = all.filter(r => r.is_member).length;
       document.getElementById("count-officer").textContent = all.filter(r => r.is_officer).length;
@@ -1949,6 +1961,7 @@ function switchCertTemplate(templateName) {
   appState.currentTemplate = templateName;
   updateStudioTemplateAvailability();
   updateCertHeaderInputs();
+  syncSignatoryChooserUI();
   renderCertificateCanvas();
 }
 
@@ -2108,7 +2121,16 @@ function saveSigPreferences() {
       sig1Size: appState.sig1Size,
       sig2Size: appState.sig2Size,
       sigSizeIndependent: appState.sigSizeIndependent,
-      sigYOffset: appState.sigYOffset
+      sigYOffset: appState.sigYOffset,
+      sig1Id: appState.sig1Id,
+      sig2Id: appState.sig2Id,
+      templateSigLayout: appState.templateSigLayout,
+      caSignatoryChoice: appState.caSignatoryChoice,
+      showSigName: appState.showSigName,
+      showSigTitle: appState.showSigTitle,
+      showSigOffice: appState.showSigOffice,
+      showSigLine: appState.showSigLine,
+      showSignatures: appState.showSignatures
     }));
   } catch (e) {}
 }
@@ -2123,15 +2145,40 @@ function initSigPreferences() {
       if (prefs.sig2Size) appState.sig2Size = prefs.sig2Size;
       if (prefs.sigSizeIndependent !== undefined) appState.sigSizeIndependent = prefs.sigSizeIndependent;
       if (prefs.sigYOffset !== undefined) appState.sigYOffset = prefs.sigYOffset;
+      if (prefs.sig1Id !== undefined) appState.sig1Id = prefs.sig1Id;
+      if (prefs.sig2Id !== undefined) appState.sig2Id = prefs.sig2Id;
+      if (prefs.templateSigLayout) appState.templateSigLayout = Object.assign({}, appState.templateSigLayout, prefs.templateSigLayout);
+      if (prefs.caSignatoryChoice) appState.caSignatoryChoice = prefs.caSignatoryChoice;
+      if (prefs.showSigName !== undefined) appState.showSigName = prefs.showSigName;
+      if (prefs.showSigTitle !== undefined) appState.showSigTitle = prefs.showSigTitle;
+      if (prefs.showSigOffice !== undefined) appState.showSigOffice = prefs.showSigOffice;
+      if (prefs.showSigLine !== undefined) appState.showSigLine = prefs.showSigLine;
+      if (prefs.showSignatures !== undefined) appState.showSignatures = prefs.showSignatures;
     }
   } catch (e) {}
   updateSigSizeUI();
+  syncSignatoryChooserUI();
 }
 
 function toggleSignatures(checked) {
   appState.showSignatures = checked;
   const grp = document.getElementById("sigSizeControlsWrapper");
   if (grp) grp.classList.toggle("opacity-40", !checked);
+  const chkSide = document.getElementById("certToggleSignatures");
+  if (chkSide) chkSide.checked = checked;
+  const chkQuick = document.getElementById("stageQuickChkEsig");
+  if (chkQuick) chkQuick.checked = checked;
+  saveSigPreferences();
+  renderCertificateCanvas();
+}
+
+function toggleSigDetail(key, checked) {
+  if (key === 'name') appState.showSigName = Boolean(checked);
+  else if (key === 'title') appState.showSigTitle = Boolean(checked);
+  else if (key === 'office') appState.showSigOffice = Boolean(checked);
+  else if (key === 'line') appState.showSigLine = Boolean(checked);
+  syncSignatoryChooserUI();
+  saveSigPreferences();
   renderCertificateCanvas();
 }
 
@@ -2379,8 +2426,23 @@ function initLayoutPreferences() {
 
 
 
+function getActiveSignatoryLayout() {
+  const tpl = appState.currentTemplate || 'participation';
+  if (appState.templateSigLayout && appState.templateSigLayout[tpl]) {
+    return appState.templateSigLayout[tpl];
+  }
+  return tpl === 'appearance' ? (appState.caSignatoryChoice || 'sig2_right') : 'both';
+}
+
 function onCaSignatoryChoiceChange(val) {
+  const tpl = appState.currentTemplate || 'participation';
   appState.caSignatoryChoice = val;
+  if (!appState.templateSigLayout) {
+    appState.templateSigLayout = { participation: 'both', appreciation: 'both', appearance: 'sig2_right' };
+  }
+  appState.templateSigLayout[tpl] = val;
+  syncSignatoryChooserUI();
+  saveSigPreferences();
   renderCertificateCanvas();
 }
 
@@ -2710,6 +2772,103 @@ async function resetCertificateSettings() {
   }
 }
 
+function getActiveSigObj(slotNum) {
+  const rawId = (slotNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const customCache = (slotNum === 1) ? appState.customSig1 : appState.customSig2;
+
+  if (typeof rawId === 'string' && rawId.startsWith('roster_')) {
+    if (customCache && customCache.id === rawId) return customCache;
+    const rId = parseInt(rawId.replace('roster_', ''), 10);
+    const pool = (appState.fullRoster && appState.fullRoster.length > 0) ? appState.fullRoster : (appState.roster || []);
+    const person = pool.find(r => r.id === rId);
+    if (person) {
+      const obj = {
+        id: rawId,
+        name: person.full_name,
+        title: person.position || (person.is_officer ? 'MOVE Chapter Officer' : 'MOVE Member'),
+        office: person.office || 'City Government of Baguio',
+        signature_image: null
+      };
+      if (slotNum === 1) appState.customSig1 = obj;
+      else appState.customSig2 = obj;
+      return obj;
+    }
+  }
+
+  const numId = parseInt(rawId, 10);
+  const found = appState.signatories.find(s => s.id === numId);
+  if (found) return found;
+
+  if (slotNum === 1) {
+    return { id: 3, name: "MARIO D. GANGA JR.", title: "MOVE Chapter President", office: "City Mayor's Office", signature_image: "GANGA.png" };
+  }
+  return { id: 1, name: "HON. BENJAMIN B. MAGALONG", title: "City Mayor & Honorary Chapter Adviser", office: "City Mayor's Office", signature_image: "signature (15).png" };
+}
+
+function buildSingleSignatoryItemHtml(slotNum, sigObj, showImg, isCA = false) {
+  const showName = appState.showSigName !== false;
+  const showTitle = appState.showSigTitle !== false;
+  const showOffice = appState.showSigOffice === true;
+  const showLine = appState.showSigLine !== false;
+
+  const borderClass = showLine ? "border-t border-slate-800 pt-1" : "pt-1";
+  const titleColorClass = isCA ? "text-slate-600 font-medium" : "text-slate-500 font-semibold";
+
+  return `
+    <div class="text-center flex flex-col items-center">
+      ${getSigImgHtml(slotNum, sigObj, showImg)}
+      ${showName ? `
+        <h5 contenteditable="true" onblur="onCanvasSigNameBlur(${slotNum}, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 ${borderClass} min-w-[12rem] px-2 cursor-text" title="Click to edit signatory name">${escapeHtml(sigObj.name || '')}</h5>
+      ` : (showLine ? `<div class="border-t border-slate-800 w-48 pt-1"></div>` : '')}
+      ${showTitle ? `
+        <p contenteditable="true" oninput="onCanvasSigTitleInput(${slotNum}, this.innerText)" onblur="onCanvasSigTitleBlur(${slotNum}, this.innerText)" class="cert-editable text-[10px] ${titleColorClass} cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sigObj.title || '')}</p>
+      ` : ''}
+      ${showOffice && sigObj.office ? `
+        <p class="text-[9px] text-slate-500 font-medium uppercase tracking-wide mt-0.5">${escapeHtml(sigObj.office)}</p>
+      ` : ''}
+    </div>
+  `;
+}
+
+function buildSignatoryFooterHtml(sig1, sig2, showSig1Img, showSig2Img, isCA = false) {
+  const layout = getActiveSignatoryLayout();
+  const topBorder = isCA ? "border-slate-300" : "border-slate-200";
+
+  if (layout === 'sig1_right' || layout === 'sig1') {
+    return `
+      <div class="flex items-end justify-end pt-4 border-t ${topBorder} text-xs relative z-10">
+        ${buildSingleSignatoryItemHtml(1, sig1, showSig1Img, isCA)}
+      </div>
+    `;
+  } else if (layout === 'sig1_center') {
+    return `
+      <div class="flex flex-col items-center pt-4 border-t ${topBorder} text-xs relative z-10">
+        ${buildSingleSignatoryItemHtml(1, sig1, showSig1Img, isCA)}
+      </div>
+    `;
+  } else if (layout === 'sig2_center') {
+    return `
+      <div class="flex flex-col items-center pt-4 border-t ${topBorder} text-xs relative z-10">
+        ${buildSingleSignatoryItemHtml(2, sig2, showSig2Img, isCA)}
+      </div>
+    `;
+  } else if (layout === 'sig2_right' || layout === 'sig2') {
+    return `
+      <div class="flex items-end justify-end pt-4 border-t ${topBorder} text-xs relative z-10">
+        ${buildSingleSignatoryItemHtml(2, sig2, showSig2Img, isCA)}
+      </div>
+    `;
+  } else {
+    // Default: 'both' (Dual Signatories: Signatory 1 Left & Signatory 2 Right)
+    return `
+      <div class="grid grid-cols-2 gap-8 pt-4 border-t ${topBorder} text-center relative z-10">
+        ${buildSingleSignatoryItemHtml(1, sig1, showSig1Img, isCA)}
+        ${buildSingleSignatoryItemHtml(2, sig2, showSig2Img, isCA)}
+      </div>
+    `;
+  }
+}
+
 // -------------------------------------------------------------
 // CERTIFICATE CANVAS RENDERING (1 UNIFIED ENGINE, 3 TEMPLATES)
 // -------------------------------------------------------------
@@ -2742,8 +2901,8 @@ function renderCertificateCanvas() {
 
   const attendee = recipients[appState.currentCertIndex] || recipients[0];
   const act = appState.customCertFields;
-  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id) || { name: "MARIO D. GANGA JR.", title: "MOVE Chapter President", signature_image: "GANGA.png" };
-  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id) || { name: "HON. BENJAMIN B. MAGALONG", title: "City Mayor & Honorary Chapter Adviser", signature_image: "signature (15).png" };
+  const sig1 = getActiveSigObj(1);
+  const sig2 = getActiveSigObj(2);
 
   const showSig1Img = appState.showSignatures && 
                       (appState.sigDisplayMode === 'both' || appState.sigDisplayMode === 'sig1_only') && 
@@ -2842,21 +3001,7 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Signatories Footer -->
-      <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center relative z-10">
-        <!-- Signatory 1 -->
-        <div class="flex flex-col items-center">
-          ${getSigImgHtml(1, sig1, showSig1Img)}
-          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
-          <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title)}</p>
-        </div>
-
-        <!-- Signatory 2 -->
-        <div class="flex flex-col items-center">
-          ${getSigImgHtml(2, sig2, showSig2Img)}
-          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
-          <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title)}</p>
-        </div>
-      </div>
+      ${buildSignatoryFooterHtml(sig1, sig2, showSig1Img, showSig2Img, false)}
     `;
   }
 
@@ -2867,68 +3012,7 @@ function renderCertificateCanvas() {
     canvas.className = "cert-canvas-container w-full max-w-[850px] aspect-[1.414/1] bg-white text-slate-900 rounded-sm shadow-2xl overflow-hidden relative p-8 sm:p-12 flex flex-col justify-between border-4 border-slate-300 transition-all";
     
     // Determine Signatory layout for Certificate of Appearance
-    let caSignatoryBlock = '';
-    const choice = appState.caSignatoryChoice || 'sig2_right';
-
-    if (choice === 'sig1_right' || choice === 'sig1') {
-      caSignatoryBlock = `
-        <div class="flex items-end justify-end pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="text-center flex flex-col items-center">
-            ${getSigImgHtml(1, sig1, showSig1Img)}
-            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
-            <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
-          </div>
-        </div>
-      `;
-    } else if (choice === 'both') {
-      caSignatoryBlock = `
-        <div class="pt-4 border-t border-slate-300 relative z-10">
-          <div class="grid grid-cols-2 gap-8 text-center text-xs">
-            <div class="flex flex-col items-center">
-              ${getSigImgHtml(1, sig1, showSig1Img)}
-              <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
-              <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
-            </div>
-            <div class="flex flex-col items-center">
-              ${getSigImgHtml(2, sig2, showSig2Img)}
-              <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
-              <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
-            </div>
-          </div>
-        </div>
-      `;
-    } else if (choice === 'sig2_center') {
-      caSignatoryBlock = `
-        <div class="flex flex-col items-center pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="text-center flex flex-col items-center">
-            ${getSigImgHtml(2, sig2, showSig2Img)}
-            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
-            <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
-          </div>
-        </div>
-      `;
-    } else if (choice === 'sig1_center') {
-      caSignatoryBlock = `
-        <div class="flex flex-col items-center pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="text-center flex flex-col items-center">
-            ${getSigImgHtml(1, sig1, showSig1Img)}
-            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
-            <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
-          </div>
-        </div>
-      `;
-    } else {
-      // Default: sig2_right (Mayor Magalong at bottom-right)
-      caSignatoryBlock = `
-        <div class="flex items-end justify-end pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="text-center flex flex-col items-center">
-            ${getSigImgHtml(2, sig2, showSig2Img)}
-            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
-            <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
-          </div>
-        </div>
-      `;
-    }
+    const caSignatoryBlock = buildSignatoryFooterHtml(sig1, sig2, showSig1Img, showSig2Img, true);
 
     canvas.innerHTML = `
       ${watermarkHtml}
@@ -3121,20 +3205,8 @@ function renderCertificateCanvas() {
         </p>
       </div>
 
-      <!-- Dual Signatories Footer -->
-      <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center relative z-10">
-        <div class="flex flex-col items-center">
-          ${getSigImgHtml(1, sig1, showSig1Img)}
-          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
-          <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title)}</p>
-        </div>
-
-        <div class="flex flex-col items-center">
-          ${getSigImgHtml(2, sig2, showSig2Img)}
-          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
-          <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title)}</p>
-        </div>
-      </div>
+      <!-- Signatories Footer -->
+      ${buildSignatoryFooterHtml(sig1, sig2, showSig1Img, showSig2Img, false)}
     `;
   }
 
@@ -3163,13 +3235,25 @@ function syncLiveCertEditsBeforePrint() {
   if (citVal) appState.certSettings.participation_citation = citVal;
   localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
 
-  // Sync signatory titles if edited
-  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id);
-  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id);
+  // Sync signatory names, titles, and offices if edited
+  const sig1 = getActiveSigObj(1);
+  const sig2 = getActiveSigObj(2);
+  const s1Name = document.getElementById("certSig1NameInput")?.value?.trim();
+  const s2Name = document.getElementById("certSig2NameInput")?.value?.trim();
   const s1Inp = document.getElementById("certSig1TitleInput")?.value?.trim();
   const s2Inp = document.getElementById("certSig2TitleInput")?.value?.trim();
-  if (sig1 && s1Inp) sig1.title = s1Inp;
-  if (sig2 && s2Inp) sig2.title = s2Inp;
+  const s1Off = document.getElementById("certSig1OfficeInput")?.value?.trim();
+  const s2Off = document.getElementById("certSig2OfficeInput")?.value?.trim();
+  if (sig1) {
+    if (s1Name) sig1.name = s1Name;
+    if (s1Inp) sig1.title = s1Inp;
+    if (s1Off !== undefined) sig1.office = s1Off;
+  }
+  if (sig2) {
+    if (s2Name) sig2.name = s2Name;
+    if (s2Inp) sig2.title = s2Inp;
+    if (s2Off !== undefined) sig2.office = s2Off;
+  }
 }
 
 function setDynamicPrintPageOrientation(orientation) {
@@ -3339,39 +3423,80 @@ async function loadSignatories() {
   }
 }
 
-// --- SIGNATORY TITLE EDITING & SAVING CONTROLLER ---
+// --- SIGNATORY CHOOSER, DETAILS & SAVING CONTROLLER ---
 function onSigSelect(sigNum, val) {
-  const id = parseInt(val, 10);
-  if (sigNum === 1) appState.sig1Id = id;
-  if (sigNum === 2) appState.sig2Id = id;
+  const isRoster = String(val).startsWith("roster_");
+  const parsedVal = isRoster ? String(val) : parseInt(val, 10);
+
+  if (sigNum === 1) {
+    appState.sig1Id = parsedVal;
+    appState.customSig1 = null;
+  } else if (sigNum === 2) {
+    appState.sig2Id = parsedVal;
+    appState.customSig2 = null;
+  }
+
   updateSignatoryTitleInputs();
+  syncSignatoryChooserUI();
+  saveSigPreferences();
   renderCertificateCanvas();
 }
 
 function updateSignatoryTitleInputs() {
-  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id);
-  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id);
+  const sig1 = getActiveSigObj(1);
+  const sig2 = getActiveSigObj(2);
 
+  const name1 = document.getElementById("certSig1NameInput");
+  const name2 = document.getElementById("certSig2NameInput");
   const inp1 = document.getElementById("certSig1TitleInput");
   const inp2 = document.getElementById("certSig2TitleInput");
+  const off1 = document.getElementById("certSig1OfficeInput");
+  const off2 = document.getElementById("certSig2OfficeInput");
+
+  if (name1 && sig1) name1.value = sig1.name || "";
+  if (name2 && sig2) name2.value = sig2.name || "";
   if (inp1 && sig1) inp1.value = sig1.title || "";
   if (inp2 && sig2) inp2.value = sig2.title || "";
+  if (off1 && sig1) off1.value = sig1.office || "";
+  if (off2 && sig2) off2.value = sig2.office || "";
+}
+
+function onSigNameInputChange(sigNum, val) {
+  const sig = getActiveSigObj(sigNum);
+  if (sig) {
+    sig.name = val;
+    syncSignatoryLayoutDynamicLabels();
+    renderCertificateCanvas();
+  }
 }
 
 function onSigTitleInputChange(sigNum, val) {
-  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
-  const sig = appState.signatories.find(s => s.id === sigId);
+  const sig = getActiveSigObj(sigNum);
   if (sig) {
     sig.title = val;
+    syncSignatoryLayoutDynamicLabels();
+    renderCertificateCanvas();
+  }
+}
+
+function onSigOfficeInputChange(sigNum, val) {
+  const sig = getActiveSigObj(sigNum);
+  if (sig) {
+    sig.office = val;
     renderCertificateCanvas();
   }
 }
 
 async function saveSignatoryTitle(sigNum) {
   const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
-  const sig = appState.signatories.find(s => s.id === sigId);
+  const sig = getActiveSigObj(sigNum);
+  const nameInp = document.getElementById(sigNum === 1 ? "certSig1NameInput" : "certSig2NameInput");
   const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
+  const offInp = document.getElementById(sigNum === 1 ? "certSig1OfficeInput" : "certSig2OfficeInput");
+
+  const nameVal = (nameInp ? nameInp.value : (sig ? sig.name : "")).trim();
   const title = (inp ? inp.value : (sig ? sig.title : "")).trim();
+  const officeVal = (offInp ? offInp.value : (sig ? sig.office : "")).trim();
   const statusSpan = document.getElementById(sigNum === 1 ? "sig1SaveStatus" : "sig2SaveStatus");
 
   if (!title) {
@@ -3379,15 +3504,37 @@ async function saveSignatoryTitle(sigNum) {
     return;
   }
 
+  if (sig) {
+    if (nameVal) sig.name = nameVal;
+    sig.title = title;
+    sig.office = officeVal;
+  }
+
+  // If a MOVE Roster member is selected rather than a DB signatory row, persist in local preferences
+  if (typeof sigId === 'string' && sigId.startsWith('roster_')) {
+    saveSigPreferences();
+    populateSignatorySelects();
+    renderCertificateCanvas();
+    if (statusSpan) {
+      statusSpan.classList.remove("hidden");
+      setTimeout(() => statusSpan.classList.add("hidden"), 2500);
+    }
+    showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} details updated!`);
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/signatories/${sigId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: title })
+      body: JSON.stringify({
+        name: nameVal || (sig ? sig.name : ""),
+        title: title,
+        office: officeVal
+      })
     });
     const data = await res.json();
     if (data.success) {
-      if (sig) sig.title = title;
       populateSignatorySelects();
       renderCertificateCanvas();
 
@@ -3395,18 +3542,17 @@ async function saveSignatoryTitle(sigNum) {
         statusSpan.classList.remove("hidden");
         setTimeout(() => statusSpan.classList.add("hidden"), 2500);
       }
-      showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} title updated in database!`);
+      showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} details updated in database!`);
     } else {
-      alert("Error saving signatory title: " + (data.message || "Unknown error"));
+      alert("Error saving signatory: " + (data.message || "Unknown error"));
     }
   } catch (err) {
-    alert("Failed to save signatory title: " + err);
+    alert("Failed to save signatory: " + err);
   }
 }
 
 function onCanvasSigTitleInput(sigNum, text) {
-  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
-  const sig = appState.signatories.find(s => s.id === sigId);
+  const sig = getActiveSigObj(sigNum);
   if (sig) {
     sig.title = text.trim();
     const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
@@ -3417,12 +3563,18 @@ function onCanvasSigTitleInput(sigNum, text) {
 async function onCanvasSigTitleBlur(sigNum, text) {
   const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
   const cleanTitle = text.trim();
-  const sig = appState.signatories.find(s => s.id === sigId);
+  const sig = getActiveSigObj(sigNum);
   if (!cleanTitle) return;
 
   if (sig) sig.title = cleanTitle;
   const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
   if (inp) inp.value = cleanTitle;
+
+  if (typeof sigId === 'string' && sigId.startsWith('roster_')) {
+    saveSigPreferences();
+    showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} title updated!`);
+    return;
+  }
 
   // Auto-save to SQLite database
   try {
@@ -3443,10 +3595,20 @@ async function onCanvasSigTitleBlur(sigNum, text) {
 async function onCanvasSigNameBlur(sigNum, text) {
   const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
   const cleanName = text.trim();
-  const sig = appState.signatories.find(s => s.id === sigId);
+  const sig = getActiveSigObj(sigNum);
   if (!cleanName || (sig && sig.name === cleanName)) return;
 
   if (sig) sig.name = cleanName;
+  const nameInp = document.getElementById(sigNum === 1 ? "certSig1NameInput" : "certSig2NameInput");
+  if (nameInp) nameInp.value = cleanName;
+
+  if (typeof sigId === 'string' && sigId.startsWith('roster_')) {
+    saveSigPreferences();
+    populateSignatorySelects();
+    showToastNotification(`Saved: Signatory name updated!`);
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/signatories/${sigId}`, {
       method: "PUT",
@@ -3526,25 +3688,119 @@ function highlightSidebarSaveStatus(key) {
 }
 
 
+function syncSignatoryLayoutDynamicLabels() {
+  const sig1 = getActiveSigObj(1);
+  const sig2 = getActiveSigObj(2);
+  const s1Short = (sig1?.name || 'Signatory 1').split(',')[0];
+  const s2Short = (sig2?.name || 'Signatory 2').split(',')[0];
+
+  const layoutSelects = [
+    document.getElementById("caSignatoryChoice"),
+    document.getElementById("stageQuickSigLayout")
+  ];
+
+  layoutSelects.forEach(sel => {
+    if (!sel) return;
+    Array.from(sel.options).forEach(opt => {
+      if (opt.value === 'both') {
+        opt.textContent = `👥 Dual Signatories (${s1Short} & ${s2Short})`;
+      } else if (opt.value === 'sig2_right') {
+        opt.textContent = `👤 Single: ${s2Short} — Right-Aligned`;
+      } else if (opt.value === 'sig2_center') {
+        opt.textContent = `👤 Single: ${s2Short} — Centered`;
+      } else if (opt.value === 'sig1_right') {
+        opt.textContent = `👤 Single: ${s1Short} — Right-Aligned`;
+      } else if (opt.value === 'sig1_center') {
+        opt.textContent = `👤 Single: ${s1Short} — Centered`;
+      }
+    });
+  });
+}
+
+function syncSignatoryChooserUI() {
+  const activeLayout = getActiveSignatoryLayout();
+
+  const caChoiceSel = document.getElementById("caSignatoryChoice");
+  if (caChoiceSel) caChoiceSel.value = activeLayout;
+
+  const quickLayoutSel = document.getElementById("stageQuickSigLayout");
+  if (quickLayoutSel) quickLayoutSel.value = activeLayout;
+
+  // Dim or highlight Signatory 1 / Signatory 2 quick pickers based on active layout
+  const wrap1 = document.getElementById("stageQuickSig1Wrap");
+  const wrap2 = document.getElementById("stageQuickSig2Wrap");
+  const usesSig1 = activeLayout === 'both' || activeLayout === 'sig1_right' || activeLayout === 'sig1_center' || activeLayout === 'sig1';
+  const usesSig2 = activeLayout === 'both' || activeLayout === 'sig2_right' || activeLayout === 'sig2_center' || activeLayout === 'sig2';
+  if (wrap1) wrap1.classList.toggle("opacity-40", !usesSig1);
+  if (wrap2) wrap2.classList.toggle("opacity-40", !usesSig2);
+
+  const sel1 = document.getElementById("certSigSelect1");
+  const sel2 = document.getElementById("certSigSelect2");
+  const qSel1 = document.getElementById("stageQuickSig1Person");
+  const qSel2 = document.getElementById("stageQuickSig2Person");
+
+  if (sel1) sel1.value = String(appState.sig1Id);
+  if (sel2) sel2.value = String(appState.sig2Id);
+  if (qSel1) qSel1.value = String(appState.sig1Id);
+  if (qSel2) qSel2.value = String(appState.sig2Id);
+
+  // Sync detail checkboxes
+  const chkName = document.getElementById("chkShowSigName");
+  const chkTitle = document.getElementById("chkShowSigTitle");
+  const chkOffice = document.getElementById("chkShowSigOffice");
+  const chkLine = document.getElementById("chkShowSigLine");
+  const qChkEsig = document.getElementById("stageQuickChkEsig");
+  const qChkTitle = document.getElementById("stageQuickChkTitle");
+  const qChkOffice = document.getElementById("stageQuickChkOffice");
+  const sideChkEsig = document.getElementById("certToggleSignatures");
+
+  if (chkName) chkName.checked = appState.showSigName !== false;
+  if (chkTitle) chkTitle.checked = appState.showSigTitle !== false;
+  if (chkOffice) chkOffice.checked = appState.showSigOffice === true;
+  if (chkLine) chkLine.checked = appState.showSigLine !== false;
+  if (qChkEsig) qChkEsig.checked = appState.showSignatures !== false;
+  if (sideChkEsig) sideChkEsig.checked = appState.showSignatures !== false;
+  if (qChkTitle) qChkTitle.checked = appState.showSigTitle !== false;
+  if (qChkOffice) qChkOffice.checked = appState.showSigOffice === true;
+
+  syncSignatoryLayoutDynamicLabels();
+}
+
 function populateSignatorySelects() {
   const sel1 = document.getElementById("certSigSelect1");
   const sel2 = document.getElementById("certSigSelect2");
-  if (!sel1 || !sel2) return;
+  const qSel1 = document.getElementById("stageQuickSig1Person");
+  const qSel2 = document.getElementById("stageQuickSig2Person");
 
-  const options = appState.signatories.map(s => {
-    return `<option value="${s.id}">${escapeHtml(s.name)} (${escapeHtml(s.title)})</option>`;
+  const officialOptions = appState.signatories.map(s => {
+    return `<option value="${s.id}">⭐ ${escapeHtml(s.name)} (${escapeHtml(s.title)})</option>`;
   }).join("");
 
-  sel1.innerHTML = options;
-  sel2.innerHTML = options;
+  // Also allow choosing any Officer or Member from the MOVE Roster as a Signatory
+  const rosterPool = (appState.fullRoster && appState.fullRoster.length > 0) ? appState.fullRoster : (appState.roster || []);
+  const officialNames = new Set(appState.signatories.map(s => (s.name || '').trim().toUpperCase()));
+  const officers = rosterPool.filter(r => r.is_officer && !officialNames.has((r.full_name || '').trim().toUpperCase()));
+  const otherMembers = rosterPool.filter(r => !r.is_officer && !officialNames.has((r.full_name || '').trim().toUpperCase()));
 
-  sel1.value = appState.sig1Id;
-  sel2.value = appState.sig2Id;
+  let optionsHtml = `<optgroup label="Official Signatories (With E-Signature Support)">${officialOptions}</optgroup>`;
+  if (officers.length > 0) {
+    optionsHtml += `<optgroup label="MOVE Chapter Officers">${officers.map(r => `<option value="roster_${r.id}">🎖️ ${escapeHtml(r.full_name)} (${escapeHtml(r.position || 'MOVE Officer')})</option>`).join("")}</optgroup>`;
+  }
+  if (otherMembers.length > 0) {
+    optionsHtml += `<optgroup label="MOVE Roster & Directory">${otherMembers.map(r => `<option value="roster_${r.id}">👤 ${escapeHtml(r.full_name)} (${escapeHtml(r.position || r.office || 'Member')})</option>`).join("")}</optgroup>`;
+  }
+
+  [sel1, sel2, qSel1, qSel2].forEach(sel => {
+    if (sel) sel.innerHTML = optionsHtml;
+  });
+
+  if (sel1) sel1.value = String(appState.sig1Id);
+  if (sel2) sel2.value = String(appState.sig2Id);
+  if (qSel1) qSel1.value = String(appState.sig1Id);
+  if (qSel2) qSel2.value = String(appState.sig2Id);
+
   updateSignatoryTitleInputs();
-
-  // Initialize Certificate of Appearance signatory & display controls
-  const caChoiceSel = document.getElementById("caSignatoryChoice");
-  if (caChoiceSel) caChoiceSel.value = appState.caSignatoryChoice || "sig2_right";
+  syncSignatoryChooserUI();
 
   const sigDispSel = document.getElementById("certSigDisplayMode");
   if (sigDispSel) sigDispSel.value = appState.sigDisplayMode || "both";
@@ -3560,12 +3816,6 @@ function populateSignatorySelects() {
 
   const lblWmOpacity = document.getElementById("lblWatermarkOpacity");
   if (lblWmOpacity && appState.watermarkOpacity) lblWmOpacity.textContent = `${appState.watermarkOpacity}%`;
-}
-
-function onSigSelect(slot, id) {
-  if (slot === 1) appState.sig1Id = parseInt(id, 10);
-  if (slot === 2) appState.sig2Id = parseInt(id, 10);
-  renderCertificateCanvas();
 }
 
 // ==========================================================================
