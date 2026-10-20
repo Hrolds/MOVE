@@ -50,6 +50,9 @@ const appState = {
   watermarkSize: 320,
   watermarkYOffset: 0,
   recipientYOffset: 0,
+  nameFontSize: 26,
+  bodyFontSize: 12,
+  titleFontSize: 28,
   caSignatoryChoice: 'sig2_right',
   sigDisplayMode: 'both',
   sigSize: 44, // Default signature height in pixels
@@ -1704,27 +1707,14 @@ function updateStudioTemplateAvailability() {
     }
   }
 
-  // Enforce certificate rules:
-  // Attendees: Participation + Appearance ONLY (Appreciation is HIDDEN)
-  // Facilitators: Appreciation + Appearance ONLY (Participation is HIDDEN)
-  if (isFac) {
-    if (tabPart) tabPart.classList.add("hidden");
-    if (tabApprec) tabApprec.classList.remove("hidden");
-    if (tabAppear) tabAppear.classList.remove("hidden");
-    if (ruleHint) ruleHint.textContent = "For Facilitators: Appreciation & CA";
-
-    if (appState.currentTemplate === 'participation') {
-      appState.currentTemplate = 'appreciation';
-    }
-  } else {
-    if (tabPart) tabPart.classList.remove("hidden");
-    if (tabApprec) tabApprec.classList.add("hidden");
-    if (tabAppear) tabAppear.classList.remove("hidden");
-    if (ruleHint) ruleHint.textContent = "For Attendees: Participation & CA";
-
-    if (appState.currentTemplate === 'appreciation') {
-      appState.currentTemplate = 'participation';
-    }
+  // All 3 certificate templates are fully accessible and clickable for both Attendees & Facilitators
+  if (tabPart) tabPart.classList.remove("hidden");
+  if (tabApprec) tabApprec.classList.remove("hidden");
+  if (tabAppear) tabAppear.classList.remove("hidden");
+  if (ruleHint) {
+    ruleHint.textContent = isFac 
+      ? "Viewing Facilitators / Resource Speakers (Appreciation / CA / Participation)" 
+      : "Viewing Activity Attendees (Participation / CA / Appreciation)";
   }
 
   // Update template tab active styling
@@ -1733,9 +1723,9 @@ function updateStudioTemplateAvailability() {
     const tab = document.getElementById(`studioTab-${t}`);
     if (tab) {
       if (t === appState.currentTemplate) {
-        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-black transition bg-move-gold-500 text-slate-950 shadow flex items-center gap-1.5";
+        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-black transition bg-move-gold-500 text-slate-950 shadow flex items-center gap-1.5 cursor-pointer";
       } else {
-        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5" + (tab.classList.contains("hidden") ? " hidden" : "");
+        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer";
       }
     }
   });
@@ -1939,13 +1929,6 @@ function nextCertificateRecipient() {
 }
 
 function switchCertTemplate(templateName) {
-  // Validate against recipient pool restrictions
-  if (appState.certRecipientPool === 'attendees' && templateName === 'appreciation') {
-    templateName = 'participation';
-  } else if (appState.certRecipientPool === 'facilitators' && templateName === 'participation') {
-    templateName = 'appreciation';
-  }
-
   appState.currentTemplate = templateName;
   updateStudioTemplateAvailability();
   renderCertificateCanvas();
@@ -2232,12 +2215,90 @@ function updateRecipientYOffsetUI() {
   if (slider) slider.value = y;
 }
 
+// --- TYPOGRAPHY & FONT RESIZING CONTROLLER ---
+function onNameFontSizeChange(val) {
+  appState.nameFontSize = parseInt(val, 10);
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function setNameFontSize(val) {
+  appState.nameFontSize = parseInt(val, 10);
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function adjustNameFontSize(delta) {
+  appState.nameFontSize = Math.max(16, Math.min(48, (appState.nameFontSize || 26) + delta));
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function onBodyFontSizeChange(val) {
+  appState.bodyFontSize = parseFloat(val);
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function adjustBodyFontSize(delta) {
+  const current = appState.bodyFontSize || 12;
+  const next = Math.max(9, Math.min(18, Math.round((current + delta) * 10) / 10));
+  appState.bodyFontSize = next;
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function onTitleFontSizeChange(val) {
+  appState.titleFontSize = parseInt(val, 10);
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function resetFontSizes() {
+  appState.nameFontSize = 26;
+  appState.bodyFontSize = 12;
+  appState.titleFontSize = 28;
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function updateTypographyUI() {
+  const n = appState.nameFontSize || 26;
+  const b = appState.bodyFontSize || 12;
+  const t = appState.titleFontSize || 28;
+
+  const lblN = document.getElementById("lblNameFontSize");
+  if (lblN) lblN.textContent = `${n}px`;
+  const sliderN = document.getElementById("certNameFontSizeSlider");
+  if (sliderN) sliderN.value = n;
+
+  const lblB = document.getElementById("lblBodyFontSize");
+  if (lblB) lblB.textContent = `${b}px`;
+  const sliderB = document.getElementById("certBodyFontSizeSlider");
+  if (sliderB) sliderB.value = b;
+
+  const lblT = document.getElementById("lblTitleFontSize");
+  if (lblT) lblT.textContent = `${t}px`;
+  const sliderT = document.getElementById("certTitleFontSizeSlider");
+  if (sliderT) sliderT.value = t;
+}
+
 function saveLayoutPreferences() {
   try {
     localStorage.setItem("move_cert_layout_prefs", JSON.stringify({
       watermarkYOffset: appState.watermarkYOffset,
       watermarkSize: appState.watermarkSize,
-      recipientYOffset: appState.recipientYOffset
+      recipientYOffset: appState.recipientYOffset,
+      nameFontSize: appState.nameFontSize,
+      bodyFontSize: appState.bodyFontSize,
+      titleFontSize: appState.titleFontSize
     }));
   } catch (e) {}
 }
@@ -2250,10 +2311,14 @@ function initLayoutPreferences() {
       if (prefs.watermarkYOffset !== undefined) appState.watermarkYOffset = prefs.watermarkYOffset;
       if (prefs.watermarkSize !== undefined) appState.watermarkSize = prefs.watermarkSize;
       if (prefs.recipientYOffset !== undefined) appState.recipientYOffset = prefs.recipientYOffset;
+      if (prefs.nameFontSize !== undefined) appState.nameFontSize = prefs.nameFontSize;
+      if (prefs.bodyFontSize !== undefined) appState.bodyFontSize = prefs.bodyFontSize;
+      if (prefs.titleFontSize !== undefined) appState.titleFontSize = prefs.titleFontSize;
     }
   } catch (e) {}
   updateWatermarkUI();
   updateRecipientYOffsetUI();
+  updateTypographyUI();
 }
 
 
@@ -2348,11 +2413,11 @@ function renderCertificateCanvas() {
           </div>
         ` : ''}
 
-        <p class="text-[10px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
-        <h4 class="text-[11px] font-extrabold uppercase text-slate-800 tracking-wider">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
-        <p class="text-[9px] text-slate-500 font-semibold uppercase">City Hall Chapter &bull; Baguio City, Philippines</p>
+        <p contenteditable="true" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
+        <h4 contenteditable="true" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
+        <p contenteditable="true" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase">City Hall Chapter &bull; Baguio City, Philippines</p>
         
-        <h2 class="font-cinzel text-2xl sm:text-3xl font-black text-[#0f1f3d] tracking-wider mt-3">
+        <h2 contenteditable="true" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;">
           CERTIFICATE OF PARTICIPATION
         </h2>
         <p class="text-[11px] italic font-serif text-slate-600 mt-0.5">This certification is proudly presented to</p>
@@ -2360,22 +2425,31 @@ function renderCertificateCanvas() {
 
       <!-- Recipient Block -->
       <div class="group/recip text-center my-auto py-2 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
-        <!-- Quick on-canvas text nudge pill on hover (hidden during print) -->
-        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
-          <span class="text-slate-400">Text Position:</span>
-          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text higher">↑ Up</button>
-          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
-          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text lower">↓ Down</button>
-          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+        <!-- Quick on-canvas text nudge & font size pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Position:</span>
+            <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move text higher">↑</button>
+            <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+            <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move text lower">↓</button>
+            ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-0.5 text-[8px]" title="Reset Center">✕</button>` : ''}
+          </div>
+          <span class="text-slate-600">|</span>
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Name Font:</span>
+            <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font smaller">A-</button>
+            <span class="text-move-gold-400 font-semibold">${appState.nameFontSize || 26}px</span>
+            <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font larger">A+</button>
+          </div>
         </div>
-        <h3 contenteditable="true" class="cert-editable font-cinzel text-xl sm:text-2xl font-black text-[#d97706] tracking-wide inline-block border-b-2 border-slate-300 pb-1 px-4 uppercase">
+        <h3 contenteditable="true" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wide inline-block border-b-2 border-slate-300 pb-1 px-4 uppercase transition-all" style="font-size: ${appState.nameFontSize || 26}px; line-height: 1.2;">
           ${escapeHtml(attendee.full_name)}
         </h3>
         <p class="text-xs text-slate-600 font-medium mt-1">
           ${escapeHtml(attendee.position || '')} &bull; <strong class="text-slate-800">${escapeHtml(attendee.office || '')}</strong>
         </p>
 
-        <p class="text-[11px] sm:text-xs text-slate-700 max-w-xl mx-auto mt-3 leading-relaxed">
+        <p class="text-slate-700 max-w-xl mx-auto mt-3 leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px; line-height: 1.45;">
           for active participation and completion of the capacity-building seminar entitled
           <strong class="text-slate-900 block font-bold text-xs sm:text-sm mt-0.5">“${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”</strong>
           held on ${escapeHtml(act.date)} at ${escapeHtml(act.venue)}.
@@ -2515,22 +2589,31 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Formal Body -->
-      <div class="group/recip my-auto py-3 space-y-3 text-xs leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
-        <!-- Quick on-canvas body nudge pill on hover (hidden during print) -->
-        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
-          <span class="text-slate-400">Body Position:</span>
-          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move body higher">↑ Up</button>
-          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
-          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move body lower">↓ Down</button>
-          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+      <div class="group/recip my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
+        <!-- Quick on-canvas body nudge & font size pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Position:</span>
+            <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move body higher">↑</button>
+            <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+            <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move body lower">↓</button>
+            ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-0.5 text-[8px]" title="Reset Center">✕</button>` : ''}
+          </div>
+          <span class="text-slate-600">|</span>
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Name Font:</span>
+            <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font smaller">A-</button>
+            <span class="text-move-gold-400 font-semibold">${appState.nameFontSize || 26}px</span>
+            <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font larger">A+</button>
+          </div>
         </div>
         <p>
-          This is to certify that <strong class="uppercase font-bold text-slate-950 text-sm">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
+          This is to certify that <strong class="uppercase font-bold text-slate-950" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.65)}px;">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
           <strong>${escapeHtml(attendee.role_title || attendee.position || 'Employee / Participant')}</strong> under the <strong>${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>, 
           was duly verified to have ${appState.certRecipientPool === 'facilitators' ? 'rendered invaluable service as Resource Speaker / Facilitator in' : 'attended and actively participated in'} the activity entitled:
         </p>
 
-        <p class="text-center font-bold text-sm text-slate-950 py-1 bg-slate-50 border border-slate-200 rounded">
+        <p class="text-center font-bold text-slate-950 py-1 bg-slate-50 border border-slate-200 rounded" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
           “${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”
         </p>
 
@@ -2538,7 +2621,7 @@ function renderCertificateCanvas() {
           held on <strong>${escapeHtml(act.date)}</strong> at the <strong>${escapeHtml(act.venue)}</strong>.
         </p>
 
-        <p class="text-[11px] text-slate-600 italic">
+        <p class="text-slate-600 italic" style="font-size: ${Math.max(10, (appState.bodyFontSize || 12) - 1)}px;">
           This certification is issued upon the request of the above-named individual for official appearance accreditation and Daily Time Record (DTR) compliance.
         </p>
       </div>
@@ -2568,10 +2651,11 @@ function renderCertificateCanvas() {
           </div>
         ` : ''}
 
-        <p class="text-[9px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
-        <h4 class="text-[10px] font-extrabold uppercase text-slate-800 tracking-wider">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
+        <p contenteditable="true" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
+        <h4 contenteditable="true" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
+        <p contenteditable="true" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5">City Hall Chapter &bull; Baguio City, Philippines</p>
         
-        <h2 class="font-cinzel text-2xl sm:text-3xl font-black text-[#d97706] tracking-wider mt-3">
+        <h2 contenteditable="true" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;">
           CERTIFICATE OF APPRECIATION
         </h2>
         <p class="text-[11px] italic font-serif text-slate-600 mt-0.5">is proudly and warmly presented to</p>
@@ -2579,22 +2663,31 @@ function renderCertificateCanvas() {
 
       <!-- Recipient Block -->
       <div class="group/recip text-center my-auto py-2 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
-        <!-- Quick on-canvas text nudge pill on hover (hidden during print) -->
-        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
-          <span class="text-slate-400">Text Position:</span>
-          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text higher">↑ Up</button>
-          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
-          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text lower">↓ Down</button>
-          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+        <!-- Quick on-canvas text nudge & font size pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Position:</span>
+            <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move text higher">↑</button>
+            <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+            <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move text lower">↓</button>
+            ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-0.5 text-[8px]" title="Reset Center">✕</button>` : ''}
+          </div>
+          <span class="text-slate-600">|</span>
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Name Font:</span>
+            <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font smaller">A-</button>
+            <span class="text-move-gold-400 font-semibold">${appState.nameFontSize || 26}px</span>
+            <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font larger">A+</button>
+          </div>
         </div>
-        <h3 contenteditable="true" class="cert-editable font-cinzel text-xl sm:text-2xl font-black text-[#0f1f3d] tracking-wide inline-block border-b-2 border-[#d97706] pb-1 px-4 uppercase">
+        <h3 contenteditable="true" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wide inline-block border-b-2 border-[#d97706] pb-1 px-4 uppercase transition-all" style="font-size: ${appState.nameFontSize || 26}px; line-height: 1.2;">
           ${escapeHtml(attendee.full_name)}
         </h3>
         <p class="text-xs text-slate-600 font-medium mt-1">
           ${attendee.role_title ? `<strong class="text-amber-800 uppercase font-bold">${escapeHtml(attendee.role_title)}</strong> &bull; ` : (attendee.position ? `${escapeHtml(attendee.position)} &bull; ` : '')}<strong class="text-slate-800">${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>
         </p>
 
-        <p class="text-[11px] sm:text-xs text-slate-700 max-w-xl mx-auto mt-3 leading-relaxed">
+        <p class="text-slate-700 max-w-xl mx-auto mt-3 leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px; line-height: 1.45;">
           in grateful recognition and profound appreciation for invaluable expertise, exemplary leadership, and selfless service rendered as
           <strong class="text-slate-900 font-bold">${escapeHtml(attendee.role_title || attendee.position || 'Resource Speaker / Lead Facilitator')}</strong>
           during the capacity-building program entitled

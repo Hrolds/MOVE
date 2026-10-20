@@ -125,6 +125,22 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
   * **Watermark Size Slider**: Dynamically resize watermark dimensions from 180px to 480px (default: 320px).
   * **On-Canvas Hover Nudge**: Hover over the watermark on the certificate canvas to click `↑ Up` / `↓ Down` directly.
   * **Watermark Seal & Opacity**: Select from MOVE Chapter Seal, City Hall Seal, Men in the Kitchen 2 Logo, or Breathe Baguio Logo with 4% to 30% opacity.
+* **Typography & Dynamic Font Sizing (Participant Name, Citation Text, Certificate Title)**:
+  * **Participant Name Font Sizer**: Dynamically scale recipient names from 18px to 44px (default: 26px) with 1-click presets (`Small 22px`, `Med 26px`, `Large 32px`, `XL 38px`).
+  * **On-Canvas Quick Font Controls (`A-` / `A+`)**: Hover over the recipient block on the canvas to click `A-` or `A+` directly next to the vertical position arrows (`↑` / `↓`).
+  * **Citation & Body Text Size Slider**: Fine-tune seminar citation text from 10px to 17px with dedicated `A-` and `A+` fine-tuning buttons.
+  * **Certificate Title Size Slider**: Adjust main certificate heading font size from 22px to 38px (default: 28px).
+  * **Dynamic Layout Accommodation**: When names or citations are enlarged, the vertical alignment nudger (-60px to +60px) allows the user to raise or lower the text block so the certificate layout remains perfectly balanced without overflowing the signatures or A4 landscape boundary.
+  * **Saved Preferences**: Font sizes automatically persist in `localStorage` across page refreshes.
+* **Certificate of Appreciation Header & Template Enhancements**:
+  * **Official 3-Line Header**: Updated to the standard format requested:
+    ```text
+    Republic of the Philippines • City Government of Baguio
+    Men Opposed to Violence Against Women Everywhere (MOVE)
+    City Hall Chapter • Baguio City, Philippines
+    ```
+  * **Full Template Availability**: Unrestricted switching between *Certificate of Participation*, *Certificate of Appreciation*, and *Certificate of Appearance* for all attendees and facilitators.
+  * **Full Feature Parity**: Certificate of Appreciation now includes e-signature sizing, vertical position nudging, typography scaling, and signatory position title database saving.
 * **Adjustable Recipient Text Vertical Alignment (Up / Down)**:
   * **Vertical Text Slider**: Smoothly nudge the participant's name, designation, office, and citations up or down (-60px to +60px) for optimal vertical centering.
   * **On-Canvas Hover Nudge**: Hover over the recipient block on the certificate stage to click `↑ Up` / `↓ Down` for instant visual feedback.
