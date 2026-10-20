@@ -48,6 +48,8 @@ const appState = {
   watermarkLogo: '/MOVE BAGUIO LOGO.png',
   watermarkOpacity: 12,
   watermarkSize: 320,
+  watermarkYOffset: 0,
+  recipientYOffset: 0,
   caSignatoryChoice: 'sig2_right',
   sigDisplayMode: 'both',
   sigSize: 44, // Default signature height in pixels
@@ -73,6 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   // Initialize E-Signature preferences & UI
   initSigPreferences();
+  initLayoutPreferences();
 
   // Pre-load attendance for default activity (ID 1)
   if (appState.activities.length > 0) {
@@ -2156,6 +2159,105 @@ function onWatermarkOpacityChange(val) {
   renderCertificateCanvas();
 }
 
+// --- WATERMARK & RECIPIENT LAYOUT CONTROLLER ---
+function onWatermarkYOffsetChange(val) {
+  appState.watermarkYOffset = parseInt(val, 10);
+  updateWatermarkUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function nudgeWatermarkYOffset(delta) {
+  appState.watermarkYOffset = Math.max(-150, Math.min(150, (appState.watermarkYOffset || 0) + delta));
+  updateWatermarkUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function setWatermarkYOffset(val) {
+  appState.watermarkYOffset = parseInt(val, 10);
+  updateWatermarkUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function onWatermarkSizeChange(val) {
+  appState.watermarkSize = parseInt(val, 10);
+  updateWatermarkUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function onRecipientYOffsetChange(val) {
+  appState.recipientYOffset = parseInt(val, 10);
+  updateRecipientYOffsetUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function nudgeRecipientYOffset(delta) {
+  appState.recipientYOffset = Math.max(-80, Math.min(80, (appState.recipientYOffset || 0) + delta));
+  updateRecipientYOffsetUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function setRecipientYOffset(val) {
+  appState.recipientYOffset = parseInt(val, 10);
+  updateRecipientYOffsetUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function updateWatermarkUI() {
+  const y = appState.watermarkYOffset || 0;
+  const s = appState.watermarkSize || 320;
+  
+  const lblY = document.getElementById("lblWatermarkYOffset");
+  if (lblY) lblY.textContent = `${y > 0 ? '+' : ''}${y}px`;
+  const sliderY = document.getElementById("certWatermarkYOffsetSlider");
+  if (sliderY) sliderY.value = y;
+
+  const lblS = document.getElementById("lblWatermarkSize");
+  if (lblS) lblS.textContent = `${s}px`;
+  const sliderS = document.getElementById("certWatermarkSizeSlider");
+  if (sliderS) sliderS.value = s;
+}
+
+function updateRecipientYOffsetUI() {
+  const y = appState.recipientYOffset || 0;
+  const lbl = document.getElementById("lblRecipientYOffset");
+  if (lbl) lbl.textContent = `${y > 0 ? '+' : ''}${y}px`;
+  const slider = document.getElementById("certRecipientYOffsetSlider");
+  if (slider) slider.value = y;
+}
+
+function saveLayoutPreferences() {
+  try {
+    localStorage.setItem("move_cert_layout_prefs", JSON.stringify({
+      watermarkYOffset: appState.watermarkYOffset,
+      watermarkSize: appState.watermarkSize,
+      recipientYOffset: appState.recipientYOffset
+    }));
+  } catch (e) {}
+}
+
+function initLayoutPreferences() {
+  try {
+    const raw = localStorage.getItem("move_cert_layout_prefs");
+    if (raw) {
+      const prefs = JSON.parse(raw);
+      if (prefs.watermarkYOffset !== undefined) appState.watermarkYOffset = prefs.watermarkYOffset;
+      if (prefs.watermarkSize !== undefined) appState.watermarkSize = prefs.watermarkSize;
+      if (prefs.recipientYOffset !== undefined) appState.recipientYOffset = prefs.recipientYOffset;
+    }
+  } catch (e) {}
+  updateWatermarkUI();
+  updateRecipientYOffsetUI();
+}
+
+
+
 function onCaSignatoryChoiceChange(val) {
   appState.caSignatoryChoice = val;
   renderCertificateCanvas();
@@ -2210,11 +2312,19 @@ function renderCertificateCanvas() {
                       Boolean(sig2.signature_image);
 
   const watermarkHtml = appState.showWatermark ? `
-    <div class="cert-watermark-overlay absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+    <div class="group/watermark cert-watermark-overlay absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+      <!-- Quick on-canvas watermark position pill (hidden during print) -->
+      <div class="no-print absolute top-3 right-4 opacity-0 group-hover/watermark:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+        <span class="text-slate-400">Watermark:</span>
+        <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark higher">↑ Up</button>
+        <span class="text-move-gold-400 font-semibold">${appState.watermarkYOffset > 0 ? '+' : ''}${appState.watermarkYOffset || 0}px</span>
+        <button type="button" onclick="nudgeWatermarkYOffset(6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark lower">↓ Down</button>
+        ${appState.watermarkYOffset !== 0 ? `<button type="button" onclick="setWatermarkYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+      </div>
       <img src="${escapeHtml(appState.watermarkLogo || '/MOVE BAGUIO LOGO.png')}" 
            alt="Watermark" 
-           class="object-contain pointer-events-none select-none max-w-[52%] max-h-[68%]"
-           style="width: ${appState.watermarkSize || 320}px; height: ${appState.watermarkSize || 320}px; opacity: ${(appState.watermarkOpacity !== undefined ? appState.watermarkOpacity : 12) / 100}; filter: grayscale(10%);">
+           class="object-contain pointer-events-none select-none max-w-[65%] max-h-[80%] transition-transform duration-100"
+           style="width: ${appState.watermarkSize || 320}px; height: ${appState.watermarkSize || 320}px; opacity: ${(appState.watermarkOpacity !== undefined ? appState.watermarkOpacity : 12) / 100}; filter: grayscale(10%); transform: translateY(${appState.watermarkYOffset || 0}px);">
     </div>
   ` : '';
 
@@ -2249,7 +2359,15 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Recipient Block -->
-      <div class="text-center my-auto py-2 relative z-10">
+      <div class="group/recip text-center my-auto py-2 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+        <!-- Quick on-canvas text nudge pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+          <span class="text-slate-400">Text Position:</span>
+          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text higher">↑ Up</button>
+          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text lower">↓ Down</button>
+          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+        </div>
         <h3 contenteditable="true" class="cert-editable font-cinzel text-xl sm:text-2xl font-black text-[#d97706] tracking-wide inline-block border-b-2 border-slate-300 pb-1 px-4 uppercase">
           ${escapeHtml(attendee.full_name)}
         </h3>
@@ -2397,7 +2515,15 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Formal Body -->
-      <div class="my-auto py-3 space-y-3 text-xs leading-relaxed text-justify text-slate-800 relative z-10">
+      <div class="group/recip my-auto py-3 space-y-3 text-xs leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+        <!-- Quick on-canvas body nudge pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+          <span class="text-slate-400">Body Position:</span>
+          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move body higher">↑ Up</button>
+          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move body lower">↓ Down</button>
+          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+        </div>
         <p>
           This is to certify that <strong class="uppercase font-bold text-slate-950 text-sm">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
           <strong>${escapeHtml(attendee.role_title || attendee.position || 'Employee / Participant')}</strong> under the <strong>${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>, 
@@ -2452,7 +2578,15 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Recipient Block -->
-      <div class="text-center my-auto py-2 relative z-10">
+      <div class="group/recip text-center my-auto py-2 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+        <!-- Quick on-canvas text nudge pill on hover (hidden during print) -->
+        <div class="no-print absolute -top-5 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+          <span class="text-slate-400">Text Position:</span>
+          <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text higher">↑ Up</button>
+          <span class="text-move-gold-400 font-semibold">${appState.recipientYOffset > 0 ? '+' : ''}${appState.recipientYOffset || 0}px</span>
+          <button type="button" onclick="nudgeRecipientYOffset(4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move text lower">↓ Down</button>
+          ${appState.recipientYOffset !== 0 ? `<button type="button" onclick="setRecipientYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+        </div>
         <h3 contenteditable="true" class="cert-editable font-cinzel text-xl sm:text-2xl font-black text-[#0f1f3d] tracking-wide inline-block border-b-2 border-[#d97706] pb-1 px-4 uppercase">
           ${escapeHtml(attendee.full_name)}
         </h3>

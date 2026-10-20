@@ -676,6 +676,27 @@
             </div>
           </div>
 
+          <!-- Recipient Text Vertical Alignment Card -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Recipient Text Position (Up / Down)
+              </label>
+              <div class="flex items-center gap-1">
+                <span id="lblRecipientYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                <button type="button" onclick="setRecipientYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset to Center">Reset</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="nudgeRecipientYOffset(-4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text higher">↑ Up</button>
+              <input type="range" id="certRecipientYOffsetSlider" min="-60" max="60" value="0" step="2"
+                oninput="onRecipientYOffsetChange(this.value)"
+                class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+              <button type="button" onclick="nudgeRecipientYOffset(4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text lower">↓ Down</button>
+            </div>
+            <p class="text-[10px] text-slate-500">Nudge the recipient name and seminar text up or down.</p>
+          </div>
+
           <!-- Background Watermark Controls -->
           <div class="space-y-3 pt-3 border-t border-slate-800">
             <div class="flex items-center justify-between">
@@ -688,22 +709,57 @@
               </label>
             </div>
 
-            <div id="watermarkSettingsGroup" class="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Watermark Seal</label>
-                <select id="certWatermarkLogoSelect" onchange="onWatermarkLogoSelect(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
-                  <option value="/MOVE BAGUIO LOGO.png">MOVE Chapter Seal</option>
-                  <option value="/CITY HALL LOGO.png">City Hall Official Seal</option>
-                  <option value="/MEN IN THE KITCHEN 2 LOGO.png">Men in Kitchen 2 Logo</option>
-                  <option value="/breathe-baguio.png">Breathe Baguio Logo</option>
-                </select>
-              </div>
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Opacity</label>
-                  <span id="lblWatermarkOpacity" class="text-[10px] font-mono text-move-gold-400">12%</span>
+            <div id="watermarkSettingsGroup" class="space-y-2.5 text-xs">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Watermark Seal</label>
+                  <select id="certWatermarkLogoSelect" onchange="onWatermarkLogoSelect(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+                    <option value="/MOVE BAGUIO LOGO.png">MOVE Chapter Seal</option>
+                    <option value="/CITY HALL LOGO.png">City Hall Official Seal</option>
+                    <option value="/MEN IN THE KITCHEN 2 LOGO.png">Men in Kitchen 2 Logo</option>
+                    <option value="/breathe-baguio.png">Breathe Baguio Logo</option>
+                  </select>
                 </div>
-                <input type="range" id="certWatermarkOpacity" min="4" max="30" value="12" oninput="onWatermarkOpacityChange(this.value)" class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg mt-2">
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase">Opacity</label>
+                    <span id="lblWatermarkOpacity" class="text-[10px] font-mono text-move-gold-400">12%</span>
+                  </div>
+                  <input type="range" id="certWatermarkOpacity" min="4" max="30" value="12" oninput="onWatermarkOpacityChange(this.value)" class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg mt-2">
+                </div>
+              </div>
+
+              <!-- Watermark Vertical Position (Up / Down) -->
+              <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
+                    <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Watermark Position (Up / Down)
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <span id="lblWatermarkYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                    <button type="button" onclick="setWatermarkYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset Center">Reset</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark higher">↑ Up</button>
+                  <input type="range" id="certWatermarkYOffsetSlider" min="-120" max="120" value="0" step="2"
+                    oninput="onWatermarkYOffsetChange(this.value)"
+                    class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  <button type="button" onclick="nudgeWatermarkYOffset(6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark lower">↓ Down</button>
+                </div>
+              </div>
+
+              <!-- Watermark Size Slider -->
+              <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
+                    <i class="fa-solid fa-expand text-move-gold-400"></i> Watermark Size
+                  </label>
+                  <span id="lblWatermarkSize" class="text-[11px] font-mono font-bold text-move-gold-400">320px</span>
+                </div>
+                <input type="range" id="certWatermarkSizeSlider" min="180" max="480" value="320" step="10"
+                  oninput="onWatermarkSizeChange(this.value)"
+                  class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
               </div>
             </div>
           </div>

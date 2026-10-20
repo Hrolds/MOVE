@@ -11,7 +11,7 @@ CREATE TABLE activities (
         target_notes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-INSERT INTO "activities" VALUES(1,'Men in the Kitchen 2','Love Served in the Kitchen','October 20, 2026','CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City','8 Hours','Chef Ramon Dela Rosa','Master Trainer & Culinary Specialist','50 target participants from various municipal departments','2026-10-15 13:57:35');
+INSERT INTO "activities" VALUES(1,'Men in the Kitchen 2','Love Served in the Kitchen','October 20, 2026','CDRRMO Building, CEOCompound, Lower Rock Quarry, Baguio City','8 Hours','Chef Ramon Dela Rosa','Master Trainer & Culinary Specialist','50 target participants from various municipal departments','2026-10-15 13:57:35');
 CREATE TABLE activity_attendees (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,

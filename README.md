@@ -120,7 +120,14 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
   * **Vertical Baseline Nudge (`↑` / `↓`)**: Fine-tune how the signatures rest or overlap onto the printed signature lines.
   * **On-Canvas Hover Resize Controls**: Hover over any signature on the certificate stage to reveal quick `[-]` and `[+]` resize buttons (automatically hidden during printing).
   * **Saved Preferences**: Size and scaling preferences automatically persist in local storage.
-* **Background Watermarks (Appreciation, Appearance & Participation)**: Centered watermark overlay with customizable logo (`MOVE Chapter Seal`, `City Hall Seal`, `Men in the Kitchen 2`, `Breathe Baguio`) and real-time opacity slider (4% to 30%).
+* **Adjustable Watermark Position & Sizing (Up / Down)**:
+  * **Vertical Position Slider**: Shift the background watermark higher or lower (-120px to +120px, default: 0px) to prevent clashing with participant names.
+  * **Watermark Size Slider**: Dynamically resize watermark dimensions from 180px to 480px (default: 320px).
+  * **On-Canvas Hover Nudge**: Hover over the watermark on the certificate canvas to click `↑ Up` / `↓ Down` directly.
+  * **Watermark Seal & Opacity**: Select from MOVE Chapter Seal, City Hall Seal, Men in the Kitchen 2 Logo, or Breathe Baguio Logo with 4% to 30% opacity.
+* **Adjustable Recipient Text Vertical Alignment (Up / Down)**:
+  * **Vertical Text Slider**: Smoothly nudge the participant's name, designation, office, and citations up or down (-60px to +60px) for optimal vertical centering.
+  * **On-Canvas Hover Nudge**: Hover over the recipient block on the certificate stage to click `↑ Up` / `↓ Down` for instant visual feedback.
 * **Flexible Appearance Certificate Signatories**: Choose which signature appears on the Certificate of Appearance — Signatory 2 (Mayor Magalong - Right/Center), Signatory 1 (President Ganga - Right/Center), or Dual Signatories (both side-by-side).
 * **Digital E-Signature Visibility**: Choose whether to display all digital signatures, Mayor only, President only, or blank signature lines for physical wet-ink signing.
 * **Recipient Navigator**: `< Recipient 1 of 47 (Verified Present) >` with a searchable dropdown.
