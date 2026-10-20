@@ -62,36 +62,63 @@ body {
 }
 
 /* Print Rules for A4 Landscape Certificates */
+@page {
+  size: A4 landscape;
+  margin: 0mm;
+}
+
 @media print {
   @page {
     size: A4 landscape;
-    margin: 0;
+    margin: 0mm;
   }
 
-  body {
-    background: white !important;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    width: 297mm !important;
+    height: 210mm !important;
+    background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: visible !important;
   }
 
-  /* Hide entire UI */
+  /* Hide entire UI and interactive overlays */
   #appSidebar,
   #topNavbar,
   #studioToolbar,
   #nonPrintableContent,
+  #serverOfflineBanner,
+  #appToastNotification,
+  .canvas-inline-saved-pill,
   .no-print {
     display: none !important;
+  }
+
+  .cert-editable,
+  .cert-editable:hover,
+  .cert-editable:focus {
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   /* Show only the print container */
   #printContainer {
     display: block !important;
     position: static !important;
-    width: 100% !important;
+    width: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: #ffffff !important;
   }
 
+  /* Exact A4 Landscape Sheet Wrapper (297mm x 210mm) */
   .print-page {
     width: 297mm !important;
     height: 210mm !important;
@@ -100,19 +127,37 @@ body {
     max-width: 297mm !important;
     max-height: 210mm !important;
     page-break-after: always !important;
+    break-after: page !important;
     page-break-inside: avoid !important;
-    box-shadow: none !important;
-    border: none !important;
+    break-inside: avoid !important;
     margin: 0 !important;
-    padding: 12mm 15mm !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
     display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    background: white !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ffffff !important;
     position: relative !important;
     overflow: hidden !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* Preserve all saved certificate borders, layout, fonts, logos, watermarks, and signatures scaled to A4 */
+  .print-cert-sheet {
+    width: 850px !important;
+    height: 601px !important;
+    min-width: 850px !important;
+    min-height: 601px !important;
+    max-width: 850px !important;
+    max-height: 601px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    transform: scale(1.26) !important;
+    transform-origin: center center !important;
+    margin: 0 auto !important;
   }
 }

@@ -3048,17 +3048,70 @@ function renderCertificateCanvas() {
 // 6. PRINTING CONTROLLER (HIGH-RESOLUTION A4 LANDSCAPE)
 // ==========================================================================
 
+function syncLiveCertEditsBeforePrint() {
+  // Ensure any sidebar input edits are synced to appState before printing
+  const h1 = document.getElementById("certHdr1Input")?.value?.trim();
+  const h2 = document.getElementById("certHdr2Input")?.value?.trim();
+  const h3 = document.getElementById("certHdr3Input")?.value?.trim();
+  const titleVal = document.getElementById("certTitleInput")?.value?.trim();
+  const introVal = document.getElementById("certIntroInput")?.value?.trim();
+  const citVal = document.getElementById("certCitationInput")?.value?.trim();
+
+  if (!appState.certSettings) appState.certSettings = {};
+  if (h1) appState.certSettings.header_line_1 = h1;
+  if (h2) appState.certSettings.header_line_2 = h2;
+  if (h3) appState.certSettings.header_line_3 = h3;
+  if (titleVal) appState.certSettings[getActiveCertTitleKey()] = titleVal;
+  if (introVal) appState.certSettings[getActiveCertIntroKey()] = introVal;
+  if (citVal) appState.certSettings.participation_citation = citVal;
+  localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
+
+  // Sync signatory titles if edited
+  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id);
+  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id);
+  const s1Inp = document.getElementById("certSig1TitleInput")?.value?.trim();
+  const s2Inp = document.getElementById("certSig2TitleInput")?.value?.trim();
+  if (sig1 && s1Inp) sig1.title = s1Inp;
+  if (sig2 && s2Inp) sig2.title = s2Inp;
+}
+
+function buildPrintableSheetHtml(canvasEl) {
+  const clone = canvasEl.cloneNode(true);
+  clone.removeAttribute("id");
+  clone.querySelectorAll(".no-print, .canvas-inline-saved-pill").forEach(el => el.remove());
+  clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
+  clone.className = `${canvasEl.className} print-cert-sheet`;
+  return `
+    <div class="print-page">
+      ${clone.outerHTML}
+    </div>
+  `;
+}
+
+function triggerA4PrintWhenImagesReady(printBox) {
+  const imgs = Array.from(printBox.querySelectorAll("img"));
+  const waitPromises = imgs.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = resolve;
+      img.onerror = resolve;
+      setTimeout(resolve, 400);
+    });
+  });
+  Promise.all(waitPromises).then(() => {
+    setTimeout(() => window.print(), 80);
+  });
+}
+
 function printSingleCertificate() {
   const canvas = document.getElementById("certStageCanvas");
   const printBox = document.getElementById("printContainer");
   if (!canvas || !printBox) return;
 
-  printBox.innerHTML = `
-    <div class="print-page">
-      ${canvas.innerHTML}
-    </div>
-  `;
-  window.print();
+  syncLiveCertEditsBeforePrint();
+  // Capture directly from the active canvas (preserving any inline edits & all saved designs/borders)
+  printBox.innerHTML = buildPrintableSheetHtml(canvas);
+  triggerA4PrintWhenImagesReady(printBox);
 }
 
 function batchPrintAllCertificates() {
@@ -3070,6 +3123,8 @@ function batchPrintAllCertificates() {
     return;
   }
 
+  syncLiveCertEditsBeforePrint();
+
   // Backup current recipient index
   const savedIndex = appState.currentCertIndex;
 
@@ -3078,11 +3133,7 @@ function batchPrintAllCertificates() {
     appState.currentCertIndex = i;
     renderCertificateCanvas();
     const canvas = document.getElementById("certStageCanvas");
-    pagesHtml += `
-      <div class="print-page">
-        ${canvas.innerHTML}
-      </div>
-    `;
+    pagesHtml += buildPrintableSheetHtml(canvas);
   }
 
   printBox.innerHTML = pagesHtml;
@@ -3091,7 +3142,7 @@ function batchPrintAllCertificates() {
   appState.currentCertIndex = savedIndex;
   renderCertificateCanvas();
 
-  window.print();
+  triggerA4PrintWhenImagesReady(printBox);
 }
 
 // ==========================================================================
