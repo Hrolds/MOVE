@@ -23,3 +23,6 @@ venv/
 *Backup.xls
 *.swp
 ~$*
+
+# Scratch files
+scratch/

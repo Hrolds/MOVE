@@ -62,9 +62,6 @@
         <button id="navTab-activities" onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
           <i class="fa-solid fa-calendar-check"></i> Activities
         </button>
-        <button id="navTab-attendance" onclick="switchView('attendance')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-clipboard-user"></i> Attendance Checklist
-        </button>
         <button id="navTab-studio" onclick="switchView('studio')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
           <i class="fa-solid fa-certificate text-move-gold-400"></i> Unified Certificate Studio
         </button>
@@ -195,14 +192,31 @@
     <!-- ==================================================================== -->
     <section id="view-attendance" class="space-y-6 hidden">
       
+      <!-- Back to Activities Navigation Bar -->
+      <div class="flex items-center justify-between pb-1 border-b border-slate-800/80">
+        <button onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2 border border-slate-700 shadow-sm" title="Return to Activities Grid">
+          <i class="fa-solid fa-arrow-left text-move-gold-400"></i>
+          <span>Back to Activities</span>
+        </button>
+        <span class="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-clipboard-user text-move-gold-400"></i>
+          <span>Activity Attendance Roster</span>
+        </span>
+      </div>
+
       <!-- Attendance Header -->
       <div class="bg-gradient-to-r from-move-navy-900 to-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span class="text-[10px] font-black uppercase tracking-wider text-move-gold-400 bg-move-gold-500/10 px-2 py-0.5 rounded border border-move-gold-500/20">
-            Selected Activity
-          </span>
-          <h2 id="attendanceActivityTitle" class="text-xl font-black text-white mt-1">Men in the Kitchen 2</h2>
-          <p id="attendanceActivityMeta" class="text-xs text-slate-400 mt-0.5">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-move-gold-400 bg-move-gold-500/10 px-2 py-0.5 rounded border border-move-gold-500/20">
+              Selected Activity
+            </span>
+            <button onclick="openModalEditActivity(appState.currentActivityId)" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-move-gold-400 text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="Edit this Activity's Venue, Date, Trainer, and details">
+              <i class="fa-solid fa-pen-to-square text-[10px] text-move-gold-400"></i> Edit Details
+            </button>
+          </div>
+          <h2 id="attendanceActivityTitle" class="text-xl font-black text-white mt-1 cursor-pointer hover:text-move-gold-400 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit activity details">Men in the Kitchen 2</h2>
+          <p id="attendanceActivityMeta" class="text-xs text-slate-400 mt-0.5 cursor-pointer hover:text-slate-200 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit date and venue">
             <i class="fa-regular fa-calendar mr-1"></i> October 20, 2026 &bull; <i class="fa-solid fa-location-dot mr-1"></i> CDRRMO Building, Lower Rock Quarry
           </p>
         </div>
@@ -233,6 +247,9 @@
           <button onclick="openModal('modalAddAttendee')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus text-move-gold-400"></i> Add Attendee
           </button>
+          <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900/70 text-xs font-semibold text-indigo-300 border border-indigo-500/30 transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-chalkboard-user text-indigo-400"></i> Add Facilitator
+          </button>
           <button onclick="batchSetAttendance(true)" class="px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/50 text-xs font-semibold text-emerald-300 border border-emerald-500/30 transition">
             Mark All Present
           </button>
@@ -244,8 +261,36 @@
         </button>
       </div>
 
-      <!-- Attendees Checklist Table -->
-      <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+      <!-- Sub-Tabs: Attendees (Participants) vs Facilitators (Resource Speakers / Trainers) -->
+      <div class="flex items-center justify-between border-b border-slate-800 px-1 pt-1">
+        <div class="flex items-center gap-1">
+          <button 
+            id="subTabBtnAttendees" 
+            onclick="switchActivitySubTab('attendees')" 
+            class="px-4 py-2.5 text-xs font-bold border-b-2 border-move-gold-500 text-move-gold-400 flex items-center gap-2 transition"
+          >
+            <i class="fa-solid fa-users text-sm"></i>
+            <span>Attendees</span>
+            <span id="badgeAttendeeCount" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono font-bold">50</span>
+          </button>
+          <button 
+            id="subTabBtnFacilitators" 
+            onclick="switchActivitySubTab('facilitators')" 
+            class="px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition"
+          >
+            <i class="fa-solid fa-chalkboard-user text-sm text-indigo-400"></i>
+            <span>Facilitators</span>
+            <span id="badgeFacilitatorCount" class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-950/80 text-indigo-300 border border-indigo-500/30 font-mono font-bold">1</span>
+          </button>
+        </div>
+
+        <div id="subTabContextHint" class="text-[11px] text-slate-400 font-medium hidden sm:block">
+          <span id="subTabHintText">Showing attendee checklist for certificate gating</span>
+        </div>
+      </div>
+
+      <!-- Attendees Checklist Table Container -->
+      <div id="containerAttendeesTable" class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
@@ -259,8 +304,111 @@
                 <th class="py-3 px-4 text-center">Attendance Verification</th>
                 <th class="py-3 px-4 text-right">Action</th>
               </tr>
+              <!-- Live Search Row Directly Below Attendee Full Name -->
+              <tr class="bg-slate-950/60 border-t border-slate-800/80">
+                <th class="py-2.5 px-4 text-center text-slate-500 font-mono text-[10px]">
+                  <i class="fa-solid fa-magnifying-glass text-slate-600"></i>
+                </th>
+                <th class="py-2.5 px-4">
+                  <div class="relative w-full max-w-sm">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    <input 
+                      type="text" 
+                      id="attendanceSearchInput" 
+                      oninput="onAttendanceSearch(this.value)" 
+                      onkeydown="if(event.key === 'Escape') clearAttendanceSearch()"
+                      placeholder="Search attendee by name..." 
+                      class="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 font-medium normal-case focus:outline-none focus:border-move-gold-500 transition shadow-inner"
+                      autocomplete="off"
+                    >
+                    <button 
+                      type="button" 
+                      id="btnClearAttendanceSearch" 
+                      onclick="clearAttendanceSearch()" 
+                      class="hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs p-0.5" 
+                      title="Clear search"
+                    >
+                      <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                  </div>
+                </th>
+                <th class="py-2.5 px-4" colspan="4">
+                  <span id="attendanceFilteredCount" class="text-[11px] font-normal normal-case text-slate-400"></span>
+                </th>
+                <th class="py-2.5 px-4 text-center">
+                  <select id="attendanceStatusFilter" onchange="onAttendanceStatusFilter(this.value)" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[11px] text-slate-300 font-medium normal-case focus:outline-none focus:border-move-gold-500">
+                    <option value="all">All Attendees</option>
+                    <option value="present">Present Only</option>
+                    <option value="absent">Absent Only</option>
+                  </select>
+                </th>
+                <th class="py-2.5 px-4 text-right"></th>
+              </tr>
             </thead>
             <tbody id="attendanceTableBody" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Facilitators Table Container -->
+      <div id="containerFacilitatorsTable" class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl hidden">
+        <!-- Facilitators Header Row with Search & Quick Add -->
+        <div class="p-3 bg-slate-950/60 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-chalkboard-user text-indigo-400"></i> Event Facilitators & Trainers
+            </span>
+            <span id="facilitatorFilteredCount" class="text-[10px] text-slate-400 font-mono"></span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Search Facilitator Box -->
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+              <input 
+                type="text" 
+                id="facilitatorSearchInput" 
+                oninput="onFacilitatorSearch(this.value)" 
+                placeholder="Search facilitator by name..." 
+                class="w-56 pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition shadow-inner"
+              >
+              <button 
+                type="button" 
+                id="btnClearFacilitatorSearch" 
+                onclick="clearFacilitatorSearch()" 
+                class="hidden absolute right-2 top-2 text-slate-500 hover:text-slate-300 text-xs" 
+                title="Clear search"
+              >
+                <i class="fa-solid fa-circle-xmark"></i>
+              </button>
+            </div>
+
+            <button onclick="launchStudioForFacilitatorsBatch()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-move-gold-500 to-amber-500 hover:from-move-gold-600 hover:to-amber-600 text-slate-950 text-xs font-black shadow-md transition flex items-center gap-1.5" title="Generate Certificate of Appreciation for Present Facilitators">
+              <i class="fa-solid fa-award"></i> Award Appreciation Certs (<span id="btnFacilitatorCertCount">1</span>)
+            </button>
+            <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> Add Facilitator
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4 w-12">#</th>
+                <th class="py-3 px-4">Facilitator Full Name</th>
+                <th class="py-3 px-4">Role / Assignment</th>
+                <th class="py-3 px-4">Position Title</th>
+                <th class="py-3 px-4">Office / Agency / Organization</th>
+                <th class="py-3 px-4 text-center">Sex</th>
+                <th class="py-3 px-4 text-center">Attendance Verification</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="facilitatorsTableBody" class="divide-y divide-slate-800/60 font-medium">
               <!-- Populated via JS -->
             </tbody>
           </table>
@@ -276,21 +424,34 @@
       <!-- Studio Ribbon & Mode Selector -->
       <div class="bg-gradient-to-r from-move-navy-950 via-slate-900 to-move-navy-950 p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4">
         
-        <!-- Template Mode Tabs -->
+        <!-- Template Mode Tabs (Dynamic based on Role: Attendees get Participation & CA; Facilitators get Appreciation & CA) -->
         <div class="flex items-center gap-1.5 bg-slate-950/90 p-1.5 rounded-xl border border-slate-800">
           <button id="studioTab-participation" onclick="switchCertTemplate('participation')" class="px-3.5 py-1.5 rounded-lg text-xs font-black transition bg-move-gold-500 text-slate-950 shadow flex items-center gap-1.5">
-            <i class="fa-solid fa-graduation-cap"></i> 1. Participation (A4)
+            <i class="fa-solid fa-graduation-cap"></i> 1. Certificate of Participation
+          </button>
+          <button id="studioTab-appreciation" onclick="switchCertTemplate('appreciation')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5 hidden">
+            <i class="fa-solid fa-award text-move-gold-400"></i> 1. Certificate of Appreciation
           </button>
           <button id="studioTab-appearance" onclick="switchCertTemplate('appearance')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-file-contract"></i> 2. Appearance / CA (DTR)
+            <i class="fa-solid fa-file-contract text-emerald-400"></i> 2. Certificate of Appearance (CA)
           </button>
-          <button id="studioTab-appreciation" onclick="switchCertTemplate('appreciation')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-award"></i> 3. Appreciation (VIPs)
-          </button>
+          <span id="studioRoleRuleHint" class="text-[10px] font-semibold text-move-gold-400/90 ml-1 hidden xl:inline-block px-2 py-1 rounded bg-slate-900 border border-slate-800">
+            For Attendees: Participation &amp; CA
+          </span>
         </div>
 
-        <!-- Recipient Navigator (STRICTLY PRESENT ATTENDEES ONLY) -->
+        <!-- Recipient Navigator (STRICTLY PRESENT ATTENDEES / FACILITATORS) -->
         <div class="flex flex-wrap items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+          <!-- Pool Switcher: Attendees vs Facilitators -->
+          <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 mr-1">
+            <button type="button" id="btnStudioPoolAttendees" onclick="toggleStudioRecipientPool('attendees')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition bg-move-gold-500 text-slate-950 flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-users text-[11px]"></i> Attendees (<span id="studioBadgeAttendeesCount">47</span>)
+            </button>
+            <button type="button" id="btnStudioPoolFacilitators" onclick="toggleStudioRecipientPool('facilitators')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5">
+              <i class="fa-solid fa-chalkboard-user text-[11px] text-indigo-400"></i> Facilitators (<span id="studioBadgeFacilitatorsCount">1</span>)
+            </button>
+          </div>
+
           <button onclick="prevCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Previous Recipient">
             <i class="fa-solid fa-chevron-left text-xs"></i>
           </button>
@@ -343,7 +504,7 @@
           <!-- Attendance Quick Summary Card in Studio Sidebar -->
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
             <div>
-              <div class="text-[10px] uppercase font-bold text-slate-400">Attendance Gating</div>
+              <div class="text-[10px] uppercase font-bold text-slate-400"><span id="sidebarPoolLabel">Attendees</span> Gating</div>
               <div class="text-xs font-bold text-emerald-400"><span id="sidebarPresentCount">47</span> Present (Eligible)</div>
             </div>
             <button onclick="switchView('attendance')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-white border border-slate-700 transition flex items-center gap-1 shadow-sm">
@@ -353,6 +514,14 @@
 
           <!-- Activity & Event Information -->
           <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-calendar-day text-move-gold-400"></i> Activity & Event Info
+              </span>
+              <button type="button" onclick="openModalEditActivity(appState.currentActivityId)" class="text-[11px] text-move-gold-400 hover:text-white font-bold transition flex items-center gap-1" title="Open Full Edit Modal">
+                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit All
+              </button>
+            </div>
             <div>
               <label class="text-[11px] font-bold text-slate-300 block mb-1">Activity Title</label>
               <input type="text" id="certInputTitle" oninput="updateCertField('title', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
@@ -375,6 +544,9 @@
               <label class="text-[11px] font-bold text-slate-300 block mb-1">Venue / Station</label>
               <input type="text" id="certInputVenue" oninput="updateCertField('venue', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
             </div>
+            <button type="button" onclick="saveStudioActivityDetails()" id="btnSaveStudioActivity" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm" title="Save changes directly to SQLite database">
+              <i class="fa-solid fa-floppy-disk text-move-gold-400"></i> Save Event Details to Database
+            </button>
           </div>
 
           <!-- Signatories Controls -->
@@ -397,16 +569,76 @@
               </select>
             </div>
 
+            <!-- Appearance Certificate Specific Signatory Selector -->
+            <div id="caSignatorySelectorWrapper" class="space-y-1 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold text-move-gold-400 uppercase flex items-center gap-1">
+                  <i class="fa-solid fa-stamp text-[10px]"></i> Certificate of Appearance Signatory
+                </label>
+              </div>
+              <select id="caSignatoryChoice" onchange="onCaSignatoryChoiceChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                <option value="sig2_right">Signatory 2: Mayor Magalong (Right)</option>
+                <option value="sig1_right">Signatory 1: President Ganga (Right)</option>
+                <option value="both">Dual Signatories: President & Mayor (Left & Right)</option>
+                <option value="sig2_center">Signatory 2: Mayor Magalong (Centered)</option>
+                <option value="sig1_center">Signatory 1: President Ganga (Centered)</option>
+              </select>
+              <p class="text-[10px] text-slate-500">Choose which signature appears on the Certificate of Appearance.</p>
+            </div>
+
+            <!-- Digital Signature Image Display Mode -->
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Digital Signature Graphic</label>
+              <select id="certSigDisplayMode" onchange="onSigDisplayModeChange(this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                <option value="both">Show All Digital Signatures</option>
+                <option value="sig2_only">Mayor's Signature Only</option>
+                <option value="sig1_only">President's Signature Only</option>
+                <option value="none">Blank Lines (For Manual Pen Signature)</option>
+              </select>
+            </div>
+
             <!-- E-Signature Sizing & Toggles -->
-            <div class="pt-2 flex items-center justify-between text-xs text-slate-300">
+            <div class="pt-1 flex items-center justify-between text-xs text-slate-300">
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" id="certToggleSigImages" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                Show Digital Signatures
+                <span class="text-xs">Show E-Signatures</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" id="certToggleLogos" onchange="toggleLogos(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                Show Official Seals
+                <span class="text-xs">Show Header Seals</span>
               </label>
+            </div>
+          </div>
+
+          <!-- Background Watermark Controls -->
+          <div class="space-y-3 pt-3 border-t border-slate-800">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-certificate text-move-gold-400"></i> Background Watermark
+              </h4>
+              <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
+                <input type="checkbox" id="certToggleWatermark" onchange="toggleWatermark(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                <span class="text-[11px] font-bold text-move-gold-400">Enable</span>
+              </label>
+            </div>
+
+            <div id="watermarkSettingsGroup" class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Watermark Seal</label>
+                <select id="certWatermarkLogoSelect" onchange="onWatermarkLogoSelect(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+                  <option value="/MOVE BAGUIO LOGO.png">MOVE Chapter Seal</option>
+                  <option value="/CITY HALL LOGO.png">City Hall Official Seal</option>
+                  <option value="/MEN IN THE KITCHEN 2 LOGO.png">Men in Kitchen 2 Logo</option>
+                  <option value="/breathe-baguio.png">Breathe Baguio Logo</option>
+                </select>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase">Opacity</label>
+                  <span id="lblWatermarkOpacity" class="text-[10px] font-mono text-move-gold-400">12%</span>
+                </div>
+                <input type="range" id="certWatermarkOpacity" min="4" max="30" value="12" oninput="onWatermarkOpacityChange(this.value)" class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg mt-2">
+              </div>
             </div>
           </div>
         </div>
@@ -584,6 +816,81 @@
     </div>
   </div>
 
+  <!-- MODAL: Edit Activity & Event Details -->
+  <div id="modalEditActivity" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-move-gold-500"></i> Edit Activity / Training Details
+        </h3>
+        <button onclick="closeModal('modalEditActivity')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formEditActivity" onsubmit="submitEditActivity(event)" class="space-y-3">
+        <input type="hidden" id="actEditId">
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Activity Title *</label>
+          <input type="text" id="actEditTitle" required placeholder="e.g. Men in the Kitchen 2" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Theme / Short Description</label>
+          <input type="text" id="actEditTheme" placeholder="e.g. Love Served in the Kitchen" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Event Date *</label>
+            <input type="text" id="actEditDate" required placeholder="e.g. October 20, 2026" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Duration</label>
+            <input type="text" id="actEditHours" placeholder="e.g. 8 Hours" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Venue / Location</label>
+          <input type="text" id="actEditVenue" placeholder="e.g. CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer / Resource Speaker</label>
+            <input type="text" id="actEditTrainer" placeholder="e.g. Chef Ramon Dela Rosa" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer Designation</label>
+            <input type="text" id="actEditTrainerPos" placeholder="e.g. Master Trainer & Culinary Specialist" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          </div>
+        </div>
+
+        <!-- Target Participants Text Field (as requested: kept as simple text) -->
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Target Participants (Notes / Quota Description)</label>
+          <textarea id="actEditTargetNotes" rows="2" placeholder="e.g. 50 target participants from various municipal departments" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+          <button type="button" onclick="deleteCurrentEditActivity()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5" title="Delete this Activity">
+            <i class="fa-solid fa-trash-can"></i> Delete
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeModal('modalEditActivity')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow flex items-center gap-1.5">
+              <i class="fa-solid fa-check"></i> Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: Add Attendee to Activity -->
   <div id="modalAddAttendee" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
@@ -597,17 +904,64 @@
       </div>
 
       <form id="formAddAttendee" onsubmit="submitAddAttendee(event)" class="space-y-3">
-        <!-- Quick Pick from MOVE Roster -->
+        <!-- Quick Pick from MOVE Roster with Search Box -->
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Quick Select from MOVE Roster (Optional)</label>
-          <select id="quickPickMoveRoster" onchange="onQuickPickMoveAttendee(this.value)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-slate-300 block">Quick Select from MOVE Roster (Optional)</label>
+            <span id="quickRosterMatchCount" class="text-[10px] text-slate-400 font-mono"></span>
+          </div>
+
+          <!-- Live Search Input Box -->
+          <div class="relative mb-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input 
+              type="text" 
+              id="quickRosterSearch" 
+              oninput="onFilterQuickPickRoster(this.value)" 
+              onkeydown="onQuickRosterSearchKey(event)" 
+              placeholder="Search by name, office, or position..." 
+              class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-gold-500 transition" 
+              autocomplete="off"
+            >
+            <button 
+              type="button" 
+              id="btnClearQuickRosterSearch" 
+              onclick="clearQuickRosterSearch()" 
+              class="hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs p-0.5" 
+              title="Clear search"
+            >
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Dropdown populated with matching MOVE Roster personnel -->
+          <select 
+            id="quickPickMoveRoster" 
+            onchange="onQuickPickMoveAttendee(this.value)" 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+          >
             <option value="">-- Choose from MOVE Roster or Type Below --</option>
           </select>
         </div>
 
         <div>
           <label class="text-xs font-bold text-slate-300 block mb-1">Attendee Full Name *</label>
-          <input type="text" id="attNewName" required placeholder="e.g. DELA CRUZ, JUAN" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 uppercase">
+          <input 
+            type="text" 
+            id="attNewName" 
+            required 
+            placeholder="e.g. DELA CRUZ, JUAN" 
+            oninput="checkDuplicateAttendeeInput(this.value)"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 uppercase transition"
+          >
+          <!-- Live Duplicate Detection Warning Banner -->
+          <div id="attDuplicateWarning" class="hidden mt-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400 mt-0.5 text-sm shrink-0"></i>
+            <div>
+              <span class="font-bold block text-rose-200">Already Enrolled in Attendance!</span>
+              <span id="attDuplicateWarningText" class="text-[11px] text-rose-200/90 leading-tight block mt-0.5"></span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -649,8 +1003,376 @@
           <button type="button" onclick="closeModal('modalAddAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow">
+          <button type="submit" id="btnSubmitAddAttendee" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow transition disabled:opacity-40 disabled:cursor-not-allowed">
             Enroll Attendee
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Facilitator / Trainer to Activity -->
+  <div id="modalAddFacilitator" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-chalkboard-user text-indigo-400"></i> Add Facilitator / Trainer to Activity
+        </h3>
+        <button onclick="closeModal('modalAddFacilitator')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formAddFacilitator" onsubmit="submitAddFacilitator(event)" class="space-y-3">
+        <!-- Quick Pick from MOVE Roster / Pool with Search Box -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-slate-300 block">Quick Select from MOVE Roster / Pool (Optional)</label>
+            <span id="quickFacilitatorMatchCount" class="text-[10px] text-slate-400 font-mono"></span>
+          </div>
+
+          <!-- Live Search Input Box -->
+          <div class="relative mb-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input 
+              type="text" 
+              id="quickFacilitatorSearch" 
+              oninput="onFilterQuickPickFacilitator(this.value)" 
+              placeholder="Search by name, office, or position..." 
+              class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition" 
+              autocomplete="off"
+            >
+            <button 
+              type="button" 
+              id="btnClearQuickFacilitatorSearch" 
+              onclick="clearQuickFacilitatorSearch()" 
+              class="hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs p-0.5" 
+              title="Clear search"
+            >
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <select 
+            id="quickPickFacilitator" 
+            onchange="onQuickPickFacilitatorSelect(this.value)" 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+          >
+            <option value="">-- Choose from MOVE Roster or Type Below --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Facilitator Full Name *</label>
+          <input 
+            type="text" 
+            id="facNewName" 
+            required 
+            placeholder="e.g. DELA ROSA, RAMON" 
+            oninput="checkDuplicateFacilitatorInput(this.value)"
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 uppercase transition"
+          >
+          <!-- Duplicate Detection Warning Banner -->
+          <div id="facDuplicateWarning" class="hidden mt-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400 mt-0.5 text-sm shrink-0"></i>
+            <div>
+              <span class="font-bold block text-rose-200">Already Enrolled as Facilitator!</span>
+              <span id="facDuplicateWarningText" class="text-[11px] text-rose-200/90 leading-tight block mt-0.5"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Role / Assignment *</label>
+            <input 
+              type="text" 
+              id="facNewRole" 
+              required
+              list="facilitatorRolePresets"
+              placeholder="e.g. Resource Speaker, Master Trainer" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            >
+            <datalist id="facilitatorRolePresets">
+              <option value="Lead Facilitator">
+              <option value="Master Trainer">
+              <option value="Resource Speaker">
+              <option value="Co-Facilitator">
+              <option value="Moderator">
+              <option value="Program Coordinator">
+              <option value="Secretariat">
+              <option value="Documenter">
+            </datalist>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Position Title</label>
+            <input type="text" id="facNewPosition" placeholder="e.g. Culinary Specialist, Attorney IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Agency / Organization</label>
+          <input type="text" id="facNewOffice" placeholder="e.g. City Mayor's Office, CDRRMO, TESDA" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
+            <select id="facNewGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
+            <select id="facNewCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <option value="Married">Married</option>
+              <option value="Single">Single</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <input type="checkbox" id="facNewIsPresent" checked class="rounded text-indigo-500">
+          <label for="facNewIsPresent" class="text-xs font-bold text-indigo-300 cursor-pointer">
+            Mark as Present immediately (Qualifies for Certificate of Appreciation / Appearance)
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalAddFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitAddFacilitator" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow transition disabled:opacity-40 disabled:cursor-not-allowed">
+            Enroll Facilitator
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Facilitator / Trainer Details -->
+  <div id="modalEditFacilitator" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-pen text-indigo-400"></i> Edit Facilitator / Trainer Details
+        </h3>
+        <button type="button" onclick="closeModal('modalEditFacilitator')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formEditFacilitator" onsubmit="submitEditFacilitator(event)" class="space-y-3">
+        <input type="hidden" id="editFacId">
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Facilitator Full Name *</label>
+          <input 
+            type="text" 
+            id="editFacName" 
+            required 
+            placeholder="e.g. DELMENDO, RHEY J." 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 uppercase transition"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Role / Assignment *</label>
+            <input 
+              type="text" 
+              id="editFacRole" 
+              required
+              list="editFacilitatorRolePresets"
+              placeholder="e.g. Lead Facilitator, Master Trainer" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            >
+            <datalist id="editFacilitatorRolePresets">
+              <option value="Lead Facilitator">
+              <option value="Master Trainer & Culinary Specialist">
+              <option value="Resource Speaker">
+              <option value="Co-Facilitator">
+              <option value="Training Moderator">
+              <option value="Chair, Education & Training Committee">
+              <option value="MOVE Chapter President / Lead Facilitator">
+              <option value="MOVE Chapter Vice President / Facilitator">
+              <option value="MOVE Chapter Secretary / Facilitator">
+              <option value="MOVE Chapter Treasurer / Facilitator">
+              <option value="Public Relations Officer / Facilitator">
+              <option value="Assistant P.R.O. / Facilitator">
+              <option value="CSWDO Focal Person on Women Program">
+              <option value="Member, Information & Advocacy Committee">
+            </datalist>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Position Title *</label>
+            <input 
+              type="text" 
+              id="editFacPosition" 
+              required
+              placeholder="e.g. Tourism Operations Officer I" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Agency / Organization *</label>
+          <input 
+            type="text" 
+            id="editFacOffice" 
+            required
+            placeholder="e.g. City Tourism Operations Office (TOURISM)" 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
+            <select id="editFacGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
+            <select id="editFacCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <option value="Married">Married</option>
+              <option value="Single">Single</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
+            <input 
+              type="text" 
+              id="editFacContact" 
+              placeholder="e.g. 0917-123-4567" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            >
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Assignment Details</label>
+            <input 
+              type="text" 
+              id="editFacNotes" 
+              placeholder="e.g. Training Committee Facilitator" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            >
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalEditFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitEditFacilitator" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow transition flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Save Position &amp; Details
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Attendee (Position, Office, Name, Details) -->
+  <div id="modalEditAttendee" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-move-gold-400"></i> Edit Attendee Details
+          </h3>
+          <p class="text-[11px] text-slate-400">Update this participant's official position, office, and record details.</p>
+        </div>
+        <button onclick="closeModal('modalEditAttendee')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formEditAttendee" onsubmit="submitEditAttendee(event)" class="space-y-3">
+        <input type="hidden" id="editAttId">
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Attendee Full Name *</label>
+          <input 
+            type="text" 
+            id="editAttName" 
+            required 
+            placeholder="e.g. DELA CRUZ, JUAN A." 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 uppercase font-semibold"
+          >
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Position Title *</label>
+          <input 
+            type="text" 
+            id="editAttPosition" 
+            required
+            placeholder="e.g. Administrative Aide IV / Driver" 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 font-medium"
+          >
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department / Agency *</label>
+          <input 
+            type="text" 
+            id="editAttOffice" 
+            required
+            placeholder="e.g. City General Services Office (GSO)" 
+            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
+            <select id="editAttGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
+            <select id="editAttCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+              <option value="Married">Married</option>
+              <option value="Single">Single</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
+            <input 
+              type="text" 
+              id="editAttContact" 
+              placeholder="e.g. 0917-123-4567" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+            >
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Remarks</label>
+            <input 
+              type="text" 
+              id="editAttNotes" 
+              placeholder="e.g. Participant Batch 2" 
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+            >
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalEditAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitEditAttendee" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-move-orange-500 hover:from-move-gold-600 hover:to-move-orange-600 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Save Position &amp; Details
           </button>
         </div>
       </form>
@@ -701,7 +1423,7 @@
   <!-- HIDDEN PRINT CONTAINER (For high-resolution single & batch A4 printing) -->
   <div id="printContainer" class="hidden"></div>
 
-  <!-- Application Logic -->
-  <script src="/frontend/js/app.js"></script>
+  <!-- Application Logic (with cache buster) -->
+  <script src="/frontend/js/app.js?v=20261020-0805"></script>
 </body>
 </html>

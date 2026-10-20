@@ -42,6 +42,25 @@ body {
   color: #0f172a;
 }
 
+/* Background Watermark Overlay */
+.cert-watermark-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.cert-watermark-overlay img {
+  pointer-events: none;
+  user-select: none;
+  object-contain: contain;
+}
+
 /* Print Rules for A4 Landscape Certificates */
 @media print {
   @page {
@@ -91,6 +110,8 @@ body {
     flex-direction: column !important;
     justify-content: space-between !important;
     background: white !important;
+    position: relative !important;
+    overflow: hidden !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

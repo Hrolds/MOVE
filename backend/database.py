@@ -85,6 +85,36 @@ def init_db():
     );
     """)
 
+    # 4b. Ensure uniqueness of attendee per activity
+    cursor.execute("""
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_activity_attendees_unique 
+    ON activity_attendees(activity_id, UPPER(TRIM(full_name)));
+    """)
+
+    # 4c. Activity Facilitators, Trainers, and Resource Speakers
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS activity_facilitators (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        move_roster_id INTEGER REFERENCES move_roster(id) ON DELETE SET NULL,
+        full_name TEXT NOT NULL,
+        role_title TEXT DEFAULT 'Facilitator',
+        position TEXT,
+        office TEXT,
+        gender TEXT DEFAULT 'M',
+        civil_status TEXT DEFAULT 'Married',
+        contact_number TEXT,
+        is_present INTEGER DEFAULT 1,
+        check_in_time TEXT,
+        notes TEXT
+    );
+    """)
+
+    cursor.execute("""
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_activity_facilitators_unique 
+    ON activity_facilitators(activity_id, UPPER(TRIM(full_name)));
+    """)
+
     # 5. Signatories registry
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS signatories (

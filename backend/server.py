@@ -4,7 +4,11 @@ import json
 import os
 import re
 import urllib.parse
+import sys
 from datetime import datetime
+
+# Ensure backend directory is in sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from database import get_connection, init_db
 
 PORT = 8765
@@ -156,6 +160,21 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": True, "activity_id": activity_id, "attendees": attendees})
             return
 
+        # 5b. API: Activity Facilitators / Trainers / Resource Speakers
+        m_fac = re.match(r"^/api/activities/(\d+)/facilitators$", path)
+        if m_fac:
+            activity_id = int(m_fac.group(1))
+            conn = get_connection()
+            cursor = conn.execute("""
+            SELECT * FROM activity_facilitators 
+            WHERE activity_id = ? 
+            ORDER BY id ASC;
+            """, (activity_id,))
+            facilitators = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "activity_id": activity_id, "facilitators": facilitators, "count": len(facilitators)})
+            return
+
         # 6. API: GATED CERTIFICATES (ONLY presents allowed!)
         m_cert = re.match(r"^/api/activities/(\d+)/eligible-certificates$", path)
         if m_cert:
@@ -176,6 +195,13 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             """, (activity_id,))
             eligible_attendees = [dict(row) for row in cursor.fetchall()]
 
+            cursor_fac = conn.execute("""
+            SELECT * FROM activity_facilitators 
+            WHERE activity_id = ? AND is_present = 1
+            ORDER BY id ASC;
+            """, (activity_id,))
+            eligible_facilitators = [dict(row) for row in cursor_fac.fetchall()]
+
             # Fetch Default Signatories
             sig_cur = conn.execute("SELECT * FROM signatories ORDER BY is_default DESC, id ASC;")
             signatories = [dict(row) for row in sig_cur.fetchall()]
@@ -186,6 +212,7 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 "activity": dict(act),
                 "count": len(eligible_attendees),
                 "eligible_attendees": eligible_attendees,
+                "eligible_facilitators": eligible_facilitators,
                 "signatories": signatories
             })
             return
@@ -313,14 +340,41 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_connection()
             cursor = conn.cursor()
-            cursor.execute("""
-            INSERT INTO activity_attendees
-            (activity_id, move_roster_id, full_name, position, gender, civil_status, office, contact_number, is_present, check_in_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (activity_id, move_roster_id, full_name, position, gender, civil, office, contact,
-                  is_present, datetime.now().strftime("%I:%M %p") if is_present else None))
-            new_id = cursor.lastrowid
-            conn.commit()
+
+            # Check if attendee is already enrolled in this activity
+            existing = cursor.execute("""
+            SELECT id, is_present, check_in_time FROM activity_attendees
+            WHERE activity_id = ? AND UPPER(TRIM(full_name)) = UPPER(TRIM(?));
+            """, (activity_id, full_name)).fetchone()
+            if existing:
+                conn.close()
+                status_str = "Present" if existing["is_present"] else "Absent"
+                self.send_json({
+                    "success": False,
+                    "duplicate": True,
+                    "existing_id": existing["id"],
+                    "message": f"'{full_name}' is already enrolled in this activity (Current Status: {status_str}). Duplicate enrollment is not allowed."
+                }, 409)
+                return
+
+            try:
+                cursor.execute("""
+                INSERT INTO activity_attendees
+                (activity_id, move_roster_id, full_name, position, gender, civil_status, office, contact_number, is_present, check_in_time)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, (activity_id, move_roster_id, full_name, position, gender, civil, office, contact,
+                      is_present, datetime.now().strftime("%I:%M %p") if is_present else None))
+                new_id = cursor.lastrowid
+                conn.commit()
+            except sqlite3.IntegrityError:
+                conn.close()
+                self.send_json({
+                    "success": False,
+                    "duplicate": True,
+                    "message": f"'{full_name}' is already enrolled in this activity."
+                }, 409)
+                return
+
             conn.close()
             self.send_json({"success": True, "message": "Attendee enrolled into activity", "id": new_id})
             return
@@ -344,21 +398,84 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             cursor = conn.cursor()
             count = 0
             for c in candidates:
-                # Check if already enrolled
+                # Check if already enrolled (case and whitespace insensitive)
                 exists = cursor.execute("""
-                SELECT id FROM activity_attendees WHERE activity_id = ? AND full_name = ?;
+                SELECT id FROM activity_attendees 
+                WHERE activity_id = ? AND UPPER(TRIM(full_name)) = UPPER(TRIM(?));
                 """, (activity_id, c["full_name"])).fetchone()
                 if not exists:
-                    cursor.execute("""
-                    INSERT INTO activity_attendees
-                    (activity_id, move_roster_id, full_name, position, gender, civil_status, office, contact_number, is_present)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0);
-                    """, (activity_id, c["id"], c["full_name"], c["position"], c["gender"],
-                          c["civil_status"], c["office"], c["contact_number"]))
-                    count += 1
+                    try:
+                        cursor.execute("""
+                        INSERT INTO activity_attendees
+                        (activity_id, move_roster_id, full_name, position, gender, civil_status, office, contact_number, is_present)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0);
+                        """, (activity_id, c["id"], c["full_name"], c["position"], c["gender"],
+                              c["civil_status"], c["office"], c["contact_number"]))
+                        count += 1
+                    except sqlite3.IntegrityError:
+                        pass
             conn.commit()
             conn.close()
             self.send_json({"success": True, "message": f"Enrolled {count} attendees into activity", "enrolled_count": count})
+            return
+
+        # 6. API: Add Facilitator to Activity (with Duplicate Detection)
+        m_add_fac = re.match(r"^/api/activities/(\d+)/facilitators$", path)
+        if m_add_fac:
+            activity_id = int(m_add_fac.group(1))
+            full_name = str(body.get("full_name", "")).strip().upper()
+            if not full_name:
+                self.send_json({"success": False, "message": "Facilitator Full Name is required"}, 400)
+                return
+            move_roster_id = body.get("move_roster_id")
+            role_title = str(body.get("role_title", "Facilitator")).strip() or "Facilitator"
+            position = str(body.get("position", "")).strip()
+            gender = str(body.get("gender", "M")).strip()
+            civil = str(body.get("civil_status", "Married")).strip()
+            office = str(body.get("office", "")).strip()
+            contact = str(body.get("contact_number", "")).strip()
+            is_present = int(bool(body.get("is_present", True)))
+            notes = str(body.get("notes", "")).strip()
+
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            # Duplicate check
+            existing = cursor.execute("""
+            SELECT id, is_present, check_in_time FROM activity_facilitators
+            WHERE activity_id = ? AND UPPER(TRIM(full_name)) = UPPER(TRIM(?));
+            """, (activity_id, full_name)).fetchone()
+            if existing:
+                conn.close()
+                status_str = "Present" if existing["is_present"] else "Absent"
+                self.send_json({
+                    "success": False,
+                    "duplicate": True,
+                    "existing_id": existing["id"],
+                    "message": f"'{full_name}' is already listed as a facilitator in this activity (Status: {status_str})."
+                }, 409)
+                return
+
+            try:
+                cursor.execute("""
+                INSERT INTO activity_facilitators
+                (activity_id, move_roster_id, full_name, role_title, position, gender, civil_status, office, contact_number, is_present, check_in_time, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, (activity_id, move_roster_id, full_name, role_title, position, gender, civil, office, contact,
+                      is_present, datetime.now().strftime("%I:%M %p") if is_present else None, notes))
+                new_id = cursor.lastrowid
+                conn.commit()
+            except sqlite3.IntegrityError:
+                conn.close()
+                self.send_json({
+                    "success": False,
+                    "duplicate": True,
+                    "message": f"'{full_name}' is already enrolled as a facilitator in this activity."
+                }, 409)
+                return
+
+            conn.close()
+            self.send_json({"success": True, "message": "Facilitator enrolled into activity", "id": new_id})
             return
 
         # Fallback 404
@@ -415,6 +532,115 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # 2a-2. API: Update Attendee Details (Position, Office, Name, Gender, Civil Status, etc.)
+        m_edit_att = re.match(r"^/api/activities/(\d+)/attendees/(\d+)$", path)
+        if m_edit_att:
+            activity_id = int(m_edit_att.group(1))
+            attendee_id = int(m_edit_att.group(2))
+
+            full_name = str(body.get("full_name", "")).strip().upper()
+            if not full_name:
+                self.send_json({"success": False, "message": "Attendee Full Name is required"}, 400)
+                return
+
+            position = str(body.get("position", "")).strip()
+            office = str(body.get("office", "")).strip()
+            gender = str(body.get("gender", "M")).strip()
+            civil = str(body.get("civil_status", "Married")).strip()
+            contact = str(body.get("contact_number", "")).strip()
+            notes = str(body.get("notes", "")).strip()
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE activity_attendees
+            SET full_name = ?, position = ?, office = ?,
+                gender = ?, civil_status = ?, contact_number = ?, notes = ?
+            WHERE id = ? AND activity_id = ?;
+            """, (full_name, position, office, gender, civil, contact, notes, attendee_id, activity_id))
+            conn.commit()
+
+            updated = conn.execute("SELECT * FROM activity_attendees WHERE id = ?;", (attendee_id,)).fetchone()
+            conn.close()
+
+            if not updated:
+                self.send_json({"success": False, "message": "Attendee not found"}, 404)
+                return
+
+            self.send_json({
+                "success": True,
+                "message": "Attendee updated successfully",
+                "attendee": dict(updated)
+            })
+            return
+
+        # 2b. API: Toggle Facilitator is_present
+        m_fac_pres = re.match(r"^/api/activities/(\d+)/facilitators/(\d+)/present$", path)
+        if m_fac_pres:
+            activity_id = int(m_fac_pres.group(1))
+            fac_id = int(m_fac_pres.group(2))
+            is_present = int(bool(body.get("is_present", 1)))
+            check_in = datetime.now().strftime("%I:%M %p") if is_present else None
+
+            conn = get_connection()
+            conn.execute("""
+            UPDATE activity_facilitators 
+            SET is_present = ?, check_in_time = ?
+            WHERE id = ? AND activity_id = ?;
+            """, (is_present, check_in, fac_id, activity_id))
+            conn.commit()
+            conn.close()
+            self.send_json({
+                "success": True,
+                "message": "Facilitator attendance updated",
+                "is_present": is_present,
+                "check_in_time": check_in
+            })
+            return
+
+        # 2c. API: Update Facilitator Details (Position, Role Title, Office, Name, etc.)
+        m_edit_fac = re.match(r"^/api/activities/(\d+)/facilitators/(\d+)$", path)
+        if m_edit_fac:
+            activity_id = int(m_edit_fac.group(1))
+            fac_id = int(m_edit_fac.group(2))
+            
+            full_name = str(body.get("full_name", "")).strip().upper()
+            if not full_name:
+                self.send_json({"success": False, "message": "Facilitator Full Name is required"}, 400)
+                return
+
+            role_title = str(body.get("role_title", "Facilitator")).strip()
+            position = str(body.get("position", "")).strip()
+            office = str(body.get("office", "")).strip()
+            gender = str(body.get("gender", "M")).strip()
+            civil = str(body.get("civil_status", "Married")).strip()
+            contact = str(body.get("contact_number", "")).strip()
+            notes = str(body.get("notes", "")).strip()
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE activity_facilitators
+            SET full_name = ?, role_title = ?, position = ?, office = ?,
+                gender = ?, civil_status = ?, contact_number = ?, notes = ?
+            WHERE id = ? AND activity_id = ?;
+            """, (full_name, role_title, position, office, gender, civil, contact, notes, fac_id, activity_id))
+            conn.commit()
+
+            updated = conn.execute("SELECT * FROM activity_facilitators WHERE id = ?;", (fac_id,)).fetchone()
+            conn.close()
+
+            if not updated:
+                self.send_json({"success": False, "message": "Facilitator not found"}, 404)
+                return
+
+            self.send_json({
+                "success": True,
+                "message": "Facilitator updated successfully",
+                "facilitator": dict(updated)
+            })
+            return
+
         # 3. API: Batch Toggle All Attendees Present / Absent
         m_batch_att = re.match(r"^/api/activities/(\d+)/batch-attendance$", path)
         if m_batch_att:
@@ -433,6 +659,46 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({
                 "success": True, 
                 "message": f"All attendees marked as {'Present' if set_all_present else 'Absent'}"
+            })
+            return
+
+        # 4. API: Update Activity Details (Venue, Date, Title, Theme, Hours, Trainer, Target Notes)
+        m_upd_act = re.match(r"^/api/activities/(\d+)$", path)
+        if m_upd_act:
+            activity_id = int(m_upd_act.group(1))
+            title = str(body.get("title", "")).strip()
+            if not title:
+                self.send_json({"success": False, "message": "Activity Title is required"}, 400)
+                return
+            theme = str(body.get("theme", "")).strip()
+            date = str(body.get("activity_date", "")).strip()
+            duration = str(body.get("duration_hours", "8 Hours")).strip()
+            venue = str(body.get("venue", "")).strip()
+            trainer = str(body.get("trainer_name", "")).strip()
+            trainer_pos = str(body.get("trainer_position", "")).strip()
+            target_notes = str(body.get("target_notes", "")).strip()
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE activities
+            SET title = ?, theme = ?, activity_date = ?, duration_hours = ?,
+                venue = ?, trainer_name = ?, trainer_position = ?, target_notes = ?
+            WHERE id = ?;
+            """, (title, theme, date, duration, venue, trainer, trainer_pos, target_notes, activity_id))
+            conn.commit()
+
+            act = conn.execute("SELECT * FROM activities WHERE id = ?;", (activity_id,)).fetchone()
+            conn.close()
+
+            if not act:
+                self.send_json({"success": False, "message": "Activity not found"}, 404)
+                return
+
+            self.send_json({
+                "success": True,
+                "message": "Activity updated successfully",
+                "activity": dict(act)
             })
             return
 
@@ -466,6 +732,31 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
             self.send_json({"success": True, "message": f"Attendee {attendee_id} removed from activity {activity_id}"})
+            return
+
+        # 2b. API: Delete Facilitator from Activity
+        m_del_fac = re.match(r"^/api/activities/(\d+)/facilitators/(\d+)$", path)
+        if m_del_fac:
+            activity_id = int(m_del_fac.group(1))
+            fac_id = int(m_del_fac.group(2))
+            conn = get_connection()
+            conn.execute("DELETE FROM activity_facilitators WHERE id = ? AND activity_id = ?;", (fac_id, activity_id))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True, "message": f"Facilitator {fac_id} removed from activity {activity_id}"})
+            return
+
+        # 3. API: Delete Activity (and all its attendees and facilitators)
+        m_del_act = re.match(r"^/api/activities/(\d+)$", path)
+        if m_del_act:
+            activity_id = int(m_del_act.group(1))
+            conn = get_connection()
+            conn.execute("DELETE FROM activity_attendees WHERE activity_id = ?;", (activity_id,))
+            conn.execute("DELETE FROM activity_facilitators WHERE activity_id = ?;", (activity_id,))
+            conn.execute("DELETE FROM activities WHERE id = ?;", (activity_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True, "message": f"Activity {activity_id}, attendees, and facilitators deleted successfully"})
             return
 
         self.send_json({"success": False, "message": "Endpoint not found"}, 404)
