@@ -124,8 +124,8 @@ CREATE TABLE certificate_settings (
         appreciation_intro TEXT DEFAULT 'is proudly and warmly presented to',
         appearance_title TEXT DEFAULT 'CERTIFICATE OF APPEARANCE',
         appearance_intro TEXT DEFAULT 'This is to certify that'
-    );
-INSERT INTO "certificate_settings" VALUES(1,'Republic of the Philippines • City Government of Baguio','Men Opposed to Violence Against Women Everywhere (MOVE)','City Hall Chapter • Baguio City, Philippines','CERTIFICATE OF PARTICIPATION','This certification is proudly presented to','CERTIFICATE OF APPRECIATION','is proudly and warmly presented to','CERTIFICATE OF APPEARANCE','This is to certify that');
+    , participation_citation TEXT DEFAULT 'for {his/her} active participation and completion of the capacity-building seminar entitled');
+INSERT INTO "certificate_settings" VALUES(1,'Republic of the Philippines • City Government of Baguio','Men Opposed to Violence Against Women Everywhere (MOVE)','City Hall Chapter • Baguio City, Philippines','CERTIFICATE OF PARTICIPATION','This certification is proudly presented to','CERTIFICATE OF APPRECIATION','is proudly and warmly presented to','CERTIFICATE OF APPEARANCE','This is to certify that','for {his/her} active participation and completion of the capacity-building seminar entitled');
 CREATE TABLE issued_certificates (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         activity_id INTEGER REFERENCES activities(id) ON DELETE CASCADE,

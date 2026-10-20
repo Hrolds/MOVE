@@ -62,7 +62,8 @@ const appState = {
     appreciation_title: 'CERTIFICATE OF APPRECIATION',
     appreciation_intro: 'is proudly and warmly presented to',
     appearance_title: 'CERTIFICATE OF APPEARANCE',
-    appearance_intro: 'This is to certify that'
+    appearance_intro: 'This is to certify that',
+    participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled'
   },
   caSignatoryChoice: 'sig2_right',
   sigDisplayMode: 'both',
@@ -2439,6 +2440,12 @@ function getActiveCertIntroKey() {
   return 'participation_intro';
 }
 
+function getGenderPronoun(attendee) {
+  const g = String(attendee?.gender || '').trim().toUpperCase();
+  if (g === 'F' || g === 'FEMALE') return 'her';
+  return 'his';
+}
+
 function updateCertHeaderInputs() {
   const h1 = document.getElementById("certHdr1Input");
   const h2 = document.getElementById("certHdr2Input");
@@ -2458,6 +2465,9 @@ function updateCertHeaderInputs() {
 
   if (title) title.value = cs[titleKey] || '';
   if (intro) intro.value = cs[introKey] || '';
+
+  const citInp = document.getElementById("certCitationInput");
+  if (citInp) citInp.value = cs.participation_citation || 'for {his/her} active participation and completion of the capacity-building seminar entitled';
 
   if (ctx) {
     ctx.textContent = appState.currentTemplate === 'appreciation' ? 'APPRECIATION' : (appState.currentTemplate === 'appearance' ? 'APPEARANCE' : 'PARTICIPATION');
@@ -2543,6 +2553,10 @@ async function saveCertField(fieldKey) {
     inpId = "certIntroInput"; 
     statusId = "introSaveStatus"; 
     labelName = "Presentation Intro Line"; 
+  } else if (fieldKey === 'participation_citation') {
+    inpId = "certCitationInput";
+    statusId = "citationSaveStatus";
+    labelName = "Participation Citation";
   }
 
   const inp = document.getElementById(inpId);
@@ -2588,8 +2602,10 @@ async function saveAllCertificateSettings() {
   const h3 = (document.getElementById("certHdr3Input")?.value || "").trim();
   const title = (document.getElementById("certTitleInput")?.value || "").trim();
   const intro = (document.getElementById("certIntroInput")?.value || "").trim();
+  const cit = (document.getElementById("certCitationInput")?.value || "").trim();
 
   if (!appState.certSettings) appState.certSettings = {};
+  if (cit) appState.certSettings.participation_citation = cit;
   if (h1) appState.certSettings.header_line_1 = h1;
   if (h2) appState.certSettings.header_line_2 = h2;
   if (h3) appState.certSettings.header_line_3 = h3;
@@ -2702,7 +2718,13 @@ async function resetCertificateSettings() {
         </p>
 
         <p class="text-slate-700 max-w-xl mx-auto mt-3 leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px; line-height: 1.45;">
-          for active participation and completion of the capacity-building seminar entitled
+          <span contenteditable="true" oninput="onCanvasCertFieldInput('participation_citation', this.innerText)" onblur="saveCanvasCertField('participation_citation', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text" title="Click to edit seminar citation (auto-saves to database)">${escapeHtml(
+            (appState.certSettings?.participation_citation || 'for {his/her} active participation and completion of the capacity-building seminar entitled')
+              .replace(/\{his\/her\)\}/gi, getGenderPronoun(attendee))
+              .replace(/\{his\/her\}/gi, getGenderPronoun(attendee))
+              .replace(/\{his\/hers\}/gi, getGenderPronoun(attendee))
+              .replace(/\{pronoun\}/gi, getGenderPronoun(attendee))
+          )}</span>
           <strong class="text-slate-900 block font-bold text-xs sm:text-sm mt-0.5">“${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”</strong>
           held on ${escapeHtml(act.date)} at ${escapeHtml(act.venue)}.
         </p>

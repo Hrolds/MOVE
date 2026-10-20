@@ -639,6 +639,23 @@
                 </div>
               </div>
 
+              <!-- Seminar Citation Reason (with dynamic {his/her} support) -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase">Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)</label>
+                  <span id="citationSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <input type="text" id="certCitationInput" oninput="onSidebarCertFieldInput('participation_citation', this.value)"
+                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500"
+                    placeholder="for {his/her} active participation and completion of the capacity-building seminar entitled">
+                  <button type="button" onclick="saveCertField('participation_citation')" id="btnSaveCitation" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Citation text directly to SQLite database">
+                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                  </button>
+                </div>
+                <p class="text-[9px] text-slate-500 mt-0.5">Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.</p>
+              </div>
+
               <div class="pt-1">
                 <button type="button" onclick="saveAllCertificateSettings()" id="btnSaveCertHeaderSettings"
                   class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm"

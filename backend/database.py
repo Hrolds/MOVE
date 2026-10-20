@@ -154,7 +154,8 @@ def init_db():
         appreciation_title TEXT DEFAULT 'CERTIFICATE OF APPRECIATION',
         appreciation_intro TEXT DEFAULT 'is proudly and warmly presented to',
         appearance_title TEXT DEFAULT 'CERTIFICATE OF APPEARANCE',
-        appearance_intro TEXT DEFAULT 'This is to certify that'
+        appearance_intro TEXT DEFAULT 'This is to certify that',
+        participation_citation TEXT DEFAULT 'for {his/her} active participation and completion of the capacity-building seminar entitled'
     );
     """)
 
@@ -163,7 +164,8 @@ def init_db():
         id, header_line_1, header_line_2, header_line_3,
         participation_title, participation_intro,
         appreciation_title, appreciation_intro,
-        appearance_title, appearance_intro
+        appearance_title, appearance_intro,
+        participation_citation
     ) VALUES (
         1,
         'Republic of the Philippines • City Government of Baguio',
@@ -174,7 +176,8 @@ def init_db():
         'CERTIFICATE OF APPRECIATION',
         'is proudly and warmly presented to',
         'CERTIFICATE OF APPEARANCE',
-        'This is to certify that'
+        'This is to certify that',
+        'for {his/her} active participation and completion of the capacity-building seminar entitled'
     );
     """)
 
