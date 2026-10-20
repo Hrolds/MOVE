@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/frontend/css/styles.css?v=1792468239">
+  <link rel="stylesheet" href="/frontend/css/styles.css?v=1792470525">
 
   <script>
     tailwind.config = {
@@ -995,10 +995,71 @@
 
         <!-- Right Column: Live Certificate Canvas Stage -->
         <div class="lg:col-span-8 flex flex-col items-center">
+
+          <!-- Certificate of Appearance (A5 Landscape on A4) Single / Dual Mode Toolbar -->
+          <div id="caPrintModeToolbar" class="hidden w-full max-w-[850px] mb-3 bg-slate-900/95 border border-emerald-500/40 rounded-2xl p-3 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-black text-xs">
+                A5
+              </span>
+              <div>
+                <div class="text-xs font-black text-white uppercase tracking-wide flex items-center gap-1.5">
+                  CA Print Layout on A4 Paper
+                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">A5 Landscape (210×148.5mm)</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Print 1 A5 slip (Single Mode) or 2 A5 slips Top &amp; Bottom at once on 1 A4 sheet (Dual Mode).</p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Single vs Dual Mode Toggle -->
+              <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button type="button" id="btnCaModeSingle" onclick="setCaPrintMode('single')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white">
+                  <i class="fa-regular fa-note-sticky"></i> Single Mode (1 A5)
+                </button>
+                <button type="button" id="btnCaModeDual" onclick="setCaPrintMode('dual')" class="px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow">
+                  <i class="fa-solid fa-table-rows"></i> Dual Mode: Top &amp; Bottom (2 on A4)
+                </button>
+              </div>
+
+              <!-- Sub-option when Dual Mode is active: Pair vs Duplicate -->
+              <select id="caDualBehaviorSelect" onchange="setCaDualBehavior(this.value)" class="bg-slate-950 border border-slate-700 rounded-xl text-[11px] py-1.5 px-2.5 text-emerald-300 font-bold focus:outline-none focus:border-emerald-400" title="Choose what prints on the bottom A5 half when clicking Print Single">
+                <option value="pair">Bottom Half: Next Recipient (Pair 2 People)</option>
+                <option value="duplicate">Bottom Half: Same Recipient (2 Copies)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Top Half Label when in CA Dual Mode -->
+          <div id="caTopSlipBadge" class="hidden w-full max-w-[850px] flex items-center justify-between text-[10px] font-mono font-bold text-emerald-400 uppercase mb-1 px-1">
+            <span><i class="fa-solid fa-arrow-up-Wide-short mr-1"></i> Top Half of A4 Sheet — A5 Landscape (210mm × 148.5mm)</span>
+            <span id="caTopSlipRecipientLabel">Slip #1</span>
+          </div>
           
-          <!-- Live Canvas Container (A4 Landscape aspect-ratio: 1.414 / 1) -->
+          <!-- Live Canvas Container (A4/A5 Landscape aspect-ratio: 1.414 / 1) -->
           <div id="certStageCanvas" class="cert-canvas-container w-full max-w-[850px] aspect-[1.414/1] bg-white text-slate-900 rounded-sm shadow-2xl overflow-hidden relative p-8 sm:p-10 flex flex-col justify-between border-[12px] border-double border-[#d97706] transition-all">
             <!-- Dynamic Certificate Content (Populated & Swapped via JS) -->
+          </div>
+
+          <!-- Dual Mode Bottom A5 Landscape Live Preview (Shown when CA + Dual Mode is active) -->
+          <div id="caDualBottomPreviewWrapper" class="hidden w-full max-w-[850px] flex flex-col items-center mt-4">
+            <!-- Dashed Cut Line Divider -->
+            <div class="w-full flex items-center gap-3 my-2">
+              <div class="flex-1 border-t-2 border-dashed border-slate-700"></div>
+              <span class="text-[10px] font-mono font-bold text-slate-400 uppercase px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-scissors text-emerald-400"></i> A4 Center Cut Line (148.5mm) — Bottom A5 Landscape Slip
+              </span>
+              <div class="flex-1 border-t-2 border-dashed border-slate-700"></div>
+            </div>
+
+            <div class="w-full flex items-center justify-between text-[10px] font-mono font-bold text-emerald-400 uppercase mb-1 px-1">
+              <span><i class="fa-solid fa-arrow-down-wide-short mr-1"></i> Bottom Half of A4 Sheet — A5 Landscape (210mm × 148.5mm)</span>
+              <span id="caBottomSlipRecipientLabel">Slip #2</span>
+            </div>
+
+            <div id="certStageCanvasBottom" class="cert-canvas-container w-full max-w-[850px] aspect-[1.414/1] bg-white text-slate-900 rounded-sm shadow-2xl overflow-hidden relative p-8 sm:p-12 flex flex-col justify-between border-4 border-slate-300 transition-all opacity-95">
+              <!-- Populated automatically in Dual Mode -->
+            </div>
           </div>
 
           <p class="text-[11px] text-slate-500 mt-3 text-center">
@@ -1774,6 +1835,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=1792470199"></script>
+  <script src="/frontend/js/app.js?v=1792470525"></script>
 </body>
 </html>

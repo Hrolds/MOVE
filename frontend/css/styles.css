@@ -80,8 +80,8 @@ body {
   }
 
   html, body {
-    width: 297mm !important;
-    height: 210mm !important;
+    width: auto !important;
+    height: auto !important;
     background: #ffffff !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -112,7 +112,7 @@ body {
   #printContainer {
     display: block !important;
     position: static !important;
-    width: 297mm !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
@@ -159,5 +159,71 @@ body {
     transform: scale(1.26) !important;
     transform-origin: center center !important;
     margin: 0 auto !important;
+  }
+
+  /* A4 Sheet (210mm x 297mm) holding 1 or 2 A5 Landscape (210mm x 148.5mm) slips Top & Bottom */
+  .print-page-a4-dual {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 210mm !important;
+    max-height: 297mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    background: #ffffff !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .print-page-a4-dual:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* Each half of the A4 sheet is exact A5 Landscape (210mm wide x 148.5mm high) */
+  .print-slot-a5 {
+    width: 210mm !important;
+    height: 148.5mm !important;
+    min-width: 210mm !important;
+    min-height: 148.5mm !important;
+    max-width: 210mm !important;
+    max-height: 148.5mm !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+  }
+
+  .print-slot-a5.has-cut-line {
+    border-bottom: 1px dashed #94a3b8 !important;
+  }
+
+  /* Scale the 850x601 (1.414:1) certificate canvas to fit inside A5 Landscape (210mm x 148.5mm) with safe margin */
+  .print-cert-sheet-a5 {
+    width: 850px !important;
+    height: 601px !important;
+    min-width: 850px !important;
+    min-height: 601px !important;
+    max-width: 850px !important;
+    max-height: 601px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    transform: scale(0.895) !important;
+    transform-origin: center center !important;
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
   }
 }

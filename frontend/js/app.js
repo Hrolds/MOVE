@@ -67,6 +67,8 @@ const appState = {
     participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled'
   },
   caSignatoryChoice: 'sig2_right',
+  caPrintMode: 'dual', // 'dual' (2x A5 Landscape Top & Bottom on A4) or 'single' (1x A5 Landscape on A4)
+  caDualBehavior: 'pair', // 'pair' (Current + Next Person) or 'duplicate' (2 Copies of Same Person)
   sigDisplayMode: 'both',
   sigSize: 44, // Default signature height in pixels
   sig1Size: 44,
@@ -2347,7 +2349,9 @@ function saveLayoutPreferences() {
       nameFontSize: appState.nameFontSize,
       bodyFontSize: appState.bodyFontSize,
       titleFontSize: appState.titleFontSize,
-      headerFontSize: appState.headerFontSize
+      headerFontSize: appState.headerFontSize,
+      caPrintMode: appState.caPrintMode,
+      caDualBehavior: appState.caDualBehavior
     }));
   } catch (e) {}
 }
@@ -2364,6 +2368,8 @@ function initLayoutPreferences() {
       if (prefs.bodyFontSize !== undefined) appState.bodyFontSize = prefs.bodyFontSize;
       if (prefs.titleFontSize !== undefined) appState.titleFontSize = prefs.titleFontSize;
       if (prefs.headerFontSize !== undefined) appState.headerFontSize = prefs.headerFontSize;
+      if (prefs.caPrintMode) appState.caPrintMode = prefs.caPrintMode;
+      if (prefs.caDualBehavior) appState.caDualBehavior = prefs.caDualBehavior;
     }
   } catch (e) {}
   updateWatermarkUI();
@@ -2376,6 +2382,57 @@ function initLayoutPreferences() {
 function onCaSignatoryChoiceChange(val) {
   appState.caSignatoryChoice = val;
   renderCertificateCanvas();
+}
+
+function setCaPrintMode(mode) {
+  appState.caPrintMode = (mode === 'single') ? 'single' : 'dual';
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function setCaDualBehavior(behavior) {
+  appState.caDualBehavior = (behavior === 'duplicate') ? 'duplicate' : 'pair';
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function updateCaPrintModeUI() {
+  const toolbar = document.getElementById("caPrintModeToolbar");
+  const btnSingle = document.getElementById("btnCaModeSingle");
+  const btnDual = document.getElementById("btnCaModeDual");
+  const behaviorSel = document.getElementById("caDualBehaviorSelect");
+  const topBadge = document.getElementById("caTopSlipBadge");
+  const bottomWrapper = document.getElementById("caDualBottomPreviewWrapper");
+
+  const isCA = appState.currentTemplate === 'appearance';
+  const isDual = appState.caPrintMode === 'dual';
+
+  if (toolbar) toolbar.classList.toggle("hidden", !isCA);
+
+  if (btnSingle && btnDual) {
+    if (isDual) {
+      btnDual.className = "px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow";
+      btnSingle.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white";
+    } else {
+      btnSingle.className = "px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center gap-1.5 bg-emerald-500 text-slate-950 shadow";
+      btnDual.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white";
+    }
+  }
+
+  if (behaviorSel) {
+    behaviorSel.value = appState.caDualBehavior || 'pair';
+    behaviorSel.classList.toggle("hidden", !isDual);
+  }
+
+  const recipients = getActiveCertRecipients();
+  if (!isCA || !isDual || recipients.length === 0) {
+    if (topBadge) topBadge.classList.add("hidden");
+    if (bottomWrapper) bottomWrapper.classList.add("hidden");
+    return;
+  }
+
+  if (topBadge) topBadge.classList.remove("hidden");
+  if (bottomWrapper) bottomWrapper.classList.remove("hidden");
 }
 
 function onSigDisplayModeChange(val) {
@@ -2933,6 +2990,68 @@ function renderCertificateCanvas() {
       <!-- Accrediting Signatory -->
       ${caSignatoryBlock}
     `;
+
+    // If Dual Mode (Top & Bottom A5 Landscape on A4) is active, populate the Bottom A5 preview canvas
+    const bottomCanvas = document.getElementById("certStageCanvasBottom");
+    if (bottomCanvas && appState.caPrintMode === 'dual' && recipients.length > 0) {
+      const isDuplicate = (appState.caDualBehavior === 'duplicate') || (recipients.length === 1);
+      const bottomIdx = isDuplicate ? appState.currentCertIndex : ((appState.currentCertIndex + 1) % recipients.length);
+      const bottomAttendee = recipients[bottomIdx] || attendee;
+
+      const topLbl = document.getElementById("caTopSlipRecipientLabel");
+      const botLbl = document.getElementById("caBottomSlipRecipientLabel");
+      if (topLbl) topLbl.textContent = `Slip #1 (Top): ${attendee.full_name}`;
+      if (botLbl) {
+        botLbl.textContent = isDuplicate
+          ? `Slip #2 (Bottom — Duplicate Copy): ${bottomAttendee.full_name}`
+          : `Slip #2 (Bottom — Recipient #${bottomIdx + 1}): ${bottomAttendee.full_name}`;
+      }
+
+      bottomCanvas.className = canvas.className;
+      bottomCanvas.innerHTML = `
+        ${watermarkHtml}
+
+        <!-- CA Header -->
+        <div class="relative z-10 text-center border-b pb-4">
+          ${appState.showLogos ? `
+            <div class="absolute left-0 top-0">
+              <img src="/CITY HALL LOGO.png" class="w-12 h-12 object-contain">
+            </div>
+            <div class="absolute right-0 top-0">
+              <img src="/MOVE BAGUIO LOGO.png" class="w-12 h-12 object-contain">
+            </div>
+          ` : ''}
+
+          <p class="uppercase tracking-widest text-slate-500 transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+          <h4 class="font-bold uppercase text-slate-800 transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+          <p class="font-semibold text-slate-600 transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;">${escapeHtml(appState.certSettings?.header_line_3 || 'Baguio City, Philippines')}</p>
+          
+          <h2 class="font-sans font-black text-slate-950 tracking-wider mt-2 uppercase transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;">
+            ${escapeHtml(appState.certSettings?.appearance_title || 'CERTIFICATE OF APPEARANCE')}
+          </h2>
+        </div>
+
+        <!-- Formal Body -->
+        <div class="my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
+          <p>
+            This is to certify that <strong class="uppercase font-bold text-slate-950" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.65)}px;">${escapeHtml(bottomAttendee.full_name)}</strong>, holding the position / assignment of 
+            <strong>${escapeHtml(bottomAttendee.role_title || bottomAttendee.position || 'Employee / Participant')}</strong> under the <strong>${escapeHtml(bottomAttendee.office || 'City Government of Baguio')}</strong>, 
+            was duly verified to have ${appState.certRecipientPool === 'facilitators' ? 'rendered invaluable service as Resource Speaker / Facilitator in' : 'attended and actively participated in'} the activity entitled:
+          </p>
+
+          <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
+            “${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”
+          </p>
+
+          <p>
+            held on <strong>${escapeHtml(act.date)}</strong> at the <strong>${escapeHtml(act.venue)}</strong>.
+          </p>
+        </div>
+
+        <!-- Accrediting Signatory -->
+        ${caSignatoryBlock}
+      `;
+    }
   }
 
   // ==========================================
@@ -3018,6 +3137,8 @@ function renderCertificateCanvas() {
       </div>
     `;
   }
+
+  updateCaPrintModeUI();
 }
 
 // ==========================================================================
@@ -3051,15 +3172,49 @@ function syncLiveCertEditsBeforePrint() {
   if (sig2 && s2Inp) sig2.title = s2Inp;
 }
 
-function buildPrintableSheetHtml(canvasEl) {
+function setDynamicPrintPageOrientation(orientation) {
+  let styleEl = document.getElementById("dynamicPrintPageStyle");
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = "dynamicPrintPageStyle";
+    document.head.appendChild(styleEl);
+  }
+  if (orientation === 'portrait') {
+    // A4 Portrait (210mm x 297mm) holds 1 or 2 A5 Landscape (210mm x 148.5mm) slips stacked Top & Bottom
+    styleEl.textContent = `@page { size: A4 portrait; margin: 0mm; } @media print { @page { size: A4 portrait; margin: 0mm; } }`;
+  } else {
+    // A4 Landscape (297mm x 210mm) for Full-Sheet Participation & Appreciation Certificates
+    styleEl.textContent = `@page { size: A4 landscape; margin: 0mm; } @media print { @page { size: A4 landscape; margin: 0mm; } }`;
+  }
+}
+
+function buildCleanCertCloneHtml(canvasEl, sheetClass) {
+  if (!canvasEl) return "";
   const clone = canvasEl.cloneNode(true);
   clone.removeAttribute("id");
   clone.querySelectorAll(".no-print, .canvas-inline-saved-pill").forEach(el => el.remove());
   clone.querySelectorAll("[contenteditable]").forEach(el => el.removeAttribute("contenteditable"));
-  clone.className = `${canvasEl.className} print-cert-sheet`;
+  clone.className = `${canvasEl.className} ${sheetClass}`;
+  return clone.outerHTML;
+}
+
+function buildPrintableSheetHtml(canvasEl) {
   return `
     <div class="print-page">
-      ${clone.outerHTML}
+      ${buildCleanCertCloneHtml(canvasEl, 'print-cert-sheet')}
+    </div>
+  `;
+}
+
+function buildPrintableA5OnA4SheetHtml(topCertHtml, bottomCertHtml) {
+  return `
+    <div class="print-page-a4-dual">
+      <div class="print-slot-a5 has-cut-line">
+        ${topCertHtml || ''}
+      </div>
+      <div class="print-slot-a5">
+        ${bottomCertHtml || ''}
+      </div>
     </div>
   `;
 }
@@ -3085,7 +3240,24 @@ function printSingleCertificate() {
   if (!canvas || !printBox) return;
 
   syncLiveCertEditsBeforePrint();
-  // Capture directly from the active canvas (preserving any inline edits & all saved designs/borders)
+
+  // Certificate of Appearance: A5 Landscape (210mm x 148.5mm) printed on A4 (Single Mode or Dual Top & Bottom Mode)
+  if (appState.currentTemplate === 'appearance') {
+    setDynamicPrintPageOrientation('portrait');
+    renderCertificateCanvas();
+    const topHtml = buildCleanCertCloneHtml(document.getElementById("certStageCanvas"), 'print-cert-sheet-a5');
+    let bottomHtml = "";
+    if (appState.caPrintMode === 'dual') {
+      const bottomCanvas = document.getElementById("certStageCanvasBottom");
+      bottomHtml = bottomCanvas ? buildCleanCertCloneHtml(bottomCanvas, 'print-cert-sheet-a5') : topHtml;
+    }
+    printBox.innerHTML = buildPrintableA5OnA4SheetHtml(topHtml, bottomHtml);
+    triggerA4PrintWhenImagesReady(printBox);
+    return;
+  }
+
+  // Participation & Appreciation: Full A4 Landscape (297mm x 210mm)
+  setDynamicPrintPageOrientation('landscape');
   printBox.innerHTML = buildPrintableSheetHtml(canvas);
   triggerA4PrintWhenImagesReady(printBox);
 }
@@ -3103,13 +3275,42 @@ function batchPrintAllCertificates() {
 
   // Backup current recipient index
   const savedIndex = appState.currentCertIndex;
-
   let pagesHtml = "";
-  for (let i = 0; i < recipients.length; i++) {
-    appState.currentCertIndex = i;
-    renderCertificateCanvas();
-    const canvas = document.getElementById("certStageCanvas");
-    pagesHtml += buildPrintableSheetHtml(canvas);
+
+  // Certificate of Appearance: A5 Landscape on A4 Paper (Dual 2-Up Top & Bottom or Single 1-Up)
+  if (appState.currentTemplate === 'appearance') {
+    setDynamicPrintPageOrientation('portrait');
+    if (appState.caPrintMode === 'dual') {
+      for (let i = 0; i < recipients.length; i += 2) {
+        appState.currentCertIndex = i;
+        renderCertificateCanvas();
+        const topHtml = buildCleanCertCloneHtml(document.getElementById("certStageCanvas"), 'print-cert-sheet-a5');
+
+        let bottomHtml = "";
+        if (i + 1 < recipients.length) {
+          appState.currentCertIndex = i + 1;
+          renderCertificateCanvas();
+          bottomHtml = buildCleanCertCloneHtml(document.getElementById("certStageCanvas"), 'print-cert-sheet-a5');
+        }
+        pagesHtml += buildPrintableA5OnA4SheetHtml(topHtml, bottomHtml);
+      }
+    } else {
+      for (let i = 0; i < recipients.length; i++) {
+        appState.currentCertIndex = i;
+        renderCertificateCanvas();
+        const topHtml = buildCleanCertCloneHtml(document.getElementById("certStageCanvas"), 'print-cert-sheet-a5');
+        pagesHtml += buildPrintableA5OnA4SheetHtml(topHtml, "");
+      }
+    }
+  } else {
+    // Participation & Appreciation: Full A4 Landscape
+    setDynamicPrintPageOrientation('landscape');
+    for (let i = 0; i < recipients.length; i++) {
+      appState.currentCertIndex = i;
+      renderCertificateCanvas();
+      const canvas = document.getElementById("certStageCanvas");
+      pagesHtml += buildPrintableSheetHtml(canvas);
+    }
   }
 
   printBox.innerHTML = pagesHtml;
