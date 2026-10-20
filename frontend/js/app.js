@@ -57,11 +57,11 @@ const appState = {
   certSettings: {
     header_line_1: 'Republic of the Philippines • City Government of Baguio',
     header_line_2: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
-    header_line_3: 'City Hall Chapter • Baguio City, Philippines',
+    header_line_3: 'Baguio City, Philippines',
     participation_title: 'CERTIFICATE OF PARTICIPATION',
-    participation_intro: 'This certification is proudly presented to',
+    participation_intro: 'is presented to',
     appreciation_title: 'CERTIFICATE OF APPRECIATION',
-    appreciation_intro: 'is proudly and warmly presented to',
+    appreciation_intro: 'is presented to',
     appearance_title: 'CERTIFICATE OF APPEARANCE',
     appearance_intro: 'This is to certify that',
     participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled'
@@ -2383,74 +2383,9 @@ function onSigDisplayModeChange(val) {
   renderCertificateCanvas();
 }
 
-// -------------------------------------------------------------
-// CERTIFICATE CANVAS RENDERING (1 UNIFIED ENGINE, 3 TEMPLATES)
-// -------------------------------------------------------------
-function renderCertificateCanvas() {
-  const canvas = document.getElementById("certStageCanvas");
-  if (!canvas) return;
-
-  const recipients = getActiveCertRecipients();
-
-  if (recipients.length === 0) {
-    const poolLabel = appState.certRecipientPool === 'facilitators' ? 'Facilitators' : 'Attendees';
-    canvas.innerHTML = `
-      <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500">
-        <i class="fa-solid fa-triangle-exclamation text-4xl text-amber-500 mb-3"></i>
-        <h3 class="text-base font-bold text-slate-700">No Eligible ${poolLabel} to Issue Certificates</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-sm">
-          Certificates are strictly gated! Only persons marked as <strong>Present</strong> in the Checklist can be issued certificates.
-        </p>
-        <button onclick="switchView('attendance')" class="mt-4 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition">
-          Go to Attendance / Facilitators Checklist
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  if (appState.currentCertIndex >= recipients.length) {
-    appState.currentCertIndex = Math.max(0, recipients.length - 1);
-  }
-
-  const attendee = recipients[appState.currentCertIndex] || recipients[0];
-  const act = appState.customCertFields;
-  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id) || { name: "MARIO D. GANGA JR.", title: "MOVE Chapter President", signature_image: "GANGA.png" };
-  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id) || { name: "HON. BENJAMIN B. MAGALONG", title: "City Mayor & Honorary Chapter Adviser", signature_image: "signature (15).png" };
-
-  const showSig1Img = appState.showSignatures && 
-                      (appState.sigDisplayMode === 'both' || appState.sigDisplayMode === 'sig1_only') && 
-                      Boolean(sig1.signature_image);
-
-  const showSig2Img = appState.showSignatures && 
-                      (appState.sigDisplayMode === 'both' || appState.sigDisplayMode === 'sig2_only') && 
-                      Boolean(sig2.signature_image);
-
-  const watermarkHtml = appState.showWatermark ? `
-    <div class="group/watermark cert-watermark-overlay absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
-      <!-- Quick on-canvas watermark position pill (hidden during print) -->
-      <div class="no-print absolute top-3 right-4 opacity-0 group-hover/watermark:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
-        <span class="text-slate-400">Watermark:</span>
-        <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark higher">↑ Up</button>
-        <span class="text-move-gold-400 font-semibold">${appState.watermarkYOffset > 0 ? '+' : ''}${appState.watermarkYOffset || 0}px</span>
-        <button type="button" onclick="nudgeWatermarkYOffset(6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark lower">↓ Down</button>
-        ${appState.watermarkYOffset !== 0 ? `<button type="button" onclick="setWatermarkYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
-      </div>
-      <img src="${escapeHtml(appState.watermarkLogo || '/MOVE BAGUIO LOGO.png')}" 
-           alt="Watermark" 
-           class="object-contain pointer-events-none select-none max-w-[65%] max-h-[80%] transition-transform duration-100"
-           style="width: ${appState.watermarkSize || 320}px; height: ${appState.watermarkSize || 320}px; opacity: ${(appState.watermarkOpacity !== undefined ? appState.watermarkOpacity : 12) / 100}; filter: grayscale(10%); transform: translateY(${appState.watermarkYOffset || 0}px);">
-    </div>
-  ` : '';
-
 // --- CERTIFICATE HEADERS, TITLES & PRESENTATION CONTROLLER ---
 async function loadCertificateSettings() {
   try {
-    const raw = localStorage.getItem("move_cert_header_settings");
-    if (raw) {
-      const saved = JSON.parse(raw);
-      appState.certSettings = Object.assign({}, appState.certSettings, saved);
-    }
     const res = await fetch(`${API_BASE}/api/certificate-settings`);
     const data = await res.json();
     if (data.success && data.settings) {
@@ -2458,9 +2393,17 @@ async function loadCertificateSettings() {
       localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
     }
   } catch (e) {
-    console.warn("Could not load certificate settings from server:", e);
+    console.warn("Could not load certificate settings from server, using fallback:", e);
+    try {
+      const raw = localStorage.getItem("move_cert_header_settings");
+      if (raw) {
+        const saved = JSON.parse(raw);
+        appState.certSettings = Object.assign({}, appState.certSettings, saved);
+      }
+    } catch (_) {}
   }
   updateCertHeaderInputs();
+  renderCertificateCanvas();
 }
 
 function getActiveCertTitleKey() {
@@ -2710,6 +2653,66 @@ async function resetCertificateSettings() {
   }
 }
 
+// -------------------------------------------------------------
+// CERTIFICATE CANVAS RENDERING (1 UNIFIED ENGINE, 3 TEMPLATES)
+// -------------------------------------------------------------
+function renderCertificateCanvas() {
+  const canvas = document.getElementById("certStageCanvas");
+  if (!canvas) return;
+
+  const recipients = getActiveCertRecipients();
+
+  if (recipients.length === 0) {
+    const poolLabel = appState.certRecipientPool === 'facilitators' ? 'Facilitators' : 'Attendees';
+    canvas.innerHTML = `
+      <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500">
+        <i class="fa-solid fa-triangle-exclamation text-4xl text-amber-500 mb-3"></i>
+        <h3 class="text-base font-bold text-slate-700">No Eligible ${poolLabel} to Issue Certificates</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm">
+          Certificates are strictly gated! Only persons marked as <strong>Present</strong> in the Checklist can be issued certificates.
+        </p>
+        <button onclick="switchView('attendance')" class="mt-4 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition">
+          Go to Attendance / Facilitators Checklist
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  if (appState.currentCertIndex >= recipients.length) {
+    appState.currentCertIndex = Math.max(0, recipients.length - 1);
+  }
+
+  const attendee = recipients[appState.currentCertIndex] || recipients[0];
+  const act = appState.customCertFields;
+  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id) || { name: "MARIO D. GANGA JR.", title: "MOVE Chapter President", signature_image: "GANGA.png" };
+  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id) || { name: "HON. BENJAMIN B. MAGALONG", title: "City Mayor & Honorary Chapter Adviser", signature_image: "signature (15).png" };
+
+  const showSig1Img = appState.showSignatures && 
+                      (appState.sigDisplayMode === 'both' || appState.sigDisplayMode === 'sig1_only') && 
+                      Boolean(sig1.signature_image);
+
+  const showSig2Img = appState.showSignatures && 
+                      (appState.sigDisplayMode === 'both' || appState.sigDisplayMode === 'sig2_only') && 
+                      Boolean(sig2.signature_image);
+
+  const watermarkHtml = appState.showWatermark ? `
+    <div class="group/watermark cert-watermark-overlay absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+      <!-- Quick on-canvas watermark position pill (hidden during print) -->
+      <div class="no-print absolute top-3 right-4 opacity-0 group-hover/watermark:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2 py-0.5 text-[9px] font-mono flex items-center gap-1.5 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+        <span class="text-slate-400">Watermark:</span>
+        <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark higher">↑ Up</button>
+        <span class="text-move-gold-400 font-semibold">${appState.watermarkYOffset > 0 ? '+' : ''}${appState.watermarkYOffset || 0}px</span>
+        <button type="button" onclick="nudgeWatermarkYOffset(6)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer" title="Move watermark lower">↓ Down</button>
+        ${appState.watermarkYOffset !== 0 ? `<button type="button" onclick="setWatermarkYOffset(0)" class="text-slate-400 hover:text-rose-400 ml-1 text-[8px]" title="Reset Center">✕</button>` : ''}
+      </div>
+      <img src="${escapeHtml(appState.watermarkLogo || '/MOVE BAGUIO LOGO.png')}" 
+           alt="Watermark" 
+           class="object-contain pointer-events-none select-none max-w-[65%] max-h-[80%] transition-transform duration-100"
+           style="width: ${appState.watermarkSize || 320}px; height: ${appState.watermarkSize || 320}px; opacity: ${(appState.watermarkOpacity !== undefined ? appState.watermarkOpacity : 12) / 100}; filter: grayscale(10%); transform: translateY(${appState.watermarkYOffset || 0}px);">
+    </div>
+  ` : '';
+
   // ==========================================
   // TEMPLATE 1: PARTICIPATION (A4 LANDSCAPE)
   // ==========================================
@@ -2732,13 +2735,13 @@ async function resetCertificateSettings() {
 
         <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable tracking-widest uppercase font-bold text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
         <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'Baguio City, Philippines')}</p>
         
         <h2 contenteditable="true" oninput="onCanvasCertFieldInput('participation_title', this.innerText, this)" onblur="saveCanvasCertField('participation_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.participation_title || 'CERTIFICATE OF PARTICIPATION')}
         </h2>
         <p contenteditable="true" oninput="onCanvasCertFieldInput('participation_intro', this.innerText, this)" onblur="saveCanvasCertField('participation_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
-          ${escapeHtml(appState.certSettings?.participation_intro || 'This certification is proudly presented to')}
+          ${escapeHtml(appState.certSettings?.participation_intro || 'is presented to')}
         </p>
       </div>
 
@@ -2906,7 +2909,7 @@ async function resetCertificateSettings() {
 
         <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase tracking-widest text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
         <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold uppercase text-slate-800 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-semibold text-slate-600 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-semibold text-slate-600 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'Baguio City, Philippines')}</p>
         
         <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appearance_title', this.innerText, this)" onblur="saveCanvasCertField('appearance_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appearance_title || 'CERTIFICATE OF APPEARANCE')}
@@ -2978,13 +2981,13 @@ async function resetCertificateSettings() {
 
         <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable tracking-widest uppercase font-bold text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
         <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'Baguio City, Philippines')}</p>
         
         <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appreciation_title', this.innerText, this)" onblur="saveCanvasCertField('appreciation_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appreciation_title || 'CERTIFICATE OF APPRECIATION')}
         </h2>
         <p contenteditable="true" oninput="onCanvasCertFieldInput('appreciation_intro', this.innerText, this)" onblur="saveCanvasCertField('appreciation_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
-          ${escapeHtml(appState.certSettings?.appreciation_intro || 'is proudly and warmly presented to')}
+          ${escapeHtml(appState.certSettings?.appreciation_intro || 'is presented to')}
         </p>
       </div>
 

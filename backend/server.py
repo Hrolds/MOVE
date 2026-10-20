@@ -498,11 +498,11 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             UPDATE certificate_settings
             SET header_line_1 = 'Republic of the Philippines • City Government of Baguio',
                 header_line_2 = 'Men Opposed to Violence Against Women Everywhere (MOVE)',
-                header_line_3 = 'City Hall Chapter • Baguio City, Philippines',
+                header_line_3 = 'Baguio City, Philippines',
                 participation_title = 'CERTIFICATE OF PARTICIPATION',
-                participation_intro = 'This certification is proudly presented to',
+                participation_intro = 'is presented to',
                 appreciation_title = 'CERTIFICATE OF APPRECIATION',
-                appreciation_intro = 'is proudly and warmly presented to',
+                appreciation_intro = 'is presented to',
                 appearance_title = 'CERTIFICATE OF APPEARANCE',
                 appearance_intro = 'This is to certify that',
                 participation_citation = 'for {his/her} active participation and completion of the capacity-building seminar entitled'
