@@ -64,7 +64,8 @@ const appState = {
     appreciation_intro: 'is presented to',
     appearance_title: 'CERTIFICATE OF APPEARANCE',
     appearance_intro: 'This is to certify that',
-    participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled'
+    participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled',
+    appearance_citation: 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in'
   },
   caSignatoryChoice: 'sig2_right',
   templateSigLayout: {
@@ -2309,9 +2310,139 @@ function onBodyFontSizeChange(val) {
   renderCertificateCanvas();
 }
 
+function getAppearanceCitation(attendee) {
+  const cs = appState.certSettings || {};
+  if (cs.appearance_citation && cs.appearance_citation.trim() !== '') {
+    return cs.appearance_citation.trim();
+  }
+  return appState.certRecipientPool === 'facilitators'
+    ? 'rendered invaluable service as Resource Speaker / Facilitator in'
+    : 'attended and actively participated in';
+}
+
+function setBodyFontSizePreset(size) {
+  appState.bodyFontSize = size;
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function openModalEditAttendeeFromStudio(recipientIdx = null) {
+  const recipients = getActiveCertRecipients();
+  const idx = (recipientIdx !== null) ? recipientIdx : appState.currentCertIndex;
+  const person = recipients[idx];
+  if (!person) return;
+  if (appState.certRecipientPool === 'facilitators') {
+    openModalEditFacilitator(person.id);
+  } else {
+    openModalEditAttendee(person.id);
+  }
+}
+
+async function onCanvasAttendeeFieldBlur(field, val, recipientIdx = null) {
+  const recipients = getActiveCertRecipients();
+  const idx = (recipientIdx !== null) ? recipientIdx : appState.currentCertIndex;
+  const person = recipients[idx];
+  if (!person) return;
+
+  const cleanVal = (val || '').trim();
+  if (!cleanVal) return;
+
+  const isFac = appState.certRecipientPool === 'facilitators';
+  const actId = appState.currentActivityId || 1;
+  const personId = person.id;
+
+  if (field === 'full_name') {
+    person.full_name = cleanVal.toUpperCase();
+  } else if (field === 'position') {
+    person.position = cleanVal;
+    if (person.role_title !== undefined) person.role_title = cleanVal;
+  } else if (field === 'role_title') {
+    person.role_title = cleanVal;
+    person.position = cleanVal;
+  } else if (field === 'office') {
+    person.office = cleanVal;
+  }
+
+  renderRecipientDropdown();
+  renderCertificateCanvas();
+
+  try {
+    const endpoint = isFac 
+      ? `${API_BASE}/api/activities/${actId}/facilitators/${personId}` 
+      : `${API_BASE}/api/activities/${actId}/attendees/${personId}`;
+
+    const payload = {
+      full_name: person.full_name,
+      position: person.position || cleanVal,
+      office: person.office || 'City Government of Baguio',
+      gender: person.gender || 'M',
+      civil_status: person.civil_status || 'Married',
+      contact_number: person.contact_number || '',
+      notes: person.notes || ''
+    };
+    if (isFac) {
+      payload.role_title = person.role_title || cleanVal;
+    }
+
+    const res = await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToastNotification(`Saved: ${field.replace('_', ' ').toUpperCase()} updated!`);
+    }
+  } catch (err) {
+    console.warn("Failed to auto-save canvas recipient edit:", err);
+  }
+}
+
+async function saveStudioActivityField(field, val) {
+  const actId = appState.currentActivityId;
+  const cleanVal = (val || '').trim();
+  if (!cleanVal || !actId) return;
+
+  if (!appState.customCertFields) appState.customCertFields = {};
+  appState.customCertFields[field] = cleanVal;
+  const currAct = (appState.activities || []).find(a => a.id === actId);
+  if (currAct) currAct[field] = cleanVal;
+
+  const inpId = field === 'title' ? 'certInputTitle' : (field === 'theme' ? 'certInputTheme' : (field === 'date' ? 'certInputDate' : (field === 'venue' ? 'certInputVenue' : null)));
+  if (inpId) {
+    const inp = document.getElementById(inpId);
+    if (inp) inp.value = cleanVal;
+  }
+
+  try {
+    const payload = {};
+    if (currAct) {
+      payload.title = currAct.title;
+      payload.theme = currAct.theme;
+      payload.date = currAct.date;
+      payload.venue = currAct.venue;
+      payload.hours = currAct.hours;
+    }
+    payload[field] = cleanVal;
+
+    const res = await fetch(`${API_BASE}/api/activities/${actId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToastNotification(`Saved: Activity ${field.toUpperCase()} updated!`);
+    }
+  } catch (e) {
+    console.warn("Failed to auto-save activity field:", e);
+  }
+}
+
 function adjustBodyFontSize(delta) {
   const current = appState.bodyFontSize || 12;
-  const next = Math.max(9, Math.min(18, Math.round((current + delta) * 10) / 10));
+  const next = Math.max(8, Math.min(26, Math.round((current + delta) * 10) / 10));
   appState.bodyFontSize = next;
   updateTypographyUI();
   saveLayoutPreferences();
@@ -2380,6 +2511,10 @@ function updateTypographyUI() {
   if (lblB) lblB.textContent = `${b}px`;
   const sliderB = document.getElementById("certBodyFontSizeSlider");
   if (sliderB) sliderB.value = b;
+  const quickB = document.getElementById("stageQuickBodySizeLabel");
+  if (quickB) quickB.textContent = `${b}px`;
+  const quickN = document.getElementById("stageQuickNameSizeLabel");
+  if (quickN) quickN.textContent = `${n}px`;
 
   const lblT = document.getElementById("lblTitleFontSize");
   if (lblT) lblT.textContent = `${t}px`;
@@ -2564,7 +2699,19 @@ function updateCertHeaderInputs() {
   if (intro) intro.value = cs[introKey] || '';
 
   const citInp = document.getElementById("certCitationInput");
-  if (citInp) citInp.value = cs.participation_citation || 'for {his/her} active participation and completion of the capacity-building seminar entitled';
+  const citLbl = document.getElementById("lblCitationContext");
+  const citTip = document.getElementById("lblCitationTip");
+  if (citInp) {
+    if (appState.currentTemplate === 'appearance') {
+      citInp.value = cs.appearance_citation || 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in';
+      if (citLbl) citLbl.textContent = 'Appearance Certification Clause';
+      if (citTip) citTip.textContent = 'Tip: This phrase appears right before "the activity entitled:". Click to edit and save.';
+    } else {
+      citInp.value = cs.participation_citation || 'for {his/her} active participation and completion of the capacity-building seminar entitled';
+      if (citLbl) citLbl.innerHTML = 'Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)';
+      if (citTip) citTip.innerHTML = 'Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.';
+    }
+  }
 
   if (ctx) {
     ctx.textContent = appState.currentTemplate === 'appreciation' ? 'APPRECIATION' : (appState.currentTemplate === 'appearance' ? 'APPEARANCE' : 'PARTICIPATION');
@@ -2576,6 +2723,9 @@ function onSidebarCertFieldInput(field, val) {
   let key = field;
   if (field === 'active_title') key = getActiveCertTitleKey();
   if (field === 'active_intro') key = getActiveCertIntroKey();
+  if (field === 'active_citation' || field === 'participation_citation') {
+    key = appState.currentTemplate === 'appearance' ? 'appearance_citation' : 'participation_citation';
+  }
 
   if (!appState.certSettings) appState.certSettings = {};
   appState.certSettings[key] = val;
@@ -2666,10 +2816,16 @@ async function saveCertField(fieldKey, isDebounce = false) {
     inpId = "certIntroInput"; 
     statusId = "introSaveStatus"; 
     labelName = "Presentation Intro Line"; 
-  } else if (fieldKey === 'participation_citation') {
+  } else if (fieldKey === 'participation_citation' || fieldKey === 'appearance_citation' || fieldKey === 'active_citation') {
     inpId = "certCitationInput";
     statusId = "citationSaveStatus";
-    labelName = "Participation Citation";
+    if (appState.currentTemplate === 'appearance') {
+      key = 'appearance_citation';
+      labelName = "Appearance Certification Clause";
+    } else {
+      key = 'participation_citation';
+      labelName = "Participation Citation";
+    }
   }
 
   const inp = document.getElementById(inpId);
@@ -3038,9 +3194,9 @@ function renderCertificateCanvas() {
       </div>
 
       <!-- Formal Body -->
-      <div class="group/recip my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
+      <div class="group/recip my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
         <!-- Quick on-canvas body nudge & font size pill on hover (hidden during print) -->
-        <div class="no-print absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
+        <div class="no-print absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
           <div class="flex items-center gap-1">
             <span class="text-slate-400">Position:</span>
             <button type="button" onclick="nudgeRecipientYOffset(-4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer bg-slate-800 rounded" title="Move body higher">↑</button>
@@ -3050,24 +3206,37 @@ function renderCertificateCanvas() {
           </div>
           <span class="text-slate-600">|</span>
           <div class="flex items-center gap-1">
+            <span class="text-slate-400">Body Font:</span>
+            <button type="button" onclick="adjustBodyFontSize(-0.5)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make body text smaller">A-</button>
+            <span class="text-move-gold-400 font-semibold">${appState.bodyFontSize || 12}px</span>
+            <button type="button" onclick="adjustBodyFontSize(0.5)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make body text larger">A+</button>
+          </div>
+          <span class="text-slate-600">|</span>
+          <div class="flex items-center gap-1">
             <span class="text-slate-400">Name Font:</span>
             <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font smaller">A-</button>
             <span class="text-move-gold-400 font-semibold">${appState.nameFontSize || 26}px</span>
             <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font larger">A+</button>
           </div>
+          <span class="text-slate-600">|</span>
+          <button type="button" onclick="openModalEditAttendeeFromStudio(${appState.currentCertIndex})" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded text-move-gold-400 flex items-center gap-1" title="Open full edit form">
+            <i class="fa-solid fa-pen-to-square text-[9px]"></i> Edit Details
+          </button>
         </div>
-        <p>
-          This is to certify that <strong class="uppercase font-bold text-slate-950" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.65)}px;">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
-          <strong>${escapeHtml(attendee.role_title || attendee.position || 'Employee / Participant')}</strong> under the <strong>${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>, 
-          was duly verified to have ${appState.certRecipientPool === 'facilitators' ? 'rendered invaluable service as Resource Speaker / Facilitator in' : 'attended and actively participated in'} the activity entitled:
+        <p class="leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px;">
+          <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_intro', this.innerText)" onblur="saveCanvasCertField('appearance_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit intro line (auto-saves to database)">${escapeHtml(appState.certSettings?.appearance_intro || 'This is to certify that')}</span> 
+          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('full_name', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.72)}px;" title="Click to edit recipient name (auto-saves)">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
+          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('position', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit position / assignment (auto-saves)">${escapeHtml(attendee.role_title || attendee.position || 'Employee / Participant')}</strong> under the 
+          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('office', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit office / agency (auto-saves)">${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>, 
+          <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_citation', this.innerText)" onblur="saveCanvasCertField('appearance_citation', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text hover:bg-amber-100/40 px-1 rounded transition" title="Click to edit certification statement (auto-saves to database)">${escapeHtml(getAppearanceCitation(attendee))}</span> the activity entitled:
         </p>
 
-        <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
-          “${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”
+        <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(18, (appState.bodyFontSize || 12) + 2)}px;">
+          “<span contenteditable="true" onblur="saveStudioActivityField('title', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity title">${escapeHtml(act.title)}</span>: <span contenteditable="true" onblur="saveStudioActivityField('theme', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity theme">${escapeHtml(act.theme)}</span>”
         </p>
 
-        <p>
-          held on <strong>${escapeHtml(act.date)}</strong> at the <strong>${escapeHtml(act.venue)}</strong>.
+        <p style="font-size: ${appState.bodyFontSize || 12}px;">
+          held on <strong contenteditable="true" onblur="saveStudioActivityField('date', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit date">${escapeHtml(act.date)}</strong> at the <strong contenteditable="true" onblur="saveStudioActivityField('venue', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit venue">${escapeHtml(act.venue)}</strong>.
         </p>
       </div>
 
@@ -3116,19 +3285,27 @@ function renderCertificateCanvas() {
         </div>
 
         <!-- Formal Body -->
-        <div class="my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
-          <p>
-            This is to certify that <strong class="uppercase font-bold text-slate-950" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.65)}px;">${escapeHtml(bottomAttendee.full_name)}</strong>, holding the position / assignment of 
-            <strong>${escapeHtml(bottomAttendee.role_title || bottomAttendee.position || 'Employee / Participant')}</strong> under the <strong>${escapeHtml(bottomAttendee.office || 'City Government of Baguio')}</strong>, 
-            was duly verified to have ${appState.certRecipientPool === 'facilitators' ? 'rendered invaluable service as Resource Speaker / Facilitator in' : 'attended and actively participated in'} the activity entitled:
+        <div class="group/recipbot my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+          <div class="no-print absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover/recipbot:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
+            <span class="text-emerald-400 font-bold">Bottom Slip:</span>
+            <button type="button" onclick="openModalEditAttendeeFromStudio(${bottomIdx})" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded text-move-gold-400 flex items-center gap-1" title="Open full edit form">
+              <i class="fa-solid fa-pen-to-square text-[9px]"></i> Edit Details
+            </button>
+          </div>
+          <p class="leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px;">
+            <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_intro', this.innerText)" onblur="saveCanvasCertField('appearance_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit intro line (auto-saves to database)">${escapeHtml(appState.certSettings?.appearance_intro || 'This is to certify that')}</span> 
+            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('full_name', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.72)}px;" title="Click to edit recipient name (auto-saves)">${escapeHtml(bottomAttendee.full_name)}</strong>, holding the position / assignment of 
+            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('position', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit position / assignment (auto-saves)">${escapeHtml(bottomAttendee.role_title || bottomAttendee.position || 'Employee / Participant')}</strong> under the 
+            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('office', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit office / agency (auto-saves)">${escapeHtml(bottomAttendee.office || 'City Government of Baguio')}</strong>, 
+            <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_citation', this.innerText)" onblur="saveCanvasCertField('appearance_citation', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text hover:bg-amber-100/40 px-1 rounded transition" title="Click to edit certification statement (auto-saves to database)">${escapeHtml(getAppearanceCitation(bottomAttendee))}</span> the activity entitled:
           </p>
 
-          <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
-            “${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”
+          <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(18, (appState.bodyFontSize || 12) + 2)}px;">
+            “<span contenteditable="true" onblur="saveStudioActivityField('title', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity title">${escapeHtml(act.title)}</span>: <span contenteditable="true" onblur="saveStudioActivityField('theme', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity theme">${escapeHtml(act.theme)}</span>”
           </p>
 
-          <p>
-            held on <strong>${escapeHtml(act.date)}</strong> at the <strong>${escapeHtml(act.venue)}</strong>.
+          <p style="font-size: ${appState.bodyFontSize || 12}px;">
+            held on <strong contenteditable="true" onblur="saveStudioActivityField('date', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit date">${escapeHtml(act.date)}</strong> at the <strong contenteditable="true" onblur="saveStudioActivityField('venue', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit venue">${escapeHtml(act.venue)}</strong>.
           </p>
         </div>
 
@@ -3232,7 +3409,13 @@ function syncLiveCertEditsBeforePrint() {
   if (h3) appState.certSettings.header_line_3 = h3;
   if (titleVal) appState.certSettings[getActiveCertTitleKey()] = titleVal;
   if (introVal) appState.certSettings[getActiveCertIntroKey()] = introVal;
-  if (citVal) appState.certSettings.participation_citation = citVal;
+  if (citVal) {
+    if (appState.currentTemplate === 'appearance') {
+      appState.certSettings.appearance_citation = citVal;
+    } else {
+      appState.certSettings.participation_citation = citVal;
+    }
+  }
   localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
 
   // Sync signatory names, titles, and offices if edited

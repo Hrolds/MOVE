@@ -505,7 +505,8 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 appreciation_intro = 'is presented to',
                 appearance_title = 'CERTIFICATE OF APPEARANCE',
                 appearance_intro = 'This is to certify that',
-                participation_citation = 'for {his/her} active participation and completion of the capacity-building seminar entitled'
+                participation_citation = 'for {his/her} active participation and completion of the capacity-building seminar entitled',
+                appearance_citation = 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in'
             WHERE id = 1;
             """)
             conn.commit()
@@ -800,6 +801,7 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             appearance_title = str(body.get("appearance_title", existing_dict.get("appearance_title", ""))).strip()
             appearance_intro = str(body.get("appearance_intro", existing_dict.get("appearance_intro", ""))).strip()
             participation_citation = str(body.get("participation_citation", existing_dict.get("participation_citation", "for {his/her} active participation and completion of the capacity-building seminar entitled"))).strip()
+            appearance_citation = str(body.get("appearance_citation", existing_dict.get("appearance_citation", "was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in"))).strip()
 
             cursor.execute("""
             UPDATE certificate_settings
@@ -807,14 +809,16 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 participation_title = ?, participation_intro = ?,
                 appreciation_title = ?, appreciation_intro = ?,
                 appearance_title = ?, appearance_intro = ?,
-                participation_citation = ?
+                participation_citation = ?,
+                appearance_citation = ?
             WHERE id = 1;
             """, (
                 header_line_1, header_line_2, header_line_3,
                 participation_title, participation_intro,
                 appreciation_title, appreciation_intro,
                 appearance_title, appearance_intro,
-                participation_citation
+                participation_citation,
+                appearance_citation
             ))
             conn.commit()
             updated = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()

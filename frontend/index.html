@@ -642,18 +642,18 @@
               <!-- Seminar Citation Reason (with dynamic {his/her} support) -->
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)</label>
+                  <label id="lblCitationContext" class="text-[10px] font-bold text-slate-400 uppercase">Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)</label>
                   <span id="citationSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <input type="text" id="certCitationInput" oninput="onSidebarCertFieldInput('participation_citation', this.value)"
+                  <input type="text" id="certCitationInput" oninput="onSidebarCertFieldInput('active_citation', this.value)"
                     class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500"
                     placeholder="for {his/her} active participation and completion of the capacity-building seminar entitled">
-                  <button type="button" onclick="saveCertField('participation_citation')" id="btnSaveCitation" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Citation text directly to SQLite database">
+                  <button type="button" onclick="saveCertField('active_citation')" id="btnSaveCitation" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Citation text directly to SQLite database">
                     <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
                   </button>
                 </div>
-                <p class="text-[9px] text-slate-500 mt-0.5">Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.</p>
+                <p id="lblCitationTip" class="text-[9px] text-slate-500 mt-0.5">Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.</p>
               </div>
 
               <div class="pt-1">
@@ -923,15 +923,25 @@
             <!-- Body / Citation Font Size -->
             <div class="space-y-1 pt-2 border-t border-slate-800/60">
               <div class="flex items-center justify-between text-xs">
-                <label class="text-[10px] font-bold text-slate-300 uppercase">Citation Text Size</label>
+                <label class="text-[10px] font-bold text-slate-300 uppercase">Body &amp; Citation Text Size</label>
                 <span id="lblBodyFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">12px</span>
               </div>
               <div class="flex items-center gap-2">
-                <button type="button" onclick="adjustBodyFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease citation text size">A-</button>
-                <input type="range" id="certBodyFontSizeSlider" min="10" max="17" value="12" step="0.5"
+                <button type="button" onclick="adjustBodyFontSize(-0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease body text size">A-</button>
+                <input type="range" id="certBodyFontSizeSlider" min="8" max="26" value="12" step="0.5"
                   oninput="onBodyFontSizeChange(this.value)"
                   class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                <button type="button" onclick="adjustBodyFontSize(1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase citation text size">A+</button>
+                <button type="button" onclick="adjustBodyFontSize(0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase body text size">A+</button>
+              </div>
+              <div class="flex items-center justify-between gap-1 pt-0.5">
+                <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="setBodyFontSizePreset(11)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (11)</button>
+                  <button type="button" onclick="setBodyFontSizePreset(12)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Normal (12)</button>
+                  <button type="button" onclick="setBodyFontSizePreset(14)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Medium (14)</button>
+                  <button type="button" onclick="setBodyFontSizePreset(16)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (16)</button>
+                  <button type="button" onclick="setBodyFontSizePreset(18)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (18)</button>
+                </div>
               </div>
             </div>
 
@@ -1090,6 +1100,20 @@
               </select>
             </div>
             <div class="flex items-center gap-2 text-[11px] text-slate-300">
+              <!-- Quick Body Font Size -->
+              <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Adjust Body / Certification font size">
+                <span class="text-slate-400 font-bold text-[10px]">Body:</span>
+                <button type="button" onclick="adjustBodyFontSize(-0.5)" class="hover:text-move-gold-400 font-bold px-1.5 bg-slate-800 rounded text-[10px]" title="Decrease body font size">A-</button>
+                <span id="stageQuickBodySizeLabel" class="text-move-gold-400 font-bold font-mono text-[11px]">12px</span>
+                <button type="button" onclick="adjustBodyFontSize(0.5)" class="hover:text-move-gold-400 font-bold px-1.5 bg-slate-800 rounded text-[10px]" title="Increase body font size">A+</button>
+              </div>
+              <!-- Quick Name Font Size -->
+              <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Adjust Recipient Name font size">
+                <span class="text-slate-400 font-bold text-[10px]">Name:</span>
+                <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 font-bold px-1.5 bg-slate-800 rounded text-[10px]" title="Decrease name font size">A-</button>
+                <span id="stageQuickNameSizeLabel" class="text-move-gold-400 font-bold font-mono text-[11px]">26px</span>
+                <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 font-bold px-1.5 bg-slate-800 rounded text-[10px]" title="Increase name font size">A+</button>
+              </div>
               <label class="flex items-center gap-1 cursor-pointer bg-slate-950 px-2 py-1 rounded-lg border border-slate-800" title="Show or hide E-Signature image">
                 <input type="checkbox" id="stageQuickChkEsig" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
                 <span>E-Sig</span>
