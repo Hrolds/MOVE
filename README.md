@@ -132,6 +132,17 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
   * **Certificate Title Size Slider**: Adjust main certificate heading font size from 22px to 38px (default: 28px).
   * **Dynamic Layout Accommodation**: When names or citations are enlarged, the vertical alignment nudger (-60px to +60px) allows the user to raise or lower the text block so the certificate layout remains perfectly balanced without overflowing the signatures or A4 landscape boundary.
   * **Saved Preferences**: Font sizes automatically persist in `localStorage` across page refreshes.
+* **Editable & Persistent Certificate Headers, Titles & Presentation Lines**:
+  * **Persistent Customization**: Full database persistence for all 5 certificate header and intro fields:
+    1. *Header Line 1*: `"Republic of the Philippines • City Government of Baguio"`
+    2. *Header Line 2*: `"Men Opposed to Violence Against Women Everywhere (MOVE)"`
+    3. *Header Line 3*: `"City Hall Chapter • Baguio City, Philippines"`
+    4. *Certificate Title*: `"CERTIFICATE OF PARTICIPATION"` / `"CERTIFICATE OF APPRECIATION"` / `"CERTIFICATE OF APPEARANCE"`
+    5. *Presentation Intro*: `"This certification is proudly presented to"` / `"is proudly and warmly presented to"`
+  * **Dual Editing Experience**:
+    * **On-Canvas Click-to-Edit & Auto-Save**: Click directly on any header line, title, or intro phrase on the certificate stage to edit in real time; changes automatically save to SQLite via `PUT /api/certificate-settings` when clicking away (blur).
+    * **Sidebar Customizer Card**: Dedicated inputs for all header lines, title, and intro text with a 1-click **`[ 💾 Save Header & Intro to Database ]`** button and **Reset to Defaults** button.
+  * **SQLite Database Backed**: Stored in the new `certificate_settings` table so all customizations persist permanently across browser sessions, page reloads, and batch printing.
 * **Certificate of Appreciation Header & Template Enhancements**:
   * **Official 3-Line Header**: Updated to the standard format requested:
     ```text

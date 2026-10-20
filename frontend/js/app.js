@@ -53,6 +53,17 @@ const appState = {
   nameFontSize: 26,
   bodyFontSize: 12,
   titleFontSize: 28,
+  certSettings: {
+    header_line_1: 'Republic of the Philippines • City Government of Baguio',
+    header_line_2: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+    header_line_3: 'City Hall Chapter • Baguio City, Philippines',
+    participation_title: 'CERTIFICATE OF PARTICIPATION',
+    participation_intro: 'This certification is proudly presented to',
+    appreciation_title: 'CERTIFICATE OF APPRECIATION',
+    appreciation_intro: 'is proudly and warmly presented to',
+    appearance_title: 'CERTIFICATE OF APPEARANCE',
+    appearance_intro: 'This is to certify that'
+  },
   caSignatoryChoice: 'sig2_right',
   sigDisplayMode: 'both',
   sigSize: 44, // Default signature height in pixels
@@ -76,9 +87,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadActivities();
   await loadRoster();
   
-  // Initialize E-Signature preferences & UI
+  // Initialize E-Signature preferences, Layout & Certificate Headers
   initSigPreferences();
   initLayoutPreferences();
+  await loadCertificateSettings();
 
   // Pre-load attendance for default activity (ID 1)
   if (appState.activities.length > 0) {
@@ -1855,6 +1867,7 @@ async function loadEligibleCertificates(activityId) {
 
       renderRecipientDropdown();
       renderCertificateCanvas();
+      updateCertHeaderInputs();
     }
   } catch (err) {
     console.error("Failed to load eligible certificates:", err);
@@ -1931,6 +1944,7 @@ function nextCertificateRecipient() {
 function switchCertTemplate(templateName) {
   appState.currentTemplate = templateName;
   updateStudioTemplateAvailability();
+  updateCertHeaderInputs();
   renderCertificateCanvas();
 }
 
@@ -2393,6 +2407,174 @@ function renderCertificateCanvas() {
     </div>
   ` : '';
 
+// --- CERTIFICATE HEADERS, TITLES & PRESENTATION CONTROLLER ---
+async function loadCertificateSettings() {
+  try {
+    const raw = localStorage.getItem("move_cert_header_settings");
+    if (raw) {
+      const saved = JSON.parse(raw);
+      appState.certSettings = Object.assign({}, appState.certSettings, saved);
+    }
+    const res = await fetch(`${API_BASE}/api/certificate-settings`);
+    const data = await res.json();
+    if (data.success && data.settings) {
+      appState.certSettings = Object.assign({}, appState.certSettings, data.settings);
+      localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
+    }
+  } catch (e) {
+    console.warn("Could not load certificate settings from server:", e);
+  }
+  updateCertHeaderInputs();
+}
+
+function getActiveCertTitleKey() {
+  if (appState.currentTemplate === 'appreciation') return 'appreciation_title';
+  if (appState.currentTemplate === 'appearance') return 'appearance_title';
+  return 'participation_title';
+}
+
+function getActiveCertIntroKey() {
+  if (appState.currentTemplate === 'appreciation') return 'appreciation_intro';
+  if (appState.currentTemplate === 'appearance') return 'appearance_intro';
+  return 'participation_intro';
+}
+
+function updateCertHeaderInputs() {
+  const h1 = document.getElementById("certHdr1Input");
+  const h2 = document.getElementById("certHdr2Input");
+  const h3 = document.getElementById("certHdr3Input");
+  const title = document.getElementById("certTitleInput");
+  const intro = document.getElementById("certIntroInput");
+  const ctx = document.getElementById("lblActiveTitleContext");
+
+  const cs = appState.certSettings || {};
+
+  if (h1 && cs.header_line_1 !== undefined) h1.value = cs.header_line_1;
+  if (h2 && cs.header_line_2 !== undefined) h2.value = cs.header_line_2;
+  if (h3 && cs.header_line_3 !== undefined) h3.value = cs.header_line_3;
+
+  const titleKey = getActiveCertTitleKey();
+  const introKey = getActiveCertIntroKey();
+
+  if (title) title.value = cs[titleKey] || '';
+  if (intro) intro.value = cs[introKey] || '';
+
+  if (ctx) {
+    ctx.textContent = appState.currentTemplate === 'appreciation' ? 'APPRECIATION' : (appState.currentTemplate === 'appearance' ? 'APPEARANCE' : 'PARTICIPATION');
+  }
+}
+
+function onSidebarCertFieldInput(field, val) {
+  let key = field;
+  if (field === 'active_title') key = getActiveCertTitleKey();
+  if (field === 'active_intro') key = getActiveCertIntroKey();
+
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings[key] = val;
+  renderCertificateCanvas();
+}
+
+function onCanvasCertFieldInput(field, val) {
+  let key = field;
+  if (field === 'active_title') key = getActiveCertTitleKey();
+  if (field === 'active_intro') key = getActiveCertIntroKey();
+
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings[key] = val;
+  updateCertHeaderInputs();
+}
+
+async function saveCanvasCertField(field, val) {
+  let key = field;
+  if (field === 'active_title') key = getActiveCertTitleKey();
+  if (field === 'active_intro') key = getActiveCertIntroKey();
+
+  const cleanVal = (val || '').trim();
+  if (!cleanVal) return;
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings[key] = cleanVal;
+  localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
+  updateCertHeaderInputs();
+
+  try {
+    const payload = {};
+    payload[key] = cleanVal;
+    const res = await fetch(`${API_BASE}/api/certificate-settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      const fieldNiceName = key.replace(/_/g, ' ').toUpperCase();
+      showToastNotification(`Saved: ${fieldNiceName} updated in database!`);
+    }
+  } catch (err) {
+    console.error("Failed to save canvas cert field:", err);
+  }
+}
+
+async function saveAllCertificateSettings() {
+  const h1 = (document.getElementById("certHdr1Input")?.value || "").trim();
+  const h2 = (document.getElementById("certHdr2Input")?.value || "").trim();
+  const h3 = (document.getElementById("certHdr3Input")?.value || "").trim();
+  const title = (document.getElementById("certTitleInput")?.value || "").trim();
+  const intro = (document.getElementById("certIntroInput")?.value || "").trim();
+
+  if (!appState.certSettings) appState.certSettings = {};
+  if (h1) appState.certSettings.header_line_1 = h1;
+  if (h2) appState.certSettings.header_line_2 = h2;
+  if (h3) appState.certSettings.header_line_3 = h3;
+
+  const titleKey = getActiveCertTitleKey();
+  const introKey = getActiveCertIntroKey();
+  if (title) appState.certSettings[titleKey] = title;
+  if (intro) appState.certSettings[introKey] = intro;
+
+  localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
+
+  try {
+    const res = await fetch(`${API_BASE}/api/certificate-settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appState.certSettings)
+    });
+    const data = await res.json();
+    if (data.success) {
+      const statusSpan = document.getElementById("certHdrSaveStatus");
+      if (statusSpan) {
+        statusSpan.classList.remove("hidden");
+        setTimeout(() => statusSpan.classList.add("hidden"), 2500);
+      }
+      showToastNotification("Saved: Certificate headers, title, and intro text saved to database!");
+      renderCertificateCanvas();
+    } else {
+      alert("Error saving certificate settings: " + (data.message || "Unknown error"));
+    }
+  } catch (err) {
+    alert("Error communicating with server: " + err);
+  }
+}
+
+async function resetCertificateSettings() {
+  const confirmReset = confirm("Reset certificate headers, titles, and intro text to official defaults?");
+  if (!confirmReset) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/certificate-settings/reset`, { method: "POST" });
+    const data = await res.json();
+    if (data.success && data.settings) {
+      appState.certSettings = data.settings;
+      localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
+      updateCertHeaderInputs();
+      renderCertificateCanvas();
+      showToastNotification("Reset: Certificate headers and titles restored to official defaults!");
+    }
+  } catch (err) {
+    alert("Error resetting certificate settings: " + err);
+  }
+}
+
   // ==========================================
   // TEMPLATE 1: PARTICIPATION (A4 LANDSCAPE)
   // ==========================================
@@ -2413,14 +2595,16 @@ function renderCertificateCanvas() {
           </div>
         ` : ''}
 
-        <p contenteditable="true" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
-        <h4 contenteditable="true" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
-        <p contenteditable="true" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase">City Hall Chapter &bull; Baguio City, Philippines</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;">
-          CERTIFICATE OF PARTICIPATION
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
+          ${escapeHtml(appState.certSettings?.participation_title || 'CERTIFICATE OF PARTICIPATION')}
         </h2>
-        <p class="text-[11px] italic font-serif text-slate-600 mt-0.5">This certification is proudly presented to</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('active_intro', this.innerText)" onblur="saveCanvasCertField('active_intro', this.innerText)" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
+          ${escapeHtml(appState.certSettings?.participation_intro || 'This certification is proudly presented to')}
+        </p>
       </div>
 
       <!-- Recipient Block -->
@@ -2579,12 +2763,12 @@ function renderCertificateCanvas() {
           </div>
         ` : ''}
 
-        <p class="text-[9px] uppercase tracking-widest text-slate-500">Republic of the Philippines</p>
-        <h4 class="text-xs font-bold uppercase text-slate-800">City Government of Baguio</h4>
-        <p class="text-[10px] font-semibold text-slate-600">Local Committee on Anti-VAWC / MOVE Chapter</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" class="cert-editable text-[9px] uppercase tracking-widest text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" class="cert-editable text-xs font-bold uppercase text-slate-800 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" class="cert-editable text-[10px] font-semibold text-slate-600 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 class="font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase">
-          CERTIFICATE OF APPEARANCE
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" class="cert-editable font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text" title="Click to edit Certificate Title (auto-saves to database)">
+          ${escapeHtml(appState.certSettings?.appearance_title || 'CERTIFICATE OF APPEARANCE')}
         </h2>
       </div>
 
@@ -2651,14 +2835,16 @@ function renderCertificateCanvas() {
           </div>
         ` : ''}
 
-        <p contenteditable="true" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500">Republic of the Philippines &bull; City Government of Baguio</p>
-        <h4 contenteditable="true" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5">Men Opposed to Violence Against Women Everywhere (MOVE)</h4>
-        <p contenteditable="true" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5">City Hall Chapter &bull; Baguio City, Philippines</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;">
-          CERTIFICATE OF APPRECIATION
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
+          ${escapeHtml(appState.certSettings?.appreciation_title || 'CERTIFICATE OF APPRECIATION')}
         </h2>
-        <p class="text-[11px] italic font-serif text-slate-600 mt-0.5">is proudly and warmly presented to</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('active_intro', this.innerText)" onblur="saveCanvasCertField('active_intro', this.innerText)" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
+          ${escapeHtml(appState.certSettings?.appreciation_intro || 'is proudly and warmly presented to')}
+        </p>
       </div>
 
       <!-- Recipient Block -->

@@ -549,6 +549,72 @@
             </button>
           </div>
 
+          <!-- Certificate Header, Title & Presentation Customizer -->
+          <div class="space-y-3 pt-3 border-t border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-heading text-move-gold-400"></i> Certificate Header & Titles
+              </span>
+              <button type="button" onclick="resetCertificateSettings()" class="text-[9px] text-slate-500 hover:text-move-gold-400 font-bold" title="Reset header and intro to official defaults">Reset</button>
+            </div>
+
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2.5">
+              <!-- Header Line 1 -->
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Header Line 1 (Country & City)</label>
+                <input type="text" id="certHdr1Input" oninput="onSidebarCertFieldInput('header_line_1', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                  placeholder="Republic of the Philippines • City Government of Baguio">
+              </div>
+
+              <!-- Header Line 2 -->
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Header Line 2 (Organization)</label>
+                <input type="text" id="certHdr2Input" oninput="onSidebarCertFieldInput('header_line_2', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                  placeholder="Men Opposed to Violence Against Women Everywhere (MOVE)">
+              </div>
+
+              <!-- Header Line 3 -->
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Header Line 3 (Chapter & Station)</label>
+                <input type="text" id="certHdr3Input" oninput="onSidebarCertFieldInput('header_line_3', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                  placeholder="City Hall Chapter • Baguio City, Philippines">
+              </div>
+
+              <!-- Certificate Title -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[10px] font-bold text-slate-400 uppercase">Certificate Title</label>
+                  <span id="lblActiveTitleContext" class="text-[9px] text-move-gold-400 font-semibold font-mono">PARTICIPATION</span>
+                </div>
+                <input type="text" id="certTitleInput" oninput="onSidebarCertFieldInput('active_title', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-move-gold-400 font-bold focus:outline-none focus:border-move-gold-500"
+                  placeholder="CERTIFICATE OF PARTICIPATION">
+              </div>
+
+              <!-- Presentation / Intro Line -->
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Presentation Intro Line</label>
+                <input type="text" id="certIntroInput" oninput="onSidebarCertFieldInput('active_intro', this.value)"
+                  class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 font-serif italic focus:outline-none focus:border-move-gold-500"
+                  placeholder="This certification is proudly presented to">
+              </div>
+
+              <div class="pt-1">
+                <button type="button" onclick="saveAllCertificateSettings()" id="btnSaveCertHeaderSettings"
+                  class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm"
+                  title="Save headers, title, and intro text directly to SQLite database">
+                  <i class="fa-solid fa-floppy-disk text-move-gold-400"></i>
+                  <span>Save Header & Intro to Database</span>
+                  <span id="certHdrSaveStatus" class="hidden text-emerald-400 font-bold text-[10px] ml-1">✓ Saved!</span>
+                </button>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500">You can also click directly on any header, title, or intro line on the certificate canvas to edit — it auto-saves when you click away!</p>
+          </div>
+
           <!-- Signatories Controls -->
           <div class="space-y-3 pt-3 border-t border-slate-800">
             <div class="flex items-center justify-between">

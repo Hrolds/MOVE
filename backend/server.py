@@ -226,6 +226,15 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": True, "signatories": signatories})
             return
 
+        # 8. API: Certificate Settings
+        if path == "/api/certificate-settings":
+            conn = get_connection()
+            cursor = conn.cursor()
+            row = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()
+            conn.close()
+            self.send_json({"success": True, "settings": dict(row) if row else {}})
+            return
+
         # Default static file handler for images, css, js
         return super().do_GET()
 
@@ -476,6 +485,33 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
 
             conn.close()
             self.send_json({"success": True, "message": "Facilitator enrolled into activity", "id": new_id})
+            return
+
+        # 7. API: Reset Certificate Settings to Default
+        if path == "/api/certificate-settings/reset":
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE certificate_settings
+            SET header_line_1 = 'Republic of the Philippines • City Government of Baguio',
+                header_line_2 = 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+                header_line_3 = 'City Hall Chapter • Baguio City, Philippines',
+                participation_title = 'CERTIFICATE OF PARTICIPATION',
+                participation_intro = 'This certification is proudly presented to',
+                appreciation_title = 'CERTIFICATE OF APPRECIATION',
+                appreciation_intro = 'is proudly and warmly presented to',
+                appearance_title = 'CERTIFICATE OF APPEARANCE',
+                appearance_intro = 'This is to certify that'
+            WHERE id = 1;
+            """)
+            conn.commit()
+            updated = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()
+            conn.close()
+            self.send_json({
+                "success": True,
+                "message": "Certificate settings reset to default",
+                "settings": dict(updated)
+            })
             return
 
         # Fallback 404
@@ -740,6 +776,46 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 "success": True,
                 "message": "Signatory position title updated successfully",
                 "signatory": dict(updated)
+            })
+            return
+
+        # 6. API: Update Certificate Settings (Header lines, Titles, Presentation lines)
+        if path == "/api/certificate-settings":
+            conn = get_connection()
+            cursor = conn.cursor()
+            existing = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()
+            existing_dict = dict(existing) if existing else {}
+
+            header_line_1 = str(body.get("header_line_1", existing_dict.get("header_line_1", ""))).strip()
+            header_line_2 = str(body.get("header_line_2", existing_dict.get("header_line_2", ""))).strip()
+            header_line_3 = str(body.get("header_line_3", existing_dict.get("header_line_3", ""))).strip()
+            participation_title = str(body.get("participation_title", existing_dict.get("participation_title", ""))).strip()
+            participation_intro = str(body.get("participation_intro", existing_dict.get("participation_intro", ""))).strip()
+            appreciation_title = str(body.get("appreciation_title", existing_dict.get("appreciation_title", ""))).strip()
+            appreciation_intro = str(body.get("appreciation_intro", existing_dict.get("appreciation_intro", ""))).strip()
+            appearance_title = str(body.get("appearance_title", existing_dict.get("appearance_title", ""))).strip()
+            appearance_intro = str(body.get("appearance_intro", existing_dict.get("appearance_intro", ""))).strip()
+
+            cursor.execute("""
+            UPDATE certificate_settings
+            SET header_line_1 = ?, header_line_2 = ?, header_line_3 = ?,
+                participation_title = ?, participation_intro = ?,
+                appreciation_title = ?, appreciation_intro = ?,
+                appearance_title = ?, appearance_intro = ?
+            WHERE id = 1;
+            """, (
+                header_line_1, header_line_2, header_line_3,
+                participation_title, participation_intro,
+                appreciation_title, appreciation_intro,
+                appearance_title, appearance_intro
+            ))
+            conn.commit()
+            updated = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()
+            conn.close()
+            self.send_json({
+                "success": True,
+                "message": "Certificate settings updated successfully",
+                "settings": dict(updated)
             })
             return
 

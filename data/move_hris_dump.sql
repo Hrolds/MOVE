@@ -77,7 +77,7 @@ INSERT INTO "activity_attendees" VALUES(101,1,NULL,'DANNY D. GAMBALA','Administr
 INSERT INTO "activity_attendees" VALUES(102,1,23,'CYRILBONE P. BARROGA','Administrative Aide II','M','Married','City Veterinary and Agriculture Office (CVAO)','09351353099',1,'08:50 AM','Designated in Executive Memorandum (Men in the Kitchen 2)');
 INSERT INTO "activity_attendees" VALUES(103,1,NULL,'ERIC LLOYD O. MANA-A','Administrative Aide III (Driver I)','M','Married','City Veterinary and Agriculture Office (CVAO)','09185837000',1,'09:00 AM','Designated in Executive Memorandum (Men in the Kitchen 2)');
 INSERT INTO "activity_attendees" VALUES(104,1,NULL,'RENCE N. MANDAP','Administrative Aide IV (Clerk II)','M','Single','LCR','',1,'09:21 AM',NULL);
-INSERT INTO "activity_attendees" VALUES(105,1,NULL,'ADRIAN P. ASWAT','Weather Facilities Technician II','M','Married','ADRIAN P. ASWAT','',1,'09:22 AM',NULL);
+INSERT INTO "activity_attendees" VALUES(105,1,NULL,'ADRIAN P. ASWAT','Weather Facilities Technician II','M','Married','City Disaster Risk Reduction and Management Office (CDRRMO)','',1,'09:22 AM','');
 INSERT INTO "activity_attendees" VALUES(106,1,NULL,'ALDRIN C. MABANTA','CASSO','M','Single','CASSO','',1,'09:24 AM',NULL);
 INSERT INTO "activity_attendees" VALUES(107,1,NULL,'JEFFERSON S. MARTIRES','Assessment Aide','M','Single','JEFFERSON S. MARTIRES','',1,'09:26 AM',NULL);
 INSERT INTO "activity_attendees" VALUES(108,1,NULL,'JAY DEE A. MANGAYAN','Administrative Officer III (Supply Officer II)','M','Married','General Services Office (GSO)','',1,'09:28 AM',NULL);
@@ -98,7 +98,7 @@ CREATE TABLE activity_facilitators (
     check_in_time TEXT,
     notes TEXT
 );
-INSERT INTO "activity_facilitators" VALUES(6,1,NULL,'MYRON GANGA','Master Trainer','CHEF','VENUS PARK VIEW HOTEL','M','Single','',1,'09:49 AM','Lead Culinary Trainer & Resource Speaker');
+INSERT INTO "activity_facilitators" VALUES(6,1,NULL,'MYRON ANGELO D. GANGA','Master Trainer','CHEF','VENUS PARK VIEW HOTEL','M','Single','',1,'09:49 AM','Lead Culinary Trainer & Resource Speaker');
 INSERT INTO "activity_facilitators" VALUES(7,1,36,'RHEY J. DELMENDO','Chair, Education & Training Committee','Tourism Operations Officer I','City Tourism Operations Office','M','Married','0912-345-6789',1,'08:59 AM','Test edit');
 INSERT INTO "activity_facilitators" VALUES(8,1,39,'HAROLD P. MALLORCA','Public Relations Officer / Facilitator','Public Relations Officer / Administrator','City Administrator''s Office (CADMO) / CMO','M','Married','09175556789',1,'09:03 AM','MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(9,1,34,'FLORENTINO N. DELA CRUZ JR.','MOVE Chapter Vice President / Facilitator','Administrative Aide III (Utility Worker II)','City Mayor''s Office - Baguio City Library (CMO-LIBRARY)','M','Married','09122980455',1,'09:11 AM','MOVE Officer / Training Committee Facilitator');
@@ -107,12 +107,25 @@ INSERT INTO "activity_facilitators" VALUES(11,1,30,'MARIO D. GANGA JR.','MOVE Ch
 INSERT INTO "activity_facilitators" VALUES(12,1,37,'REGINO G. RAGUDO','MOVE Chapter Treasurer / Facilitator','Administrative Aide III (Driver I)','Sangguniang Panlungsod (SP)','M','Married','09106814929',0,NULL,'MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(13,1,10,'CRISTOBAL T. BULACAN','Assistant P.R.O. / Facilitator','Administrative Aide III (Data Controller I)','City Civil Registry Office (CCRO) / HSO','M','Married','09277840269',1,'09:01 AM','MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(14,1,43,'JAYSON R. MARTIN','Public Relations Officer / Facilitator','Social Welfare Aide','City Social Welfare and Development Office (OCSWDO)','M','Married','09176340371',0,NULL,'MOVE Officer / Training Committee Facilitator');
-INSERT INTO "activity_facilitators" VALUES(15,1,59,'JACQUELINE C. TUPONG','CSWDO Focal Person on Women Program','Social Welfare Officer / Focal Person','City Social Welfare and Development Office (OCSWDO)','F','Married','0907-288-1918',1,'09:18 AM','CSWDO Women Program Coordinator (Contact: 0907-288-1918)');
+INSERT INTO "activity_facilitators" VALUES(15,1,59,'JACQUELINE C. TUPONG','HOME MANAGEMENT','Social Welfare Officer / Focal Person','City Social Welfare and Development Office (OCSWDO)','F','Married','0907-288-1918',1,'09:18 AM','CSWDO Women Program Coordinator (Contact: 0907-288-1918)');
 INSERT INTO "activity_facilitators" VALUES(16,1,35,'RUPERTO D. GUADAÑA JR.','MOVE Chapter Secretary / Facilitator','Administrative Officer I (Records Officer I)','Sangguniang Panlungsod (SP)','M','Married','09560227292',1,'09:03 AM','MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(17,1,33,'DAN RICKY M. ONG','MOVE Immediate Past President / Speaker','Assistant Department Head II (Assistant City Secretary)','Sangguniang Panlungsod (SP)','M','Married','09205222112',1,'09:02 AM','MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(18,1,31,'PROTACIO P. TANGALIN JR.','Member, Information & Advocacy Committee','Local Legislative Staff Officer V','Sangguniang Panlungsod (SP) - Research Division','M','Married','09273960620',1,'09:07 AM','MOVE Officer / Training Committee Facilitator');
 INSERT INTO "activity_facilitators" VALUES(19,1,NULL,'ROSELLA C. BAHNI','Resource Speaker','Senior Gender and Development Specialist','City Planning, Development, and Sustainability Office','F','Married','',1,'09:41 AM','');
-INSERT INTO "activity_facilitators" VALUES(20,1,NULL,'CHRISTIAN GANGA','Master Trainer','CHEF','VENUS PARK VIEW HOTEL','M','Single','',1,'09:49 AM','');
+INSERT INTO "activity_facilitators" VALUES(20,1,NULL,'CHRISTIAN PHILIP D. TAMAYO','Master Trainer','CHEF','VENUS PARK VIEW HOTEL','M','Single','',1,'09:49 AM','');
+CREATE TABLE certificate_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        header_line_1 TEXT DEFAULT 'Republic of the Philippines • City Government of Baguio',
+        header_line_2 TEXT DEFAULT 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+        header_line_3 TEXT DEFAULT 'City Hall Chapter • Baguio City, Philippines',
+        participation_title TEXT DEFAULT 'CERTIFICATE OF PARTICIPATION',
+        participation_intro TEXT DEFAULT 'This certification is proudly presented to',
+        appreciation_title TEXT DEFAULT 'CERTIFICATE OF APPRECIATION',
+        appreciation_intro TEXT DEFAULT 'is proudly and warmly presented to',
+        appearance_title TEXT DEFAULT 'CERTIFICATE OF APPEARANCE',
+        appearance_intro TEXT DEFAULT 'This is to certify that'
+    );
+INSERT INTO "certificate_settings" VALUES(1,'Republic of the Philippines • City Government of Baguio','Men Opposed to Violence Against Women Everywhere (MOVE)','City Hall Chapter • Baguio City, Philippines','CERTIFICATE OF PARTICIPATION','This certification is proudly presented to','CERTIFICATE OF APPRECIATION','is proudly and warmly presented to','CERTIFICATE OF APPEARANCE','This is to certify that');
 CREATE TABLE issued_certificates (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         activity_id INTEGER REFERENCES activities(id) ON DELETE CASCADE,
@@ -965,7 +978,7 @@ CREATE TABLE signatories (
         signature_image TEXT,
         is_default INTEGER DEFAULT 0
     );
-INSERT INTO "signatories" VALUES(1,'HON. BENJAMIN B. MAGALONG','City Mayor & Honorary Chapter Adviser','City Government of Baguio','signature (15).png',1);
+INSERT INTO "signatories" VALUES(1,'HON. BENJAMIN B. MAGALONG','City Mayor','City Government of Baguio','signature (15).png',1);
 INSERT INTO "signatories" VALUES(2,'HON. FAUSTINO A. OLOWAN','City Vice Mayor & Chapter Adviser','City Government of Baguio','',0);
 INSERT INTO "signatories" VALUES(3,'MARIO D. GANGA JR.','MOVE Baguio Chapter President','CMO - PDAO','GANGA.png',1);
 INSERT INTO "signatories" VALUES(4,'FLORENTINO N. DELA CRUZ JR.','MOVE Vice President','CMO - Library','',0);

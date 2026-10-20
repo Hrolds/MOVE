@@ -142,6 +142,42 @@ def init_db():
     );
     """)
 
+    # 7. Certificate Header, Title, and Presentation Settings
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS certificate_settings (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        header_line_1 TEXT DEFAULT 'Republic of the Philippines • City Government of Baguio',
+        header_line_2 TEXT DEFAULT 'Men Opposed to Violence Against Women Everywhere (MOVE)',
+        header_line_3 TEXT DEFAULT 'City Hall Chapter • Baguio City, Philippines',
+        participation_title TEXT DEFAULT 'CERTIFICATE OF PARTICIPATION',
+        participation_intro TEXT DEFAULT 'This certification is proudly presented to',
+        appreciation_title TEXT DEFAULT 'CERTIFICATE OF APPRECIATION',
+        appreciation_intro TEXT DEFAULT 'is proudly and warmly presented to',
+        appearance_title TEXT DEFAULT 'CERTIFICATE OF APPEARANCE',
+        appearance_intro TEXT DEFAULT 'This is to certify that'
+    );
+    """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO certificate_settings (
+        id, header_line_1, header_line_2, header_line_3,
+        participation_title, participation_intro,
+        appreciation_title, appreciation_intro,
+        appearance_title, appearance_intro
+    ) VALUES (
+        1,
+        'Republic of the Philippines • City Government of Baguio',
+        'Men Opposed to Violence Against Women Everywhere (MOVE)',
+        'City Hall Chapter • Baguio City, Philippines',
+        'CERTIFICATE OF PARTICIPATION',
+        'This certification is proudly presented to',
+        'CERTIFICATE OF APPRECIATION',
+        'is proudly and warmly presented to',
+        'CERTIFICATE OF APPEARANCE',
+        'This is to certify that'
+    );
+    """)
+
     conn.commit()
     conn.close()
     print("SQLite database initialized at:", DB_PATH)
