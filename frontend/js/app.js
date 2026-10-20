@@ -2815,11 +2815,7 @@ function renderCertificateCanvas() {
 
     if (choice === 'sig1_right' || choice === 'sig1') {
       caSignatoryBlock = `
-        <div class="flex items-end justify-between pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div>
-            <p class="text-[9px] text-slate-500">Issued this ${escapeHtml(act.date)}</p>
-            <p class="text-[9px] text-slate-400 font-mono">Control Ref: /drmo/ctb</p>
-          </div>
+        <div class="flex items-end justify-end pt-4 border-t border-slate-300 text-xs relative z-10">
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(1, sig1, showSig1Img)}
             <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
@@ -2830,10 +2826,6 @@ function renderCertificateCanvas() {
     } else if (choice === 'both') {
       caSignatoryBlock = `
         <div class="pt-4 border-t border-slate-300 relative z-10">
-          <div class="flex items-center justify-between text-[9px] text-slate-500 mb-2">
-            <span>Issued this ${escapeHtml(act.date)}</span>
-            <span class="font-mono text-slate-400">Control Ref: /drmo/ctb</span>
-          </div>
           <div class="grid grid-cols-2 gap-8 text-center text-xs">
             <div class="flex flex-col items-center">
               ${getSigImgHtml(1, sig1, showSig1Img)}
@@ -2851,10 +2843,6 @@ function renderCertificateCanvas() {
     } else if (choice === 'sig2_center') {
       caSignatoryBlock = `
         <div class="flex flex-col items-center pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="w-full flex justify-between text-[9px] text-slate-500 mb-2">
-            <span>Issued this ${escapeHtml(act.date)}</span>
-            <span class="font-mono text-slate-400">Control Ref: /drmo/ctb</span>
-          </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(2, sig2, showSig2Img)}
             <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
@@ -2865,10 +2853,6 @@ function renderCertificateCanvas() {
     } else if (choice === 'sig1_center') {
       caSignatoryBlock = `
         <div class="flex flex-col items-center pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div class="w-full flex justify-between text-[9px] text-slate-500 mb-2">
-            <span>Issued this ${escapeHtml(act.date)}</span>
-            <span class="font-mono text-slate-400">Control Ref: /drmo/ctb</span>
-          </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(1, sig1, showSig1Img)}
             <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
@@ -2879,11 +2863,7 @@ function renderCertificateCanvas() {
     } else {
       // Default: sig2_right (Mayor Magalong at bottom-right)
       caSignatoryBlock = `
-        <div class="flex items-end justify-between pt-4 border-t border-slate-300 text-xs relative z-10">
-          <div>
-            <p class="text-[9px] text-slate-500">Issued this ${escapeHtml(act.date)}</p>
-            <p class="text-[9px] text-slate-400 font-mono">Control Ref: /drmo/ctb</p>
-          </div>
+        <div class="flex items-end justify-end pt-4 border-t border-slate-300 text-xs relative z-10">
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(2, sig2, showSig2Img)}
             <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
@@ -2911,7 +2891,7 @@ function renderCertificateCanvas() {
         <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold uppercase text-slate-800 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
         <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-semibold text-slate-600 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appearance_title', this.innerText, this)" onblur="saveCanvasCertField('appearance_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text" title="Click to edit Certificate Title (auto-saves to database)">
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appearance_title', this.innerText, this)" onblur="saveCanvasCertField('appearance_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-sans font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text transition-all" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appearance_title || 'CERTIFICATE OF APPEARANCE')}
         </h2>
       </div>
@@ -2941,16 +2921,12 @@ function renderCertificateCanvas() {
           was duly verified to have ${appState.certRecipientPool === 'facilitators' ? 'rendered invaluable service as Resource Speaker / Facilitator in' : 'attended and actively participated in'} the activity entitled:
         </p>
 
-        <p class="text-center font-bold text-slate-950 py-1 bg-slate-50 border border-slate-200 rounded" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
+        <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(15, (appState.bodyFontSize || 12) + 2)}px;">
           “${escapeHtml(act.title)}: ${escapeHtml(act.theme)}”
         </p>
 
         <p>
           held on <strong>${escapeHtml(act.date)}</strong> at the <strong>${escapeHtml(act.venue)}</strong>.
-        </p>
-
-        <p class="text-slate-600 italic" style="font-size: ${Math.max(10, (appState.bodyFontSize || 12) - 1)}px;">
-          This certification is issued upon the request of the above-named individual for official appearance accreditation and Daily Time Record (DTR) compliance.
         </p>
       </div>
 
