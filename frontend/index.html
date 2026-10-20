@@ -597,16 +597,82 @@
               </select>
             </div>
 
-            <!-- E-Signature Sizing & Toggles -->
-            <div class="pt-1 flex items-center justify-between text-xs text-slate-300">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="certToggleSigImages" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                <span class="text-xs">Show E-Signatures</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="certToggleLogos" onchange="toggleLogos(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                <span class="text-xs">Show Header Seals</span>
-              </label>
+            <!-- E-Signature Size & Display Controls -->
+            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
+              <div class="flex items-center justify-between text-xs text-slate-300">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="certToggleSigImages" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                  <span class="text-xs font-bold text-white">Show E-Signatures</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="certToggleLogos" onchange="toggleLogos(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                  <span class="text-xs text-slate-400">Header Seals</span>
+                </label>
+              </div>
+
+              <!-- Signature Size Adjustment Group -->
+              <div id="sigSizeControlsWrapper" class="space-y-2 pt-2 border-t border-slate-800/70">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-nib text-move-gold-400"></i> E-Signature Size
+                  </label>
+                  <span id="lblSigSize" class="text-[11px] font-mono font-bold text-move-gold-400">44px</span>
+                </div>
+
+                <!-- Linked Master Slider (Controls All Signatures) -->
+                <div id="sigLinkedSizeGroup">
+                  <input type="range" id="certSigSizeSlider" min="20" max="96" value="44" step="2"
+                    oninput="onSigSizeChange(this.value)"
+                    class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                </div>
+
+                <!-- Independent Sliders (Optional Per-Signatory Tuning) -->
+                <div id="sigIndependentSizeGroup" class="hidden space-y-2 pt-1 bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">
+                  <div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                      <span>Signatory 1 (President):</span>
+                      <span id="lblSig1Size" class="font-mono text-move-gold-400 font-bold">44px</span>
+                    </div>
+                    <input type="range" id="certSig1SizeSlider" min="20" max="96" value="44" step="2"
+                      oninput="onSig1SizeChange(this.value)"
+                      class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                      <span>Signatory 2 (Mayor):</span>
+                      <span id="lblSig2Size" class="font-mono text-move-gold-400 font-bold">48px</span>
+                    </div>
+                    <input type="range" id="certSig2SizeSlider" min="20" max="96" value="48" step="2"
+                      oninput="onSig2SizeChange(this.value)"
+                      class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="flex items-center justify-between gap-1 pt-1">
+                  <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
+                  <div class="flex items-center gap-1">
+                    <button type="button" onclick="setSigPreset(32)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (32)</button>
+                    <button type="button" onclick="setSigPreset(44)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Med (44)</button>
+                    <button type="button" onclick="setSigPreset(56)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (56)</button>
+                    <button type="button" onclick="setSigPreset(72)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (72)</button>
+                  </div>
+                </div>
+
+                <!-- Fine Tuning Options: Independent Sizing & Vertical Nudge -->
+                <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
+                  <label class="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
+                    <input type="checkbox" id="certToggleSigIndependent" onchange="toggleSigSizeIndependent(this.checked)" class="rounded text-move-gold-500 focus:ring-0">
+                    <span>Tune Separately</span>
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <span class="text-slate-500">Nudge Line:</span>
+                    <button type="button" onclick="nudgeSigYOffset(-2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature higher above line">↑</button>
+                    <span id="lblSigYOffset" class="font-mono text-move-gold-400 text-[9px] w-6 text-center">0px</span>
+                    <button type="button" onclick="nudgeSigYOffset(2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature lower onto line">↓</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -50,6 +50,11 @@ const appState = {
   watermarkSize: 320,
   caSignatoryChoice: 'sig2_right',
   sigDisplayMode: 'both',
+  sigSize: 44, // Default signature height in pixels
+  sig1Size: 44,
+  sig2Size: 48,
+  sigSizeIndependent: false,
+  sigYOffset: 0,
   customCertFields: {
     title: '',
     theme: '',
@@ -66,6 +71,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadActivities();
   await loadRoster();
   
+  // Initialize E-Signature preferences & UI
+  initSigPreferences();
+
   // Pre-load attendance for default activity (ID 1)
   if (appState.activities.length > 0) {
     appState.currentActivityId = appState.activities[0].id;
@@ -1946,10 +1954,183 @@ function updateCertField(key, val) {
   renderCertificateCanvas();
 }
 
-function toggleSignatures(checked) {
-  appState.showSignatures = checked;
+// --- SIGNATURE SIZING & SCALING CONTROLLER ---
+function getSigImgHtml(sigNum, sigObj, showImg) {
+  const size = (sigNum === 1) 
+    ? (appState.sigSizeIndependent ? (appState.sig1Size || appState.sigSize || 44) : (appState.sigSize || 44))
+    : (appState.sigSizeIndependent ? (appState.sig2Size || appState.sigSize || 48) : (appState.sigSize || 44));
+  const mb = -Math.round(size * 0.28) + (appState.sigYOffset || 0);
+
+  if (!showImg || !sigObj || !sigObj.signature_image) {
+    return `<div style="height: ${size}px;" class="transition-all"></div>`;
+  }
+
+  return `
+    <div class="relative group/sig flex flex-col items-center justify-end" style="height: ${size}px;">
+      <!-- On-canvas quick resize controls (hidden during print) -->
+      <div class="no-print absolute -top-4 opacity-0 group-hover/sig:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-1.5 py-0.5 text-[9px] font-mono flex items-center gap-1 shadow-lg z-30 border border-slate-700 pointer-events-auto">
+        <button type="button" onclick="adjustSigSize(${sigNum}, -4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer transition" title="Decrease signature size (4px)">-</button>
+        <span class="text-move-gold-400 font-semibold">${size}px</span>
+        <button type="button" onclick="adjustSigSize(${sigNum}, 4)" class="hover:text-move-gold-400 px-1 font-bold cursor-pointer transition" title="Increase signature size (4px)">+</button>
+      </div>
+      <img src="/${sigObj.signature_image}" 
+           alt="${escapeHtml(sigObj.name)} E-Signature" 
+           class="object-contain pointer-events-none transition-all duration-100" 
+           style="height: ${size}px; max-height: 110px; margin-bottom: ${mb}px; z-index: 10;">
+    </div>
+  `;
+}
+
+function onSigSizeChange(val) {
+  const size = parseInt(val, 10);
+  appState.sigSize = size;
+  if (!appState.sigSizeIndependent) {
+    appState.sig1Size = size;
+    appState.sig2Size = size;
+  }
+  saveSigPreferences();
+  updateSigSizeUI();
   renderCertificateCanvas();
 }
+
+function onSig1SizeChange(val) {
+  appState.sig1Size = parseInt(val, 10);
+  saveSigPreferences();
+  updateSigSizeUI();
+  renderCertificateCanvas();
+}
+
+function onSig2SizeChange(val) {
+  appState.sig2Size = parseInt(val, 10);
+  saveSigPreferences();
+  updateSigSizeUI();
+  renderCertificateCanvas();
+}
+
+function setSigPreset(size) {
+  appState.sigSize = size;
+  appState.sig1Size = size;
+  appState.sig2Size = size;
+  saveSigPreferences();
+  updateSigSizeUI();
+  renderCertificateCanvas();
+}
+
+function toggleSigSizeIndependent(checked) {
+  appState.sigSizeIndependent = checked;
+  const indepBox = document.getElementById("sigIndependentSizeGroup");
+  const linkedBox = document.getElementById("sigLinkedSizeGroup");
+  if (indepBox) indepBox.classList.toggle("hidden", !checked);
+  if (linkedBox) linkedBox.classList.toggle("hidden", checked);
+  saveSigPreferences();
+  updateSigSizeUI();
+  renderCertificateCanvas();
+}
+
+function onSigYOffsetChange(val) {
+  appState.sigYOffset = parseInt(val, 10);
+  const lbl = document.getElementById("lblSigYOffset");
+  if (lbl) lbl.textContent = `${appState.sigYOffset > 0 ? '+' : ''}${appState.sigYOffset}px`;
+  saveSigPreferences();
+  renderCertificateCanvas();
+}
+
+function nudgeSigYOffset(delta) {
+  appState.sigYOffset = Math.max(-20, Math.min(20, (appState.sigYOffset || 0) + delta));
+  const lbl = document.getElementById("lblSigYOffset");
+  if (lbl) lbl.textContent = `${appState.sigYOffset > 0 ? '+' : ''}${appState.sigYOffset}px`;
+  saveSigPreferences();
+  renderCertificateCanvas();
+}
+
+function adjustSigSize(sigNum, delta) {
+  if (sigNum === 1) {
+    appState.sig1Size = Math.max(20, Math.min(110, (appState.sig1Size || appState.sigSize || 44) + delta));
+    if (!appState.sigSizeIndependent) {
+      appState.sigSize = appState.sig1Size;
+      appState.sig2Size = appState.sig1Size;
+    }
+  } else if (sigNum === 2) {
+    appState.sig2Size = Math.max(20, Math.min(110, (appState.sig2Size || appState.sigSize || 44) + delta));
+    if (!appState.sigSizeIndependent) {
+      appState.sigSize = appState.sig2Size;
+      appState.sig1Size = appState.sig2Size;
+    }
+  } else {
+    appState.sigSize = Math.max(20, Math.min(110, (appState.sigSize || 44) + delta));
+    appState.sig1Size = appState.sigSize;
+    appState.sig2Size = appState.sigSize;
+  }
+  saveSigPreferences();
+  updateSigSizeUI();
+  renderCertificateCanvas();
+}
+
+function updateSigSizeUI() {
+  const s = appState.sigSize || 44;
+  const s1 = appState.sig1Size || s;
+  const s2 = appState.sig2Size || s;
+
+  const lbl = document.getElementById("lblSigSize");
+  if (lbl) lbl.textContent = `${s}px`;
+  const slider = document.getElementById("certSigSizeSlider");
+  if (slider) slider.value = s;
+
+  const lbl1 = document.getElementById("lblSig1Size");
+  if (lbl1) lbl1.textContent = `${s1}px`;
+  const slider1 = document.getElementById("certSig1SizeSlider");
+  if (slider1) slider1.value = s1;
+
+  const lbl2 = document.getElementById("lblSig2Size");
+  if (lbl2) lbl2.textContent = `${s2}px`;
+  const slider2 = document.getElementById("certSig2SizeSlider");
+  if (slider2) slider2.value = s2;
+
+  const chkIndep = document.getElementById("certToggleSigIndependent");
+  if (chkIndep) chkIndep.checked = Boolean(appState.sigSizeIndependent);
+  const indepBox = document.getElementById("sigIndependentSizeGroup");
+  const linkedBox = document.getElementById("sigLinkedSizeGroup");
+  if (indepBox) indepBox.classList.toggle("hidden", !appState.sigSizeIndependent);
+  if (linkedBox) linkedBox.classList.toggle("hidden", Boolean(appState.sigSizeIndependent));
+
+  const lblY = document.getElementById("lblSigYOffset");
+  if (lblY) lblY.textContent = `${appState.sigYOffset > 0 ? '+' : ''}${appState.sigYOffset || 0}px`;
+}
+
+function saveSigPreferences() {
+  try {
+    localStorage.setItem("move_cert_sig_prefs", JSON.stringify({
+      sigSize: appState.sigSize,
+      sig1Size: appState.sig1Size,
+      sig2Size: appState.sig2Size,
+      sigSizeIndependent: appState.sigSizeIndependent,
+      sigYOffset: appState.sigYOffset
+    }));
+  } catch (e) {}
+}
+
+function initSigPreferences() {
+  try {
+    const raw = localStorage.getItem("move_cert_sig_prefs");
+    if (raw) {
+      const prefs = JSON.parse(raw);
+      if (prefs.sigSize) appState.sigSize = prefs.sigSize;
+      if (prefs.sig1Size) appState.sig1Size = prefs.sig1Size;
+      if (prefs.sig2Size) appState.sig2Size = prefs.sig2Size;
+      if (prefs.sigSizeIndependent !== undefined) appState.sigSizeIndependent = prefs.sigSizeIndependent;
+      if (prefs.sigYOffset !== undefined) appState.sigYOffset = prefs.sigYOffset;
+    }
+  } catch (e) {}
+  updateSigSizeUI();
+}
+
+function toggleSignatures(checked) {
+  appState.showSignatures = checked;
+  const grp = document.getElementById("sigSizeControlsWrapper");
+  if (grp) grp.classList.toggle("opacity-40", !checked);
+  renderCertificateCanvas();
+}
+
 
 function toggleLogos(checked) {
   appState.showLogos = checked;
@@ -2087,18 +2268,14 @@ function renderCertificateCanvas() {
       <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center relative z-10">
         <!-- Signatory 1 -->
         <div class="flex flex-col items-center">
-          ${showSig1Img ? `
-            <img src="/${sig1.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-          ` : '<div class="h-10"></div>'}
+          ${getSigImgHtml(1, sig1, showSig1Img)}
           <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
           <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig1.title)}</p>
         </div>
 
         <!-- Signatory 2 -->
         <div class="flex flex-col items-center">
-          ${showSig2Img ? `
-            <img src="/${sig2.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-          ` : '<div class="h-10"></div>'}
+          ${getSigImgHtml(2, sig2, showSig2Img)}
           <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
           <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig2.title)}</p>
         </div>
@@ -2124,9 +2301,7 @@ function renderCertificateCanvas() {
             <p class="text-[9px] text-slate-400 font-mono">Control Ref: /drmo/ctb</p>
           </div>
           <div class="text-center flex flex-col items-center">
-            ${showSig1Img ? `
-              <img src="/${sig1.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-            ` : '<div class="h-10"></div>'}
+            ${getSigImgHtml(1, sig1, showSig1Img)}
             <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
             <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
           </div>
@@ -2141,16 +2316,12 @@ function renderCertificateCanvas() {
           </div>
           <div class="grid grid-cols-2 gap-8 text-center text-xs">
             <div class="flex flex-col items-center">
-              ${showSig1Img ? `
-                <img src="/${sig1.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-              ` : '<div class="h-10"></div>'}
+              ${getSigImgHtml(1, sig1, showSig1Img)}
               <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
               <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
             </div>
             <div class="flex flex-col items-center">
-              ${showSig2Img ? `
-                <img src="/${sig2.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-              ` : '<div class="h-10"></div>'}
+              ${getSigImgHtml(2, sig2, showSig2Img)}
               <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
               <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
             </div>
@@ -2165,9 +2336,7 @@ function renderCertificateCanvas() {
             <span class="font-mono text-slate-400">Control Ref: /drmo/ctb</span>
           </div>
           <div class="text-center flex flex-col items-center">
-            ${showSig2Img ? `
-              <img src="/${sig2.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-            ` : '<div class="h-10"></div>'}
+            ${getSigImgHtml(2, sig2, showSig2Img)}
             <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
             <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
           </div>
@@ -2181,9 +2350,7 @@ function renderCertificateCanvas() {
             <span class="font-mono text-slate-400">Control Ref: /drmo/ctb</span>
           </div>
           <div class="text-center flex flex-col items-center">
-            ${showSig1Img ? `
-              <img src="/${sig1.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-            ` : '<div class="h-10"></div>'}
+            ${getSigImgHtml(1, sig1, showSig1Img)}
             <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
             <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
           </div>
@@ -2198,9 +2365,7 @@ function renderCertificateCanvas() {
             <p class="text-[9px] text-slate-400 font-mono">Control Ref: /drmo/ctb</p>
           </div>
           <div class="text-center flex flex-col items-center">
-            ${showSig2Img ? `
-              <img src="/${sig2.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-            ` : '<div class="h-10"></div>'}
+            ${getSigImgHtml(2, sig2, showSig2Img)}
             <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
             <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
           </div>
@@ -2307,17 +2472,13 @@ function renderCertificateCanvas() {
       <!-- Dual Signatories Footer -->
       <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center relative z-10">
         <div class="flex flex-col items-center">
-          ${showSig1Img ? `
-            <img src="/${sig1.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-          ` : '<div class="h-10"></div>'}
+          ${getSigImgHtml(1, sig1, showSig1Img)}
           <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
           <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig1.title)}</p>
         </div>
 
         <div class="flex flex-col items-center">
-          ${showSig2Img ? `
-            <img src="/${sig2.signature_image}" class="h-10 object-contain -mb-3 z-10 pointer-events-none">
-          ` : '<div class="h-10"></div>'}
+          ${getSigImgHtml(2, sig2, showSig2Img)}
           <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
           <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig2.title)}</p>
         </div>

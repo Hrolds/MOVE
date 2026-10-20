@@ -113,6 +113,13 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 * **Save Event Details Directly to Database**: Edit activity title, theme, date, duration, or venue directly in the studio sidebar and save them instantly to SQLite.
 
 #### Printing & Customization:
+* **Adjustable E-Signature Sizing & Scaling**:
+  * **Interactive Size Slider**: Smoothly scale e-signatures from 20px to 96px in real time (default: 44px).
+  * **Quick Size Presets**: 1-click buttons for `Small (32px)`, `Medium (44px)`, `Large (56px)`, and `XL (72px)`.
+  * **Independent Signatory Tuning**: Check *"Tune Separately"* to set independent heights for Signatory 1 (President Ganga) and Signatory 2 (Mayor Magalong) to visually balance different image paddings.
+  * **Vertical Baseline Nudge (`↑` / `↓`)**: Fine-tune how the signatures rest or overlap onto the printed signature lines.
+  * **On-Canvas Hover Resize Controls**: Hover over any signature on the certificate stage to reveal quick `[-]` and `[+]` resize buttons (automatically hidden during printing).
+  * **Saved Preferences**: Size and scaling preferences automatically persist in local storage.
 * **Background Watermarks (Appreciation, Appearance & Participation)**: Centered watermark overlay with customizable logo (`MOVE Chapter Seal`, `City Hall Seal`, `Men in the Kitchen 2`, `Breathe Baguio`) and real-time opacity slider (4% to 30%).
 * **Flexible Appearance Certificate Signatories**: Choose which signature appears on the Certificate of Appearance — Signatory 2 (Mayor Magalong - Right/Center), Signatory 1 (President Ganga - Right/Center), or Dual Signatories (both side-by-side).
 * **Digital E-Signature Visibility**: Choose whether to display all digital signatures, Mayor only, President only, or blank signature lines for physical wet-ink signing.
