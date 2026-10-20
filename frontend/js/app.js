@@ -53,6 +53,7 @@ const appState = {
   nameFontSize: 26,
   bodyFontSize: 12,
   titleFontSize: 28,
+  headerFontSize: 10,
   certSettings: {
     header_line_1: 'Republic of the Philippines • City Government of Baguio',
     header_line_2: 'Men Opposed to Violence Against Women Everywhere (MOVE)',
@@ -2275,7 +2276,33 @@ function onTitleFontSizeChange(val) {
   renderCertificateCanvas();
 }
 
+function adjustTitleFontSize(delta) {
+  const current = appState.titleFontSize || 28;
+  const next = Math.max(18, Math.min(48, current + delta));
+  appState.titleFontSize = next;
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function onHeaderFontSizeChange(val) {
+  appState.headerFontSize = parseFloat(val);
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
+function adjustHeaderFontSize(delta) {
+  const current = appState.headerFontSize || 10;
+  const next = Math.max(8, Math.min(20, Math.round((current + delta) * 10) / 10));
+  appState.headerFontSize = next;
+  updateTypographyUI();
+  saveLayoutPreferences();
+  renderCertificateCanvas();
+}
+
 function resetFontSizes() {
+  appState.headerFontSize = 10;
   appState.nameFontSize = 26;
   appState.bodyFontSize = 12;
   appState.titleFontSize = 28;
@@ -2288,6 +2315,12 @@ function updateTypographyUI() {
   const n = appState.nameFontSize || 26;
   const b = appState.bodyFontSize || 12;
   const t = appState.titleFontSize || 28;
+  const h = appState.headerFontSize || 10;
+
+  const lblH = document.getElementById("lblHeaderFontSize");
+  if (lblH) lblH.textContent = `${h}px`;
+  const sliderH = document.getElementById("certHeaderFontSizeSlider");
+  if (sliderH) sliderH.value = h;
 
   const lblN = document.getElementById("lblNameFontSize");
   if (lblN) lblN.textContent = `${n}px`;
@@ -2313,7 +2346,8 @@ function saveLayoutPreferences() {
       recipientYOffset: appState.recipientYOffset,
       nameFontSize: appState.nameFontSize,
       bodyFontSize: appState.bodyFontSize,
-      titleFontSize: appState.titleFontSize
+      titleFontSize: appState.titleFontSize,
+      headerFontSize: appState.headerFontSize
     }));
   } catch (e) {}
 }
@@ -2329,6 +2363,7 @@ function initLayoutPreferences() {
       if (prefs.nameFontSize !== undefined) appState.nameFontSize = prefs.nameFontSize;
       if (prefs.bodyFontSize !== undefined) appState.bodyFontSize = prefs.bodyFontSize;
       if (prefs.titleFontSize !== undefined) appState.titleFontSize = prefs.titleFontSize;
+      if (prefs.headerFontSize !== undefined) appState.headerFontSize = prefs.headerFontSize;
     }
   } catch (e) {}
   updateWatermarkUI();
@@ -2474,6 +2509,7 @@ function updateCertHeaderInputs() {
   }
 }
 
+let _sidebarDebounceTimer = null;
 function onSidebarCertFieldInput(field, val) {
   let key = field;
   if (field === 'active_title') key = getActiveCertTitleKey();
@@ -2482,9 +2518,16 @@ function onSidebarCertFieldInput(field, val) {
   if (!appState.certSettings) appState.certSettings = {};
   appState.certSettings[key] = val;
   renderCertificateCanvas();
+
+  if (_sidebarDebounceTimer) clearTimeout(_sidebarDebounceTimer);
+  _sidebarDebounceTimer = setTimeout(() => {
+    saveCertField(field, true);
+  }, 700);
 }
 
-function onCanvasCertFieldInput(field, val) {
+let _certDebounceTimer = null;
+
+function onCanvasCertFieldInput(field, val, el) {
   let key = field;
   if (field === 'active_title') key = getActiveCertTitleKey();
   if (field === 'active_intro') key = getActiveCertIntroKey();
@@ -2492,9 +2535,15 @@ function onCanvasCertFieldInput(field, val) {
   if (!appState.certSettings) appState.certSettings = {};
   appState.certSettings[key] = val;
   updateCertHeaderInputs();
+
+  // Debounced auto-save after 700ms of pausing typing
+  if (_certDebounceTimer) clearTimeout(_certDebounceTimer);
+  _certDebounceTimer = setTimeout(() => {
+    saveCanvasCertField(key, val, el);
+  }, 700);
 }
 
-async function saveCanvasCertField(field, val) {
+async function saveCanvasCertField(field, val, el) {
   let key = field;
   if (field === 'active_title') key = getActiveCertTitleKey();
   if (field === 'active_intro') key = getActiveCertIntroKey();
@@ -2505,6 +2554,7 @@ async function saveCanvasCertField(field, val) {
   appState.certSettings[key] = cleanVal;
   localStorage.setItem("move_cert_header_settings", JSON.stringify(appState.certSettings));
   updateCertHeaderInputs();
+  highlightSidebarSaveStatus(key);
 
   try {
     const payload = {};
@@ -2517,14 +2567,15 @@ async function saveCanvasCertField(field, val) {
     const data = await res.json();
     if (data.success) {
       const fieldNiceName = key.replace(/_/g, ' ').toUpperCase();
-      showToastNotification(`Saved: ${fieldNiceName} updated in database!`);
+      showToastNotification(`Saved: ${fieldNiceName} saved to database!`);
+      if (el) showCanvasSaveIndicator(el, `Saved: ${fieldNiceName}`);
     }
   } catch (err) {
     console.error("Failed to save canvas cert field:", err);
   }
 }
 
-async function saveCertField(fieldKey) {
+async function saveCertField(fieldKey, isDebounce = false) {
   let key = fieldKey;
   if (fieldKey === 'active_title') key = getActiveCertTitleKey();
   if (fieldKey === 'active_intro') key = getActiveCertIntroKey();
@@ -2564,7 +2615,7 @@ async function saveCertField(fieldKey) {
   const statusSpan = document.getElementById(statusId);
 
   if (!val) {
-    alert(`${labelName} cannot be empty.`);
+    if (!isDebounce) alert(`${labelName} cannot be empty.`);
     return;
   }
 
@@ -2679,14 +2730,14 @@ async function resetCertificateSettings() {
           </div>
         ` : ''}
 
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
-        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable tracking-widest uppercase font-bold text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('participation_title', this.innerText, this)" onblur="saveCanvasCertField('participation_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#0f1f3d] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.participation_title || 'CERTIFICATE OF PARTICIPATION')}
         </h2>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('active_intro', this.innerText)" onblur="saveCanvasCertField('active_intro', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('participation_intro', this.innerText, this)" onblur="saveCanvasCertField('participation_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.participation_intro || 'This certification is proudly presented to')}
         </p>
       </div>
@@ -2853,11 +2904,11 @@ async function resetCertificateSettings() {
           </div>
         ` : ''}
 
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[9px] uppercase tracking-widest text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
-        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-xs font-bold uppercase text-slate-800 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[10px] font-semibold text-slate-600 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase tracking-widest text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold uppercase text-slate-800 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-semibold text-slate-600 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text" title="Click to edit Certificate Title (auto-saves to database)">
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appearance_title', this.innerText, this)" onblur="saveCanvasCertField('appearance_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-sans text-xl sm:text-2xl font-black text-slate-950 tracking-wider mt-2 uppercase cursor-text" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appearance_title || 'CERTIFICATE OF APPEARANCE')}
         </h2>
       </div>
@@ -2925,14 +2976,14 @@ async function resetCertificateSettings() {
           </div>
         ` : ''}
 
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText)" onblur="saveCanvasCertField('header_line_1', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[10px] tracking-widest uppercase font-bold text-slate-500 cursor-text" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
-        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText)" onblur="saveCanvasCertField('header_line_2', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText)" onblur="saveCanvasCertField('header_line_3', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[9px] text-slate-500 font-semibold uppercase mt-0.5 cursor-text" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_1', this.innerText, this)" onblur="saveCanvasCertField('header_line_1', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable tracking-widest uppercase font-bold text-slate-500 cursor-text transition-all" style="font-size: ${appState.headerFontSize || 10}px; line-height: 1.2;" title="Click to edit Header Line 1 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_1 || 'Republic of the Philippines • City Government of Baguio')}</p>
+        <h4 contenteditable="true" oninput="onCanvasCertFieldInput('header_line_2', this.innerText, this)" onblur="saveCanvasCertField('header_line_2', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-extrabold uppercase text-slate-800 tracking-wider mt-0.5 cursor-text transition-all" style="font-size: ${(appState.headerFontSize || 10) + 1}px; line-height: 1.2;" title="Click to edit Header Line 2 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_2 || 'Men Opposed to Violence Against Women Everywhere (MOVE)')}</h4>
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('header_line_3', this.innerText, this)" onblur="saveCanvasCertField('header_line_3', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-slate-500 font-semibold uppercase mt-0.5 cursor-text transition-all" style="font-size: ${Math.max(8, (appState.headerFontSize || 10) - 1)}px; line-height: 1.2;" title="Click to edit Header Line 3 (auto-saves to database)">${escapeHtml(appState.certSettings?.header_line_3 || 'City Hall Chapter • Baguio City, Philippines')}</p>
         
-        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('active_title', this.innerText)" onblur="saveCanvasCertField('active_title', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
+        <h2 contenteditable="true" oninput="onCanvasCertFieldInput('appreciation_title', this.innerText, this)" onblur="saveCanvasCertField('appreciation_title', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-cinzel font-black text-[#d97706] tracking-wider mt-3 transition-all cursor-text" style="font-size: ${appState.titleFontSize || 28}px; line-height: 1.1;" title="Click to edit Certificate Title (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appreciation_title || 'CERTIFICATE OF APPRECIATION')}
         </h2>
-        <p contenteditable="true" oninput="onCanvasCertFieldInput('active_intro', this.innerText)" onblur="saveCanvasCertField('active_intro', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
+        <p contenteditable="true" oninput="onCanvasCertFieldInput('appreciation_intro', this.innerText, this)" onblur="saveCanvasCertField('appreciation_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable text-[11px] italic font-serif text-slate-600 mt-0.5 cursor-text" title="Click to edit Presentation Intro (auto-saves to database)">
           ${escapeHtml(appState.certSettings?.appreciation_intro || 'is proudly and warmly presented to')}
         </p>
       </div>
@@ -3186,14 +3237,61 @@ function showToastNotification(message) {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "appToastNotification";
-    toast.className = "fixed bottom-5 right-5 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-3";
+    toast.className = "fixed top-6 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 transition-all duration-300 pointer-events-none border border-emerald-400";
     document.body.appendChild(toast);
   }
-  toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(message)}</span>`;
-  toast.classList.remove("opacity-0", "translate-y-3", "pointer-events-none");
-  setTimeout(() => {
-    toast.classList.add("opacity-0", "translate-y-3", "pointer-events-none");
+  toast.innerHTML = `<i class="fa-solid fa-circle-check text-base text-white"></i> <span>${escapeHtml(message)}</span>`;
+  toast.style.opacity = "1";
+  toast.style.transform = "translate(-50%, 0)";
+  if (window._toastTimer) clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translate(-50%, -10px)";
   }, 2800);
+}
+
+function showCanvasSaveIndicator(element, text) {
+  if (!element) return;
+  const parent = element.parentElement || document.body;
+  let pill = parent.querySelector(".canvas-inline-saved-pill");
+  if (!pill) {
+    pill = document.createElement("div");
+    pill.className = "canvas-inline-saved-pill no-print absolute bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-md shadow-2xl z-50 flex items-center gap-1.5 transition-all duration-200 pointer-events-none border border-emerald-300";
+    if (window.getComputedStyle(parent).position === 'static') {
+      parent.style.position = "relative";
+    }
+    parent.appendChild(pill);
+  }
+  const topPos = Math.max(0, element.offsetTop - 24);
+  pill.style.top = `${topPos}px`;
+  pill.style.left = "50%";
+  pill.style.transform = "translateX(-50%)";
+  pill.innerHTML = `<i class="fa-solid fa-check text-[10px]"></i> <span>${escapeHtml(text || 'Saved to Database')}</span>`;
+  pill.style.opacity = "1";
+  if (pill._hideTimer) clearTimeout(pill._hideTimer);
+  pill._hideTimer = setTimeout(() => {
+    if (pill) {
+      pill.style.opacity = "0";
+    }
+  }, 2200);
+}
+
+function highlightSidebarSaveStatus(key) {
+  let statusId = null;
+  if (key === 'header_line_1') statusId = 'hdr1SaveStatus';
+  else if (key === 'header_line_2') statusId = 'hdr2SaveStatus';
+  else if (key === 'header_line_3') statusId = 'hdr3SaveStatus';
+  else if (key.includes('title')) statusId = 'titleSaveStatus';
+  else if (key.includes('intro')) statusId = 'introSaveStatus';
+  else if (key.includes('citation')) statusId = 'citationSaveStatus';
+
+  if (statusId) {
+    const s = document.getElementById(statusId);
+    if (s) {
+      s.classList.remove("hidden");
+      setTimeout(() => s.classList.add("hidden"), 3000);
+    }
+  }
 }
 
 
