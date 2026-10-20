@@ -551,22 +551,55 @@
 
           <!-- Signatories Controls -->
           <div class="space-y-3 pt-3 border-t border-slate-800">
-            <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
-              <i class="fa-solid fa-signature text-move-orange-400"></i> Executive Signatories
-            </h4>
-
-            <div>
-              <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 1 (Left / Chapter Head)</label>
-              <select id="certSigSelect1" onchange="onSigSelect(1, this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                <!-- Populated via JS -->
-              </select>
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-signature text-move-orange-400"></i> Executive Signatories & Titles
+              </h4>
+              <span class="text-[9px] text-move-gold-400 font-bold uppercase">Editable</span>
             </div>
 
-            <div>
-              <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 2 (Right / City Mayor)</label>
-              <select id="certSigSelect2" onchange="onSigSelect(2, this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                <!-- Populated via JS -->
-              </select>
+            <!-- Signatory 1 Card -->
+            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 1 (Left / Chapter Head)</label>
+                <select id="certSigSelect1" onchange="onSigSelect(1, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase">Position Title</label>
+                  <span id="sig1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <input type="text" id="certSig1TitleInput" oninput="onSigTitleInputChange(1, this.value)" placeholder="e.g. MOVE Baguio Chapter President" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
+                  <button type="button" onclick="saveSignatoryTitle(1)" id="btnSaveSig1Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 1 title directly to SQLite database">
+                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Signatory 2 Card -->
+            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Signatory 2 (Right / City Mayor)</label>
+                <select id="certSigSelect2" onchange="onSigSelect(2, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[9px] font-bold text-slate-400 uppercase">Position Title</label>
+                  <span id="sig2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <input type="text" id="certSig2TitleInput" oninput="onSigTitleInputChange(2, this.value)" placeholder="e.g. City Mayor & Honorary Chapter Adviser" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
+                  <button type="button" onclick="saveSignatoryTitle(2)" id="btnSaveSig2Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 2 title directly to SQLite database">
+                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- Appearance Certificate Specific Signatory Selector -->

@@ -128,6 +128,10 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 * **Adjustable Recipient Text Vertical Alignment (Up / Down)**:
   * **Vertical Text Slider**: Smoothly nudge the participant's name, designation, office, and citations up or down (-60px to +60px) for optimal vertical centering.
   * **On-Canvas Hover Nudge**: Hover over the recipient block on the certificate stage to click `↑ Up` / `↓ Down` for instant visual feedback.
+* **Editable Signatory Position Titles & Database Persistence**:
+  * **Sidebar Inputs & Direct Save**: Dedicated title text inputs in the sidebar with 1-click **Save** buttons that commit position titles directly to the `signatories` SQLite table via `PUT /api/signatories/{id}`.
+  * **On-Canvas Click-to-Edit & Auto-Save**: Click directly on any signatory's title (e.g. *"City Mayor & Honorary Chapter Adviser"*) on the certificate stage to edit, with automatic saving to the database upon clicking away (blur).
+  * **Universal Sync Across All Templates**: Persists across Participation, Appearance/CA, and Appreciation templates.
 * **Flexible Appearance Certificate Signatories**: Choose which signature appears on the Certificate of Appearance — Signatory 2 (Mayor Magalong - Right/Center), Signatory 1 (President Ganga - Right/Center), or Dual Signatories (both side-by-side).
 * **Digital E-Signature Visibility**: Choose whether to display all digital signatures, Mayor only, President only, or blank signature lines for physical wet-ink signing.
 * **Recipient Navigator**: `< Recipient 1 of 47 (Verified Present) >` with a searchable dropdown.
@@ -164,6 +168,7 @@ Replaced 3 separate studios with a single, elegant studio featuring a **Template
 | `DELETE` | `/api/activities/{id}/facilitators/{fac_id}` | Remove a facilitator from an activity |
 | `GET` | `/api/activities/{id}/eligible-certificates` | Gated list of eligible attendees and facilitators (`is_present = 1`) |
 | `GET` | `/api/signatories` | Get list of available executive signatories |
+| `PUT` | `/api/signatories/{id}` | Update signatory position title, name, or office in SQLite |
 
 ### 🎓 Role-Based Certificate Matrix
 

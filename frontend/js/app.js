@@ -2387,15 +2387,15 @@ function renderCertificateCanvas() {
         <!-- Signatory 1 -->
         <div class="flex flex-col items-center">
           ${getSigImgHtml(1, sig1, showSig1Img)}
-          <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
-          <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig1.title)}</p>
+          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
+          <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title)}</p>
         </div>
 
         <!-- Signatory 2 -->
         <div class="flex flex-col items-center">
           ${getSigImgHtml(2, sig2, showSig2Img)}
-          <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
-          <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig2.title)}</p>
+          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
+          <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title)}</p>
         </div>
       </div>
     `;
@@ -2420,8 +2420,8 @@ function renderCertificateCanvas() {
           </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(1, sig1, showSig1Img)}
-            <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
-            <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
+            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
+            <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
           </div>
         </div>
       `;
@@ -2435,13 +2435,13 @@ function renderCertificateCanvas() {
           <div class="grid grid-cols-2 gap-8 text-center text-xs">
             <div class="flex flex-col items-center">
               ${getSigImgHtml(1, sig1, showSig1Img)}
-              <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
-              <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
+              <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
+              <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
             </div>
             <div class="flex flex-col items-center">
               ${getSigImgHtml(2, sig2, showSig2Img)}
-              <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
-              <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
+              <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
+              <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
             </div>
           </div>
         </div>
@@ -2455,8 +2455,8 @@ function renderCertificateCanvas() {
           </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(2, sig2, showSig2Img)}
-            <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
-            <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
+            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
+            <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
           </div>
         </div>
       `;
@@ -2469,8 +2469,8 @@ function renderCertificateCanvas() {
           </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(1, sig1, showSig1Img)}
-            <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
-            <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
+            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
+            <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title || 'MOVE Chapter President')}</p>
           </div>
         </div>
       `;
@@ -2484,8 +2484,8 @@ function renderCertificateCanvas() {
           </div>
           <div class="text-center flex flex-col items-center">
             ${getSigImgHtml(2, sig2, showSig2Img)}
-            <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
-            <p contenteditable="true" class="cert-editable text-[10px] text-slate-600 font-medium">City Mayor &bull; LCAT-VAWC Chairperson</p>
+            <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
+            <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-600 font-medium cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title || 'City Mayor & Honorary Chapter Adviser')}</p>
           </div>
         </div>
       `;
@@ -2607,14 +2607,14 @@ function renderCertificateCanvas() {
       <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center relative z-10">
         <div class="flex flex-col items-center">
           ${getSigImgHtml(1, sig1, showSig1Img)}
-          <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig1.name)}</h5>
-          <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig1.title)}</p>
+          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(1, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig1.name)}</h5>
+          <p contenteditable="true" oninput="onCanvasSigTitleInput(1, this.innerText)" onblur="onCanvasSigTitleBlur(1, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig1.title)}</p>
         </div>
 
         <div class="flex flex-col items-center">
           ${getSigImgHtml(2, sig2, showSig2Img)}
-          <h5 contenteditable="true" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48">${escapeHtml(sig2.name)}</h5>
-          <p contenteditable="true" class="cert-editable text-[10px] text-slate-500 font-semibold">${escapeHtml(sig2.title)}</p>
+          <h5 contenteditable="true" onblur="onCanvasSigNameBlur(2, this.innerText)" class="cert-editable font-bold text-xs uppercase text-slate-900 border-t border-slate-800 pt-1 w-48" title="Click to edit signatory name">${escapeHtml(sig2.name)}</h5>
+          <p contenteditable="true" oninput="onCanvasSigTitleInput(2, this.innerText)" onblur="onCanvasSigTitleBlur(2, this.innerText)" class="cert-editable text-[10px] text-slate-500 font-semibold cursor-text" title="Click to edit position title (auto-saves to database)">${escapeHtml(sig2.title)}</p>
         </div>
       </div>
     `;
@@ -2688,6 +2688,146 @@ async function loadSignatories() {
   }
 }
 
+// --- SIGNATORY TITLE EDITING & SAVING CONTROLLER ---
+function onSigSelect(sigNum, val) {
+  const id = parseInt(val, 10);
+  if (sigNum === 1) appState.sig1Id = id;
+  if (sigNum === 2) appState.sig2Id = id;
+  updateSignatoryTitleInputs();
+  renderCertificateCanvas();
+}
+
+function updateSignatoryTitleInputs() {
+  const sig1 = appState.signatories.find(s => s.id === appState.sig1Id);
+  const sig2 = appState.signatories.find(s => s.id === appState.sig2Id);
+
+  const inp1 = document.getElementById("certSig1TitleInput");
+  const inp2 = document.getElementById("certSig2TitleInput");
+  if (inp1 && sig1) inp1.value = sig1.title || "";
+  if (inp2 && sig2) inp2.value = sig2.title || "";
+}
+
+function onSigTitleInputChange(sigNum, val) {
+  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const sig = appState.signatories.find(s => s.id === sigId);
+  if (sig) {
+    sig.title = val;
+    renderCertificateCanvas();
+  }
+}
+
+async function saveSignatoryTitle(sigNum) {
+  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const sig = appState.signatories.find(s => s.id === sigId);
+  const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
+  const title = (inp ? inp.value : (sig ? sig.title : "")).trim();
+  const statusSpan = document.getElementById(sigNum === 1 ? "sig1SaveStatus" : "sig2SaveStatus");
+
+  if (!title) {
+    alert("Signatory position title cannot be empty.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/signatories/${sigId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: title })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (sig) sig.title = title;
+      populateSignatorySelects();
+      renderCertificateCanvas();
+
+      if (statusSpan) {
+        statusSpan.classList.remove("hidden");
+        setTimeout(() => statusSpan.classList.add("hidden"), 2500);
+      }
+      showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} title updated in database!`);
+    } else {
+      alert("Error saving signatory title: " + (data.message || "Unknown error"));
+    }
+  } catch (err) {
+    alert("Failed to save signatory title: " + err);
+  }
+}
+
+function onCanvasSigTitleInput(sigNum, text) {
+  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const sig = appState.signatories.find(s => s.id === sigId);
+  if (sig) {
+    sig.title = text.trim();
+    const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
+    if (inp) inp.value = sig.title;
+  }
+}
+
+async function onCanvasSigTitleBlur(sigNum, text) {
+  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const cleanTitle = text.trim();
+  const sig = appState.signatories.find(s => s.id === sigId);
+  if (!cleanTitle) return;
+
+  if (sig) sig.title = cleanTitle;
+  const inp = document.getElementById(sigNum === 1 ? "certSig1TitleInput" : "certSig2TitleInput");
+  if (inp) inp.value = cleanTitle;
+
+  // Auto-save to SQLite database
+  try {
+    const res = await fetch(`${API_BASE}/api/signatories/${sigId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: cleanTitle })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} title updated!`);
+    }
+  } catch (err) {
+    console.warn("Auto-save signatory title failed:", err);
+  }
+}
+
+async function onCanvasSigNameBlur(sigNum, text) {
+  const sigId = (sigNum === 1) ? appState.sig1Id : appState.sig2Id;
+  const cleanName = text.trim();
+  const sig = appState.signatories.find(s => s.id === sigId);
+  if (!cleanName || (sig && sig.name === cleanName)) return;
+
+  if (sig) sig.name = cleanName;
+  try {
+    const res = await fetch(`${API_BASE}/api/signatories/${sigId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: cleanName })
+    });
+    const data = await res.json();
+    if (data.success) {
+      populateSignatorySelects();
+      showToastNotification(`Saved: Signatory name updated!`);
+    }
+  } catch (err) {
+    console.warn("Auto-save signatory name failed:", err);
+  }
+}
+
+function showToastNotification(message) {
+  let toast = document.getElementById("appToastNotification");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "appToastNotification";
+    toast.className = "fixed bottom-5 right-5 z-50 bg-emerald-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none transform translate-y-3";
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${escapeHtml(message)}</span>`;
+  toast.classList.remove("opacity-0", "translate-y-3", "pointer-events-none");
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "translate-y-3", "pointer-events-none");
+  }, 2800);
+}
+
+
 function populateSignatorySelects() {
   const sel1 = document.getElementById("certSigSelect1");
   const sel2 = document.getElementById("certSigSelect2");
@@ -2702,6 +2842,7 @@ function populateSignatorySelects() {
 
   sel1.value = appState.sig1Id;
   sel2.value = appState.sig2Id;
+  updateSignatoryTitleInputs();
 
   // Initialize Certificate of Appearance signatory & display controls
   const caChoiceSel = document.getElementById("caSignatoryChoice");

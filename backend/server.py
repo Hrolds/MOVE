@@ -702,6 +702,47 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # 5. API: Update Signatory (Title, Name, Office)
+        m_upd_sig = re.match(r"^/api/signatories/(\d+)$", path)
+        if m_upd_sig:
+            sig_id = int(m_upd_sig.group(1))
+            title = str(body.get("title", "")).strip()
+            name = str(body.get("name", "")).strip()
+            office = str(body.get("office", "")).strip()
+
+            if not title and not name:
+                self.send_json({"success": False, "message": "Signatory title or name is required"}, 400)
+                return
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            existing = cursor.execute("SELECT * FROM signatories WHERE id = ?;", (sig_id,)).fetchone()
+            if not existing:
+                conn.close()
+                self.send_json({"success": False, "message": "Signatory not found"}, 404)
+                return
+
+            final_title = title if title else existing["title"]
+            final_name = name if name else existing["name"]
+            final_office = office if office else existing["office"]
+
+            cursor.execute("""
+            UPDATE signatories
+            SET title = ?, name = ?, office = ?
+            WHERE id = ?;
+            """, (final_title, final_name, final_office, sig_id))
+            conn.commit()
+
+            updated = cursor.execute("SELECT * FROM signatories WHERE id = ?;", (sig_id,)).fetchone()
+            conn.close()
+
+            self.send_json({
+                "success": True,
+                "message": "Signatory position title updated successfully",
+                "signatory": dict(updated)
+            })
+            return
+
         self.send_json({"success": False, "message": "Endpoint not found"}, 404)
 
     # -------------------------------------------------------------
