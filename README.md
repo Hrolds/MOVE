@@ -91,6 +91,7 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
   * **Office / Dept**: Official municipal office or agency.
   * Plus **Sex**, **Civil Status**, and **Actions**.
 * **In-Place Member Editing**: Click `[ ✏️ Edit ]` on any row to open `#modalEditMember` and update name, MOVE role, government position title, or office with immediate SQLite persistence.
+* **Standardized Office & Department Conventions**: Clean, concise department and division naming across all roster and facilitator records (e.g. City Mayor's Office - Library streamlined to avoid verbose repetitions, and Department of Education (DEPED) synchronized with attendance rosters).
 * **High-Resolution Transparent Logo**: `MOVE BAGUIO LOGO.png` is an anti-aliased RGBA PNG that floats transparently on dark headers, cards, and certificate watermarks.
 
 ### 2. 📅 Activities & Simple Target Notes
@@ -293,7 +294,7 @@ Comprehensive signatory customization available via both the **Quick Bar** above
 2. Both `data/move_hris.db` and `data/move_hris_dump.sql` contain the complete official records:
    - **59 Attendees** for *Men in the Kitchen 2* (with positions, offices, contact numbers, and verified attendance).
    - **16 Facilitators** (committee facilitators + Master Trainer Chef Ramon Dela Rosa).
-   - **Full MOVE Roster** with 10-row pagination, Left Nav Panel, and transparent Baguio emblem.
+   - **Full MOVE Roster** with 10-row pagination, Left Nav Panel, standardized office/department naming, and transparent Baguio emblem.
    - Saved custom certificate headers, titles, appearance citations, and signatory configurations.
 
 ### On Another Computer (After You Pull):
