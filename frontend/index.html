@@ -37,7 +37,7 @@
 
   <!-- TOP NAVBAR -->
   <header id="topNavbar" class="bg-move-navy-950/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div class="max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- Brand & Insignia -->
       <div class="flex items-center gap-3">
@@ -85,7 +85,7 @@
   </div>
 
   <!-- MAIN APP CONTAINER -->
-  <main id="nonPrintableContent" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+  <main id="nonPrintableContent" class="flex-1 max-w-[1700px] w-full mx-auto p-4 sm:p-6 lg:p-8">
 
     <!-- ==================================================================== -->
     <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER                       -->
@@ -96,7 +96,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <h2 class="text-xl font-black text-white flex items-center gap-2">
-            <i class="fa-solid fa-id-card-clip text-move-orange-500"></i> MOVE Chapter Roster & Selective Status
+            <i class="fa-solid fa-id-card-clip text-move-orange-500"></i> MOVE Chapter Roster &amp; Selective Status
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">
             Dedicated MOVE table with selective status toggles (Member, Officer, Committee, Participant).
@@ -109,55 +109,128 @@
         </div>
       </div>
 
-      <!-- Filter Bar: Search & Status Pills -->
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+      <!-- Main Layout: Left Navigation Panel + Right Table Area -->
+      <div class="flex flex-col lg:flex-row gap-6 items-start">
         
-        <!-- Status Tabs -->
-        <div class="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
-          <button onclick="filterRosterByStatus('all')" id="rosterFilter-all" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-white">
-            All (<span id="count-all">0</span>)
-          </button>
-          <button onclick="filterRosterByStatus('member')" id="rosterFilter-member" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
-            Members (<span id="count-member">0</span>)
-          </button>
-          <button onclick="filterRosterByStatus('officer')" id="rosterFilter-officer" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
-            Officers (<span id="count-officer">0</span>)
-          </button>
-          <button onclick="filterRosterByStatus('committee')" id="rosterFilter-committee" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
-            Committees (<span id="count-committee">0</span>)
-          </button>
-          <button onclick="filterRosterByStatus('participant')" id="rosterFilter-participant" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800">
-            Participants (<span id="count-participant">0</span>)
-          </button>
-        </div>
+        <!-- LEFT: Category Navigation Panel (w-full lg:w-64 shrink-0) -->
+        <aside class="w-full lg:w-64 shrink-0 bg-slate-900/90 rounded-2xl border border-slate-800 p-4 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <span class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-move-orange-400"></i> Roster Nav Panel
+            </span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono" id="navPanelTotalBadge">0</span>
+          </div>
 
-        <!-- Live Search Input -->
-        <div class="relative w-full md:w-72">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-          <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Search name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
-        </div>
-      </div>
+          <nav class="space-y-1.5" id="rosterNavPanel">
+            <button onclick="filterRosterByStatus('all')" id="rosterFilter-all" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-md border-move-orange-400/50">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-users-gear w-4 text-center"></i>
+                <span>Manage Personnel</span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/20 text-white" id="count-all">0</span>
+            </button>
 
-      <!-- Roster Table Card -->
-      <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
-              <tr>
-                <th class="py-3 px-4 w-12">#</th>
-                <th class="py-3 px-4">Full Name</th>
-                <th class="py-3 px-4">Position Title</th>
-                <th class="py-3 px-4">Office / Dept</th>
-                <th class="py-3 px-4 text-center">Sex</th>
-                <th class="py-3 px-4">Civil Status</th>
-                <th class="py-3 px-4 text-center">Selective Status (Click to Toggle)</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
-              <!-- Dynamically populated via JS -->
-            </tbody>
-          </table>
+            <button onclick="filterRosterByStatus('member')" id="rosterFilter-member" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-400"></i>
+                <span>Members (Cadre)</span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" id="count-member">0</span>
+            </button>
+
+            <button onclick="filterRosterByStatus('officer')" id="rosterFilter-officer" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-star w-4 text-center text-amber-400"></i>
+                <span>Officers</span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30" id="count-officer">0</span>
+            </button>
+
+            <button onclick="filterRosterByStatus('committee')" id="rosterFilter-committee" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-diagram-project w-4 text-center text-purple-400"></i>
+                <span>Committees</span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30" id="count-committee">0</span>
+            </button>
+
+            <button onclick="filterRosterByStatus('participant')" id="rosterFilter-participant" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-user-check w-4 text-center text-cyan-400"></i>
+                <span>Participants</span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" id="count-participant">0</span>
+            </button>
+          </nav>
+
+          <!-- Nav Panel Quick Actions -->
+          <div class="pt-3 border-t border-slate-800/80 space-y-2">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-1">Quick Tools</span>
+            <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium border border-slate-800 transition flex items-center gap-2">
+              <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
+              <span>Search Municipal Pool (748)</span>
+            </button>
+            <button onclick="openModal('modalAddMember')" class="w-full px-3 py-2 rounded-xl bg-move-orange-500/10 hover:bg-move-orange-500/20 text-move-orange-300 text-xs font-semibold border border-move-orange-500/30 transition flex items-center gap-2">
+              <i class="fa-solid fa-plus text-xs"></i>
+              <span>Add Person to MOVE</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- RIGHT: Table & Search Toolbar (flex-1 min-w-0) -->
+        <div class="flex-1 min-w-0 space-y-4">
+          
+          <!-- Toolbar: Live Search & Active Category Banner -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+            <div class="flex items-center gap-2">
+              <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-users text-move-orange-400"></i> All Personnel
+              </span>
+              <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Showing all roster entries</span>
+            </div>
+
+            <!-- Live Search Input -->
+            <div class="relative w-full sm:w-72">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+              <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Search name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
+            </div>
+          </div>
+
+          <!-- Roster Table Card -->
+          <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th class="py-3 px-3 w-12 text-slate-500 font-mono text-center">#</th>
+                    <th class="py-3 px-4 whitespace-nowrap">Full Name</th>
+                    <th class="py-3 px-4 whitespace-nowrap">MOVE Position Title</th>
+                    <th class="py-3 px-4 whitespace-nowrap">Office Position Title</th>
+                    <th class="py-3 px-4 whitespace-nowrap">Office / Dept</th>
+                    <th class="py-3 px-3 text-center whitespace-nowrap w-12">Sex</th>
+                    <th class="py-3 px-3 text-center whitespace-nowrap w-24">Civil Status</th>
+                    <th id="thSelectiveStatus" class="py-3 px-4 text-center whitespace-nowrap">Selective Status</th>
+                    <th class="py-3 px-4 text-right whitespace-nowrap w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
+                  <!-- Dynamically populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination Controls (Locked to 10 Rows Per Page) -->
+          <div id="rosterPaginationBar" class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs">
+            <div class="text-slate-400 font-medium text-[11px] flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-move-orange-400"></i>
+              <span id="rosterPaginationInfo">Showing 1 – 10 of 59 personnel</span>
+            </div>
+            <div class="flex items-center gap-1.5" id="rosterPaginationControls">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -1258,6 +1331,98 @@
     </div>
   </div>
 
+  <!-- MODAL: Edit MOVE Member -->
+  <div id="modalEditMember" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-user-pen text-move-orange-400"></i> Edit MOVE Member
+          </h3>
+          <p class="text-[11px] text-slate-400">Update personnel name, MOVE role, government position title, and office.</p>
+        </div>
+        <button onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="formEditMember" onsubmit="submitEditMember(event)" class="space-y-3">
+        <input type="hidden" id="editMemberId">
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Full Name (SURNAME, FIRSTNAME M.I.) *</label>
+          <input type="text" id="editMemberName" required placeholder="e.g. DELA CRUZ, JUAN A." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 uppercase font-semibold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">MOVE Position Title *</label>
+            <input type="text" id="editMemberRole" list="listMoveRoles" required placeholder="e.g. Member (Cadre)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 font-medium">
+            <datalist id="listMoveRoles">
+              <option value="Member (Cadre)"></option>
+              <option value="President"></option>
+              <option value="Vice President"></option>
+              <option value="Secretary"></option>
+              <option value="Treasurer"></option>
+              <option value="Assistant Treasurer"></option>
+              <option value="Auditor"></option>
+              <option value="Public Relations Officer"></option>
+              <option value="Committee Chairperson"></option>
+              <option value="Committee Member"></option>
+            </datalist>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Office Position Title *</label>
+            <input type="text" id="editMemberPosition" required placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 font-medium">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department / Agency *</label>
+          <input type="text" id="editMemberOffice" required placeholder="e.g. City Assessor's Office (CASSO)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Gender / Sex</label>
+            <select id="editMemberGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+              <option value="M">Male (M)</option>
+              <option value="F">Female (F)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
+            <select id="editMemberCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+              <option value="Married">Married</option>
+              <option value="Single">Single</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
+            <input type="text" id="editMemberContact" placeholder="e.g. 0917-123-4567" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Remarks</label>
+            <input type="text" id="editMemberNotes" placeholder="e.g. Executive Committee" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalEditMember')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitEditMember" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-black shadow transition flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Save Member Details
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: Create New Activity -->
   <div id="modalCreateActivity" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
@@ -1896,8 +2061,9 @@
         <div>
           <h3 class="text-base font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-magnifying-glass text-slate-400"></i> Municipal Employee Search Pool (748)
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-move-orange-500/20 text-move-orange-400 border border-move-orange-500/30">Locked to 10 Results</span>
           </h3>
-          <p class="text-[11px] text-slate-400">Separate search table. Ready to be linked to your external API when provided.</p>
+          <p class="text-[11px] text-slate-400">Showing top 10 matching employees from the 748 municipal pool.</p>
         </div>
         <button onclick="closeModal('modalSearchPool')" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -1934,6 +2100,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=1792472201"></script>
+  <script src="/frontend/js/app.js?v=20261029-1715"></script>
 </body>
 </html>

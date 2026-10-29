@@ -112,7 +112,7 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/search-pool":
             q = query.get("q", [""])[0].strip()
             office = query.get("office", [""])[0].strip()
-            limit = int(query.get("limit", [50])[0])
+            limit = int(query.get("limit", [10])[0])
 
             conn = get_connection()
             sql = "SELECT * FROM municipal_employees_search_pool WHERE 1=1"
@@ -547,6 +547,47 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
             self.send_json({"success": True, "message": f"Updated {field} = {val} for roster ID {roster_id}"})
+            return
+
+        # 1b. API: Update MOVE Roster Member Details (Full Name, Role Title, Position, Office, etc.)
+        m_edit_roster = re.match(r"^/api/move-roster/(\d+)$", path)
+        if m_edit_roster:
+            roster_id = int(m_edit_roster.group(1))
+            full_name = str(body.get("full_name", "")).strip().upper()
+            if not full_name:
+                self.send_json({"success": False, "message": "Personnel Full Name is required"}, 400)
+                return
+
+            role_title = str(body.get("role_title", "Member (Cadre)")).strip()
+            position = str(body.get("position", "")).strip()
+            office = str(body.get("office", "")).strip()
+            gender = str(body.get("gender", "M")).strip()
+            civil = str(body.get("civil_status", "Married")).strip()
+            contact = str(body.get("contact_number", "")).strip()
+            notes = str(body.get("notes", "")).strip()
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE move_roster
+            SET full_name = ?, role_title = ?, position = ?, office = ?,
+                gender = ?, civil_status = ?, contact_number = ?, notes = ?
+            WHERE id = ?;
+            """, (full_name, role_title, position, office, gender, civil, contact, notes, roster_id))
+            conn.commit()
+
+            updated = conn.execute("SELECT * FROM move_roster WHERE id = ?;", (roster_id,)).fetchone()
+            conn.close()
+
+            if not updated:
+                self.send_json({"success": False, "message": "Member not found"}, 404)
+                return
+
+            self.send_json({
+                "success": True,
+                "message": "MOVE Member updated successfully",
+                "member": dict(updated)
+            })
             return
 
         # 2. API: Toggle Attendee is_present (The Certificate Gate!)

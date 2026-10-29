@@ -70,15 +70,28 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
 
 ## 🚀 Key Modules & Features
 
-### 1. 👥 Dedicated MOVE Roster & Selective Status Flags
-* Direct visual table with interactive status pill buttons:
-  * `[✓ Member]` (Emerald)
-  * `[★ Officer]` (Amber)
-  * `[◈ Committee]` (Purple)
-  * `[● Participant]` (Cyan)
-* Click any badge to toggle that person's status in real time.
-* **Quick Add Member**: Modal for manual entry with validation.
-* **Search Pool (748)**: Search permanent and casual municipal staff and copy them into MOVE with 1 click.
+### 1. 👥 Dedicated MOVE Roster, Left Nav Panel & Selective Status Manager
+* **Ergonomic Category Navigation Panel**:
+  * **Manage Personnel** (`fa-users-gear`): Central administrative hub where all personnel are displayed and selective status flags are managed.
+  * **Members (Cadre)**: Dedicated directory view of active chapter members.
+  * **Officers**: Executive board members.
+  * **Committees**: Standing committee leaders and members.
+  * **Participants**: Designated training trainees.
+  * Displays dynamic count badges and docked quick tool shortcuts (*Search Municipal Pool 748* and *Add Person to MOVE*).
+* **Selective Status Column Exclusivity**:
+  * The interactive status toggle buttons (`[✓ Member]`, `[★ Officer]`, `[◈ Committee]`, `[● Participant]`) are exclusively available under **Manage Personnel**.
+  * The status column is automatically hidden on the Members, Officers, Committees, and Participants views to provide clean, uncluttered directory tables.
+* **Locked to 10 Rows Per Page (Pagination)**:
+  * Avoids whole-page vertical scrolling with clean, instant pagination controls (`[ < ] [ 1 ] [ 2 ] ... [ > ]`).
+  * Displays real-time range indicators (e.g. `Showing 1 – 10 of 59 personnel`).
+* **Clean Distinct Column Layout**:
+  * **Full Name**: Clean personnel name in bold (no address text clutter underneath).
+  * **MOVE Position Title**: Distinct badge (e.g. `Member (Cadre)`, `Assistant Treasurer`, `Auditor`).
+  * **Office Position Title**: Official government / plantilla designation (`Administrative Assistant II`, etc.) with quick edit pencil.
+  * **Office / Dept**: Official municipal office or agency.
+  * Plus **Sex**, **Civil Status**, and **Actions**.
+* **In-Place Member Editing**: Click `[ ✏️ Edit ]` on any row to open `#modalEditMember` and update name, MOVE role, government position title, or office with immediate SQLite persistence.
+* **High-Resolution Transparent Logo**: `MOVE BAGUIO LOGO.png` is an anti-aliased RGBA PNG that floats transparently on dark headers, cards, and certificate watermarks.
 
 ### 2. 📅 Activities & Simple Target Notes
 * Create and edit capacity-building events and seminars.
@@ -210,8 +223,9 @@ Comprehensive signatory customization available via both the **Quick Bar** above
 | `GET` | `/api/status` | Server and SQLite database health check |
 | `GET` | `/api/move-roster` | List MOVE members (`status=all\|member\|officer\|committee\|participant`, `q=search`) |
 | `POST` | `/api/move-roster` | Add a new person directly into MOVE roster |
+| `PUT` | `/api/move-roster/{id}` | Update member details (full_name, role_title, position, office, gender, civil_status, contact, notes) |
 | `PUT` | `/api/move-roster/{id}/status` | Toggle status flag (`field`: `is_member`\|`is_officer`\|`is_committee`\|`is_participant`, `value`: `0`\|`1`) |
-| `GET` | `/api/municipal-pool` | Search workforce pool (`q=search`, `office=office`, `limit=limit`) |
+| `GET` | `/api/search-pool` | Search workforce pool (default `limit=10`, `q=search`, `office=office`) |
 | `POST` | `/api/municipal-pool/copy-to-move` | Copy employee from search pool to `move_roster` |
 | `GET` | `/api/activities` | List all activities with attendee and attendance counts |
 | `POST` | `/api/activities` | Create a new activity |
@@ -277,8 +291,9 @@ Comprehensive signatory customization available via both the **Quick Bar** above
 ### On This Machine:
 1. Double-click **`Start_HRIS.bat`** to start the backend server and open the browser interface.
 2. Both `data/move_hris.db` and `data/move_hris_dump.sql` contain the complete official records:
-   - **50 Attendees** for *Men in the Kitchen 2* (with positions, offices, contact numbers, and verified attendance).
-   - **13 Facilitators** (12 committee facilitators + Chef Ramon Dela Rosa).
+   - **59 Attendees** for *Men in the Kitchen 2* (with positions, offices, contact numbers, and verified attendance).
+   - **16 Facilitators** (committee facilitators + Master Trainer Chef Ramon Dela Rosa).
+   - **Full MOVE Roster** with 10-row pagination, Left Nav Panel, and transparent Baguio emblem.
    - Saved custom certificate headers, titles, appearance citations, and signatory configurations.
 
 ### On Another Computer (After You Pull):

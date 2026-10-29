@@ -17,6 +17,8 @@ const appState = {
   fullRoster: [],
   rosterFilter: 'all',
   rosterSearch: '',
+  rosterPage: 1,
+  rosterPageSize: 10,
 
   // Activities State
   activities: [],
@@ -188,6 +190,8 @@ async function updateRosterCounts() {
       document.getElementById("count-officer").textContent = all.filter(r => r.is_officer).length;
       document.getElementById("count-committee").textContent = all.filter(r => r.is_committee).length;
       document.getElementById("count-participant").textContent = all.filter(r => r.is_participant).length;
+      const totalBadge = document.getElementById("navPanelTotalBadge");
+      if (totalBadge) totalBadge.textContent = all.length;
     }
   } catch (err) {
     console.warn("Count update failed:", err);
@@ -196,22 +200,47 @@ async function updateRosterCounts() {
 
 function filterRosterByStatus(status) {
   appState.rosterFilter = status;
-  const statuses = ['all', 'member', 'officer', 'committee', 'participant'];
+  appState.rosterPage = 1;
+  const statuses = [
+    { key: 'all', label: 'Manage Personnel', icon: 'fa-users-gear' },
+    { key: 'member', label: 'Members (Cadre)', icon: 'fa-shield-halved' },
+    { key: 'officer', label: 'Officers', icon: 'fa-star' },
+    { key: 'committee', label: 'Committees', icon: 'fa-diagram-project' },
+    { key: 'participant', label: 'Participants', icon: 'fa-user-check' }
+  ];
+
   statuses.forEach(s => {
-    const btn = document.getElementById(`rosterFilter-${s}`);
+    const btn = document.getElementById(`rosterFilter-${s.key}`);
     if (btn) {
-      if (s === status) {
-        btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-white";
+      if (s.key === status) {
+        btn.className = "w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-md border-move-orange-400/50";
       } else {
-        btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-800";
+        btn.className = "w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80";
       }
     }
   });
+
+  const activeObj = statuses.find(s => s.key === status) || statuses[0];
+  const lblCat = document.getElementById("lblActiveNavCategory");
+  if (lblCat) {
+    lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-move-orange-400"></i> ${escapeHtml(activeObj.label)}`;
+  }
+  const lblCount = document.getElementById("lblActiveNavCount");
+  if (lblCount) {
+    lblCount.textContent = status === 'all' ? 'Full Directory & Status Manager • All updates made here' : `Directory of ${activeObj.label}`;
+  }
+
+  const thStatus = document.getElementById("thSelectiveStatus");
+  if (thStatus) {
+    thStatus.classList.toggle("hidden", status !== "all");
+  }
+
   loadRoster();
 }
 
 function onRosterSearch(val) {
   appState.rosterSearch = val;
+  appState.rosterPage = 1;
   loadRoster();
 }
 
@@ -219,62 +248,162 @@ function renderRosterTable() {
   const tbody = document.getElementById("rosterTableBody");
   if (!tbody) return;
 
-  if (appState.roster.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500">No personnel found matching the filter.</td></tr>`;
+  const total = (appState.roster || []).length;
+  const isManageAll = (appState.rosterFilter === 'all');
+  const thStatus = document.getElementById("thSelectiveStatus");
+  if (thStatus) {
+    thStatus.classList.toggle("hidden", !isManageAll);
+  }
+
+  const colSpanCount = isManageAll ? 9 : 8;
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="text-center py-8 text-slate-500">No personnel found matching the filter.</td></tr>`;
+    renderRosterPagination(0);
     return;
   }
 
-  tbody.innerHTML = appState.roster.map((r, idx) => {
+  // Pagination slice (locked to 10 per page)
+  const pageSize = appState.rosterPageSize || 10;
+  const totalPages = Math.ceil(total / pageSize) || 1;
+  if (!appState.rosterPage || appState.rosterPage < 1) appState.rosterPage = 1;
+  if (appState.rosterPage > totalPages) appState.rosterPage = totalPages;
+
+  const startIndex = (appState.rosterPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, total);
+  const pageItems = appState.roster.slice(startIndex, endIndex);
+
+  tbody.innerHTML = pageItems.map((r, idx) => {
+    const globalIdx = startIndex + idx + 1;
     return `
       <tr class="hover:bg-slate-800/40 transition">
-        <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${idx + 1}</td>
-        <td class="py-3 px-4">
-          <div class="font-bold text-white">${escapeHtml(r.full_name)}</div>
-          <div class="text-[10px] text-slate-400">${escapeHtml(r.role_title || 'Member')}</div>
+        <td class="py-3 px-3 text-slate-500 font-mono text-[11px] text-center w-12">${globalIdx}</td>
+        
+        <!-- 1. Full Name (clean, NO survey address) -->
+        <td class="py-3 px-4 whitespace-nowrap">
+          <div class="font-bold text-white text-xs">${escapeHtml(r.full_name)}</div>
         </td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(r.position || '-')}</td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(r.office || '-')}</td>
-        <td class="py-3 px-4 text-center">
+
+        <!-- 2. MOVE Position Title -->
+        <td class="py-3 px-4 whitespace-nowrap">
+          <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-move-orange-500/10 text-move-orange-300 border border-move-orange-500/20 inline-flex items-center gap-1.5 whitespace-nowrap">
+            <i class="fa-solid fa-shield-halved text-[10px]"></i>
+            ${escapeHtml(r.role_title || 'Member (Cadre)')}
+          </span>
+        </td>
+
+        <!-- 3. Office Position Title -->
+        <td class="py-3 px-4 text-slate-300 whitespace-nowrap">
+          <div class="flex items-center justify-between gap-3 group whitespace-nowrap">
+            <span class="font-medium text-slate-200">${escapeHtml(r.position || '-')}</span>
+            <button onclick="openModalEditMember(${r.id})" class="text-slate-500 hover:text-move-orange-400 transition p-1 rounded" title="Edit Member Details">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+          </div>
+        </td>
+
+        <!-- 4. Office / Dept -->
+        <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${escapeHtml(r.office || '-')}</td>
+
+        <!-- 5. Sex -->
+        <td class="py-3 px-3 text-center whitespace-nowrap w-12">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'}">
             ${r.gender || 'M'}
           </span>
         </td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(r.civil_status || 'Married')}</td>
-        <td class="py-3 px-4">
-          <div class="flex items-center justify-center gap-1.5">
-            <!-- Member Status Toggle -->
-            <button onclick="toggleRosterStatus(${r.id}, 'is_member', ${r.is_member})" title="Toggle Member" 
-              class="px-2 py-0.5 rounded text-[10px] font-bold transition border ${r.is_member ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-              ${r.is_member ? '✓ Member' : 'Member'}
-            </button>
 
-            <!-- Officer Status Toggle -->
-            <button onclick="toggleRosterStatus(${r.id}, 'is_officer', ${r.is_officer})" title="Toggle Officer"
-              class="px-2 py-0.5 rounded text-[10px] font-bold transition border ${r.is_officer ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-              ${r.is_officer ? '★ Officer' : 'Officer'}
-            </button>
+        <!-- 6. Civil Status -->
+        <td class="py-3 px-3 text-slate-300 whitespace-nowrap w-24 text-center">${escapeHtml(r.civil_status || 'Married')}</td>
 
-            <!-- Committee Status Toggle -->
-            <button onclick="toggleRosterStatus(${r.id}, 'is_committee', ${r.is_committee})" title="Toggle Committee"
-              class="px-2 py-0.5 rounded text-[10px] font-bold transition border ${r.is_committee ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-              ${r.is_committee ? '◈ Committee' : 'Committee'}
-            </button>
+        <!-- 7. Selective Status Toggles (ONLY shown on Manage Personnel) -->
+        ${isManageAll ? `
+          <td class="py-3 px-4 whitespace-nowrap text-center">
+            <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <!-- Member Status Toggle -->
+              <button onclick="toggleRosterStatus(${r.id}, 'is_member', ${r.is_member})" title="Toggle Member" 
+                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_member ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
+                ${r.is_member ? '✓ Member' : 'Member'}
+              </button>
 
-            <!-- Participant Status Toggle -->
-            <button onclick="toggleRosterStatus(${r.id}, 'is_participant', ${r.is_participant})" title="Toggle Participant"
-              class="px-2 py-0.5 rounded text-[10px] font-bold transition border ${r.is_participant ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-              ${r.is_participant ? '● Participant' : 'Participant'}
+              <!-- Officer Status Toggle -->
+              <button onclick="toggleRosterStatus(${r.id}, 'is_officer', ${r.is_officer})" title="Toggle Officer"
+                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_officer ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
+                ${r.is_officer ? '★ Officer' : 'Officer'}
+              </button>
+
+              <!-- Committee Status Toggle -->
+              <button onclick="toggleRosterStatus(${r.id}, 'is_committee', ${r.is_committee})" title="Toggle Committee"
+                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_committee ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
+                ${r.is_committee ? '◈ Committee' : 'Committee'}
+              </button>
+
+              <!-- Participant Status Toggle -->
+              <button onclick="toggleRosterStatus(${r.id}, 'is_participant', ${r.is_participant})" title="Toggle Participant"
+                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_participant ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
+                ${r.is_participant ? '● Participant' : 'Participant'}
+              </button>
+            </div>
+          </td>
+        ` : ''}
+
+        <!-- 8. Actions (Edit & Delete) -->
+        <td class="py-3 px-4 text-right whitespace-nowrap w-24">
+          <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+            <button onclick="openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-move-orange-400 hover:text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs whitespace-nowrap" title="Edit Member Details">
+              <i class="fa-solid fa-pen-to-square text-xs"></i> Edit
+            </button>
+            <button onclick="deleteRosterMember(${r.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Delete Person">
+              <i class="fa-regular fa-trash-can"></i>
             </button>
           </div>
-        </td>
-        <td class="py-3 px-4 text-right">
-          <button onclick="deleteRosterMember(${r.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Delete Person">
-            <i class="fa-regular fa-trash-can"></i>
-          </button>
         </td>
       </tr>
     `;
   }).join("");
+
+  renderRosterPagination(total, startIndex, endIndex, totalPages);
+}
+
+function renderRosterPagination(total, startIndex = 0, endIndex = 0, totalPages = 1) {
+  const infoEl = document.getElementById("rosterPaginationInfo");
+  const ctrlEl = document.getElementById("rosterPaginationControls");
+  if (!infoEl || !ctrlEl) return;
+
+  if (total === 0) {
+    infoEl.textContent = "No personnel found";
+    ctrlEl.innerHTML = "";
+    return;
+  }
+
+  infoEl.textContent = `Showing ${startIndex + 1} – ${endIndex} of ${total} personnel (Locked to 10 per page)`;
+
+  let html = `
+    <button onclick="changeRosterPage(${appState.rosterPage - 1})" ${appState.rosterPage <= 1 ? 'disabled class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"'} title="Previous 10">
+      <i class="fa-solid fa-chevron-left text-xs"></i>
+    </button>
+  `;
+
+  for (let p = 1; p <= totalPages; p++) {
+    const isCurrent = p === appState.rosterPage;
+    html += `
+      <button onclick="changeRosterPage(${p})" class="px-2.5 py-1 rounded-lg font-mono text-xs font-bold transition border ${isCurrent ? 'bg-move-orange-500 text-white border-move-orange-400 shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'}">
+        ${p}
+      </button>
+    `;
+  }
+
+  html += `
+    <button onclick="changeRosterPage(${appState.rosterPage + 1})" ${appState.rosterPage >= totalPages ? 'disabled class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700 transition"'} title="Next 10">
+      <i class="fa-solid fa-chevron-right text-xs"></i>
+    </button>
+  `;
+
+  ctrlEl.innerHTML = html;
+}
+
+function changeRosterPage(page) {
+  appState.rosterPage = page;
+  renderRosterTable();
 }
 
 async function toggleRosterStatus(id, field, currentValue) {
@@ -328,6 +457,91 @@ async function submitAddMember(e) {
   }
 }
 
+
+function openModalEditMember(id) {
+  const member = (appState.roster || []).find(r => Number(r.id) === Number(id)) ||
+                 (appState.fullRoster || []).find(r => Number(r.id) === Number(id));
+  if (!member) {
+    alert("Member record not found.");
+    return;
+  }
+
+  const idInput = document.getElementById("editMemberId");
+  const nameInput = document.getElementById("editMemberName");
+  const roleInput = document.getElementById("editMemberRole");
+  const posInput = document.getElementById("editMemberPosition");
+  const offInput = document.getElementById("editMemberOffice");
+  const genInput = document.getElementById("editMemberGender");
+  const civInput = document.getElementById("editMemberCivil");
+  const conInput = document.getElementById("editMemberContact");
+  const notesInput = document.getElementById("editMemberNotes");
+
+  if (idInput) idInput.value = member.id;
+  if (nameInput) nameInput.value = member.full_name || "";
+  if (roleInput) roleInput.value = member.role_title || "Member (Cadre)";
+  if (posInput) posInput.value = member.position || "";
+  if (offInput) offInput.value = member.office || "";
+  if (genInput) genInput.value = member.gender === 'F' ? 'F' : 'M';
+  if (civInput) civInput.value = member.civil_status || "Married";
+  if (conInput) conInput.value = member.contact_number || "";
+  if (notesInput) notesInput.value = member.notes || "";
+
+  openModal("modalEditMember");
+
+  setTimeout(() => {
+    if (roleInput) {
+      roleInput.focus();
+      roleInput.select();
+    }
+  }, 100);
+}
+
+async function submitEditMember(e) {
+  e.preventDefault();
+  const id = document.getElementById("editMemberId").value;
+  const fullName = document.getElementById("editMemberName").value.trim().toUpperCase();
+  const roleTitle = document.getElementById("editMemberRole").value.trim();
+  const position = document.getElementById("editMemberPosition").value.trim();
+  const office = document.getElementById("editMemberOffice").value.trim();
+  const gender = document.getElementById("editMemberGender").value;
+  const civilStatus = document.getElementById("editMemberCivil").value;
+  const contactNumber = document.getElementById("editMemberContact").value.trim();
+  const notes = document.getElementById("editMemberNotes").value.trim();
+
+  if (!fullName) {
+    alert("Please enter full name.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/move-roster/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        full_name: fullName,
+        role_title: roleTitle,
+        position: position,
+        office: office,
+        gender: gender,
+        civil_status: civilStatus,
+        contact_number: contactNumber,
+        notes: notes
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      closeModal("modalEditMember");
+      await loadRoster();
+      await updateRosterCounts();
+    } else {
+      alert("Failed to update member: " + (data.message || "Error"));
+    }
+  } catch (err) {
+    alert("Error updating member: " + err);
+  }
+}
+
 async function deleteRosterMember(id) {
   if (!confirm("Are you sure you want to remove this person from the MOVE roster?")) return;
   try {
@@ -348,7 +562,7 @@ function onSearchPool(q) {
   clearTimeout(poolSearchTimeout);
   poolSearchTimeout = setTimeout(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=30`);
+      const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=10`);
       const data = await res.json();
       if (data.success) {
         renderPoolTable(data.employees);
@@ -363,12 +577,14 @@ function renderPoolTable(employees) {
   const tbody = document.getElementById("poolTableBody");
   if (!tbody) return;
 
-  if (employees.length === 0) {
+  const list = (employees || []).slice(0, 10);
+
+  if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500">No matching employees found in pool.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = employees.map(emp => {
+  tbody.innerHTML = list.map(emp => {
     return `
       <tr class="hover:bg-slate-800/50">
         <td class="py-2.5 px-3 font-bold text-white">${escapeHtml(emp.full_name)}</td>
@@ -1576,7 +1792,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
   let html = '';
   if (!q) {
     html += `<option value="">-- Choose from MOVE Roster (${roster.length}) or Search Above --</option>`;
-    html += filteredRoster.map(r => {
+    html += filteredRoster.slice(0, 10).map(r => {
       const isEnrolled = enrolledFacNames.has((r.full_name || '').trim().toUpperCase());
       const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
       return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -1588,7 +1804,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
       html += `<option value="">-- Found ${totalMatches} matching result(s) --</option>`;
       if (filteredRoster.length > 0) {
         html += `<optgroup label="MOVE Chapter Roster (${filteredRoster.length})">`;
-        html += filteredRoster.map(r => {
+        html += filteredRoster.slice(0, 10).map(r => {
           const isEnrolled = enrolledFacNames.has((r.full_name || '').trim().toUpperCase());
           const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}`;
           return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -1597,7 +1813,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
       }
       if (poolMatches.length > 0) {
         html += `<optgroup label="City Municipal Employee Pool (${poolMatches.length})">`;
-        html += poolMatches.map(p => {
+        html += poolMatches.slice(0, 10).map(p => {
           const isEnrolled = enrolledFacNames.has((p.full_name || '').trim().toUpperCase());
           const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)}` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')}`;
           return `<option value="pool_${p.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -1621,7 +1837,7 @@ function onFilterQuickPickFacilitator(val) {
   if (q.length >= 2) {
     quickPickFacilitatorDebounce = setTimeout(async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=15`);
+        const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=10`);
         const data = await res.json();
         if (data.success && data.employees) {
           quickPickFacilitatorPoolCache = data.employees;
@@ -4071,7 +4287,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
   let html = '';
   if (!q) {
     html += `<option value="">-- Choose from MOVE Roster (${roster.length}) or Search Above --</option>`;
-    html += filteredRoster.map(r => {
+    html += filteredRoster.slice(0, 10).map(r => {
       const isEnrolled = enrolledNames.has((r.full_name || '').trim().toUpperCase());
       const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
       return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -4083,7 +4299,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
       html += `<option value="">-- Found ${totalMatches} matching result(s) (Select below) --</option>`;
       if (filteredRoster.length > 0) {
         html += `<optgroup label="MOVE Chapter Roster (${filteredRoster.length})">`;
-        html += filteredRoster.map(r => {
+        html += filteredRoster.slice(0, 10).map(r => {
           const isEnrolled = enrolledNames.has((r.full_name || '').trim().toUpperCase());
           const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})`;
           return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -4092,7 +4308,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
       }
       if (poolMatches.length > 0) {
         html += `<optgroup label="City Municipal Employee Pool (${poolMatches.length})">`;
-        html += poolMatches.map(p => {
+        html += poolMatches.slice(0, 10).map(p => {
           const isEnrolled = enrolledNames.has((p.full_name || '').trim().toUpperCase());
           const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})`;
           return `<option value="pool_${p.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
@@ -4126,7 +4342,7 @@ function onFilterQuickPickRoster(val) {
   if (q.length >= 2) {
     quickPickDebounceTimer = setTimeout(async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=15`);
+        const res = await fetch(`${API_BASE}/api/search-pool?q=${encodeURIComponent(q)}&limit=10`);
         const data = await res.json();
         if (data.success && data.employees) {
           quickPickPoolCache = data.employees;
