@@ -227,7 +227,7 @@ function filterRosterByStatus(status) {
   }
   const lblCount = document.getElementById("lblActiveNavCount");
   if (lblCount) {
-    lblCount.textContent = status === 'all' ? 'Full Directory & Status Manager • All updates made here' : `Directory of ${activeObj.label}`;
+    lblCount.textContent = status === 'all' ? 'Full Directory & Status Manager — All updates made here' : `Directory of ${activeObj.label}`;
   }
 
   const thStatus = document.getElementById("thSelectiveStatus");
@@ -277,15 +277,15 @@ function renderRosterTable() {
     const globalIdx = startIndex + idx + 1;
     return `
       <tr class="hover:bg-slate-800/40 transition">
-        <td class="py-3 px-3 text-slate-500 font-mono text-[11px] text-center w-12">${globalIdx}</td>
+        <td class="py-2.5 px-3 text-slate-500 font-mono text-[11px] text-center w-12">${globalIdx}</td>
         
-        <!-- 1. Full Name (clean, NO survey address) -->
-        <td class="py-3 px-4 whitespace-nowrap">
+        <!-- 1. Full Name (clean, NO survey address, fitted width to eliminate wasted space) -->
+        <td class="py-2.5 px-3 whitespace-nowrap w-60">
           <div class="font-bold text-white text-xs">${escapeHtml(r.full_name)}</div>
         </td>
 
-        <!-- 2. MOVE Position Title -->
-        <td class="py-3 px-4 whitespace-nowrap">
+        <!-- 2. MOVE Position Title (sits snug next to Full Name) -->
+        <td class="py-2.5 px-3 whitespace-nowrap w-56">
           <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-move-orange-500/10 text-move-orange-300 border border-move-orange-500/20 inline-flex items-center gap-1.5 whitespace-nowrap">
             <i class="fa-solid fa-shield-halved text-[10px]"></i>
             ${escapeHtml(r.role_title || 'Member (Cadre)')}
@@ -293,31 +293,33 @@ function renderRosterTable() {
         </td>
 
         <!-- 3. Office Position Title -->
-        <td class="py-3 px-4 text-slate-300 whitespace-nowrap">
-          <div class="flex items-center justify-between gap-3 group whitespace-nowrap">
-            <span class="font-medium text-slate-200">${escapeHtml(r.position || '-')}</span>
+        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap w-64">
+          <div class="flex items-center justify-between gap-2 group whitespace-nowrap">
+            <span class="font-medium text-slate-200 text-xs">${escapeHtml(r.position || '-')}</span>
             <button onclick="openModalEditMember(${r.id})" class="text-slate-500 hover:text-move-orange-400 transition p-1 rounded" title="Edit Member Details">
               <i class="fa-solid fa-pen text-xs"></i>
             </button>
           </div>
         </td>
 
-        <!-- 4. Office / Dept -->
-        <td class="py-3 px-4 text-slate-300 whitespace-nowrap">${escapeHtml(r.office || '-')}</td>
+        <!-- 4. Office / Dept (absorbs flexible space naturally) -->
+        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap min-w-[220px]">
+          <span class="text-xs text-slate-300">${escapeHtml(r.office || '-')}</span>
+        </td>
 
         <!-- 5. Sex -->
-        <td class="py-3 px-3 text-center whitespace-nowrap w-12">
+        <td class="py-2.5 px-2 text-center whitespace-nowrap w-14">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'}">
             ${r.gender || 'M'}
           </span>
         </td>
 
         <!-- 6. Civil Status -->
-        <td class="py-3 px-3 text-slate-300 whitespace-nowrap w-24 text-center">${escapeHtml(r.civil_status || 'Married')}</td>
+        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap w-24 text-center text-xs">${escapeHtml(r.civil_status || 'Married')}</td>
 
         <!-- 7. Selective Status Toggles (ONLY shown on Manage Personnel) -->
         ${isManageAll ? `
-          <td class="py-3 px-4 whitespace-nowrap text-center">
+          <td class="py-2.5 px-3 whitespace-nowrap text-center w-72">
             <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
               <!-- Member Status Toggle -->
               <button onclick="toggleRosterStatus(${r.id}, 'is_member', ${r.is_member})" title="Toggle Member" 
@@ -347,7 +349,7 @@ function renderRosterTable() {
         ` : ''}
 
         <!-- 8. Actions (Edit & Delete) -->
-        <td class="py-3 px-4 text-right whitespace-nowrap w-24">
+        <td class="py-2.5 px-3 text-right whitespace-nowrap w-24">
           <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
             <button onclick="openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-move-orange-400 hover:text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs whitespace-nowrap" title="Edit Member Details">
               <i class="fa-solid fa-pen-to-square text-xs"></i> Edit

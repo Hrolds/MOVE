@@ -184,9 +184,9 @@
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
             <div class="flex items-center gap-2">
               <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2">
-                <i class="fa-solid fa-users text-move-orange-400"></i> All Personnel
+                <i class="fa-solid fa-users-gear text-move-orange-400"></i> Manage Personnel
               </span>
-              <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Showing all roster entries</span>
+              <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Full Directory &amp; Status Manager &mdash; All updates made here</span>
             </div>
 
             <!-- Live Search Input -->
@@ -202,15 +202,15 @@
               <table class="w-full text-left text-xs border-collapse">
                 <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
                   <tr>
-                    <th class="py-3 px-3 w-12 text-slate-500 font-mono text-center">#</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Full Name</th>
-                    <th class="py-3 px-4 whitespace-nowrap">MOVE Position Title</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Office Position Title</th>
-                    <th class="py-3 px-4 whitespace-nowrap">Office / Dept</th>
-                    <th class="py-3 px-3 text-center whitespace-nowrap w-12">Sex</th>
-                    <th class="py-3 px-3 text-center whitespace-nowrap w-24">Civil Status</th>
-                    <th id="thSelectiveStatus" class="py-3 px-4 text-center whitespace-nowrap">Selective Status</th>
-                    <th class="py-3 px-4 text-right whitespace-nowrap w-24">Actions</th>
+                    <th class="py-2.5 px-3 w-12 text-slate-500 font-mono text-center">#</th>
+                    <th class="py-2.5 px-3 w-60 whitespace-nowrap">Full Name</th>
+                    <th class="py-2.5 px-3 w-56 whitespace-nowrap">MOVE Position Title</th>
+                    <th class="py-2.5 px-3 w-64 whitespace-nowrap">Office Position Title</th>
+                    <th class="py-2.5 px-3 min-w-[220px] whitespace-nowrap">Office / Dept</th>
+                    <th class="py-2.5 px-2 text-center whitespace-nowrap w-14">Sex</th>
+                    <th class="py-2.5 px-3 text-center whitespace-nowrap w-24">Civil Status</th>
+                    <th id="thSelectiveStatus" class="py-2.5 px-3 text-center whitespace-nowrap w-72">Selective Status</th>
+                    <th class="py-2.5 px-3 text-right whitespace-nowrap w-24">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
@@ -2100,6 +2100,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261029-1715"></script>
+  <script src="/frontend/js/app.js?v=20261030-0800"></script>
 </body>
 </html>
