@@ -400,11 +400,11 @@ function renderRosterTable() {
         
         <!-- 1. Full Name (Clickable Row opens Member Profile) -->
         <td class="py-3 px-4 min-w-[220px]">
-          <div class="flex items-center gap-2.5">
-            <div class="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-700/80 bg-slate-950 flex items-center justify-center">
+          <div class="flex items-center gap-3">
+            <div class="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-700/80 bg-slate-950 flex items-center justify-center">
               <img src="/api/move-roster/${r.id}/photo" alt="${escapeHtml(r.full_name)}" loading="lazy" class="w-full h-full object-cover"
                 onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';">
-              <div class="w-full h-full ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'} items-center justify-center font-bold text-xs hidden">
+              <div class="w-full h-full ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'} items-center justify-center font-bold text-sm hidden">
                 ${escapeHtml(getInitials(r.full_name))}
               </div>
             </div>
@@ -667,9 +667,9 @@ function openModalEditMember(id) {
   if (heroFallback) {
     heroFallback.textContent = initials;
     if (member.gender === 'F') {
-      heroFallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-base";
+      heroFallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl";
     } else {
-      heroFallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-base";
+      heroFallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl";
     }
   }
 

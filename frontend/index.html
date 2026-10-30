@@ -1537,19 +1537,19 @@
       </div>
 
       <!-- Member Profile Hero Banner Card -->
-      <div class="bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-slate-800/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
-        <div class="flex items-center gap-3.5">
-          <div class="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-move-orange-500/50 shadow-lg bg-slate-950 flex items-center justify-center">
+      <div class="bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
+        <div class="flex items-center gap-4 sm:gap-5">
+          <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 ring-2 ring-move-orange-500/60 shadow-xl bg-slate-950 flex items-center justify-center">
             <img id="editHeroPhoto" src="" alt="Profile Photo" class="w-full h-full object-cover hidden"
               onload="this.classList.remove('hidden'); document.getElementById('editHeroAvatarFallback').classList.add('hidden')"
               onerror="this.classList.add('hidden'); document.getElementById('editHeroAvatarFallback').classList.remove('hidden')">
-            <div id="editHeroAvatarFallback" class="w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-base">
+            <div id="editHeroAvatarFallback" class="w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl">
               DS
             </div>
           </div>
           <div>
-            <div id="editHeroName" class="text-base sm:text-lg font-black text-white tracking-wide uppercase leading-tight">DEXTER SEE</div>
-            <div class="flex flex-wrap items-center gap-2 mt-1">
+            <div id="editHeroName" class="text-base sm:text-xl font-black text-white tracking-wide uppercase leading-tight">DEXTER SEE</div>
+            <div class="flex flex-wrap items-center gap-2 mt-1.5">
               <span id="editHeroStatusPill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="editHeroStatusText">Active Member</span>
@@ -1561,7 +1561,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2 self-start sm:self-center">
-          <div id="editHeroIdBadge" class="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-black shadow-inner tracking-wider">
+          <div id="editHeroIdBadge" class="px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs sm:text-sm font-black shadow-inner tracking-wider">
             ID: #001
           </div>
         </div>
@@ -2685,6 +2685,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261030-1442"></script>
+  <script src="/frontend/js/app.js?v=20261030-1510"></script>
 </body>
 </html>
