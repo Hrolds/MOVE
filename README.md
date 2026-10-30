@@ -70,6 +70,18 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
 
 ## 🚀 Key Modules & Features
 
+### 0. 🏠 Interactive Home Front Page & "About MOVE" Guided Showcase
+* **Official Chapter Landing Page**: Set as the default opening view (`id="navTab-home"`), providing a welcoming, prestigious portal for the MOVE Baguio Chapter under the City Government of Baguio GAD Council.
+* **Interactive Step-by-Step Guided Showcase ("About MOVE")**:
+  * Multi-topic interactive walkthrough with **"Next"** and **"Previous"** controls, keyboard arrow support (`←` / `→`), progress bar, and direct topic jump pills:
+    1. **Mandate & Law**: Overview of Men Opposed to Violence Against Women Everywhere, Republic Act 9262 (Anti-VAWC Act), Philippine Commission on Women (PCW) partnership, and men as proactive allies.
+    2. **Core Principles & Safe Spaces**: Republic Act 11313 (Safe Spaces / Bawal Bastos Law) enforcement across city workplaces, positive masculinity, and zero-tolerance culture.
+    3. **Executive Governance**: Chapter Executive Board showcased in official protocol order (President, Vice President, Secretary, Assistant Secretary, Treasurer, Assistant Treasurer, P.R.O., Assistant P.R.O., and Focal Person).
+    4. **Seminars & Capacity Building**: Hands-on culinary and livelihood workshops, gender sensitivity orientations, live gatekeeper attendance, and Unified Certificate Studio awards.
+    5. **The MOVE Cadre Pledge**: The sacred commitment oath with quick jump action links.
+* **Live Statistics Ribbon**: Real-time counters showing total registered members (58), executive officers (9), and active training seminars (1).
+* **Quick Action Hub Cards**: 1-click shortcuts to explore the Chapter Roster, Officers Protocol hierarchy, Activities & Seminars, and Certificate Studio.
+
 ### 1. 👥 Dedicated MOVE Roster, Left Nav Panel & Selective Status Manager
 * **Ergonomic Category Navigation Panel**:
   * **Manage Personnel** (`fa-users-gear`): Central administrative hub where all personnel are displayed and selective status flags are managed.

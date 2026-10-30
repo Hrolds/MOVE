@@ -9,7 +9,8 @@ const API_BASE = (typeof window !== 'undefined' && window.location.origin && win
 
 // --- GLOBAL APPLICATION STATE ---
 const appState = {
-  activeView: 'roster',
+  activeView: 'home',
+  homeSlide: 1,
   currentActivityId: 1,
   
   // Roster State
@@ -135,6 +136,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     appState.currentActivity = appState.activities[0];
     await loadAttendance(appState.currentActivityId);
   }
+
+  // Initialize Home Front Page
+  switchView('home');
+  initHomeKeyListeners();
 });
 
 // --- SERVER HEALTH CHECK ---
@@ -156,7 +161,7 @@ async function checkServerHealth() {
 // --- NAVIGATION CONTROLLER ---
 function switchView(viewName) {
   appState.activeView = viewName;
-  const views = ['roster', 'activities', 'attendance', 'studio'];
+  const views = ['home', 'roster', 'activities', 'attendance', 'studio'];
   
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
@@ -172,6 +177,7 @@ function switchView(viewName) {
     }
   });
 
+  if (viewName === 'home') renderHomeSlide(appState.homeSlide || 1);
   if (viewName === 'roster') loadRoster();
   if (viewName === 'activities') loadActivities();
   if (viewName === 'attendance') loadAttendance(appState.currentActivityId);
@@ -218,6 +224,10 @@ async function updateRosterCounts() {
       document.getElementById("count-committee").textContent = all.filter(r => r.is_committee).length;
       document.getElementById("count-participant").textContent = all.filter(r => r.is_participant).length;
 
+      const homeM = document.getElementById("homeStatMembers");
+      if (homeM) homeM.textContent = all.length;
+      const homeO = document.getElementById("homeStatOfficers");
+      if (homeO) homeO.textContent = all.filter(r => r.is_officer).length;
     }
   } catch (err) {
     console.warn("Count update failed:", err);
@@ -1856,6 +1866,8 @@ async function loadActivities() {
     if (data.success) {
       appState.activities = data.activities;
       renderActivitiesGrid();
+      const homeA = document.getElementById("homeStatActivities");
+      if (homeA) homeA.textContent = appState.activities.length;
     }
   } catch (err) {
     console.error("Failed to load activities:", err);
@@ -6021,4 +6033,122 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+
+// ============================================================================
+// HOME / FRONT PAGE INTERACTIVE SHOWCASE CONTROLLER
+// ============================================================================
+
+const HOME_SLIDE_DATA = [
+  { id: 1, title: "1. Mandate", nextLabel: "Next: Core Principles" },
+  { id: 2, title: "2. Principles", nextLabel: "Next: Leadership Hierarchy" },
+  { id: 3, title: "3. Officers", nextLabel: "Next: Training Activities" },
+  { id: 4, title: "4. Activities", nextLabel: "Next: Cadre Pledge" },
+  { id: 5, title: "5. Cadre Pledge", nextLabel: "Explore Chapter Roster" }
+];
+
+function goToHomeSlide(slideIndex) {
+  const target = Math.max(1, Math.min(5, parseInt(slideIndex, 10) || 1));
+  appState.homeSlide = target;
+  renderHomeSlide(target);
+}
+
+function nextHomeSlide() {
+  const current = appState.homeSlide || 1;
+  if (current < 5) {
+    goToHomeSlide(current + 1);
+  } else {
+    switchView('roster');
+  }
+}
+
+function prevHomeSlide() {
+  const current = appState.homeSlide || 1;
+  if (current > 1) {
+    goToHomeSlide(current - 1);
+  }
+}
+
+function renderHomeSlide(slideIndex) {
+  const idx = Math.max(1, Math.min(5, parseInt(slideIndex, 10) || 1));
+
+  // 1. Show active slide, hide others
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`homeSlide-${i}`);
+    if (el) {
+      el.classList.toggle("hidden", i !== idx);
+    }
+  }
+
+  // 2. Update step selector pills
+  for (let i = 1; i <= 5; i++) {
+    const pill = document.getElementById(`homePill-${i}`);
+    if (pill) {
+      if (i === idx) {
+        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-move-orange-500 text-white shadow-sm border border-move-orange-400";
+      } else {
+        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800";
+      }
+    }
+  }
+
+  // 3. Update Progress Dots
+  for (let i = 1; i <= 5; i++) {
+    const dot = document.getElementById(`homeDot-${i}`);
+    if (dot) {
+      if (i === idx) {
+        dot.className = "w-3 h-3 rounded-full bg-move-orange-500 cursor-pointer transition-all shadow-xs ring-2 ring-move-orange-500/40";
+      } else if (i < idx) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500/70 cursor-pointer transition-all";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all hover:bg-slate-700";
+      }
+    }
+  }
+
+  // 4. Update Progress Bar
+  const pBar = document.getElementById("homeProgressBar");
+  if (pBar) {
+    pBar.style.width = `${(idx / 5) * 100}%`;
+  }
+
+  // 5. Update Counter Label
+  const lblCounter = document.getElementById("homeSlideCounterLabel");
+  if (lblCounter) {
+    lblCounter.textContent = `(Topic ${idx} of 5)`;
+  }
+
+  // 6. Update Previous & Next Buttons
+  const btnPrev = document.getElementById("btnPrevHomeSlide");
+  if (btnPrev) {
+    btnPrev.disabled = (idx === 1);
+    if (idx === 1) {
+      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-900/60 text-slate-600 text-xs font-bold border border-slate-800/80 transition flex items-center gap-2 cursor-not-allowed";
+    } else {
+      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-700 transition flex items-center gap-2 active:scale-95";
+    }
+  }
+
+  const btnNextLabel = document.getElementById("btnNextHomeSlideLabel");
+  const slideMeta = HOME_SLIDE_DATA[idx - 1] || HOME_SLIDE_DATA[0];
+  if (btnNextLabel) {
+    btnNextLabel.textContent = slideMeta.nextLabel;
+  }
+}
+
+let homeKeyListenersAttached = false;
+function initHomeKeyListeners() {
+  if (homeKeyListenersAttached) return;
+  homeKeyListenersAttached = true;
+  document.addEventListener("keydown", (e) => {
+    if (appState.activeView !== 'home') return;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+    if (e.key === "ArrowRight") {
+      nextHomeSlide();
+    } else if (e.key === "ArrowLeft") {
+      prevHomeSlide();
+    }
+  });
 }
