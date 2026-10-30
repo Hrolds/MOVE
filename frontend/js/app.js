@@ -547,6 +547,78 @@ function syncEditHeroName(val) {
   if (fallbackEl) fallbackEl.textContent = initials;
 }
 
+// Open Enlarged Profile Photo Modal on double-click
+function openEnlargedHeroPhoto() {
+  const memberId = document.getElementById("editMemberId")?.value;
+  const heroPhoto = document.getElementById("editHeroPhoto");
+  const heroName = document.getElementById("editHeroName")?.textContent || "Personnel";
+  const heroId = document.getElementById("editHeroIdBadge")?.textContent || "";
+  const member = (appState.roster || []).find(r => Number(r.id) === Number(memberId)) ||
+                 (appState.fullRoster || []).find(r => Number(r.id) === Number(memberId));
+
+  const modal = document.getElementById("modalEnlargedPhoto");
+  const img = document.getElementById("enlargedPhotoImg");
+  const fallback = document.getElementById("enlargedPhotoFallback");
+  const nameEl = document.getElementById("enlargedPhotoName");
+  const idEl = document.getElementById("enlargedPhotoId");
+  const posEl = document.getElementById("enlargedPhotoPosition");
+  const btnFull = document.getElementById("btnDownloadPhoto");
+
+  if (!modal) return;
+
+  if (nameEl) nameEl.textContent = heroName;
+  if (idEl) idEl.textContent = heroId;
+  if (posEl) posEl.textContent = member?.position || "Member Details";
+
+  // Check if real portrait photo is loaded and visible
+  const hasPhoto = heroPhoto && !heroPhoto.classList.contains("hidden") && heroPhoto.src;
+  if (hasPhoto) {
+    if (img) {
+      img.src = heroPhoto.src;
+      img.classList.remove("hidden");
+    }
+    if (fallback) fallback.classList.add("hidden");
+    if (btnFull) {
+      btnFull.href = heroPhoto.src;
+      btnFull.classList.remove("hidden");
+    }
+  } else {
+    // Show high-res fallback initials avatar
+    if (img) img.classList.add("hidden");
+    if (fallback) {
+      fallback.classList.remove("hidden");
+      fallback.textContent = getInitials(heroName);
+      if (member?.gender === "F") {
+        fallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-6xl";
+      } else {
+        fallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-6xl";
+      }
+    }
+    if (btnFull) btnFull.classList.add("hidden");
+  }
+
+  modal.classList.remove("hidden");
+}
+
+function closeEnlargedPhoto(e) {
+  if (e && e.target && e.target.id !== "modalEnlargedPhoto" && !e.target.closest("button") && !e.target.closest("a")) {
+    return;
+  }
+  const modal = document.getElementById("modalEnlargedPhoto");
+  if (modal) modal.classList.add("hidden");
+}
+
+// Global escape key handler to close photo preview
+window.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    const enlargedModal = document.getElementById("modalEnlargedPhoto");
+    if (enlargedModal && !enlargedModal.classList.contains("hidden")) {
+      enlargedModal.classList.add("hidden");
+      e.stopPropagation();
+    }
+  }
+});
+
 function syncEditToggleWithPills() {
   const isOfficer = document.getElementById("editToggleOfficer")?.checked;
   const isMember = document.getElementById("editToggleMember")?.checked;

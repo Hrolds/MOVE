@@ -1517,6 +1517,58 @@
     </div>
   </div>
 
+  <!-- MODAL: Enlarged Photo Lightbox (Double-click from Edit Member Profile) -->
+  <div id="modalEnlargedPhoto" class="fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden" onclick="closeEnlargedPhoto(event)">
+    <div class="relative max-w-md w-full bg-slate-900/95 border border-slate-700/90 rounded-3xl p-5 shadow-2xl flex flex-col items-center gap-4 text-center ring-1 ring-white/10" onclick="event.stopPropagation()">
+      
+      <!-- Top Bar -->
+      <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-move-orange-400">
+          <i class="fa-solid fa-id-badge text-sm"></i>
+          <span>Official Portrait Photo</span>
+        </div>
+        <button type="button" onclick="closeEnlargedPhoto()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition" title="Close (Esc)">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Large Image Container -->
+      <div class="relative w-full max-w-[340px] sm:max-w-[360px] aspect-square rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl bg-slate-950 flex items-center justify-center ring-2 ring-move-orange-500/50">
+        <img id="enlargedPhotoImg" src="" alt="Enlarged Portrait" class="w-full h-full object-cover">
+        <div id="enlargedPhotoFallback" class="w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-6xl hidden">
+          DS
+        </div>
+      </div>
+
+      <!-- Personnel Info Header -->
+      <div class="w-full pt-1 space-y-1">
+        <div id="enlargedPhotoName" class="text-base sm:text-lg font-black text-white uppercase tracking-wide">
+          DEXTER SEE
+        </div>
+        <div class="flex items-center justify-center flex-wrap gap-2 text-xs text-slate-400">
+          <span id="enlargedPhotoId" class="font-mono text-amber-300 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/20">
+            ID: #001
+          </span>
+          <span id="enlargedPhotoPosition" class="text-slate-300 font-medium">
+            Administrative Officer IV
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="w-full flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+        <a id="btnDownloadPhoto" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold transition flex items-center gap-1.5 border border-slate-700 shadow-xs">
+          <i class="fa-solid fa-up-right-from-square text-xs text-move-orange-400"></i>
+          <span>Open Full Image</span>
+        </a>
+        <button type="button" onclick="closeEnlargedPhoto()" class="px-5 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white font-bold transition shadow-sm">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 
 
   <!-- MODAL: Edit MOVE Member (Modern Studio Profile View) -->
@@ -1539,12 +1591,21 @@
       <!-- Member Profile Hero Banner Card -->
       <div class="bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
         <div class="flex items-center gap-4 sm:gap-5">
-          <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 ring-2 ring-move-orange-500/60 shadow-xl bg-slate-950 flex items-center justify-center">
-            <img id="editHeroPhoto" src="" alt="Profile Photo" class="w-full h-full object-cover hidden"
+          <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden shrink-0 ring-2 ring-move-orange-500/60 shadow-xl bg-slate-950 flex items-center justify-center cursor-pointer group select-none"
+               ondblclick="openEnlargedHeroPhoto()"
+               title="Double-click to enlarge photo">
+            <img id="editHeroPhoto" src="" alt="Profile Photo" class="w-full h-full object-cover hidden transition duration-300 group-hover:scale-105"
               onload="this.classList.remove('hidden'); document.getElementById('editHeroAvatarFallback').classList.add('hidden')"
               onerror="this.classList.add('hidden'); document.getElementById('editHeroAvatarFallback').classList.remove('hidden')">
             <div id="editHeroAvatarFallback" class="w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl">
               DS
+            </div>
+            <!-- Hover overlay indicator showing expand icon -->
+            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center pointer-events-none">
+              <span class="px-2 py-1 rounded-lg bg-black/75 text-white text-[10px] font-bold backdrop-blur-xs shadow-md border border-white/20 flex items-center gap-1">
+                <i class="fa-solid fa-magnifying-glass-plus text-move-orange-400"></i>
+                <span>Enlarge</span>
+              </span>
             </div>
           </div>
           <div>
@@ -2685,6 +2746,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261030-1510"></script>
+  <script src="/frontend/js/app.js?v=20261030-1520"></script>
 </body>
 </html>
