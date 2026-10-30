@@ -78,6 +78,10 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
   * **Committees**: Standing committee leaders and members.
   * **Participants**: Designated training trainees.
   * Displays dynamic count badges and docked quick tool shortcut (*Compare with HRIS API*).
+* **Officers Protocol Hierarchy & Arrangement Manager**:
+  * Dedicated ordering system for executive board officers adhering to official government protocol: **President &rarr; Vice President &rarr; Secretary &rarr; Assistant Secretary &rarr; Treasurer &rarr; Assistant Treasurer &rarr; Public Relations Officer &rarr; Assistant P.R.O.**
+  * **Interactive Arrangement Modal (`#modalArrangeOfficers`)**: Drag-and-drop or use Up/Down arrows to customize order, with a 1-click **Reset to Protocol Order** button and persistent SQLite saving (`/api/move-roster/reorder-officers`).
+  * **Inline Quick-Nudge Controls**: Click `▲` and `▼` directly in the Officers table to adjust ranking with instant database auto-save.
 * **Selective Status Column Exclusivity**:
   * The interactive status toggle buttons (`[✓ Member]`, `[★ Officer]`, `[◈ Committee]`, `[● Participant]`) are exclusively available under **Manage Personnel**.
   * The status column is automatically hidden on the Members, Officers, Committees, and Participants views to provide clean, uncluttered directory tables.

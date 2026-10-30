@@ -19,6 +19,7 @@ const appState = {
   rosterSearch: '',
   rosterPage: 1,
   rosterPageSize: 10,
+  reorderOfficersList: [],
 
   // HRIS Comparison State
   hrisCompare: {
@@ -260,6 +261,11 @@ function filterRosterByStatus(status) {
     thStatus.classList.toggle("hidden", status !== "all");
   }
 
+  const btnArrange = document.getElementById("btnToolbarArrangeOfficers");
+  if (btnArrange) {
+    btnArrange.classList.toggle("hidden", status !== "officer");
+  }
+
   loadRoster();
 }
 
@@ -438,9 +444,21 @@ function renderRosterTable() {
 
         <!-- 3. Move Position -->
         <td class="py-3 px-4 min-w-[180px]">
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-move-orange-400 shrink-0"></span>
-            <span class="font-semibold text-slate-200 text-xs">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
+          <div class="flex items-center justify-between gap-1.5">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="w-1.5 h-1.5 rounded-full ${appState.rosterFilter === 'officer' ? 'bg-amber-400' : 'bg-move-orange-400'} shrink-0"></span>
+              <span class="font-semibold text-slate-200 text-xs truncate">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
+            </div>
+            ${appState.rosterFilter === 'officer' ? `
+              <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0" onclick="event.stopPropagation()">
+                <button type="button" onclick="moveOfficerInline(${r.id}, 'up')" ${idx === 0 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-600"' : 'class="p-1 text-slate-400 hover:text-amber-300 transition"'} title="Move Up in Protocol Hierarchy">
+                  <i class="fa-solid fa-chevron-up text-[10px]"></i>
+                </button>
+                <button type="button" onclick="moveOfficerInline(${r.id}, 'down')" ${idx === items.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-600"' : 'class="p-1 text-slate-400 hover:text-amber-300 transition"'} title="Move Down in Protocol Hierarchy">
+                  <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                </button>
+              </div>
+            ` : ''}
           </div>
         </td>
 
@@ -524,6 +542,230 @@ async function submitAddMember(e) {
   }
 }
 
+
+
+// ============================================================================
+// OFFICERS POSITION ARRANGEMENT & PROTOCOL HIERARCHY CONTROLLER
+// ============================================================================
+
+let draggedOfficerIndex = null;
+
+function getStandardProtocolRank(roleTitle) {
+  const t = (roleTitle || '').trim().toLowerCase();
+  if (t === 'president' || t === 'chapter president') return 1;
+  if (t.includes('vice president')) return 2;
+  if (t === 'secretary' || t === 'chapter secretary') return 3;
+  if (t.includes('assistant secretary') || t.includes('asst. secretary')) return 4;
+  if (t === 'treasurer' || t === 'chapter treasurer') return 5;
+  if (t.includes('assistant treasurer') || t.includes('asst. treasurer')) return 6;
+  if (t.includes('assistant public relations officer') || t.includes('assistant p.r.o.') || t.includes('asst. p.r.o.')) return 8;
+  if (t.includes('public relations officer') || t.includes('p.r.o.')) return 7;
+  if (t.includes('auditor')) return 9;
+  if (t.includes('business manager')) return 10;
+  if (t.includes('peace officer') || t.includes('sergeant at arms')) return 11;
+  return 99;
+}
+
+async function openModalArrangeOfficers() {
+  try {
+    const res = await fetch(`${API_BASE}/api/move-roster?status=officer`);
+    const data = await res.json();
+    if (data.success && data.roster) {
+      appState.reorderOfficersList = [...data.roster];
+      renderArrangeOfficersList();
+      openModal("modalArrangeOfficers");
+    }
+  } catch (err) {
+    console.error("Failed to load officers for arrangement:", err);
+    alert("Could not load officers list: " + err);
+  }
+}
+
+function renderArrangeOfficersList() {
+  const container = document.getElementById("arrangeOfficersList");
+  if (!container) return;
+
+  const list = appState.reorderOfficersList || [];
+  const badgeCount = document.getElementById("badgeOfficerCount");
+  if (badgeCount) badgeCount.textContent = `${list.length} Officers`;
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">No active officers found. Mark members as Officers in Manage Personnel first.</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map((officer, idx) => {
+    const rank = idx + 1;
+    const isFirst = (idx === 0);
+    const isLast = (idx === list.length - 1);
+    const badgeColor = rank === 1 ? 'bg-amber-500 text-slate-950 font-black' : 
+                       (rank === 2 ? 'bg-slate-200 text-slate-900 font-bold' : 
+                       (rank === 3 ? 'bg-amber-700 text-white font-bold' : 'bg-slate-800 text-slate-300 font-semibold'));
+
+    return `
+      <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 transition group cursor-move"
+           draggable="true"
+           ondragstart="onOfficerDragStart(event, ${idx})"
+           ondragover="onOfficerDragOver(event)"
+           ondrop="onOfficerDrop(event, ${idx})">
+        
+        <!-- Left: Grip, Rank Badge & Officer Info -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="cursor-grab active:cursor-grabbing text-slate-600 group-hover:text-amber-400 px-1 py-2 transition" title="Drag to reorder position">
+            <i class="fa-solid fa-grip-vertical"></i>
+          </div>
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-mono shadow-sm shrink-0 ${badgeColor}">
+            #${rank}
+          </div>
+          <div class="min-w-0">
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <span class="truncate">${escapeHtml(officer.full_name)}</span>
+              ${officer.hris_id ? `<span class="text-[10px] font-mono text-slate-500 font-normal shrink-0">#${officer.hris_id}</span>` : ''}
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1 shrink-0">
+                <i class="fa-solid fa-star text-[9px]"></i>
+                <span>${escapeHtml(officer.role_title || 'Officer')}</span>
+              </span>
+              <span class="text-[10px] text-slate-400 truncate" title="${escapeHtml(officer.office || '')}">
+                ${escapeHtml(officer.office || '-')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Move Up / Down Buttons -->
+        <div class="flex items-center gap-1.5 shrink-0" onclick="event.stopPropagation()">
+          <button type="button" onclick="moveOfficerInList(${idx}, 'up')" ${isFirst ? 'disabled class="w-8 h-8 rounded-xl bg-slate-950/40 text-slate-700 cursor-not-allowed flex items-center justify-center"' : 'class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center justify-center active:scale-95 shadow-xs"'} title="Move Up">
+            <i class="fa-solid fa-arrow-up text-xs"></i>
+          </button>
+          <button type="button" onclick="moveOfficerInList(${idx}, 'down')" ${isLast ? 'disabled class="w-8 h-8 rounded-xl bg-slate-950/40 text-slate-700 cursor-not-allowed flex items-center justify-center"' : 'class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center justify-center active:scale-95 shadow-xs"'} title="Move Down">
+            <i class="fa-solid fa-arrow-down text-xs"></i>
+          </button>
+        </div>
+
+      </div>
+    `;
+  }).join("");
+}
+
+function onOfficerDragStart(e, index) {
+  draggedOfficerIndex = index;
+  e.dataTransfer.effectAllowed = "move";
+}
+
+function onOfficerDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+}
+
+function onOfficerDrop(e, targetIndex) {
+  e.preventDefault();
+  if (draggedOfficerIndex === null || draggedOfficerIndex === targetIndex) return;
+  const list = appState.reorderOfficersList;
+  const movedItem = list.splice(draggedOfficerIndex, 1)[0];
+  list.splice(targetIndex, 0, movedItem);
+  draggedOfficerIndex = null;
+  renderArrangeOfficersList();
+}
+
+function moveOfficerInList(index, direction) {
+  const list = appState.reorderOfficersList;
+  if (!list || list.length === 0) return;
+  if (direction === 'up' && index > 0) {
+    const temp = list[index];
+    list[index] = list[index - 1];
+    list[index - 1] = temp;
+  } else if (direction === 'down' && index < list.length - 1) {
+    const temp = list[index];
+    list[index] = list[index + 1];
+    list[index + 1] = temp;
+  }
+  renderArrangeOfficersList();
+}
+
+function resetOfficersToStandardProtocol() {
+  if (!appState.reorderOfficersList || appState.reorderOfficersList.length === 0) return;
+  appState.reorderOfficersList.sort((a, b) => {
+    const rankA = getStandardProtocolRank(a.role_title);
+    const rankB = getStandardProtocolRank(b.role_title);
+    if (rankA !== rankB) return rankA - rankB;
+    return (a.full_name || '').localeCompare(b.full_name || '');
+  });
+  renderArrangeOfficersList();
+}
+
+async function saveOfficersOrder() {
+  const list = appState.reorderOfficersList || [];
+  if (list.length === 0) {
+    closeModal("modalArrangeOfficers");
+    return;
+  }
+
+  const btn = document.getElementById("btnSaveOfficersOrder");
+  const origText = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Saving...</span>`;
+  }
+
+  try {
+    const orderedIds = list.map(o => o.id);
+    const res = await fetch(`${API_BASE}/api/move-roster/reorder-officers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ordered_ids: orderedIds })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeModal("modalArrangeOfficers");
+      await loadRoster();
+      alert("Officers arrangement saved successfully!");
+    } else {
+      alert("Failed to save order: " + (data.message || data.error));
+    }
+  } catch (err) {
+    alert("Error saving officers order: " + err);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+}
+
+async function moveOfficerInline(memberId, direction) {
+  const currentOfficers = [...(appState.roster || [])];
+  const idx = currentOfficers.findIndex(o => o.id === memberId);
+  if (idx === -1) return;
+
+  if (direction === 'up' && idx > 0) {
+    const temp = currentOfficers[idx];
+    currentOfficers[idx] = currentOfficers[idx - 1];
+    currentOfficers[idx - 1] = temp;
+  } else if (direction === 'down' && idx < currentOfficers.length - 1) {
+    const temp = currentOfficers[idx];
+    currentOfficers[idx] = currentOfficers[idx + 1];
+    currentOfficers[idx + 1] = temp;
+  } else {
+    return;
+  }
+
+  try {
+    const orderedIds = currentOfficers.map(o => o.id);
+    const res = await fetch(`${API_BASE}/api/move-roster/reorder-officers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ordered_ids: orderedIds })
+    });
+    const data = await res.json();
+    if (data.success) {
+      await loadRoster();
+    }
+  } catch (err) {
+    console.error("Inline officer reorder error:", err);
+  }
+}
 
 // Backward compatibility alias: openPersonnelProfileModal opens the unified member profile modal
 function openPersonnelProfileModal(id) {
