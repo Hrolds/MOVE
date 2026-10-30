@@ -26,3 +26,8 @@ venv/
 
 # Scratch files
 scratch/
+
+# Local HRIS API caches
+data/.hris_*.json
+data/profile_cache/
+

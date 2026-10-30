@@ -10,6 +10,8 @@ from datetime import datetime
 # Ensure backend directory is in sys.path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from database import get_connection, init_db
+import hris_service
+import sftp_service
 
 PORT = 8765
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +81,24 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # 1b. API: HRIS Comparison & Audit
+        if path == "/api/hris/compare":
+            force_refresh = str(query.get("force", ["0"])[0]).lower() in ("1", "true", "yes")
+            try:
+                result = hris_service.compare_roster_with_hris(force=force_refresh)
+                self.send_json(result)
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
+
+        if path == "/api/hris/departments":
+            try:
+                depts = hris_service.get_hris_departments()
+                self.send_json({"success": True, "departments": depts})
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
+
         # 2. API: MOVE Dedicated Roster (with selective status filtering)
         if path == "/api/move-roster":
             status_filter = query.get("status", ["all"])[0]
@@ -106,6 +126,40 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             roster = [dict(row) for row in cursor.fetchall()]
             conn.close()
             self.send_json({"success": True, "count": len(roster), "roster": roster})
+            return
+
+        # 2b. API: MOVE Roster Member Photo (from local cache or SFTP)
+        m_roster_photo = re.match(r"^/api/move-roster/(\d+)/photo$", path)
+        if m_roster_photo:
+            roster_id = int(m_roster_photo.group(1))
+            photo_info = sftp_service.get_profile_photo_for_roster_id(roster_id)
+            if photo_info:
+                file_path, mime = photo_info
+                self.send_response(200)
+                self.send_header("Content-Type", mime)
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                with open(file_path, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_json({"success": False, "message": "Photo not found"}, 404)
+            return
+
+        # 2c. API: HRIS Employee Photo
+        m_hris_photo = re.match(r"^/api/hris/(\d+)/photo$", path)
+        if m_hris_photo:
+            hris_id = int(m_hris_photo.group(1))
+            photo_info = sftp_service.get_profile_photo_for_hris_id(hris_id)
+            if photo_info:
+                file_path, mime = photo_info
+                self.send_response(200)
+                self.send_header("Content-Type", mime)
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                with open(file_path, "rb") as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_json({"success": False, "message": "Photo not found"}, 404)
             return
 
         # 3. API: Municipal Employees Search Pool (Separate Table)
@@ -248,6 +302,47 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         body = self.parse_body()
+
+        # 0a. API: HRIS Bulk Sync
+        if path == "/api/hris/sync-roster":
+            ids = body.get("ids", [])
+            all_outdated = body.get("all_outdated", False)
+            update_position = body.get("update_position", True)
+            update_office = body.get("update_office", True)
+            try:
+                if all_outdated:
+                    comp = hris_service.compare_roster_with_hris()
+                    # Only include outdated active employees by default
+                    ids = [item["id"] for item in comp.get("comparison", []) if item.get("is_outdated") and not item.get("is_inactive")]
+                result = hris_service.sync_members(ids, update_position=update_position, update_office=update_office)
+                self.send_json(result)
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
+
+        # 0b. API: HRIS Single Member Sync
+        if path == "/api/hris/sync-single":
+            member_id = body.get("id")
+            update_position = body.get("update_position", True)
+            update_office = body.get("update_office", True)
+            try:
+                result = hris_service.sync_members([member_id], update_position=update_position, update_office=update_office)
+                self.send_json(result)
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
+
+        # 0c. API: Manually link HRIS ID to member
+        if path == "/api/hris/link-id":
+            member_id = body.get("member_id")
+            hris_id = body.get("hris_id")
+            apply_sync = body.get("apply_sync", True)
+            try:
+                result = hris_service.link_manual_hris_id(int(member_id), int(hris_id), apply_sync=apply_sync)
+                self.send_json(result)
+            except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
 
         # 1. API: Add Person directly into MOVE Roster
         if path == "/api/move-roster":
@@ -506,7 +601,10 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 appearance_title = 'CERTIFICATE OF APPEARANCE',
                 appearance_intro = 'This is to certify that',
                 participation_citation = 'for {his/her} active participation and completion of the capacity-building seminar entitled',
-                appearance_citation = 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in'
+                appearance_citation = 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in',
+                ca_template_formula = 'This is to certify that {title_prefix} {full_name}, {position} of {office}, was duly verified to have attended and participated in the activity entitled “{activity_title}: {activity_theme},” held on {activity_date}, at the {activity_venue}.',
+                header_spacing = 0,
+                logo_distance = 0
             WHERE id = 1;
             """)
             conn.commit()
@@ -568,12 +666,21 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_connection()
             cursor = conn.cursor()
-            cursor.execute("""
-            UPDATE move_roster
-            SET full_name = ?, role_title = ?, position = ?, office = ?,
-                gender = ?, civil_status = ?, contact_number = ?, notes = ?
-            WHERE id = ?;
-            """, (full_name, role_title, position, office, gender, civil, contact, notes, roster_id))
+
+            set_clauses = [
+                "full_name = ?", "role_title = ?", "position = ?", "office = ?",
+                "gender = ?", "civil_status = ?", "contact_number = ?", "notes = ?"
+            ]
+            params = [full_name, role_title, position, office, gender, civil, contact, notes]
+
+            for f in ["is_member", "is_officer", "is_committee", "is_participant"]:
+                if f in body:
+                    set_clauses.append(f"{f} = ?")
+                    params.append(1 if body[f] else 0)
+
+            params.append(roster_id)
+            sql = f"UPDATE move_roster SET {', '.join(set_clauses)} WHERE id = ?;"
+            cursor.execute(sql, params)
             conn.commit()
 
             updated = conn.execute("SELECT * FROM move_roster WHERE id = ?;", (roster_id,)).fetchone()
@@ -843,6 +950,9 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             appearance_intro = str(body.get("appearance_intro", existing_dict.get("appearance_intro", ""))).strip()
             participation_citation = str(body.get("participation_citation", existing_dict.get("participation_citation", "for {his/her} active participation and completion of the capacity-building seminar entitled"))).strip()
             appearance_citation = str(body.get("appearance_citation", existing_dict.get("appearance_citation", "was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in"))).strip()
+            ca_template_formula = str(body.get("ca_template_formula", existing_dict.get("ca_template_formula", "This is to certify that {title_prefix} {full_name}, {position} of {office}, was duly verified to have attended and participated in the activity entitled “{activity_title}: {activity_theme},” held on {activity_date}, at the {activity_venue}."))).strip()
+            header_spacing = int(body.get("header_spacing", existing_dict.get("header_spacing", 0)))
+            logo_distance = int(body.get("logo_distance", existing_dict.get("logo_distance", 0)))
 
             cursor.execute("""
             UPDATE certificate_settings
@@ -851,7 +961,10 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 appreciation_title = ?, appreciation_intro = ?,
                 appearance_title = ?, appearance_intro = ?,
                 participation_citation = ?,
-                appearance_citation = ?
+                appearance_citation = ?,
+                ca_template_formula = ?,
+                header_spacing = ?,
+                logo_distance = ?
             WHERE id = 1;
             """, (
                 header_line_1, header_line_2, header_line_3,
@@ -859,7 +972,10 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 appreciation_title, appreciation_intro,
                 appearance_title, appearance_intro,
                 participation_citation,
-                appearance_citation
+                appearance_citation,
+                ca_template_formula,
+                header_spacing,
+                logo_distance
             ))
             conn.commit()
             updated = cursor.execute("SELECT * FROM certificate_settings WHERE id = 1;").fetchone()
@@ -937,6 +1053,10 @@ def run_server():
     print(f"  Database : SQLite ({os.path.join(BASE_DIR, 'data', 'move_hris.db')})")
     print(f"  Port     : http://127.0.0.1:{PORT}")
     print(f"============================================================")
+    try:
+        sftp_service.warm_cache_in_background()
+    except Exception as e:
+        print(f"SFTP warm cache notice: {e}")
     with socketserver.TCPServer(("127.0.0.1", PORT), HRISApiHandler) as httpd:
         try:
             httpd.serve_forever()

@@ -33,10 +33,13 @@
     }
   </script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-move-gold-500/30 selection:text-white">
+
+  <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer"></div>
 
   <!-- TOP NAVBAR -->
-  <header id="topNavbar" class="bg-move-navy-950/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+  <header id="topNavbar" class="bg-move-navy-950/95 border-b border-slate-800/90 sticky top-0 z-40 backdrop-blur-md shadow-lg">
     <div class="max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <!-- Brand & Insignia -->
@@ -46,7 +49,7 @@
         <div>
           <h1 class="text-sm font-black tracking-wide text-white uppercase flex items-center gap-2">
             MOVE Baguio Chapter
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shadow-2xs">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SQLite Active
             </span>
           </h1>
@@ -55,8 +58,8 @@
       </div>
 
       <!-- Main Navigation Tabs -->
-      <nav class="flex flex-wrap items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
-        <button id="navTab-roster" onclick="switchView('roster')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow">
+      <nav class="flex flex-wrap items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 shadow-inner">
+        <button id="navTab-roster" onclick="switchView('roster')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 nav-tab-active">
           <i class="fa-solid fa-users"></i> MOVE Roster
         </button>
         <button id="navTab-activities" onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
@@ -69,7 +72,12 @@
 
       <!-- Quick Actions -->
       <div class="flex items-center gap-2">
-        <button onclick="openModal('modalSearchPool')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+        <button onclick="openHrisCompareModal()" class="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white text-xs font-bold border border-blue-500/30 transition flex items-center gap-1.5 shadow-xs">
+          <i class="fa-solid fa-scale-balanced text-blue-400"></i>
+          <span>HRIS Compare</span>
+          <span id="badgeTopNavHrisCount" class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] hidden">0</span>
+        </button>
+        <button onclick="openModal('modalSearchPool')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-xs">
           <i class="fa-solid fa-magnifying-glass text-slate-400"></i> Search Pool (748)
         </button>
       </div>
@@ -90,27 +98,10 @@
     <!-- ==================================================================== -->
     <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER                       -->
     <!-- ==================================================================== -->
-    <section id="view-roster" class="space-y-6">
-      
-      <!-- View Header & Controls -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-        <div>
-          <h2 class="text-xl font-black text-white flex items-center gap-2">
-            <i class="fa-solid fa-id-card-clip text-move-orange-500"></i> MOVE Chapter Roster &amp; Selective Status
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Dedicated MOVE table with selective status toggles (Member, Officer, Committee, Participant).
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="openModal('modalAddMember')" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-2">
-            <i class="fa-solid fa-user-plus"></i> Add Person to MOVE
-          </button>
-        </div>
-      </div>
+    <section id="view-roster" class="space-y-4">
 
       <!-- Main Layout: Left Navigation Panel + Right Table Area -->
-      <div class="flex flex-col lg:flex-row gap-6 items-start">
+      <div class="flex flex-col lg:flex-row gap-5 items-start">
         
         <!-- LEFT: Category Navigation Panel (w-full lg:w-64 shrink-0) -->
         <aside class="w-full lg:w-64 shrink-0 bg-slate-900/90 rounded-2xl border border-slate-800 p-4 space-y-4 shadow-xl">
@@ -166,6 +157,16 @@
           <!-- Nav Panel Quick Actions -->
           <div class="pt-3 border-t border-slate-800/80 space-y-2">
             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-1">Quick Tools</span>
+            <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white text-xs font-semibold border border-blue-500/30 transition flex items-center justify-between group shadow-sm">
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-xs text-blue-400 group-hover:rotate-12 transition-transform"></i>
+                <span>Compare with HRIS API</span>
+              </span>
+              <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="badgeHrisDiffCountText">HRIS</span>
+              </span>
+            </button>
             <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium border border-slate-800 transition flex items-center gap-2">
               <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
               <span>Search Municipal Pool (748)</span>
@@ -182,35 +183,43 @@
           
           <!-- Toolbar: Live Search & Active Category Banner -->
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2">
                 <i class="fa-solid fa-users-gear text-move-orange-400"></i> Manage Personnel
               </span>
               <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Full Directory &amp; Status Manager &mdash; All updates made here</span>
+              <button type="button" onclick="openHrisCompareModal()" id="btnToolbarHrisCompare" class="ml-1 px-2.5 py-1 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 text-[11px] font-bold border border-blue-500/30 transition flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-scale-balanced text-blue-400"></i>
+                <span>HRIS Sync</span>
+                <span id="badgeToolbarHrisCount" class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] hidden">0</span>
+              </button>
             </div>
 
-            <!-- Live Search Input -->
-            <div class="relative w-full sm:w-72">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-              <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Search name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
+            <!-- Search & Add Actions -->
+            <div class="flex items-center gap-2">
+              <div class="relative w-full sm:w-64">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Search name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
+              </div>
+              <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0" title="Add Person to MOVE">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                <span>Add Person</span>
+              </button>
             </div>
           </div>
 
-          <!-- Roster Table Card -->
-          <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
-            <div class="overflow-x-auto">
+          <!-- Roster Table Card with Side Scrollbar & Sticky Header -->
+          <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl flex flex-col">
+            <div class="overflow-x-auto overflow-y-auto max-h-[70vh] roster-scroll-container">
               <table class="w-full text-left text-xs border-collapse">
-                <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800 sticky top-0 z-10 shadow-sm">
                   <tr>
-                    <th class="py-2.5 px-3 w-12 text-slate-500 font-mono text-center">#</th>
-                    <th class="py-2.5 px-3 w-60 whitespace-nowrap">Full Name</th>
-                    <th class="py-2.5 px-3 w-56 whitespace-nowrap">MOVE Position Title</th>
-                    <th class="py-2.5 px-3 w-64 whitespace-nowrap">Office Position Title</th>
-                    <th class="py-2.5 px-3 min-w-[220px] whitespace-nowrap">Office / Dept</th>
-                    <th class="py-2.5 px-2 text-center whitespace-nowrap w-14">Sex</th>
-                    <th class="py-2.5 px-3 text-center whitespace-nowrap w-24">Civil Status</th>
-                    <th id="thSelectiveStatus" class="py-2.5 px-3 text-center whitespace-nowrap w-72">Selective Status</th>
-                    <th class="py-2.5 px-3 text-right whitespace-nowrap w-24">Actions</th>
+                    <th class="py-3 px-3 w-10 text-slate-500 font-mono text-center bg-slate-950">#</th>
+                    <th class="py-3 px-4 min-w-[220px] bg-slate-950">Full Name</th>
+                    <th class="py-3 px-3 min-w-[120px] bg-slate-950">Civil Status</th>
+                    <th class="py-3 px-4 min-w-[180px] bg-slate-950">Move Position</th>
+                    <th class="py-3 px-3 min-w-[110px] bg-slate-950">Office</th>
+                    <th class="py-3 px-3 text-right whitespace-nowrap w-24 bg-slate-950">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
@@ -218,16 +227,17 @@
                 </tbody>
               </table>
             </div>
-          </div>
 
-          <!-- Pagination Controls (Locked to 10 Rows Per Page) -->
-          <div id="rosterPaginationBar" class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-xs">
-            <div class="text-slate-400 font-medium text-[11px] flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-move-orange-400"></i>
-              <span id="rosterPaginationInfo">Showing 1 – 10 of 59 personnel</span>
-            </div>
-            <div class="flex items-center gap-1.5" id="rosterPaginationControls">
-              <!-- Rendered via JS -->
+            <!-- Bottom Info Counter Bar (No paging numbering) -->
+            <div class="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-t border-slate-800/80 text-[11px] text-slate-400">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="rosterTotalCountLabel" class="font-medium text-slate-300">Showing all personnel</span>
+              </div>
+              <div class="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-up-down text-[10px] text-move-orange-400"></i>
+                <span>Scroll table to view all records</span>
+              </div>
             </div>
           </div>
 
@@ -495,26 +505,23 @@
     <section id="view-studio" class="space-y-6 hidden">
       
       <!-- Studio Ribbon & Mode Selector -->
-      <div class="bg-gradient-to-r from-move-navy-950 via-slate-900 to-move-navy-950 p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div class="bg-gradient-to-r from-move-navy-950 via-slate-900 to-move-navy-950 p-4 rounded-2xl border border-slate-800 flex flex-col xl:flex-row items-center justify-between gap-3 shadow-xl">
         
         <!-- Template Mode Tabs (Dynamic based on Role: Attendees get Participation & CA; Facilitators get Appreciation & CA) -->
-        <div class="flex items-center gap-1.5 bg-slate-950/90 p-1.5 rounded-xl border border-slate-800">
+        <div class="flex items-center gap-1.5 bg-slate-950/90 p-1.5 rounded-xl border border-slate-800 shrink-0">
           <button id="studioTab-participation" onclick="switchCertTemplate('participation')" class="px-3.5 py-1.5 rounded-lg text-xs font-black transition bg-move-gold-500 text-slate-950 shadow flex items-center gap-1.5">
-            <i class="fa-solid fa-graduation-cap"></i> 1. Certificate of Participation
+            <i class="fa-solid fa-graduation-cap"></i> 1. Participation
           </button>
           <button id="studioTab-appreciation" onclick="switchCertTemplate('appreciation')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5 hidden">
-            <i class="fa-solid fa-award text-move-gold-400"></i> 1. Certificate of Appreciation
+            <i class="fa-solid fa-award text-move-gold-400"></i> 1. Appreciation
           </button>
           <button id="studioTab-appearance" onclick="switchCertTemplate('appearance')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-file-contract text-emerald-400"></i> 2. Certificate of Appearance (CA)
+            <i class="fa-solid fa-file-contract text-emerald-400"></i> 2. Appearance (CA)
           </button>
-          <span id="studioRoleRuleHint" class="text-[10px] font-semibold text-move-gold-400/90 ml-1 hidden xl:inline-block px-2 py-1 rounded bg-slate-900 border border-slate-800">
-            For Attendees: Participation &amp; CA
-          </span>
         </div>
 
         <!-- Recipient Navigator (STRICTLY PRESENT ATTENDEES / FACILITATORS) -->
-        <div class="flex flex-wrap items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+        <div class="flex flex-wrap items-center justify-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
           <!-- Pool Switcher: Attendees vs Facilitators -->
           <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 mr-1">
             <button type="button" id="btnStudioPoolAttendees" onclick="toggleStudioRecipientPool('attendees')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition bg-move-gold-500 text-slate-950 flex items-center gap-1.5 shadow-sm">
@@ -528,54 +535,79 @@
           <button onclick="prevCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Previous Recipient">
             <i class="fa-solid fa-chevron-left text-xs"></i>
           </button>
-          <div class="text-center px-2">
+          <div class="text-center px-1.5">
             <span class="text-[11px] font-bold text-white block">
-              Recipient <span id="studioRecipientCurrent">1</span> of <span id="studioRecipientTotal">47</span>
+              <span id="studioRecipientCurrent">1</span> / <span id="studioRecipientTotal">47</span>
             </span>
-            <!-- Interactive Attendance Toggle Button -->
-            <button onclick="toggleCurrentRecipientAttendance()" id="btnStudioAttendeeAttendance" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 transition flex items-center justify-center gap-1 mx-auto cursor-pointer" title="Click to change this person's attendance to Absent">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified Present (Click to mark Absent)
+            <button onclick="toggleCurrentRecipientAttendance()" id="btnStudioAttendeeAttendance" class="px-2 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-rose-500/20 hover:text-rose-300 transition flex items-center justify-center gap-1 mx-auto cursor-pointer" title="Click to change attendance to Absent">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Present
             </button>
           </div>
           <button onclick="nextCertificateRecipient()" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Next Recipient">
             <i class="fa-solid fa-chevron-right text-xs"></i>
           </button>
           
-          <select id="studioRecipientSelect" onchange="onSelectRecipientDropdown(this.value)" class="ml-1 bg-slate-900 border border-slate-700 rounded-lg text-xs py-1 px-2 text-white font-medium focus:outline-none focus:border-move-gold-500 max-w-[200px]">
+          <select id="studioRecipientSelect" onchange="onSelectRecipientDropdown(this.value)" class="ml-1 bg-slate-900 border border-slate-700 rounded-lg text-xs py-1 px-2 text-white font-medium focus:outline-none focus:border-move-gold-500 max-w-[180px]">
             <!-- Populated via JS -->
           </select>
 
-          <!-- Direct Shortcut Button to Full Attendance Checklist -->
-          <button onclick="switchView('attendance')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow" title="Open full attendance checklist to view and change attendance for all participants">
-            <i class="fa-solid fa-clipboard-user text-move-gold-400"></i> Change Attendance
+          <button onclick="switchView('attendance')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1" title="Open full attendance checklist">
+            <i class="fa-solid fa-clipboard-user text-move-gold-400"></i> Checklist
           </button>
         </div>
 
-        <!-- Studio Print & Output Actions -->
-        <div class="flex items-center gap-2">
-          <button onclick="printSingleCertificate()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 shadow transition flex items-center gap-1.5">
-            <i class="fa-solid fa-print"></i> Print Single
-          </button>
-          <button onclick="batchPrintAllCertificates()" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-1.5">
-            <i class="fa-solid fa-print"></i> Batch Print Present (<span id="batchPrintBtnCount">47</span>)
-          </button>
+        <!-- Studio Zoom Engine & Output Actions -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- In-App Viewport Zoom Controls -->
+          <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800 text-xs">
+            <button type="button" onclick="autoFitStudioCanvas()" id="certZoomFitBtn" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-move-gold-400 border border-slate-700 hover:border-move-gold-500 transition shadow-xs" title="Auto-fit certificate to available screen height without browser zoom">
+              <i class="fa-solid fa-compress text-[9px] mr-1"></i>Fit
+            </button>
+            <button type="button" onclick="adjustStudioCanvasZoom(-10)" id="certZoomOutBtn" class="w-6 h-6 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold transition flex items-center justify-center border border-slate-800" title="Zoom Out">-</button>
+            <button type="button" onclick="setStudioCanvasZoom(100)" id="certZoomDisplay" class="font-mono text-white text-[10px] px-1 font-bold hover:text-move-gold-400" title="Reset to 100%">100%</button>
+            <button type="button" onclick="adjustStudioCanvasZoom(10)" id="certZoomInBtn" class="w-6 h-6 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold transition flex items-center justify-center border border-slate-800" title="Zoom In">+</button>
+            <button type="button" onclick="toggleStudioFocusMode()" id="certZoomFocusBtn" class="ml-0.5 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition flex items-center gap-1" title="Toggle Fullscreen Focus Mode">
+              <i class="fa-solid fa-expand text-[9px]"></i>
+            </button>
+          </div>
+
+          <!-- Print Buttons -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="printSingleCertificate()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold border border-slate-700 shadow transition flex items-center gap-1.5">
+              <i class="fa-solid fa-print"></i> Single
+            </button>
+            <button onclick="batchPrintAllCertificates()" class="px-3.5 py-1.5 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-1.5">
+              <i class="fa-solid fa-print"></i> Batch (<span id="batchPrintBtnCount">47</span>)
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Studio Two-Column Workspace -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <!-- Left Column: Unified Controls Sidebar -->
-        <div class="lg:col-span-4 bg-slate-900/90 p-5 rounded-2xl border border-slate-800 space-y-5">
-          <div class="border-b border-slate-800 pb-3">
-            <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-move-gold-500"></i> Certificate Customizer
-            </h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">Adjust text, signatories, or click any word on the certificate canvas to edit.</p>
+                <!-- Left Column: Unified Controls Sidebar with 4 Collapsible Accordions -->
+        <div id="studioControlsSidebar" class="lg:col-span-4 space-y-3.5">
+          <!-- Sidebar Header & Global Accordion Toggle -->
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-move-gold-500"></i> Certificate Customizer
+              </h3>
+              <p class="text-[10px] text-slate-400 mt-0.5">Custom layout, formulas &amp; typography</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="expandAllStudioAccordions()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold border border-slate-700 transition" title="Expand All Sections">
+                Expand All
+              </button>
+              <button type="button" onclick="collapseAllStudioAccordions()" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold border border-slate-700 transition" title="Collapse All Sections">
+                Collapse All
+              </button>
+            </div>
           </div>
 
           <!-- Attendance Quick Summary Card in Studio Sidebar -->
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between shadow-sm">
             <div>
               <div class="text-[10px] uppercase font-bold text-slate-400"><span id="sidebarPoolLabel">Attendees</span> Gating</div>
               <div class="text-xs font-bold text-emerald-400"><span id="sidebarPresentCount">47</span> Present (Eligible)</div>
@@ -585,540 +617,689 @@
             </button>
           </div>
 
-          <!-- Activity & Event Information -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <i class="fa-solid fa-calendar-day text-move-gold-400"></i> Activity & Event Info
-              </span>
-              <button type="button" onclick="openModalEditActivity(appState.currentActivityId)" class="text-[11px] text-move-gold-400 hover:text-white font-bold transition flex items-center gap-1" title="Open Full Edit Modal">
-                <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit All
-              </button>
-            </div>
-            <div>
-              <label class="text-[11px] font-bold text-slate-300 block mb-1">Activity Title</label>
-              <input type="text" id="certInputTitle" oninput="updateCertField('title', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
-            </div>
-            <div>
-              <label class="text-[11px] font-bold text-slate-300 block mb-1">Theme / Short Description</label>
-              <input type="text" id="certInputTheme" oninput="updateCertField('theme', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="text-[11px] font-bold text-slate-300 block mb-1">Date</label>
-                <input type="text" id="certInputDate" oninput="updateCertField('date', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <!-- ACCORDION 1: Content & Wording -->
+          <div class="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleStudioAccordion('content')" class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800/80 transition flex items-center justify-between text-left text-xs font-bold text-white border-b border-slate-800/60">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-file-pen text-move-gold-400"></i>
+                <span>1. Content &amp; Wording</span>
               </div>
-              <div>
-                <label class="text-[11px] font-bold text-slate-300 block mb-1">Duration</label>
-                <input type="text" id="certInputHours" oninput="updateCertField('hours', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-normal">Titles, Body &amp; Formulas</span>
+                <i id="acc-icon-content" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i>
               </div>
-            </div>
-            <div>
-              <label class="text-[11px] font-bold text-slate-300 block mb-1">Venue / Station</label>
-              <input type="text" id="certInputVenue" oninput="updateCertField('venue', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
-            </div>
-            <button type="button" onclick="saveStudioActivityDetails()" id="btnSaveStudioActivity" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm" title="Save changes directly to SQLite database">
-              <i class="fa-solid fa-floppy-disk text-move-gold-400"></i> Save Event Details to Database
             </button>
-          </div>
-
-          <!-- Certificate Header, Title & Presentation Customizer -->
-          <div class="space-y-3 pt-3 border-t border-slate-800">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <i class="fa-solid fa-heading text-move-gold-400"></i> Certificate Header & Titles
-              </span>
-              <button type="button" onclick="resetCertificateSettings()" class="text-[9px] text-slate-500 hover:text-move-gold-400 font-bold" title="Reset header and intro to official defaults">Reset</button>
-            </div>
-
-            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
-              <!-- Header Line 1 -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 1 (Country & City)</label>
-                  <span id="hdr1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certHdr1Input" oninput="onSidebarCertFieldInput('header_line_1', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
-                    placeholder="Republic of the Philippines • City Government of Baguio">
-                  <button type="button" onclick="saveCertField('header_line_1')" id="btnSaveHdr1" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 1 directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+            <div id="acc-body-content" class="studio-accordion-body p-4 space-y-4">
+              
+              <!-- Activity & Event Information -->
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-calendar-day text-move-gold-400"></i> Activity &amp; Event Info
+                  </span>
+                  <button type="button" onclick="openModalEditActivity(appState.currentActivityId)" class="text-[11px] text-move-gold-400 hover:text-white font-bold transition flex items-center gap-1" title="Open Full Edit Modal">
+                    <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit All
                   </button>
                 </div>
-              </div>
-
-              <!-- Header Line 2 -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 2 (Organization)</label>
-                  <span id="hdr2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-300 block mb-1">Activity Title</label>
+                  <input type="text" id="certInputTitle" oninput="updateCertField('title', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
                 </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certHdr2Input" oninput="onSidebarCertFieldInput('header_line_2', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
-                    placeholder="Men Opposed to Violence Against Women Everywhere (MOVE)">
-                  <button type="button" onclick="saveCertField('header_line_2')" id="btnSaveHdr2" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 2 directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-300 block mb-1">Theme / Short Description</label>
+                  <input type="text" id="certInputTheme" oninput="updateCertField('theme', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
                 </div>
-              </div>
-
-              <!-- Header Line 3 -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 3 (Chapter & Station)</label>
-                  <span id="hdr3SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[11px] font-bold text-slate-300 block mb-1">Date</label>
+                    <input type="text" id="certInputDate" oninput="updateCertField('date', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+                  </div>
+                  <div>
+                    <label class="text-[11px] font-bold text-slate-300 block mb-1">Duration</label>
+                    <input type="text" id="certInputHours" oninput="updateCertField('hours', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+                  </div>
                 </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certHdr3Input" oninput="onSidebarCertFieldInput('header_line_3', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
-                    placeholder="Baguio City, Philippines">
-                  <button type="button" onclick="saveCertField('header_line_3')" id="btnSaveHdr3" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 3 directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-300 block mb-1">Venue / Station</label>
+                  <input type="text" id="certInputVenue" oninput="updateCertField('venue', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
                 </div>
-              </div>
-
-              <!-- Certificate Title -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Certificate Title (<span id="lblActiveTitleContext" class="text-move-gold-400 font-semibold font-mono">PARTICIPATION</span>)</label>
-                  <span id="titleSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certTitleInput" oninput="onSidebarCertFieldInput('active_title', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-move-gold-400 font-bold focus:outline-none focus:border-move-gold-500"
-                    placeholder="CERTIFICATE OF PARTICIPATION">
-                  <button type="button" onclick="saveCertField('active_title')" id="btnSaveTitle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Certificate Title directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
-                </div>
-              </div>
-
-              <!-- Presentation / Intro Line -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="text-[10px] font-bold text-slate-400 uppercase">Presentation Intro Line</label>
-                  <span id="introSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certIntroInput" oninput="onSidebarCertFieldInput('active_intro', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 font-serif italic focus:outline-none focus:border-move-gold-500"
-                    placeholder="is presented to">
-                  <button type="button" onclick="saveCertField('active_intro')" id="btnSaveIntro" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Presentation Intro directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
-                </div>
-              </div>
-
-              <!-- Seminar Citation Reason (with dynamic {his/her} support) -->
-              <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label id="lblCitationContext" class="text-[10px] font-bold text-slate-400 uppercase">Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)</label>
-                  <span id="citationSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certCitationInput" oninput="onSidebarCertFieldInput('active_citation', this.value)"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500"
-                    placeholder="for {his/her} active participation and completion of the capacity-building seminar entitled">
-                  <button type="button" onclick="saveCertField('active_citation')" id="btnSaveCitation" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Citation text directly to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
-                </div>
-                <p id="lblCitationTip" class="text-[9px] text-slate-500 mt-0.5">Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.</p>
-              </div>
-
-              <div class="pt-1">
-                <button type="button" onclick="saveAllCertificateSettings()" id="btnSaveCertHeaderSettings"
-                  class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm"
-                  title="Save all headers, title, and intro text directly to SQLite database">
-                  <i class="fa-solid fa-floppy-disk text-move-gold-400"></i>
-                  <span>Save All Headers & Titles</span>
-                  <span id="certHdrSaveStatus" class="hidden text-emerald-400 font-bold text-[10px] ml-1">✓ Saved!</span>
+                <button type="button" onclick="saveStudioActivityDetails()" id="btnSaveStudioActivity" class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm" title="Save changes directly to SQLite database">
+                  <i class="fa-solid fa-floppy-disk text-move-gold-400"></i> Save Event Details to Database
                 </button>
               </div>
-            </div>
-            <p class="text-[10px] text-slate-500">You can also click directly on any header, title, or intro line on the certificate canvas to edit — it auto-saves when you click away!</p>
-          </div>
 
-          <!-- Signatories Controls -->
-          <div class="space-y-3 pt-3 border-t border-slate-800">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-signature text-move-orange-400"></i> Executive Signatories & Titles
-              </h4>
-              <span class="text-[9px] text-move-gold-400 font-bold uppercase">Editable</span>
-            </div>
-
-            <!-- Choose Which Signatory & Layout Appears on Certificate -->
-            <div id="caSignatorySelectorWrapper" class="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-move-gold-500/40 shadow-md">
-              <div class="flex items-center justify-between">
-                <label class="text-[10px] font-black text-move-gold-400 uppercase flex items-center gap-1.5">
-                  <i class="fa-solid fa-user-check text-[11px]"></i> 1. Choose Who Appears on Signatory
-                </label>
-                <span class="text-[9px] font-mono text-emerald-400 font-bold">Active Template</span>
-              </div>
-              <select id="caSignatoryChoice" onchange="onCaSignatoryChoiceChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold focus:outline-none focus:border-move-gold-500">
-                <option value="both">Dual Signatories: Signatory 1 (Left) &amp; Signatory 2 (Right)</option>
-                <option value="sig1_center">Single Signatory: Signatory 1 Only (Centered)</option>
-                <option value="sig1_right">Single Signatory: Signatory 1 Only (Right-Aligned)</option>
-                <option value="sig2_center">Single Signatory: Signatory 2 Only (Centered)</option>
-                <option value="sig2_right">Single Signatory: Signatory 2 Only (Right-Aligned)</option>
-              </select>
-
-              <!-- Choose What Elements Appear Inside the Signatory Block -->
-              <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-300 uppercase block">2. Choose What Details to Show on Signatory:</label>
-                <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300">
-                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
-                    <input type="checkbox" id="chkShowSigName" onchange="toggleSigDetail('showSigName', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                    <span>Full Name</span>
-                  </label>
-                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
-                    <input type="checkbox" id="chkShowSigTitle" onchange="toggleSigDetail('showSigTitle', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                    <span>Position Title</span>
-                  </label>
-                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
-                    <input type="checkbox" id="chkShowSigOffice" onchange="toggleSigDetail('showSigOffice', this.checked)" class="rounded text-move-gold-500 focus:ring-0">
-                    <span>Office / Agency</span>
-                  </label>
-                  <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
-                    <input type="checkbox" id="chkShowSigLine" onchange="toggleSigDetail('showSigLine', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                    <span>Signature Line</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Signatory 1 Card -->
-            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 1 (Left or Single)</label>
-                <span id="sig1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
-                <select id="certSigSelect1" onchange="onSigSelect(1, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                  <!-- Populated via JS -->
-                </select>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
-                <input type="text" id="certSig1NameInput" oninput="onSigNameInputChange(1, this.value)" placeholder="e.g. MARIO D. GANGA JR." class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certSig1TitleInput" oninput="onSigTitleInputChange(1, this.value)" placeholder="e.g. MOVE Baguio Chapter President" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
-                  <button type="button" onclick="saveSignatoryTitle(1)" id="btnSaveSig1Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 1 Name & Title to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
-                <input type="text" id="certSig1OfficeInput" oninput="onSigOfficeInputChange(1, this.value)" placeholder="e.g. CMO - PDAO / Baguio City" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
-              </div>
-            </div>
-
-            <!-- Signatory 2 Card -->
-            <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 2 (Right or Single)</label>
-                <span id="sig2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
-                <select id="certSigSelect2" onchange="onSigSelect(2, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                  <!-- Populated via JS -->
-                </select>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
-                <input type="text" id="certSig2NameInput" oninput="onSigNameInputChange(2, this.value)" placeholder="e.g. HON. BENJAMIN B. MAGALONG" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
-                <div class="flex items-center gap-1.5">
-                  <input type="text" id="certSig2TitleInput" oninput="onSigTitleInputChange(2, this.value)" placeholder="e.g. City Mayor & Honorary Chapter Adviser" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
-                  <button type="button" onclick="saveSignatoryTitle(2)" id="btnSaveSig2Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 2 Name & Title to SQLite database">
-                    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
-                <input type="text" id="certSig2OfficeInput" oninput="onSigOfficeInputChange(2, this.value)" placeholder="e.g. City Government of Baguio" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
-              </div>
-            </div>
-
-            <!-- Digital Signature Image Display Mode -->
-            <div>
-              <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Digital Signature Graphic</label>
-              <select id="certSigDisplayMode" onchange="onSigDisplayModeChange(this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
-                <option value="both">Show All Digital Signatures</option>
-                <option value="sig2_only">Mayor's Signature Only</option>
-                <option value="sig1_only">President's Signature Only</option>
-                <option value="none">Blank Lines (For Manual Pen Signature)</option>
-              </select>
-            </div>
-
-            <!-- E-Signature Size & Display Controls -->
-            <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
-              <div class="flex items-center justify-between text-xs text-slate-300">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" id="certToggleSigImages" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                  <span class="text-xs font-bold text-white">Show E-Signatures</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" id="certToggleLogos" onchange="toggleLogos(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                  <span class="text-xs text-slate-400">Header Seals</span>
-                </label>
-              </div>
-
-              <!-- Signature Size Adjustment Group -->
-              <div id="sigSizeControlsWrapper" class="space-y-2 pt-2 border-t border-slate-800/70">
+              <!-- Certificate Header Lines & Presentation Titles -->
+              <div class="space-y-3 pt-3 border-t border-slate-800">
                 <div class="flex items-center justify-between">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
-                    <i class="fa-solid fa-pen-nib text-move-gold-400"></i> E-Signature Size
-                  </label>
-                  <span id="lblSigSize" class="text-[11px] font-mono font-bold text-move-gold-400">44px</span>
+                  <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-heading text-move-gold-400"></i> Certificate Header &amp; Titles
+                  </span>
+                  <button type="button" onclick="resetCertificateSettings()" class="text-[9px] text-slate-500 hover:text-move-gold-400 font-bold" title="Reset header and intro to official defaults">Reset</button>
                 </div>
 
-                <!-- Linked Master Slider (Controls All Signatures) -->
-                <div id="sigLinkedSizeGroup">
-                  <input type="range" id="certSigSizeSlider" min="20" max="96" value="44" step="2"
-                    oninput="onSigSizeChange(this.value)"
-                    class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                </div>
-
-                <!-- Independent Sliders (Optional Per-Signatory Tuning) -->
-                <div id="sigIndependentSizeGroup" class="hidden space-y-2 pt-1 bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">
+                <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
+                  <!-- Header Line 1 -->
                   <div>
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span>Signatory 1 (President):</span>
-                      <span id="lblSig1Size" class="font-mono text-move-gold-400 font-bold">44px</span>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 1 (Country &amp; City)</label>
+                      <span id="hdr1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
                     </div>
-                    <input type="range" id="certSig1SizeSlider" min="20" max="96" value="44" step="2"
-                      oninput="onSig1SizeChange(this.value)"
-                      class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certHdr1Input" oninput="onSidebarCertFieldInput('header_line_1', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                        placeholder="Republic of the Philippines • City Government of Baguio">
+                      <button type="button" onclick="saveCertField('header_line_1')" id="btnSaveHdr1" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 1 directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
                   </div>
+
+                  <!-- Header Line 2 -->
                   <div>
-                    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span>Signatory 2 (Mayor):</span>
-                      <span id="lblSig2Size" class="font-mono text-move-gold-400 font-bold">48px</span>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 2 (Organization)</label>
+                      <span id="hdr2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
                     </div>
-                    <input type="range" id="certSig2SizeSlider" min="20" max="96" value="48" step="2"
-                      oninput="onSig2SizeChange(this.value)"
-                      class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certHdr2Input" oninput="onSidebarCertFieldInput('header_line_2', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                        placeholder="Men Opposed to Violence Against Women Everywhere (MOVE)">
+                      <button type="button" onclick="saveCertField('header_line_2')" id="btnSaveHdr2" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 2 directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Header Line 3 -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Header Line 3 (Chapter &amp; Station)</label>
+                      <span id="hdr3SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certHdr3Input" oninput="onSidebarCertFieldInput('header_line_3', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500"
+                        placeholder="Baguio City, Philippines">
+                      <button type="button" onclick="saveCertField('header_line_3')" id="btnSaveHdr3" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Header Line 3 directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Certificate Title -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Certificate Title (<span id="lblActiveTitleContext" class="text-move-gold-400 font-semibold font-mono">PARTICIPATION</span>)</label>
+                      <span id="titleSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certTitleInput" oninput="onSidebarCertFieldInput('active_title', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-move-gold-400 font-bold focus:outline-none focus:border-move-gold-500"
+                        placeholder="CERTIFICATE OF PARTICIPATION">
+                      <button type="button" onclick="saveCertField('active_title')" id="btnSaveTitle" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Certificate Title directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Presentation / Intro Line -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Presentation Intro Line</label>
+                      <span id="introSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certIntroInput" oninput="onSidebarCertFieldInput('active_intro', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 font-serif italic focus:outline-none focus:border-move-gold-500"
+                        placeholder="is presented to">
+                      <button type="button" onclick="saveCertField('active_intro')" id="btnSaveIntro" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Presentation Intro directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Seminar Citation Reason -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label id="lblCitationContext" class="text-[10px] font-bold text-slate-400 uppercase">Participation Citation (<span class="text-move-gold-400 font-mono font-semibold">{his/her}</span>)</label>
+                      <span id="citationSaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="certCitationInput" oninput="onSidebarCertFieldInput('active_citation', this.value)"
+                        class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500"
+                        placeholder="for {his/her} active participation and completion of the capacity-building seminar entitled">
+                      <button type="button" onclick="saveCertField('active_citation')" id="btnSaveCitation" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1 shrink-0" title="Save Citation text directly to SQLite database">
+                        <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                      </button>
+                    </div>
+                    <p id="lblCitationTip" class="text-[9px] text-slate-500 mt-0.5">Tip: <code class="text-move-gold-400 font-mono">{his/her}</code> automatically adjusts to "his" or "her" based on recipient gender.</p>
+                  </div>
+
+                  <div class="pt-1">
+                    <button type="button" onclick="saveAllCertificateSettings()" id="btnSaveCertHeaderSettings"
+                      class="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm"
+                      title="Save all headers, title, and intro text directly to SQLite database">
+                      <i class="fa-solid fa-floppy-disk text-move-gold-400"></i>
+                      <span>Save All Headers &amp; Titles</span>
+                      <span id="certHdrSaveStatus" class="hidden text-emerald-400 font-bold text-[10px] ml-1">✓ Saved!</span>
+                    </button>
                   </div>
                 </div>
+              </div>
 
-                <!-- Quick Presets -->
-                <div class="flex items-center justify-between gap-1 pt-1">
-                  <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
-                  <div class="flex items-center gap-1">
-                    <button type="button" onclick="setSigPreset(32)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (32)</button>
-                    <button type="button" onclick="setSigPreset(44)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Med (44)</button>
-                    <button type="button" onclick="setSigPreset(56)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (56)</button>
-                    <button type="button" onclick="setSigPreset(72)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (72)</button>
-                  </div>
-                </div>
-
-                <!-- Fine Tuning Options: Independent Sizing & Vertical Nudge -->
-                <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
-                  <label class="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
-                    <input type="checkbox" id="certToggleSigIndependent" onchange="toggleSigSizeIndependent(this.checked)" class="rounded text-move-gold-500 focus:ring-0">
-                    <span>Tune Separately</span>
+              <!-- CA Body Paragraph Formula Editor (Dedicated Token-Based Template Editor) -->
+              <div id="caFormulaEditorCard" class="space-y-2.5 pt-3 border-t border-slate-800">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-code text-[11px]"></i> CA Body Paragraph Template
                   </label>
-                  <div class="flex items-center gap-1">
-                    <span class="text-slate-500">Nudge Line:</span>
-                    <button type="button" onclick="nudgeSigYOffset(-2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature higher above line">↑</button>
-                    <span id="lblSigYOffset" class="font-mono text-move-gold-400 text-[9px] w-6 text-center">0px</span>
-                    <button type="button" onclick="nudgeSigYOffset(2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature lower onto line">↓</button>
-                  </div>
+                  <span class="text-[9px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Custom Formula</span>
                 </div>
-              </div>
-            </div>
-          </div>
+                <p class="text-[10px] text-slate-400">
+                  Customize the official Certificate of Appearance paragraph. Click tokens below to insert dynamic fields:
+                </p>
 
-          <!-- Recipient Text Vertical Alignment Card -->
-          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
-                <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Recipient Text Position (Up / Down)
-              </label>
-              <div class="flex items-center gap-1">
-                <span id="lblRecipientYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
-                <button type="button" onclick="setRecipientYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset to Center">Reset</button>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="nudgeRecipientYOffset(-4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text higher">↑ Up</button>
-              <input type="range" id="certRecipientYOffsetSlider" min="-60" max="60" value="0" step="2"
-                oninput="onRecipientYOffsetChange(this.value)"
-                class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-              <button type="button" onclick="nudgeRecipientYOffset(4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text lower">↓ Down</button>
-            </div>
-            <p class="text-[10px] text-slate-500">Nudge the recipient name and seminar text up or down.</p>
-          </div>
-
-          <!-- Typography & Font Sizing Card -->
-          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                <i class="fa-solid fa-text-height text-move-gold-400"></i> Typography & Font Sizing
-              </h4>
-              <button type="button" onclick="resetFontSizes()" class="text-[9px] text-slate-500 hover:text-move-gold-400 font-bold" title="Reset font sizes to default">Reset</button>
-            </div>
-
-            <!-- Recipient Name Font Size -->
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs">
-                <label class="text-[10px] font-bold text-slate-300 uppercase">Participant Name Size</label>
-                <span id="lblNameFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">26px</span>
-              </div>
-              <input type="range" id="certNameFontSizeSlider" min="18" max="44" value="26" step="1"
-                oninput="onNameFontSizeChange(this.value)"
-                class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-              <div class="flex items-center justify-between gap-1 pt-0.5">
-                <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
-                <div class="flex items-center gap-1">
-                  <button type="button" onclick="setNameFontSize(22)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (22)</button>
-                  <button type="button" onclick="setNameFontSize(26)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Med (26)</button>
-                  <button type="button" onclick="setNameFontSize(32)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (32)</button>
-                  <button type="button" onclick="setNameFontSize(38)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (38)</button>
+                <!-- Dynamic Field Insertion Tokens -->
+                <div class="flex flex-wrap gap-1">
+                  <button type="button" onclick="insertCaToken('{title_prefix}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Title Prefix (MR. / MS.)">+{title_prefix}</button>
+                  <button type="button" onclick="insertCaToken('{full_name}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Employee Full Name">+{full_name}</button>
+                  <button type="button" onclick="insertCaToken('{position}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Position Title">+{position}</button>
+                  <button type="button" onclick="insertCaToken('{office}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Department / Office">+{office}</button>
+                  <button type="button" onclick="insertCaToken('{activity_title}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Activity Title">+{activity_title}</button>
+                  <button type="button" onclick="insertCaToken('{activity_theme}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Activity Theme">+{activity_theme}</button>
+                  <button type="button" onclick="insertCaToken('{activity_date}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Date">+{activity_date}</button>
+                  <button type="button" onclick="insertCaToken('{activity_venue}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Venue">+{activity_venue}</button>
+                  <button type="button" onclick="insertCaToken('{his/her}')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 hover:bg-emerald-950 text-emerald-300 hover:text-emerald-200 border border-slate-700 hover:border-emerald-500 transition" title="Insert Gender Pronoun (his/her)">+{his/her}</button>
                 </div>
-              </div>
-            </div>
 
-            <!-- Body / Citation Font Size -->
-            <div class="space-y-1 pt-2 border-t border-slate-800/60">
-              <div class="flex items-center justify-between text-xs">
-                <label class="text-[10px] font-bold text-slate-300 uppercase">Body &amp; Citation Text Size</label>
-                <span id="lblBodyFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">12px</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="adjustBodyFontSize(-0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease body text size">A-</button>
-                <input type="range" id="certBodyFontSizeSlider" min="8" max="26" value="12" step="0.5"
-                  oninput="onBodyFontSizeChange(this.value)"
-                  class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                <button type="button" onclick="adjustBodyFontSize(0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase body text size">A+</button>
-              </div>
-              <div class="flex items-center justify-between gap-1 pt-0.5">
-                <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
-                <div class="flex items-center gap-1">
-                  <button type="button" onclick="setBodyFontSizePreset(11)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (11)</button>
-                  <button type="button" onclick="setBodyFontSizePreset(12)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Normal (12)</button>
-                  <button type="button" onclick="setBodyFontSizePreset(14)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Medium (14)</button>
-                  <button type="button" onclick="setBodyFontSizePreset(16)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (16)</button>
-                  <button type="button" onclick="setBodyFontSizePreset(18)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (18)</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Certificate Title Font Size -->
-            <div class="space-y-1 pt-2 border-t border-slate-800/60">
-              <div class="flex items-center justify-between text-xs">
-                <label class="text-[10px] font-bold text-slate-300 uppercase">Certificate Title Size</label>
-                <span id="lblTitleFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">28px</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="adjustTitleFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease title size">A-</button>
-                <input type="range" id="certTitleFontSizeSlider" min="20" max="42" value="28" step="1"
-                  oninput="onTitleFontSizeChange(this.value)"
-                  class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                <button type="button" onclick="adjustTitleFontSize(1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase title size">A+</button>
-              </div>
-            </div>
-
-            <!-- Header Lines Font Size -->
-            <div class="space-y-1 pt-2 border-t border-slate-800/60">
-              <div class="flex items-center justify-between text-xs">
-                <label class="text-[10px] font-bold text-slate-300 uppercase">Header Lines Font Size</label>
-                <span id="lblHeaderFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">10px</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="adjustHeaderFontSize(-0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease header text size">A-</button>
-                <input type="range" id="certHeaderFontSizeSlider" min="8" max="18" value="10" step="0.5"
-                  oninput="onHeaderFontSizeChange(this.value)"
-                  class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                <button type="button" onclick="adjustHeaderFontSize(0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase header text size">A+</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Background Watermark Controls -->
-          <div class="space-y-3 pt-3 border-t border-slate-800">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-certificate text-move-gold-400"></i> Background Watermark
-              </h4>
-              <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
-                <input type="checkbox" id="certToggleWatermark" onchange="toggleWatermark(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
-                <span class="text-[11px] font-bold text-move-gold-400">Enable</span>
-              </label>
-            </div>
-
-            <div id="watermarkSettingsGroup" class="space-y-2.5 text-xs">
-              <div class="grid grid-cols-2 gap-2">
+                <!-- Template Textarea -->
                 <div>
-                  <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Watermark Seal</label>
-                  <select id="certWatermarkLogoSelect" onchange="onWatermarkLogoSelect(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
-                    <option value="/MOVE BAGUIO LOGO.png">MOVE Chapter Seal</option>
-                    <option value="/CITY HALL LOGO.png">City Hall Official Seal</option>
-                    <option value="/MEN IN THE KITCHEN 2 LOGO.png">Men in Kitchen 2 Logo</option>
-                    <option value="/breathe-baguio.png">Breathe Baguio Logo</option>
+                  <textarea id="certCaTemplateInput" rows="4" oninput="onCaTemplateFormulaInput(this.value)"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-100 font-mono leading-relaxed focus:outline-none focus:border-emerald-500 shadow-inner"
+                    placeholder="This is to certify that {title_prefix} {full_name}, {position} of {office}, was duly verified to have attended and participated in the activity entitled “{activity_title}: {activity_theme},” held on {activity_date}, at the {activity_venue}."></textarea>
+                </div>
+
+                <!-- Action Buttons: Save & Reset -->
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="saveCaTemplateFormula()" id="btnSaveCaTemplate"
+                    class="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-floppy-disk text-[11px]"></i>
+                    <span>Save CA Formula to Database</span>
+                    <span id="caTemplateSaveStatus" class="hidden font-mono text-[9px] ml-1">✓</span>
+                  </button>
+                  <button type="button" onclick="resetCaTemplateFormula()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs font-bold border border-slate-700 transition" title="Reset CA formula to official standard">
+                    Reset
+                  </button>
+                </div>
+
+                <!-- Live Evaluation Sample -->
+                <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 space-y-1">
+                  <span class="text-[9px] uppercase font-bold text-slate-500 block">Live Compiled Preview for Selected Recipient:</span>
+                  <div id="caFormulaLivePreview" class="text-[11px] text-slate-300 italic leading-relaxed">
+                    <!-- Evaluated dynamically via JS -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ACCORDION 2: Signatories & Seals -->
+          <div class="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleStudioAccordion('signatories')" class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800/80 transition flex items-center justify-between text-left text-xs font-bold text-white border-b border-slate-800/60">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-signature text-move-orange-400"></i>
+                <span>2. Signatories &amp; Seals</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-normal">Executive Titles &amp; E-Sigs</span>
+                <i id="acc-icon-signatories" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i>
+              </div>
+            </button>
+            <div id="acc-body-signatories" class="studio-accordion-body p-4 space-y-4">
+              
+              <!-- Choose Which Signatory & Layout Appears on Certificate -->
+              <div id="caSignatorySelectorWrapper" class="space-y-2 bg-slate-950/80 p-3 rounded-xl border border-move-gold-500/40 shadow-md">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-black text-move-gold-400 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-check text-[11px]"></i> 1. Choose Signatory Layout
+                  </label>
+                  <span class="text-[9px] font-mono text-emerald-400 font-bold">Active Template</span>
+                </div>
+                <select id="caSignatoryChoice" onchange="onCaSignatoryChoiceChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold focus:outline-none focus:border-move-gold-500">
+                  <option value="both">Dual Signatories: Signatory 1 (Left) &amp; Signatory 2 (Right)</option>
+                  <option value="sig1_center">Single Signatory: Signatory 1 Only (Centered)</option>
+                  <option value="sig1_right">Single Signatory: Signatory 1 Only (Right-Aligned)</option>
+                  <option value="sig2_center">Single Signatory: Signatory 2 Only (Centered)</option>
+                  <option value="sig2_right">Single Signatory: Signatory 2 Only (Right-Aligned)</option>
+                </select>
+
+                <!-- Choose What Elements Appear Inside the Signatory Block -->
+                <div class="pt-2 border-t border-slate-800/80 space-y-1.5">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase block">2. Details to Show on Signatory:</label>
+                  <div class="grid grid-cols-2 gap-1.5 text-[11px] text-slate-300">
+                    <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                      <input type="checkbox" id="chkShowSigName" onchange="toggleSigDetail('showSigName', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                      <span>Full Name</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                      <input type="checkbox" id="chkShowSigTitle" onchange="toggleSigDetail('showSigTitle', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                      <span>Position Title</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                      <input type="checkbox" id="chkShowSigOffice" onchange="toggleSigDetail('showSigOffice', this.checked)" class="rounded text-move-gold-500 focus:ring-0">
+                      <span>Office / Agency</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900/80 px-2 py-1 rounded border border-slate-800 hover:border-slate-700">
+                      <input type="checkbox" id="chkShowSigLine" onchange="toggleSigDetail('showSigLine', this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                      <span>Signature Line</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Signatory 1 Card -->
+              <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 1 (Left or Single)</label>
+                  <span id="sig1SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
+                  <select id="certSigSelect1" onchange="onSigSelect(1, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                    <!-- Populated via JS -->
                   </select>
                 </div>
                 <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Opacity</label>
-                    <span id="lblWatermarkOpacity" class="text-[10px] font-mono text-move-gold-400">12%</span>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
+                  <input type="text" id="certSig1NameInput" oninput="onSigNameInputChange(1, this.value)" placeholder="e.g. MARIO D. GANGA JR." class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
+                  <div class="flex items-center gap-1.5">
+                    <input type="text" id="certSig1TitleInput" oninput="onSigTitleInputChange(1, this.value)" placeholder="e.g. MOVE Baguio Chapter President" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
+                    <button type="button" onclick="saveSignatoryTitle(1)" id="btnSaveSig1Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 1 Name &amp; Title to SQLite database">
+                      <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                    </button>
                   </div>
-                  <input type="range" id="certWatermarkOpacity" min="4" max="30" value="12" oninput="onWatermarkOpacityChange(this.value)" class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg mt-2">
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
+                  <input type="text" id="certSig1OfficeInput" oninput="onSigOfficeInputChange(1, this.value)" placeholder="e.g. CMO - PDAO / Baguio City" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
                 </div>
               </div>
 
-              <!-- Watermark Vertical Position (Up / Down) -->
-              <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
+              <!-- Signatory 2 Card -->
+              <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 space-y-2">
                 <div class="flex items-center justify-between">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
-                    <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Watermark Position (Up / Down)
+                  <label class="text-[10px] font-bold text-move-gold-400 uppercase">Signatory 2 (Right or Single)</label>
+                  <span id="sig2SaveStatus" class="text-[9px] font-mono text-emerald-400 hidden">Saved</span>
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Select Person from List / Roster</label>
+                  <select id="certSigSelect2" onchange="onSigSelect(2, this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                    <!-- Populated via JS -->
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Printed Name</label>
+                  <input type="text" id="certSig2NameInput" oninput="onSigNameInputChange(2, this.value)" placeholder="e.g. HON. BENJAMIN B. MAGALONG" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-bold uppercase focus:outline-none focus:border-move-gold-500">
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Position / Role Title</label>
+                  <div class="flex items-center gap-1.5">
+                    <input type="text" id="certSig2TitleInput" oninput="onSigTitleInputChange(2, this.value)" placeholder="e.g. City Mayor &amp; Honorary Chapter Adviser" class="flex-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-move-gold-500">
+                    <button type="button" onclick="saveSignatoryTitle(2)" id="btnSaveSig2Title" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-move-gold-400 hover:text-white border border-slate-700 hover:border-move-gold-500 transition shadow-sm flex items-center gap-1" title="Save Signatory 2 Name &amp; Title to SQLite database">
+                      <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label class="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">Office / Department (Optional)</label>
+                  <input type="text" id="certSig2OfficeInput" oninput="onSigOfficeInputChange(2, this.value)" placeholder="e.g. City Government of Baguio" class="w-full px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-move-gold-500">
+                </div>
+              </div>
+
+              <!-- Digital Signature Image Display Mode -->
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Digital Signature Graphic</label>
+                <select id="certSigDisplayMode" onchange="onSigDisplayModeChange(this.value)" class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-medium focus:outline-none focus:border-move-gold-500">
+                  <option value="both">Show All Digital Signatures</option>
+                  <option value="sig2_only">Mayor's Signature Only</option>
+                  <option value="sig1_only">President's Signature Only</option>
+                  <option value="none">Blank Lines (For Manual Pen Signature)</option>
+                </select>
+              </div>
+
+              <!-- E-Signature Size & Display Controls -->
+              <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
+                <div class="flex items-center justify-between text-xs text-slate-300">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="certToggleSigImages" onchange="toggleSignatures(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                    <span class="text-xs font-bold text-white">Show E-Signatures</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="certToggleLogos" onchange="toggleLogos(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                    <span class="text-xs text-slate-400">Header Seals</span>
+                  </label>
+                </div>
+
+                <!-- Signature Size Adjustment Group -->
+                <div id="sigSizeControlsWrapper" class="space-y-2 pt-2 border-t border-slate-800/70">
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                      <i class="fa-solid fa-pen-nib text-move-gold-400"></i> E-Signature Size
+                    </label>
+                    <span id="lblSigSize" class="text-[11px] font-mono font-bold text-move-gold-400">44px</span>
+                  </div>
+
+                  <!-- Linked Master Slider (Controls All Signatures) -->
+                  <div id="sigLinkedSizeGroup">
+                    <input type="range" id="certSigSizeSlider" min="20" max="96" value="44" step="2"
+                      oninput="onSigSizeChange(this.value)"
+                      class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  </div>
+
+                  <!-- Independent Sliders (Optional Per-Signatory Tuning) -->
+                  <div id="sigIndependentSizeGroup" class="hidden space-y-2 pt-1 bg-slate-900/60 p-2 rounded-lg border border-slate-800/60">
+                    <div>
+                      <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                        <span>Signatory 1 (President):</span>
+                        <span id="lblSig1Size" class="font-mono text-move-gold-400 font-bold">44px</span>
+                      </div>
+                      <input type="range" id="certSig1SizeSlider" min="20" max="96" value="44" step="2"
+                        oninput="onSig1SizeChange(this.value)"
+                        class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    </div>
+                    <div>
+                      <div class="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
+                        <span>Signatory 2 (Mayor):</span>
+                        <span id="lblSig2Size" class="font-mono text-move-gold-400 font-bold">48px</span>
+                      </div>
+                      <input type="range" id="certSig2SizeSlider" min="20" max="96" value="48" step="2"
+                        oninput="onSig2SizeChange(this.value)"
+                        class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    </div>
+                  </div>
+
+                  <!-- Quick Presets -->
+                  <div class="flex items-center justify-between gap-1 pt-1">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
+                    <div class="flex items-center gap-1">
+                      <button type="button" onclick="setSigPreset(32)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (32)</button>
+                      <button type="button" onclick="setSigPreset(44)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Med (44)</button>
+                      <button type="button" onclick="setSigPreset(56)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (56)</button>
+                      <button type="button" onclick="setSigPreset(72)" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (72)</button>
+                    </div>
+                  </div>
+
+                  <!-- Fine Tuning Options: Independent Sizing & Vertical Nudge -->
+                  <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
+                    <label class="flex items-center gap-1.5 cursor-pointer text-slate-400 hover:text-slate-200">
+                      <input type="checkbox" id="certToggleSigIndependent" onchange="toggleSigSizeIndependent(this.checked)" class="rounded text-move-gold-500 focus:ring-0">
+                      <span>Tune Separately</span>
+                    </label>
+                    <div class="flex items-center gap-1">
+                      <span class="text-slate-500">Nudge Line:</span>
+                      <button type="button" onclick="nudgeSigYOffset(-2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature higher above line">↑</button>
+                      <span id="lblSigYOffset" class="font-mono text-move-gold-400 text-[9px] w-6 text-center">0px</span>
+                      <button type="button" onclick="nudgeSigYOffset(2)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700" title="Move signature lower onto line">↓</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ACCORDION 3: Typography & Layout -->
+          <div class="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleStudioAccordion('typography')" class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800/80 transition flex items-center justify-between text-left text-xs font-bold text-white border-b border-slate-800/60">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-text-height text-move-gold-400"></i>
+                <span>3. Typography &amp; Layout</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-normal">Header &amp; Font Sliders</span>
+                <i id="acc-icon-typography" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i>
+              </div>
+            </button>
+            <div id="acc-body-typography" class="studio-accordion-body p-4 space-y-4">
+              
+              <!-- Header Top Spacing Slider -->
+              <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Header Top Spacing (Up / Down)
                   </label>
                   <div class="flex items-center gap-1">
-                    <span id="lblWatermarkYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
-                    <button type="button" onclick="setWatermarkYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset Center">Reset</button>
+                    <span id="lblHeaderSpacing" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                    <button type="button" onclick="setHeaderSpacing(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset to Center">Reset</button>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark higher">↑ Up</button>
-                  <input type="range" id="certWatermarkYOffsetSlider" min="-120" max="120" value="0" step="2"
-                    oninput="onWatermarkYOffsetChange(this.value)"
+                  <button type="button" onclick="nudgeHeaderSpacing(-2)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move header higher">↑ Up</button>
+                  <input type="range" id="certHeaderSpacingSlider" min="-30" max="50" value="0" step="1"
+                    oninput="onHeaderSpacingChange(this.value)"
                     class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
-                  <button type="button" onclick="nudgeWatermarkYOffset(6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark lower">↓ Down</button>
+                  <button type="button" onclick="nudgeHeaderSpacing(2)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move header lower">↓ Down</button>
+                </div>
+                <p class="text-[10px] text-slate-500">Fine-tune the top spacing of Baguio seals and heading lines.</p>
+              </div>
+
+              <!-- Header Logo Distance Slider (Left & Right) -->
+              <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-left-right text-move-gold-400"></i> Logo Distance (Left / Right)
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <span id="lblLogoDistance" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                    <button type="button" onclick="setLogoDistance(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset distance">Reset</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="nudgeLogoDistance(-2)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move logos inward">← In</button>
+                  <input type="range" id="certLogoDistanceSlider" min="-20" max="60" value="0" step="2"
+                    oninput="onLogoDistanceChange(this.value)"
+                    class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  <button type="button" onclick="nudgeLogoDistance(2)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move logos outward">→ Out</button>
+                </div>
+                <p class="text-[10px] text-slate-500">Adjust the margin between the two official seals and the page edges.</p>
+              </div>
+
+              <!-- Recipient Text Vertical Alignment Card -->
+              <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Recipient Text Position (Up / Down)
+                  </label>
+                  <div class="flex items-center gap-1">
+                    <span id="lblRecipientYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                    <button type="button" onclick="setRecipientYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset to Center">Reset</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="nudgeRecipientYOffset(-4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text higher">↑ Up</button>
+                  <input type="range" id="certRecipientYOffsetSlider" min="-60" max="60" value="0" step="2"
+                    oninput="onRecipientYOffsetChange(this.value)"
+                    class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  <button type="button" onclick="nudgeRecipientYOffset(4)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move recipient text lower">↓ Down</button>
+                </div>
+                <p class="text-[10px] text-slate-500">Nudge the recipient name and seminar text up or down.</p>
+              </div>
+
+              <!-- Typography & Font Sizing Group -->
+              <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-text-height text-move-gold-400"></i> Typography &amp; Font Sizing
+                  </h4>
+                  <button type="button" onclick="resetFontSizes()" class="text-[9px] text-slate-500 hover:text-move-gold-400 font-bold" title="Reset font sizes to default">Reset</button>
+                </div>
+
+                <!-- Recipient Name Font Size -->
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-xs">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase">Participant Name Size</label>
+                    <span id="lblNameFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">26px</span>
+                  </div>
+                  <input type="range" id="certNameFontSizeSlider" min="18" max="44" value="26" step="1"
+                    oninput="onNameFontSizeChange(this.value)"
+                    class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                  <div class="flex items-center justify-between gap-1 pt-0.5">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
+                    <div class="flex items-center gap-1">
+                      <button type="button" onclick="setNameFontSize(22)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (22)</button>
+                      <button type="button" onclick="setNameFontSize(26)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Med (26)</button>
+                      <button type="button" onclick="setNameFontSize(32)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (32)</button>
+                      <button type="button" onclick="setNameFontSize(38)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (38)</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Body / Citation Font Size -->
+                <div class="space-y-1 pt-2 border-t border-slate-800/60">
+                  <div class="flex items-center justify-between text-xs">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase">Body &amp; Citation Text Size</label>
+                    <span id="lblBodyFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">12px</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustBodyFontSize(-0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease body text size">A-</button>
+                    <input type="range" id="certBodyFontSizeSlider" min="8" max="26" value="12" step="0.5"
+                      oninput="onBodyFontSizeChange(this.value)"
+                      class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <button type="button" onclick="adjustBodyFontSize(0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase body text size">A+</button>
+                  </div>
+                  <div class="flex items-center justify-between gap-1 pt-0.5">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold">Presets:</span>
+                    <div class="flex items-center gap-1">
+                      <button type="button" onclick="setBodyFontSizePreset(11)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Small (11)</button>
+                      <button type="button" onclick="setBodyFontSizePreset(12)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Normal (12)</button>
+                      <button type="button" onclick="setBodyFontSizePreset(14)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Medium (14)</button>
+                      <button type="button" onclick="setBodyFontSizePreset(16)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">Large (16)</button>
+                      <button type="button" onclick="setBodyFontSizePreset(18)" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-move-gold-500 transition">XL (18)</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Certificate Title Font Size -->
+                <div class="space-y-1 pt-2 border-t border-slate-800/60">
+                  <div class="flex items-center justify-between text-xs">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase">Certificate Title Size</label>
+                    <span id="lblTitleFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">28px</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustTitleFontSize(-1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease title size">A-</button>
+                    <input type="range" id="certTitleFontSizeSlider" min="20" max="42" value="28" step="1"
+                      oninput="onTitleFontSizeChange(this.value)"
+                      class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <button type="button" onclick="adjustTitleFontSize(1)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase title size">A+</button>
+                  </div>
+                </div>
+
+                <!-- Header Lines Font Size -->
+                <div class="space-y-1 pt-2 border-t border-slate-800/60">
+                  <div class="flex items-center justify-between text-xs">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase">Header Lines Font Size</label>
+                    <span id="lblHeaderFontSize" class="text-[11px] font-mono font-bold text-move-gold-400">10px</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="adjustHeaderFontSize(-0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Decrease header text size">A-</button>
+                    <input type="range" id="certHeaderFontSizeSlider" min="8" max="18" value="10" step="0.5"
+                      oninput="onHeaderFontSizeChange(this.value)"
+                      class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <button type="button" onclick="adjustHeaderFontSize(0.5)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Increase header text size">A+</button>
+                  </div>
                 </div>
               </div>
 
-              <!-- Watermark Size Slider -->
-              <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
-                    <i class="fa-solid fa-expand text-move-gold-400"></i> Watermark Size
-                  </label>
-                  <span id="lblWatermarkSize" class="text-[11px] font-mono font-bold text-move-gold-400">320px</span>
-                </div>
-                <input type="range" id="certWatermarkSizeSlider" min="180" max="480" value="320" step="10"
-                  oninput="onWatermarkSizeChange(this.value)"
-                  class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+            </div>
+          </div>
+
+          <!-- ACCORDION 4: Watermark & Background -->
+          <div class="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+            <button type="button" onclick="toggleStudioAccordion('watermark')" class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800/80 transition flex items-center justify-between text-left text-xs font-bold text-white border-b border-slate-800/60">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-certificate text-move-gold-400"></i>
+                <span>4. Background Watermark</span>
               </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400 font-normal">Official Seals &amp; Opacity</span>
+                <i id="acc-icon-watermark" class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform"></i>
+              </div>
+            </button>
+            <div id="acc-body-watermark" class="studio-accordion-body p-4 space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <i class="fa-solid fa-certificate text-move-gold-400"></i> Background Watermark
+                </h4>
+                <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-300">
+                  <input type="checkbox" id="certToggleWatermark" onchange="toggleWatermark(this.checked)" checked class="rounded text-move-gold-500 focus:ring-0">
+                  <span class="text-[11px] font-bold text-move-gold-400">Enable</span>
+                </label>
+              </div>
+
+              <div id="watermarkSettingsGroup" class="space-y-2.5 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Watermark Seal</label>
+                    <select id="certWatermarkLogoSelect" onchange="onWatermarkLogoSelect(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-move-gold-500">
+                      <option value="/MOVE BAGUIO LOGO.png">MOVE Chapter Seal</option>
+                      <option value="/CITY HALL LOGO.png">City Hall Official Seal</option>
+                      <option value="/MEN IN THE KITCHEN 2 LOGO.png">Men in Kitchen 2 Logo</option>
+                      <option value="/breathe-baguio.png">Breathe Baguio Logo</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="text-[10px] font-bold text-slate-400 uppercase">Opacity</label>
+                      <span id="lblWatermarkOpacity" class="text-[10px] font-mono text-move-gold-400">12%</span>
+                    </div>
+                    <input type="range" id="certWatermarkOpacity" min="4" max="30" value="12" oninput="onWatermarkOpacityChange(this.value)" class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg mt-2">
+                  </div>
+                </div>
+
+                <!-- Watermark Vertical Position (Up / Down) -->
+                <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
+                      <i class="fa-solid fa-arrows-up-down text-move-gold-400"></i> Watermark Position (Up / Down)
+                    </label>
+                    <div class="flex items-center gap-1">
+                      <span id="lblWatermarkYOffset" class="text-[11px] font-mono font-bold text-move-gold-400 w-12 text-right">0px</span>
+                      <button type="button" onclick="setWatermarkYOffset(0)" class="text-[9px] text-slate-500 hover:text-move-gold-400 ml-1" title="Reset Center">Reset</button>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="nudgeWatermarkYOffset(-6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark higher">↑ Up</button>
+                    <input type="range" id="certWatermarkYOffsetSlider" min="-120" max="120" value="0" step="2"
+                      oninput="onWatermarkYOffsetChange(this.value)"
+                      class="flex-1 accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                    <button type="button" onclick="nudgeWatermarkYOffset(6)" class="px-2 py-0.5 rounded bg-slate-900 text-slate-300 hover:text-white border border-slate-800 text-[10px] font-bold" title="Move watermark lower">↓ Down</button>
+                  </div>
+                </div>
+
+                <!-- Watermark Size Slider -->
+                <div class="pt-2 border-t border-slate-800/60 space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1">
+                      <i class="fa-solid fa-expand text-move-gold-400"></i> Watermark Size
+                    </label>
+                    <span id="lblWatermarkSize" class="text-[11px] font-mono font-bold text-move-gold-400">320px</span>
+                  </div>
+                  <input type="range" id="certWatermarkSizeSlider" min="180" max="480" value="320" step="10"
+                    oninput="onWatermarkSizeChange(this.value)"
+                    class="w-full accent-move-gold-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg">
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
 
         <!-- Right Column: Live Certificate Canvas Stage -->
-        <div class="lg:col-span-8 flex flex-col items-center">
+        <div id="studioCanvasArea" class="lg:col-span-8 flex flex-col items-center">
 
           <!-- Certificate of Appearance (A5 Landscape on A4) Single / Dual Mode Toolbar -->
           <div id="caPrintModeToolbar" class="hidden w-full max-w-[850px] mb-3 bg-slate-900/95 border border-emerald-500/40 rounded-2xl p-3 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -1202,7 +1383,10 @@
             </div>
           </div>
 
-          <!-- Top Half Label when in CA Dual Mode -->
+                    <!-- Canvas Viewport Wrapper (Handles Smooth CSS Scale Zoom without browser zoom) -->
+          <div class="cert-viewport-container w-full max-w-[850px] overflow-hidden flex flex-col items-center">
+            <div id="certViewportStage" class="cert-viewport-stage w-full flex flex-col items-center">
+              <!-- Top Half Label when in CA Dual Mode -->
           <div id="caTopSlipBadge" class="hidden w-full max-w-[850px] flex items-center justify-between text-[10px] font-mono font-bold text-emerald-400 uppercase mb-1 px-1">
             <span><i class="fa-solid fa-arrow-up-Wide-short mr-1"></i> Top Half of A4 Sheet — A5 Landscape (210mm × 148.5mm)</span>
             <span id="caTopSlipRecipientLabel">Slip #1</span>
@@ -1231,6 +1415,8 @@
 
             <div id="certStageCanvasBottom" class="cert-canvas-container w-full max-w-[850px] aspect-[1.414/1] bg-white text-slate-900 rounded-sm shadow-2xl overflow-hidden relative p-8 sm:p-12 flex flex-col justify-between border-4 border-slate-300 transition-all opacity-95">
               <!-- Populated automatically in Dual Mode -->
+            </div>
+          </div>
             </div>
           </div>
 
@@ -1331,94 +1517,329 @@
     </div>
   </div>
 
-  <!-- MODAL: Edit MOVE Member -->
-  <div id="modalEditMember" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-user-pen text-move-orange-400"></i> Edit MOVE Member
-          </h3>
-          <p class="text-[11px] text-slate-400">Update personnel name, MOVE role, government position title, and office.</p>
+
+
+  <!-- MODAL: Edit MOVE Member (Modern Studio Profile View) -->
+  <div id="modalEditMember" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-[#0b1320]/95 border border-slate-700/80 rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl space-y-4 max-h-[92vh] flex flex-col overflow-y-auto text-slate-100">
+      
+      <!-- Modal Top Navigation Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 flex items-center justify-center shadow-inner">
+            <i class="fa-solid fa-user-pen text-sm"></i>
+          </span>
+          <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">Edit Member Profile</h3>
         </div>
-        <button onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white">
+        <button type="button" onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition" title="Close">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <form id="formEditMember" onsubmit="submitEditMember(event)" class="space-y-3">
+      <!-- Member Profile Hero Banner Card -->
+      <div class="bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-950/90 border border-slate-800/90 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
+        <div class="flex items-center gap-3.5">
+          <div class="relative w-14 h-14 rounded-full overflow-hidden shrink-0 ring-2 ring-move-orange-500/50 shadow-lg bg-slate-950 flex items-center justify-center">
+            <img id="editHeroPhoto" src="" alt="Profile Photo" class="w-full h-full object-cover hidden"
+              onload="this.classList.remove('hidden'); document.getElementById('editHeroAvatarFallback').classList.add('hidden')"
+              onerror="this.classList.add('hidden'); document.getElementById('editHeroAvatarFallback').classList.remove('hidden')">
+            <div id="editHeroAvatarFallback" class="w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-base">
+              DS
+            </div>
+          </div>
+          <div>
+            <div id="editHeroName" class="text-base sm:text-lg font-black text-white tracking-wide uppercase leading-tight">DEXTER SEE</div>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+              <span id="editHeroStatusPill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="editHeroStatusText">Active Member</span>
+              </span>
+              <span id="editHeroHrisTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                HRIS Synced
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-start sm:self-center">
+          <div id="editHeroIdBadge" class="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-black shadow-inner tracking-wider">
+            ID: #001
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Form Section -->
+      <form id="formEditMember" onsubmit="submitEditMember(event)" class="space-y-4">
         <input type="hidden" id="editMemberId">
 
-        <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Full Name (SURNAME, FIRSTNAME M.I.) *</label>
-          <input type="text" id="editMemberName" required placeholder="e.g. DELA CRUZ, JUAN A." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 uppercase font-semibold">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          
+          <!-- LEFT COLUMN (Personal Info, Chapter Role, Government Details) -->
+          <div class="lg:col-span-8 space-y-4 flex flex-col justify-between">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <!-- CARD 1: Personal Info -->
+              <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-regular fa-address-card text-move-orange-400"></i>
+                  <span>Personal Info</span>
+                </h4>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Full Name</label>
+                  <div class="relative">
+                    <i class="fa-regular fa-user absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <input type="text" id="editMemberName" required placeholder="SURNAME, FIRSTNAME M.I." oninput="syncEditHeroName(this.value)"
+                      class="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950/90 border border-move-orange-500/80 ring-1 ring-move-orange-500/40 text-xs text-white uppercase font-bold focus:outline-none focus:border-move-orange-400 focus:ring-2 focus:ring-move-orange-400/50 shadow-inner">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Civil Status</label>
+                  <div class="relative">
+                    <select id="editMemberCivil" class="w-full pl-3 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white appearance-none focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                      <option value="Married">Married</option>
+                      <option value="Single">Single</option>
+                      <option value="Widowed">Widowed</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-slate-500 text-[10px] pointer-events-none"></i>
+                  </div>
+                </div>
+
+                <!-- Compact Sex & Contact No. -->
+                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/60">
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Sex</label>
+                    <select id="editMemberGender" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-move-orange-500">
+                      <option value="M">Male (M)</option>
+                      <option value="F">Female (F)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Contact No.</label>
+                    <input type="text" id="editMemberContact" placeholder="0917..." class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-move-orange-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: Chapter Role (MOVE) -->
+              <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                  <span>Chapter Role (MOVE)</span>
+                </h4>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Committee Role</label>
+                  <div class="relative">
+                    <i class="fa-solid fa-trophy absolute left-3 top-2.5 text-amber-400 text-xs"></i>
+                    <input type="text" id="editMemberRole" list="listMoveRoles" required placeholder="e.g. Chair, Committee on..." 
+                      class="w-full pl-8 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-slate-500 text-[10px] pointer-events-none"></i>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Role Status</label>
+                  <div class="flex items-center gap-2 pt-0.5">
+                    <button type="button" id="btnEditPillActive" onclick="toggleRoleStatusPill('active')" 
+                      class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
+                      Active
+                    </button>
+                    <button type="button" id="btnEditPillOfficer" onclick="toggleRoleStatusPill('officer')" 
+                      class="px-3 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">
+                      Officer
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Notes / Remarks -->
+                <div class="pt-1 border-t border-slate-800/60">
+                  <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Remarks / Survey Address</label>
+                  <input type="text" id="editMemberNotes" placeholder="e.g. Baguio City" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 focus:outline-none focus:border-move-orange-500">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- CARD 3: Government Details -->
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-3">
+              <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-building-columns text-emerald-400"></i>
+                <span>Government Details</span>
+              </h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Government Position</label>
+                  <div class="relative">
+                    <i class="fa-solid fa-briefcase absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <input type="text" id="editMemberPosition" required placeholder="e.g. Administrative Officer IV" 
+                      class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                    <span id="editPosVerifiedCheck" class="absolute right-2.5 top-2.5 text-emerald-400 text-xs" title="Official Government Title">
+                      <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 block mb-1">Office / Department</label>
+                  <div class="relative">
+                    <input type="text" id="editMemberOffice" list="listMoveOffices" required placeholder="e.g. City Mayor's Office (CMO)" 
+                      class="w-full px-3 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-slate-500 text-[10px] pointer-events-none"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: Activity History & Status Toggles -->
+          <div class="lg:col-span-4 bg-slate-900/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between space-y-4">
+            
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center justify-between">
+                <span>Activity History</span>
+                <span class="text-[10px] text-slate-500 font-mono">MOVE Log</span>
+              </h4>
+
+              <!-- Timeline -->
+              <div class="space-y-3 py-1">
+                <div class="flex items-start gap-2.5">
+                  <div class="relative flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500 ring-4 ring-amber-500/20"></div>
+                    <div class="w-0.5 h-6 bg-slate-800 my-0.5"></div>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-bold text-white" id="editTimelineAddedText">Added on Roster</div>
+                    <div class="text-[10px] text-slate-500" id="editTimelineAddedSub">Official MOVE Member</div>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2.5">
+                  <div class="relative flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full bg-sky-500 ring-4 ring-sky-500/20"></div>
+                    <div class="w-0.5 h-6 bg-slate-800 my-0.5"></div>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-bold text-white">HRIS Biometrics Linked</div>
+                    <div class="text-[10px] text-slate-500" id="editTimelineHrisText">ID #4451 &bull; Active</div>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2.5">
+                  <div class="relative flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
+                  </div>
+                  <div>
+                    <div class="text-[11px] font-bold text-white">HRIS Synced</div>
+                    <div class="text-[10px] text-emerald-400 font-medium" id="editTimelineSyncText">Verified in Database</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- The 4 Modern Toggle Switches (Directly matching screenshot) -->
+            <div class="pt-3 border-t border-slate-800/80 space-y-2.5">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Chapter Status Privileges</span>
+
+              <!-- Toggle 1: Executive Officer -->
+              <label class="flex items-center justify-between cursor-pointer group select-none">
+                <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition">Executive Officer</span>
+                <div class="relative inline-flex items-center">
+                  <input type="checkbox" id="editToggleOfficer" onchange="syncEditToggleWithPills()" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-move-orange-500 border border-slate-700 shadow-inner"></div>
+                </div>
+              </label>
+
+              <!-- Toggle 2: Voting Rights (Member) -->
+              <label class="flex items-center justify-between cursor-pointer group select-none">
+                <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition">Voting Rights</span>
+                <div class="relative inline-flex items-center">
+                  <input type="checkbox" id="editToggleMember" onchange="syncEditToggleWithPills()" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 border border-slate-700 shadow-inner"></div>
+                </div>
+              </label>
+
+              <!-- Toggle 3: Member Committees -->
+              <label class="flex items-center justify-between cursor-pointer group select-none">
+                <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition">Member Committees</span>
+                <div class="relative inline-flex items-center">
+                  <input type="checkbox" id="editToggleCommittee" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500 border border-slate-700 shadow-inner"></div>
+                </div>
+              </label>
+
+              <!-- Toggle 4: Participant / Seminar Attendee -->
+              <label class="flex items-center justify-between cursor-pointer group select-none">
+                <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition">Participant Status</span>
+                <div class="relative inline-flex items-center">
+                  <input type="checkbox" id="editToggleParticipant" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500 border border-slate-700 shadow-inner"></div>
+                </div>
+              </label>
+            </div>
+
+          </div>
+
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">MOVE Position Title *</label>
-            <input type="text" id="editMemberRole" list="listMoveRoles" required placeholder="e.g. Member (Cadre)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 font-medium">
-            <datalist id="listMoveRoles">
-              <option value="Member (Cadre)"></option>
-              <option value="President"></option>
-              <option value="Vice President"></option>
-              <option value="Secretary"></option>
-              <option value="Treasurer"></option>
-              <option value="Assistant Treasurer"></option>
-              <option value="Auditor"></option>
-              <option value="Public Relations Officer"></option>
-              <option value="Committee Chairperson"></option>
-              <option value="Committee Member"></option>
-            </datalist>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Office Position Title *</label>
-            <input type="text" id="editMemberPosition" required placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 font-medium">
-          </div>
-        </div>
+        <!-- Role Options & Offices Datalists -->
+        <datalist id="listMoveRoles">
+          <option value="Member (Cadre)"></option>
+          <option value="President"></option>
+          <option value="Vice President"></option>
+          <option value="Secretary"></option>
+          <option value="Treasurer"></option>
+          <option value="Assistant Treasurer"></option>
+          <option value="Auditor"></option>
+          <option value="Public Relations Officer"></option>
+          <option value="Committee Chairperson"></option>
+          <option value="Committee Member"></option>
+          <option value="Chair, Committee on Information &amp; Advocacy"></option>
+        </datalist>
 
-        <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department / Agency *</label>
-          <input type="text" id="editMemberOffice" required placeholder="e.g. City Assessor's Office (CASSO)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
-        </div>
+        <datalist id="listMoveOffices">
+          <option value="City Mayor's Office (CMO)"></option>
+          <option value="City Environment and Parks Management Office (CEPMO)"></option>
+          <option value="City Planning, Development and Sustainability Office (CPDSO)"></option>
+          <option value="City Assessors Office (CASSO)"></option>
+          <option value="City Treasury Office (CTO)"></option>
+          <option value="City Administrator's Office (CADMO)"></option>
+          <option value="City Buildings and Architecture Office (CBAO)"></option>
+          <option value="City Engineering Office (CEO)"></option>
+          <option value="City Health Services Office (CHSO)"></option>
+          <option value="City Accounting Office (ACCTG)"></option>
+          <option value="City Budget Office (CBO)"></option>
+          <option value="City Veterinary and Agriculture Office (CVAO)"></option>
+          <option value="General Services Office (GSO)"></option>
+          <option value="Sangguniang Panlungsod (SP)"></option>
+          <option value="City Legal Office (LEGAL)"></option>
+          <option value="City Social Welfare and Development Office (OCSWDO)"></option>
+          <option value="City Civil Registry (LCR)"></option>
+          <option value="City Disaster Risk Reduction Management Office (CDRRMO)"></option>
+          <option value="City Human Resource Management Office (CHRMO)"></option>
+          <option value="Tourism, Culture and Arts Office (TOURISM)"></option>
+        </datalist>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Gender / Sex</label>
-            <select id="editMemberGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
-              <option value="M">Male (M)</option>
-              <option value="F">Female (F)</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="editMemberCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
-              <option value="Married">Married</option>
-              <option value="Single">Single</option>
-              <option value="Widowed">Widowed</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
-            <input type="text" id="editMemberContact" placeholder="e.g. 0917-123-4567" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Remarks</label>
-            <input type="text" id="editMemberNotes" placeholder="e.g. Executive Committee" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
-          </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalEditMember')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <!-- MODAL FOOTER: Cancel on Left, Update Profile & Sync with HRIS on Right -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeModal('modalEditMember')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitEditMember" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-black shadow transition flex items-center gap-1.5">
-            <i class="fa-solid fa-floppy-disk"></i> Save Member Details
-          </button>
+
+          <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            <button type="submit" id="btnSubmitEditMember" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-move-orange-500 to-amber-500 hover:from-move-orange-600 hover:to-amber-600 text-white text-xs font-black shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition flex items-center justify-center gap-2">
+              <span>Update Profile</span>
+            </button>
+            <button type="button" id="btnEditSyncHris" onclick="syncCurrentEditWithHris()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 transition flex items-center gap-2 shadow-sm">
+              <i class="fa-solid fa-scale-balanced text-teal-400"></i>
+              <span>Sync with HRIS</span>
+            </button>
+          </div>
         </div>
+
       </form>
     </div>
   </div>
@@ -2096,10 +2517,174 @@
     </div>
   </div>
 
+  <!-- MODAL: Compare Personnel with HRIS API -->
+  <div id="modalHrisCompare" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-6xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] flex flex-col text-slate-200">
+      
+      <!-- Modal Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center shadow-inner">
+              <i class="fa-solid fa-scale-balanced text-sm"></i>
+            </span>
+            <div>
+              <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                <span>Compare Personnel with City HRIS API</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Source of Truth</span>
+                </span>
+              </h3>
+              <p class="text-[11px] text-slate-400">
+                Live reconciliation against official City Government HRIS records (Host: <code class="text-blue-300 font-mono">192.168.3.43:5000</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-center">
+          <button type="button" onclick="reScanHrisCompare()" id="btnRescanHris" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Refresh records from HRIS API">
+            <i class="fa-solid fa-arrows-rotate text-blue-400"></i>
+            <span>Re-scan HRIS</span>
+          </button>
+          <button type="button" onclick="closeHrisCompareModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Metrics Filter Ribbon (5 Clickable Filter Pills) -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+        <!-- Tab: Differences -->
+        <button type="button" onclick="filterHrisCompareTab('differences')" id="tabHris-differences" class="hris-tab-btn px-3 py-2 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold flex flex-col items-start transition hover:border-amber-400">
+          <span class="text-[10px] text-amber-400/80 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-triangle-exclamation"></i> Differences
+          </span>
+          <span id="metricHrisDiff" class="text-lg font-black text-white">0</span>
+        </button>
+
+        <!-- Tab: In Sync -->
+        <button type="button" onclick="filterHrisCompareTab('in_sync')" id="tabHris-in_sync" class="hris-tab-btn px-3 py-2 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 font-semibold flex flex-col items-start transition hover:border-slate-700">
+          <span class="text-[10px] text-emerald-400/80 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-circle-check"></i> In Sync
+          </span>
+          <span id="metricHrisInSync" class="text-lg font-black text-white">0</span>
+        </button>
+
+        <!-- Tab: Non-Active Status Alerts -->
+        <button type="button" onclick="filterHrisCompareTab('inactive')" id="tabHris-inactive" class="hris-tab-btn px-3 py-2 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 font-semibold flex flex-col items-start transition hover:border-slate-700">
+          <span class="text-[10px] text-rose-400/80 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-user-xmark"></i> Status Alerts
+          </span>
+          <span id="metricHrisInactive" class="text-lg font-black text-white">0</span>
+        </button>
+
+        <!-- Tab: Not Found in HRIS -->
+        <button type="button" onclick="filterHrisCompareTab('not_found')" id="tabHris-not_found" class="hris-tab-btn px-3 py-2 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 font-semibold flex flex-col items-start transition hover:border-slate-700">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-question-circle"></i> Not in HRIS
+          </span>
+          <span id="metricHrisNotFound" class="text-lg font-black text-white">0</span>
+        </button>
+
+        <!-- Tab: All Personnel -->
+        <button type="button" onclick="filterHrisCompareTab('all')" id="tabHris-all" class="hris-tab-btn px-3 py-2 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 font-semibold flex flex-col items-start transition hover:border-slate-700">
+          <span class="text-[10px] text-blue-400/80 uppercase font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-users"></i> All Personnel
+          </span>
+          <span id="metricHrisTotal" class="text-lg font-black text-white">0</span>
+        </button>
+      </div>
+
+      <!-- Search & Selection Action Strip -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-slate-950/60 p-2.5 rounded-2xl border border-slate-800 text-xs">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+          <input type="text" id="hrisCompareSearchInput" oninput="onHrisCompareSearch(this.value)" placeholder="Filter compared list by name, position, or office..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="selectAllHrisOutdated(true)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-[11px] border border-slate-700 transition flex items-center gap-1">
+            <i class="fa-regular fa-square-check text-amber-400"></i>
+            <span>Select All Outdated</span>
+          </button>
+          <button type="button" onclick="selectAllHrisOutdated(false)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-medium text-[11px] border border-slate-700 transition">
+            <span>Deselect All</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Comparison Diff Table -->
+      <div class="flex-1 overflow-y-auto border border-slate-800 rounded-2xl bg-slate-950/80 shadow-inner">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 z-10 border-b border-slate-800 shadow-sm">
+            <tr>
+              <th class="py-2.5 px-3 w-10 text-center">
+                <input type="checkbox" id="chkHrisSelectAll" onchange="toggleHrisSelectAll(this.checked)" class="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-0">
+              </th>
+              <th class="py-2.5 px-2 w-10 text-slate-500 font-mono text-center">#</th>
+              <th class="py-2.5 px-3 w-56 whitespace-nowrap">Personnel Name</th>
+              <th class="py-2.5 px-3 min-w-[220px]">Current in MOVE</th>
+              <th class="py-2.5 px-3 min-w-[260px]">Official in HRIS API</th>
+              <th class="py-2.5 px-3 w-40 text-center whitespace-nowrap">Status Diff</th>
+              <th class="py-2.5 px-3 text-right w-28 whitespace-nowrap">Action</th>
+            </tr>
+          </thead>
+          <tbody id="hrisCompareTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Batch Actions & Sync Footer -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-800 text-xs">
+        <!-- Left: Selected Count & Field Checkboxes -->
+        <div class="flex flex-wrap items-center gap-4">
+          <div class="text-slate-300 font-bold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            <span>Selected:</span>
+            <span id="lblHrisSelectedCount" class="font-mono text-white text-sm font-black bg-blue-500/20 px-2 py-0.5 rounded-lg border border-blue-500/30">0</span>
+            <span class="text-slate-400 font-normal">personnel</span>
+          </div>
+
+          <div class="flex items-center gap-3 text-slate-300 text-[11px] font-semibold bg-slate-950/60 px-3 py-1.5 rounded-xl border border-slate-800">
+            <span class="text-slate-500 text-[10px] uppercase font-bold">Fields to Sync:</span>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-white">
+              <input type="checkbox" id="chkHrisSyncPosition" checked class="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-0">
+              <span>Position Title</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer hover:text-white">
+              <input type="checkbox" id="chkHrisSyncOffice" checked class="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-0">
+              <span>Office / Dept</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-2 justify-end">
+          <button type="button" onclick="closeHrisCompareModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">
+            Close
+          </button>
+          <button type="button" onclick="syncSelectedHrisMembers()" id="btnHrisUpdateSelected" disabled class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 text-white text-xs font-black shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Update Selected (<span id="btnHrisSelectedCountText">0</span>)</span>
+          </button>
+          <button type="button" onclick="syncAllOutdatedHrisMembers()" id="btnHrisUpdateAll" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-move-orange-500 hover:from-amber-600 hover:to-move-orange-600 text-slate-950 text-xs font-black shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-bolt-lightning"></i>
+            <span>Update All Outdated (<span id="btnHrisAllOutdatedCountText">0</span>)</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
   <!-- HIDDEN PRINT CONTAINER (For high-resolution single & batch A4 printing) -->
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261030-0800"></script>
+  <script src="/frontend/js/app.js?v=20261030-1442"></script>
 </body>
 </html>

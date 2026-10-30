@@ -46,9 +46,18 @@ def init_db():
         is_officer INTEGER DEFAULT 0,
         is_committee INTEGER DEFAULT 0,
         is_participant INTEGER DEFAULT 0,
-        notes TEXT
+        notes TEXT,
+        hris_id INTEGER,
+        hris_status TEXT DEFAULT 'ACTIVE'
     );
     """)
+
+    cursor.execute("PRAGMA table_info(move_roster)")
+    mr_cols = [r["name"] for r in cursor.fetchall()]
+    if "hris_id" not in mr_cols:
+        cursor.execute("ALTER TABLE move_roster ADD COLUMN hris_id INTEGER")
+    if "hris_status" not in mr_cols:
+        cursor.execute("ALTER TABLE move_roster ADD COLUMN hris_status TEXT DEFAULT 'ACTIVE'")
 
     # 3. Activities / Seminars table
     cursor.execute("""

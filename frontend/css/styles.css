@@ -4,8 +4,8 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #0b1329;
-  color: #1e293b;
+  background-color: #060d1a;
+  color: #f1f5f9;
 }
 
 .font-cinzel {
@@ -14,6 +14,167 @@ body {
 
 .font-playfair {
   font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Custom System-Wide Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09152b;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #09152b;
+}
+
+/* Dedicated Scrollbar for Roster Table */
+.roster-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.roster-scroll-container::-webkit-scrollbar-track {
+  background: #060d1a;
+  border-radius: 9999px;
+}
+.roster-scroll-container::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+  border: 2px solid #060d1a;
+}
+.roster-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* Active Navigation Glow */
+.nav-tab-active {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px 0 rgba(249, 115, 22, 0.39) !important;
+}
+
+/* Studio Canvas Viewport & Scaling Stage */
+.cert-viewport-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0.5rem 0;
+  min-height: 400px;
+}
+
+.cert-viewport-stage {
+  transform-origin: top center;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Studio Accordion Transitions */
+.studio-accordion-body {
+  transition: max-height 0.25s ease-out, opacity 0.2s ease-out;
+  overflow: hidden;
+}
+
+.studio-accordion-body.collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: none;
+}
+
+/* Floating Toast Notifications */
+#toastContainer {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100% - 2.5rem);
+}
+
+.app-toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  animation: toastSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.app-toast-item.toast-leave {
+  opacity: 0;
+  transform: translateX(20px) scale(0.9);
+}
+
+.toast-success {
+  background: rgba(6, 78, 59, 0.92);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #ecfdf5;
+}
+
+.toast-error {
+  background: rgba(136, 19, 55, 0.92);
+  border: 1px solid rgba(244, 63, 94, 0.5);
+  color: #fff1f2;
+}
+
+.toast-warning {
+  background: rgba(120, 53, 15, 0.92);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fffbeb;
+}
+
+.toast-info {
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #f8fafc;
+}
+
+/* Micro-switch buttons for Roster Table */
+.micro-switch {
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 /* Certificate Canvas Shadow & Styling */

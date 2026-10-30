@@ -20,6 +20,17 @@ const appState = {
   rosterPage: 1,
   rosterPageSize: 10,
 
+  // HRIS Comparison State
+  hrisCompare: {
+    loaded: false,
+    metrics: {},
+    data: [],
+    activeTab: 'differences',
+    search: '',
+    selectedIds: new Set(),
+    diffMapByMemberId: {}
+  },
+
   // Activities State
   activities: [],
   currentActivity: null,
@@ -52,6 +63,10 @@ const appState = {
   watermarkSize: 320,
   watermarkYOffset: 0,
   recipientYOffset: 0,
+  headerSpacing: 0,
+  logoDistance: 0,
+  certZoom: 100,
+  isFocusMode: false,
   nameFontSize: 26,
   bodyFontSize: 12,
   titleFontSize: 28,
@@ -67,7 +82,10 @@ const appState = {
     appearance_title: 'CERTIFICATE OF APPEARANCE',
     appearance_intro: 'This is to certify that',
     participation_citation: 'for {his/her} active participation and completion of the capacity-building seminar entitled',
-    appearance_citation: 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in'
+    appearance_citation: 'was duly verified to have rendered invaluable service as Resource Speaker / Facilitator in',
+    ca_template_formula: 'This is to certify that {title_prefix} {full_name}, {position} of {office}, was duly verified to have attended and participated in the activity entitled “{activity_title}: {activity_theme},” held on {activity_date}, at the {activity_venue}.',
+    header_spacing: 0,
+    logo_distance: 0
   },
   caSignatoryChoice: 'sig2_right',
   templateSigLayout: {
@@ -146,7 +164,7 @@ function switchView(viewName) {
     if (tab) {
       const isActive = (v === viewName) || (viewName === 'attendance' && v === 'activities');
       if (isActive) {
-        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow";
+        tab.className = "nav-tab-active px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow";
       } else {
         tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
       }
@@ -156,7 +174,12 @@ function switchView(viewName) {
   if (viewName === 'roster') loadRoster();
   if (viewName === 'activities') loadActivities();
   if (viewName === 'attendance') loadAttendance(appState.currentActivityId);
-  if (viewName === 'studio') loadEligibleCertificates(appState.currentActivityId);
+  if (viewName === 'studio') {
+    loadEligibleCertificates(appState.currentActivityId);
+    setTimeout(() => {
+      autoFitStudioCanvas();
+    }, 120);
+  }
 }
 
 // ==========================================================================
@@ -171,6 +194,9 @@ async function loadRoster() {
       appState.roster = data.roster;
       renderRosterTable();
       updateRosterCounts();
+      if (!appState.hrisCompare.loaded) {
+        fetchHrisBackgroundAudit();
+      }
     }
   } catch (err) {
     console.error("Failed to load MOVE roster:", err);
@@ -244,169 +270,209 @@ function onRosterSearch(val) {
   loadRoster();
 }
 
+// ============================================================================
+// Baguio City Office Code & Full Name Directory
+// ============================================================================
+const BAGUIO_OFFICE_MAP = {
+  "ACCTG": "City Accounting Office",
+  "BAC": "Procurement Support Services Unit",
+  "BARANGAY": "Liga ng mga Barangay",
+  "BUDGET": "City Budget Office",
+  "CBO": "City Budget Office",
+  "CADMO": "City Administrator's Office",
+  "CASSO": "City Assessors Office",
+  "CBAO": "City Buildings and Architecture Office",
+  "CDRRMO": "City Disaster Risk Reduction Management Office",
+  "CEO": "City Engineering Office",
+  "CEPMO": "City Environment and Parks Management Office",
+  "CHRMO": "City Human Resource Management Office",
+  "CMO": "City Mayor's Office",
+  "COA": "City Auditor's Office",
+  "CTO": "City Treasury Office",
+  "DEPED": "Department of Education",
+  "GSO": "General Services Office",
+  "HSO": "Health Services Office",
+  "CHSO": "City Health Services Office",
+  "LCR": "City Civil Registry",
+  "LEGAL": "City Legal Office",
+  "MAHARLIKA": "Maharlika Livelihood Center",
+  "MTCC": "Municipal Trial Court in Cities",
+  "OCSWDO": "City Social Welfare and Development Office",
+  "CSWDO": "City Social Welfare and Development Office",
+  "PLANNING": "City Planning, Development and Sustainability Office",
+  "CPDSO": "City Planning, Development and Sustainability Office",
+  "PROSEC": "City Prosecutor's Office",
+  "RD": "Registry of Deeds",
+  "RTC": "Regional Trial Court",
+  "SP": "Sangguniang Panlungsod",
+  "TOURISM": "Tourism, Culture and Arts Office",
+  "VET": "City Veterinary and Agriculture Office",
+  "CVAO": "City Veterinary and Agriculture Office"
+};
+
+function getOfficeDetails(str, hrisDiff = null) {
+  if (!str && !hrisDiff?.hris_office_code) {
+    return { code: "LGU", fullName: "City Government of Baguio" };
+  }
+
+  const raw = (str || "").trim();
+  const rawUpper = raw.toUpperCase();
+  let code = "";
+  let baseName = raw.replace(/\s*\([^)]*\)\s*/g, "").trim();
+
+  // If raw is directly an office code key (e.g. "CEPMO" or "CPDSO")
+  if (BAGUIO_OFFICE_MAP[rawUpper]) {
+    code = rawUpper;
+  } else {
+    // Check parenthesis first: e.g. "City Assessors Office (CASSO)"
+    const m = raw.match(/\(([^)]+)\)/);
+    if (m) code = m[1].trim().toUpperCase();
+  }
+
+  if (!code && hrisDiff && hrisDiff.hris_office_code) {
+    code = hrisDiff.hris_office_code.trim().toUpperCase();
+  }
+
+  if (code && code.includes("-")) {
+    const parent = code.split("-")[0];
+    if (BAGUIO_OFFICE_MAP[parent]) code = parent;
+  }
+  if (code === "PLANNING") code = "CPDSO";
+  if (code === "VET") code = "CVAO";
+  if (code === "HSO") code = "CHSO";
+
+  if (!code) {
+    for (const [c, fn] of Object.entries(BAGUIO_OFFICE_MAP)) {
+      if (baseName.toLowerCase().includes(fn.toLowerCase()) || fn.toLowerCase().includes(baseName.toLowerCase())) {
+        code = (c === "PLANNING" ? "CPDSO" : (c === "VET" ? "CVAO" : (c === "HSO" ? "CHSO" : c)));
+        break;
+      }
+    }
+  }
+
+  let fullName = BAGUIO_OFFICE_MAP[code] || baseName;
+  if (code === "CPDSO" || code === "PLANNING" || baseName.toLowerCase().includes("planning")) {
+    fullName = "City Planning, Development and Sustainability Office";
+    code = "CPDSO";
+  } else if (code === "CEPMO" || baseName.toLowerCase().includes("environment and parks")) {
+    fullName = "City Environment and Parks Management Office";
+    code = "CEPMO";
+  }
+
+  return { code: code || raw || "LGU", fullName: fullName || raw || "City Government of Baguio" };
+}
+
+function getInitials(name) {
+  if (!name) return "??";
+  const parts = name.trim().split(/[\s,]+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
 function renderRosterTable() {
   const tbody = document.getElementById("rosterTableBody");
   if (!tbody) return;
 
-  const total = (appState.roster || []).length;
-  const isManageAll = (appState.rosterFilter === 'all');
-  const thStatus = document.getElementById("thSelectiveStatus");
-  if (thStatus) {
-    thStatus.classList.toggle("hidden", !isManageAll);
+  const items = appState.roster || [];
+  const total = items.length;
+  const colSpanCount = 6;
+
+  // Update total count indicator
+  const countLabel = document.getElementById("rosterTotalCountLabel");
+  if (countLabel) {
+    countLabel.textContent = `Showing all ${total} personnel`;
   }
 
-  const colSpanCount = isManageAll ? 9 : 8;
-
   if (total === 0) {
-    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="text-center py-8 text-slate-500">No personnel found matching the filter.</td></tr>`;
-    renderRosterPagination(0);
+    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="text-center py-12 text-slate-500">No personnel found matching the filter.</td></tr>`;
     return;
   }
 
-  // Pagination slice (locked to 10 per page)
-  const pageSize = appState.rosterPageSize || 10;
-  const totalPages = Math.ceil(total / pageSize) || 1;
-  if (!appState.rosterPage || appState.rosterPage < 1) appState.rosterPage = 1;
-  if (appState.rosterPage > totalPages) appState.rosterPage = totalPages;
+  tbody.innerHTML = items.map((r, idx) => {
+    const globalIdx = idx + 1;
+    const hrisDiff = appState.hrisCompare?.diffMapByMemberId?.[r.id];
+    const hasHrisDiff = Boolean(hrisDiff && hrisDiff.is_outdated);
+    const officeInfo = getOfficeDetails(r.office, hrisDiff);
 
-  const startIndex = (appState.rosterPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, total);
-  const pageItems = appState.roster.slice(startIndex, endIndex);
-
-  tbody.innerHTML = pageItems.map((r, idx) => {
-    const globalIdx = startIndex + idx + 1;
     return `
-      <tr class="hover:bg-slate-800/40 transition">
-        <td class="py-2.5 px-3 text-slate-500 font-mono text-[11px] text-center w-12">${globalIdx}</td>
+      <tr onclick="openModalEditMember(${r.id})" class="hover:bg-slate-800/60 transition cursor-pointer group border-b border-slate-800/40">
+        <td class="py-3 px-3 text-slate-500 font-mono text-[11px] text-center w-10">${globalIdx}</td>
         
-        <!-- 1. Full Name (clean, NO survey address, fitted width to eliminate wasted space) -->
-        <td class="py-2.5 px-3 whitespace-nowrap w-60">
-          <div class="font-bold text-white text-xs">${escapeHtml(r.full_name)}</div>
-        </td>
-
-        <!-- 2. MOVE Position Title (sits snug next to Full Name) -->
-        <td class="py-2.5 px-3 whitespace-nowrap w-56">
-          <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-move-orange-500/10 text-move-orange-300 border border-move-orange-500/20 inline-flex items-center gap-1.5 whitespace-nowrap">
-            <i class="fa-solid fa-shield-halved text-[10px]"></i>
-            ${escapeHtml(r.role_title || 'Member (Cadre)')}
-          </span>
-        </td>
-
-        <!-- 3. Office Position Title -->
-        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap w-64">
-          <div class="flex items-center justify-between gap-2 group whitespace-nowrap">
-            <span class="font-medium text-slate-200 text-xs">${escapeHtml(r.position || '-')}</span>
-            <button onclick="openModalEditMember(${r.id})" class="text-slate-500 hover:text-move-orange-400 transition p-1 rounded" title="Edit Member Details">
-              <i class="fa-solid fa-pen text-xs"></i>
-            </button>
+        <!-- 1. Full Name (Clickable Row opens Member Profile) -->
+        <td class="py-3 px-4 min-w-[220px]">
+          <div class="flex items-center gap-2.5">
+            <div class="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-700/80 bg-slate-950 flex items-center justify-center">
+              <img src="/api/move-roster/${r.id}/photo" alt="${escapeHtml(r.full_name)}" loading="lazy" class="w-full h-full object-cover"
+                onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+              <div class="w-full h-full ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'} items-center justify-center font-bold text-xs hidden">
+                ${escapeHtml(getInitials(r.full_name))}
+              </div>
+            </div>
+            <div class="min-w-0">
+              <div class="font-bold text-white text-xs group-hover:text-move-orange-400 transition flex items-center gap-1.5">
+                <span class="truncate">${escapeHtml(r.full_name)}</span>
+                ${hasHrisDiff ? `
+                  <button type="button" onclick="event.stopPropagation(); openHrisCompareModal(${r.id})" class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.2 rounded-md ${hrisDiff.is_inactive ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} hover:scale-105 transition" title="HRIS Diff: ${escapeHtml(hrisDiff.is_inactive ? hrisDiff.hris_status : 'Click to sync')}">
+                    <i class="fa-solid fa-arrows-rotate text-[8px]"></i>
+                    <span>${hrisDiff.is_inactive ? escapeHtml(hrisDiff.hris_status) : 'Diff'}</span>
+                  </button>
+                ` : ((!hasHrisDiff && hrisDiff?.is_matched) ? `
+                  <span class="text-emerald-400 text-[10px]" title="In Sync with HRIS">
+                    <i class="fa-solid fa-circle-check"></i>
+                  </span>
+                ` : '')}
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
+                <i class="fa-solid fa-id-badge text-[9px] text-slate-500"></i>
+                <span>ID: <strong class="text-slate-300">${r.hris_id ? '#' + r.hris_id : (hrisDiff?.hris_id ? '#' + hrisDiff.hris_id : 'Not Linked')}</strong></span>
+              </div>
+            </div>
           </div>
         </td>
 
-        <!-- 4. Office / Dept (absorbs flexible space naturally) -->
-        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap min-w-[220px]">
-          <span class="text-xs text-slate-300">${escapeHtml(r.office || '-')}</span>
-        </td>
-
-        <!-- 5. Sex -->
-        <td class="py-2.5 px-2 text-center whitespace-nowrap w-14">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'}">
-            ${r.gender || 'M'}
+        <!-- 2. Civil Status -->
+        <td class="py-3 px-3 min-w-[120px]">
+          <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${r.civil_status === 'Single' ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30' : (r.civil_status === 'Married' ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700')}">
+            ${escapeHtml(r.civil_status || 'Married')}
           </span>
         </td>
 
-        <!-- 6. Civil Status -->
-        <td class="py-2.5 px-3 text-slate-300 whitespace-nowrap w-24 text-center text-xs">${escapeHtml(r.civil_status || 'Married')}</td>
+        <!-- 3. Move Position -->
+        <td class="py-3 px-4 min-w-[180px]">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-move-orange-400 shrink-0"></span>
+            <span class="font-semibold text-slate-200 text-xs">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
+          </div>
+        </td>
 
-        <!-- 7. Selective Status Toggles (ONLY shown on Manage Personnel) -->
-        ${isManageAll ? `
-          <td class="py-2.5 px-3 whitespace-nowrap text-center w-72">
-            <div class="flex items-center justify-center gap-1.5 whitespace-nowrap">
-              <!-- Member Status Toggle -->
-              <button onclick="toggleRosterStatus(${r.id}, 'is_member', ${r.is_member})" title="Toggle Member" 
-                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_member ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-                ${r.is_member ? '✓ Member' : 'Member'}
-              </button>
+        <!-- 4. Office (use office code) -->
+        <td class="py-3 px-3 min-w-[110px]">
+          <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-950 text-amber-300 border border-amber-500/30 shadow-2xs group-hover:border-amber-400/60 transition inline-block text-center" title="${escapeHtml(officeInfo.fullName)}">
+            ${escapeHtml(officeInfo.code)}
+          </span>
+        </td>
 
-              <!-- Officer Status Toggle -->
-              <button onclick="toggleRosterStatus(${r.id}, 'is_officer', ${r.is_officer})" title="Toggle Officer"
-                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_officer ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-                ${r.is_officer ? '★ Officer' : 'Officer'}
-              </button>
-
-              <!-- Committee Status Toggle -->
-              <button onclick="toggleRosterStatus(${r.id}, 'is_committee', ${r.is_committee})" title="Toggle Committee"
-                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_committee ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-                ${r.is_committee ? '◈ Committee' : 'Committee'}
-              </button>
-
-              <!-- Participant Status Toggle -->
-              <button onclick="toggleRosterStatus(${r.id}, 'is_participant', ${r.is_participant})" title="Toggle Participant"
-                class="px-2 py-0.5 rounded text-[10px] font-bold transition border whitespace-nowrap ${r.is_participant ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-slate-800/50 text-slate-500 border-slate-700/50'}">
-                ${r.is_participant ? '● Participant' : 'Participant'}
-              </button>
-            </div>
-          </td>
-        ` : ''}
-
-        <!-- 8. Actions (Edit & Delete) -->
-        <td class="py-2.5 px-3 text-right whitespace-nowrap w-24">
-          <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
-            <button onclick="openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-move-orange-400 hover:text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs whitespace-nowrap" title="Edit Member Details">
-              <i class="fa-solid fa-pen-to-square text-xs"></i> Edit
+        <!-- 5. Actions -->
+        <td class="py-3 px-3 text-right whitespace-nowrap w-28" onclick="event.stopPropagation()">
+          <div class="flex items-center justify-end gap-1.5">
+            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="View Profile">
+              <i class="fa-solid fa-id-badge text-move-orange-400 text-xs"></i> View
             </button>
-            <button onclick="deleteRosterMember(${r.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Delete Person">
-              <i class="fa-regular fa-trash-can"></i>
+            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition" title="Edit Profile Details">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button onclick="event.stopPropagation(); deleteRosterMember(${r.id})" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 border border-slate-700/60 transition" title="Delete Person">
+              <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
         </td>
       </tr>
     `;
   }).join("");
-
-  renderRosterPagination(total, startIndex, endIndex, totalPages);
 }
 
-function renderRosterPagination(total, startIndex = 0, endIndex = 0, totalPages = 1) {
-  const infoEl = document.getElementById("rosterPaginationInfo");
-  const ctrlEl = document.getElementById("rosterPaginationControls");
-  if (!infoEl || !ctrlEl) return;
-
-  if (total === 0) {
-    infoEl.textContent = "No personnel found";
-    ctrlEl.innerHTML = "";
-    return;
-  }
-
-  infoEl.textContent = `Showing ${startIndex + 1} – ${endIndex} of ${total} personnel (Locked to 10 per page)`;
-
-  let html = `
-    <button onclick="changeRosterPage(${appState.rosterPage - 1})" ${appState.rosterPage <= 1 ? 'disabled class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"'} title="Previous 10">
-      <i class="fa-solid fa-chevron-left text-xs"></i>
-    </button>
-  `;
-
-  for (let p = 1; p <= totalPages; p++) {
-    const isCurrent = p === appState.rosterPage;
-    html += `
-      <button onclick="changeRosterPage(${p})" class="px-2.5 py-1 rounded-lg font-mono text-xs font-bold transition border ${isCurrent ? 'bg-move-orange-500 text-white border-move-orange-400 shadow-sm' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'}">
-        ${p}
-      </button>
-    `;
-  }
-
-  html += `
-    <button onclick="changeRosterPage(${appState.rosterPage + 1})" ${appState.rosterPage >= totalPages ? 'disabled class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700 transition"'} title="Next 10">
-      <i class="fa-solid fa-chevron-right text-xs"></i>
-    </button>
-  `;
-
-  ctrlEl.innerHTML = html;
-}
-
-function changeRosterPage(page) {
-  appState.rosterPage = page;
-  renderRosterTable();
-}
+function renderRosterPagination() {}
+function changeRosterPage() {}
 
 async function toggleRosterStatus(id, field, currentValue) {
   const newValue = currentValue ? 0 : 1;
@@ -421,7 +487,7 @@ async function toggleRosterStatus(id, field, currentValue) {
       loadRoster();
     }
   } catch (err) {
-    alert("Error updating status: " + err);
+    showToast("Error updating status: : " + err, "error");
   }
 }
 
@@ -455,19 +521,181 @@ async function submitAddMember(e) {
       alert(data.message);
     }
   } catch (err) {
-    alert("Error saving member: " + err);
+    showToast("Error saving member: : " + err, "error");
   }
 }
 
+
+// Backward compatibility alias: openPersonnelProfileModal opens the unified member profile modal
+function openPersonnelProfileModal(id) {
+  openModalEditMember(id);
+}
+
+// ============================================================================
+// EDIT MEMBER PROFILE (STUDIO DESIGN CONTROLLER)
+// ============================================================================
+let currentEditMemberId = null;
+
+function syncEditHeroName(val) {
+  const nameEl = document.getElementById("editHeroName");
+  const avatarEl = document.getElementById("editHeroAvatar");
+  const fallbackEl = document.getElementById("editHeroAvatarFallback");
+  const trimmed = (val || "").trim().toUpperCase();
+  if (nameEl) nameEl.textContent = trimmed || "PERSONNEL NAME";
+  const initials = getInitials(trimmed);
+  if (avatarEl) avatarEl.textContent = initials;
+  if (fallbackEl) fallbackEl.textContent = initials;
+}
+
+function syncEditToggleWithPills() {
+  const isOfficer = document.getElementById("editToggleOfficer")?.checked;
+  const isMember = document.getElementById("editToggleMember")?.checked;
+
+  const btnActive = document.getElementById("btnEditPillActive");
+  const btnOfficer = document.getElementById("btnEditPillOfficer");
+  const statusText = document.getElementById("editHeroStatusText");
+
+  if (btnActive) {
+    if (isMember) {
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition shadow-2xs";
+    } else {
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition";
+    }
+  }
+
+  if (btnOfficer) {
+    if (isOfficer) {
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition shadow-2xs";
+    } else {
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition";
+    }
+  }
+
+  if (statusText) {
+    statusText.textContent = isOfficer ? "Executive Officer" : (isMember ? "Active Member" : "Participant");
+  }
+}
+
+function toggleRoleStatusPill(type) {
+  const chkMember = document.getElementById("editToggleMember");
+  const chkOfficer = document.getElementById("editToggleOfficer");
+
+  if (type === 'active' && chkMember) {
+    chkMember.checked = !chkMember.checked;
+  } else if (type === 'officer' && chkOfficer) {
+    chkOfficer.checked = !chkOfficer.checked;
+  }
+  syncEditToggleWithPills();
+}
+
+async function syncCurrentEditWithHris() {
+  const memberId = document.getElementById("editMemberId")?.value;
+  if (!memberId) return;
+
+  const btnSync = document.getElementById("btnEditSyncHris");
+  const originalHtml = btnSync ? btnSync.innerHTML : "";
+  if (btnSync) {
+    btnSync.disabled = true;
+    btnSync.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-teal-400"></i><span>Syncing...</span>`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/sync-single`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: memberId,
+        update_position: true,
+        update_office: true
+      })
+    });
+    const data = await res.json();
+    if (data.success && data.member) {
+      const updated = data.member;
+      const posInput = document.getElementById("editMemberPosition");
+      const offInput = document.getElementById("editMemberOffice");
+      if (posInput) posInput.value = updated.position || "";
+      if (offInput) offInput.value = updated.office || "";
+
+      // Flash verification check animation
+      const checkEl = document.getElementById("editPosVerifiedCheck");
+      if (checkEl) {
+        checkEl.className = "absolute right-2.5 top-2.5 text-emerald-400 text-xs animate-bounce";
+        setTimeout(() => { if (checkEl) checkEl.className = "absolute right-2.5 top-2.5 text-emerald-400 text-xs"; }, 1500);
+      }
+
+      showToast(`HRIS sync complete for ${updated.full_name}! Position & Office updated.`, "success");
+      await loadRoster();
+      await updateRosterCounts();
+    } else {
+      showToast("Could not sync with HRIS: " + (data.message || "No match found"), "warning");
+    }
+  } catch (err) {
+    showToast("HRIS Sync error: " + err, "error");
+  } finally {
+    if (btnSync) {
+      btnSync.disabled = false;
+      btnSync.innerHTML = originalHtml;
+    }
+  }
+}
 
 function openModalEditMember(id) {
   const member = (appState.roster || []).find(r => Number(r.id) === Number(id)) ||
                  (appState.fullRoster || []).find(r => Number(r.id) === Number(id));
   if (!member) {
-    alert("Member record not found.");
+    showToast("Member record not found.", "error");
     return;
   }
+  currentEditMemberId = member.id;
 
+  const hrisDiff = appState.hrisCompare?.diffMapByMemberId?.[member.id] ||
+                   (appState.hrisCompare?.comparison || []).find(c => Number(c.id) === Number(member.id));
+
+  // Populate hero card
+  const heroName = document.getElementById("editHeroName");
+  const heroAvatar = document.getElementById("editHeroAvatar");
+  const heroFallback = document.getElementById("editHeroAvatarFallback");
+  const heroPhoto = document.getElementById("editHeroPhoto");
+  const heroIdBadge = document.getElementById("editHeroIdBadge");
+  const heroHrisTag = document.getElementById("editHeroHrisTag");
+
+  if (heroName) heroName.textContent = member.full_name || "PERSONNEL NAME";
+  
+  const initials = getInitials(member.full_name);
+  if (heroAvatar) heroAvatar.textContent = initials;
+  if (heroFallback) {
+    heroFallback.textContent = initials;
+    if (member.gender === 'F') {
+      heroFallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-base";
+    } else {
+      heroFallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-base";
+    }
+  }
+
+  // Load portrait photo from SFTP endpoint with fallback
+  if (heroPhoto) {
+    heroPhoto.classList.add("hidden");
+    if (heroFallback) heroFallback.classList.remove("hidden");
+    heroPhoto.src = `/api/move-roster/${member.id}/photo?_t=${Date.now()}`;
+  }
+
+  const displayId = member.hris_id ? String(member.hris_id).padStart(3, '0') : String(member.id).padStart(3, '0');
+  if (heroIdBadge) {
+    heroIdBadge.textContent = `ID: #${displayId}`;
+  }
+
+  if (heroHrisTag) {
+    if (member.hris_id) {
+      heroHrisTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30";
+      heroHrisTag.textContent = "HRIS Synced";
+    } else {
+      heroHrisTag.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+      heroHrisTag.textContent = "Manual Roster";
+    }
+  }
+
+  // Populate form fields
   const idInput = document.getElementById("editMemberId");
   const nameInput = document.getElementById("editMemberName");
   const roleInput = document.getElementById("editMemberRole");
@@ -488,12 +716,34 @@ function openModalEditMember(id) {
   if (conInput) conInput.value = member.contact_number || "";
   if (notesInput) notesInput.value = member.notes || "";
 
+  // Switches
+  const tOfficer = document.getElementById("editToggleOfficer");
+  const tMember = document.getElementById("editToggleMember");
+  const tCommittee = document.getElementById("editToggleCommittee");
+  const tParticipant = document.getElementById("editToggleParticipant");
+
+  if (tOfficer) tOfficer.checked = Boolean(member.is_officer);
+  if (tMember) tMember.checked = Boolean(member.is_member);
+  if (tCommittee) tCommittee.checked = Boolean(member.is_committee);
+  if (tParticipant) tParticipant.checked = Boolean(member.is_participant);
+
+  syncEditToggleWithPills();
+
+  // Timeline
+  const tlHris = document.getElementById("editTimelineHrisText");
+  const tlSync = document.getElementById("editTimelineSyncText");
+  if (tlHris) {
+    tlHris.textContent = member.hris_id ? `ID #${member.hris_id} • ${member.hris_status || 'ACTIVE'}` : "Not linked to HRIS";
+  }
+  if (tlSync) {
+    tlSync.textContent = (hrisDiff && !hrisDiff.is_outdated) ? "In Sync with HRIS Database" : (member.hris_id ? "Sync Available" : "Manual Record");
+  }
+
   openModal("modalEditMember");
 
   setTimeout(() => {
-    if (roleInput) {
-      roleInput.focus();
-      roleInput.select();
+    if (nameInput) {
+      nameInput.focus();
     }
   }, 100);
 }
@@ -510,9 +760,20 @@ async function submitEditMember(e) {
   const contactNumber = document.getElementById("editMemberContact").value.trim();
   const notes = document.getElementById("editMemberNotes").value.trim();
 
+  const isOfficer = document.getElementById("editToggleOfficer")?.checked ? 1 : 0;
+  const isMember = document.getElementById("editToggleMember")?.checked ? 1 : 0;
+  const isCommittee = document.getElementById("editToggleCommittee")?.checked ? 1 : 0;
+  const isParticipant = document.getElementById("editToggleParticipant")?.checked ? 1 : 0;
+
   if (!fullName) {
-    alert("Please enter full name.");
+    showToast("Please enter full name.", "warning");
     return;
+  }
+
+  const btnSubmit = document.getElementById("btnSubmitEditMember");
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Saving...</span>`;
   }
 
   try {
@@ -527,20 +788,30 @@ async function submitEditMember(e) {
         gender: gender,
         civil_status: civilStatus,
         contact_number: contactNumber,
-        notes: notes
+        notes: notes,
+        is_officer: isOfficer,
+        is_member: isMember,
+        is_committee: isCommittee,
+        is_participant: isParticipant
       })
     });
 
     const data = await res.json();
     if (data.success) {
       closeModal("modalEditMember");
+      showToast(`Member profile for ${fullName} updated successfully!`, "success");
       await loadRoster();
       await updateRosterCounts();
     } else {
-      alert("Failed to update member: " + (data.message || "Error"));
+      showToast("Failed to update member: " + (data.message || "Error"), "error");
     }
   } catch (err) {
-    alert("Error updating member: " + err);
+    showToast("Error updating member: " + err, "error");
+  } finally {
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<span>Update Profile</span>`;
+    }
   }
 }
 
@@ -552,6 +823,651 @@ async function deleteRosterMember(id) {
     if (data.success) loadRoster();
   } catch (err) {
     alert("Delete failed: " + err);
+  }
+}
+
+// ==========================================================================
+// 1.5 HRIS API LIVE COMPARISON & SYNCHRONIZATION CONTROLLER
+// ==========================================================================
+
+async function fetchHrisBackgroundAudit() {
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/compare?force=0`);
+    const data = await res.json();
+    if (data.success) {
+      appState.hrisCompare.data = data.comparison || [];
+      appState.hrisCompare.metrics = data.metrics || {};
+      appState.hrisCompare.loaded = true;
+
+      const diffMap = {};
+      (data.comparison || []).forEach(item => {
+        if (item.id) {
+          diffMap[item.id] = item;
+        }
+      });
+      appState.hrisCompare.diffMapByMemberId = diffMap;
+
+      updateHrisMetricBadges(data.metrics || {});
+
+      // Refresh roster table so HRIS indicator badges appear
+      if (appState.activeView === 'roster') {
+        renderRosterTable();
+      }
+    }
+  } catch (err) {
+    console.warn("Background HRIS audit error:", err);
+  }
+}
+
+function openHrisCompareModal(focusMemberId = null) {
+  const modal = document.getElementById("modalHrisCompare");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+
+  const searchInput = document.getElementById("hrisCompareSearchInput");
+
+  if (focusMemberId) {
+    const targetItem = (appState.hrisCompare.data || []).find(x => Number(x.id) === Number(focusMemberId));
+    if (targetItem) {
+      if (searchInput) searchInput.value = targetItem.full_name;
+      appState.hrisCompare.search = targetItem.full_name;
+      appState.hrisCompare.activeTab = 'all';
+    } else {
+      if (searchInput) searchInput.value = "";
+      appState.hrisCompare.search = "";
+    }
+  } else {
+    if (searchInput) searchInput.value = "";
+    appState.hrisCompare.search = "";
+  }
+
+  if (!appState.hrisCompare.loaded) {
+    loadHrisComparison(false);
+  } else {
+    updateHrisMetricBadges(appState.hrisCompare.metrics);
+    filterHrisCompareTab(appState.hrisCompare.activeTab || 'differences');
+  }
+}
+
+function closeHrisCompareModal() {
+  const modal = document.getElementById("modalHrisCompare");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function reScanHrisCompare() {
+  const btn = document.getElementById("btnRescanHris");
+  const origHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-400"></i><span>Scanning HRIS...</span>`;
+  }
+
+  try {
+    await loadHrisComparison(true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+}
+
+async function loadHrisComparison(force = false) {
+  const tbody = document.getElementById("hrisCompareTableBody");
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-12 text-slate-400">
+          <div class="flex flex-col items-center justify-center gap-2">
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-400"></i>
+            <span class="text-xs font-semibold text-slate-300">Reconciling MOVE Roster with Central City HRIS API...</span>
+            <span class="text-[11px] text-slate-500 font-mono">Host: 192.168.3.43:5000</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/compare?force=${force ? '1' : '0'}`);
+    const data = await res.json();
+    if (data.success) {
+      appState.hrisCompare.data = data.comparison || [];
+      appState.hrisCompare.metrics = data.metrics || {};
+      appState.hrisCompare.loaded = true;
+
+      const diffMap = {};
+      (data.comparison || []).forEach(item => {
+        if (item.id) {
+          diffMap[item.id] = item;
+        }
+      });
+      appState.hrisCompare.diffMapByMemberId = diffMap;
+
+      updateHrisMetricBadges(data.metrics || {});
+      renderHrisCompareTable();
+
+      // Also trigger roster table update so badges reflect latest state
+      if (appState.activeView === 'roster') {
+        renderRosterTable();
+      }
+    } else {
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-10 text-rose-400 text-xs">
+              <i class="fa-solid fa-circle-exclamation text-base mb-1"></i>
+              <div>Failed to load comparison: ${escapeHtml(data.error || "Unknown error")}</div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+  } catch (err) {
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-10 text-rose-400 text-xs">
+            <i class="fa-solid fa-triangle-exclamation text-base mb-1"></i>
+            <div>Network error connecting to MOVE HRIS proxy: ${escapeHtml(String(err))}</div>
+          </td>
+        </tr>
+      `;
+    }
+  }
+}
+
+function updateHrisMetricBadges(metrics = {}) {
+  const mDiff = document.getElementById("metricHrisDiff");
+  const mInSync = document.getElementById("metricHrisInSync");
+  const mInactive = document.getElementById("metricHrisInactive");
+  const mNotFound = document.getElementById("metricHrisNotFound");
+  const mTotal = document.getElementById("metricHrisTotal");
+  const btnAllCount = document.getElementById("btnHrisAllOutdatedCountText");
+  const toolbarBadge = document.getElementById("badgeToolbarHrisCount");
+  const navBadgeText = document.getElementById("badgeHrisDiffCountText");
+
+  const diffCount = metrics.diff_count ?? 0;
+  const inSyncCount = metrics.in_sync_count ?? 0;
+  const inactiveCount = metrics.inactive_count ?? 0;
+  const notFoundCount = metrics.not_found_count ?? 0;
+  const totalCount = metrics.total_roster ?? 0;
+
+  if (mDiff) mDiff.textContent = diffCount;
+  if (mInSync) mInSync.textContent = inSyncCount;
+  if (mInactive) mInactive.textContent = inactiveCount;
+  if (mNotFound) mNotFound.textContent = notFoundCount;
+  if (mTotal) mTotal.textContent = totalCount;
+  if (btnAllCount) btnAllCount.textContent = diffCount;
+
+  if (toolbarBadge) {
+    if (diffCount > 0) {
+      toolbarBadge.textContent = diffCount;
+      toolbarBadge.classList.remove("hidden");
+    } else {
+      toolbarBadge.classList.add("hidden");
+    }
+  }
+
+  if (navBadgeText) {
+    navBadgeText.textContent = diffCount > 0 ? `${diffCount} Diff` : "In Sync";
+  }
+}
+
+function filterHrisCompareTab(tabKey) {
+  appState.hrisCompare.activeTab = tabKey;
+
+  const tabs = [
+    { key: 'differences', activeClass: 'bg-amber-500/20 border-amber-500/50 text-amber-300 ring-1 ring-amber-500/40 font-bold' },
+    { key: 'in_sync', activeClass: 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 ring-1 ring-emerald-500/40 font-bold' },
+    { key: 'inactive', activeClass: 'bg-rose-500/20 border-rose-500/50 text-rose-300 ring-1 ring-rose-500/40 font-bold' },
+    { key: 'not_found', activeClass: 'bg-purple-500/20 border-purple-500/50 text-purple-300 ring-1 ring-purple-500/40 font-bold' },
+    { key: 'all', activeClass: 'bg-blue-500/20 border-blue-500/50 text-blue-300 ring-1 ring-blue-500/40 font-bold' }
+  ];
+
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tabHris-${t.key}`);
+    if (btn) {
+      if (t.key === tabKey) {
+        btn.className = `hris-tab-btn px-3 py-2 rounded-2xl ${t.activeClass} flex flex-col items-start transition`;
+      } else {
+        btn.className = `hris-tab-btn px-3 py-2 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 font-semibold flex flex-col items-start transition hover:border-slate-700`;
+      }
+    }
+  });
+
+  renderHrisCompareTable();
+}
+
+function onHrisCompareSearch(val) {
+  appState.hrisCompare.search = (val || "").trim().toLowerCase();
+  renderHrisCompareTable();
+}
+
+function renderHrisCompareTable() {
+  const tbody = document.getElementById("hrisCompareTableBody");
+  if (!tbody) return;
+
+  const items = appState.hrisCompare.data || [];
+  const tab = appState.hrisCompare.activeTab || 'differences';
+  const query = appState.hrisCompare.search || "";
+
+  // 1. Tab filtering
+  let filtered = items.filter(m => {
+    if (tab === 'differences') return m.is_outdated && !m.is_inactive;
+    if (tab === 'in_sync') return m.is_matched && !m.is_outdated && !m.is_inactive;
+    if (tab === 'inactive') return m.is_inactive;
+    if (tab === 'not_found') return !m.is_matched;
+    return true; // 'all'
+  });
+
+  // 2. Search query filtering
+  if (query) {
+    filtered = filtered.filter(m => {
+      const name = (m.full_name || "").toLowerCase();
+      const currPos = (m.current_position || "").toLowerCase();
+      const currOff = (m.current_office || "").toLowerCase();
+      const hrisPos = (m.hris_position || "").toLowerCase();
+      const hrisOff = (m.hris_office_formatted || m.hris_office_code || "").toLowerCase();
+      const hrisId = String(m.hris_id || "");
+      const status = (m.hris_status || "").toLowerCase();
+      return name.includes(query) || currPos.includes(query) || currOff.includes(query) ||
+             hrisPos.includes(query) || hrisOff.includes(query) || hrisId.includes(query) || status.includes(query);
+    });
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center py-10 text-slate-500 font-medium text-xs">
+          <i class="fa-solid fa-folder-open text-xl mb-1 text-slate-600 block"></i>
+          <span>No personnel records match this tab and filter.</span>
+        </td>
+      </tr>
+    `;
+    updateHrisSelectedUi();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((m, idx) => {
+    const isSelected = appState.hrisCompare.selectedIds.has(m.id);
+
+    // Status diff pill presentation
+    let diffPill = "";
+    if (!m.is_matched) {
+      diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 whitespace-nowrap"><i class="fa-solid fa-question mr-1"></i>Not in HRIS</span>`;
+    } else if (m.is_inactive) {
+      diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap"><i class="fa-solid fa-user-xmark mr-1"></i>${escapeHtml(m.hris_status)}</span>`;
+    } else if (m.is_outdated) {
+      if (m.has_position_diff && m.has_office_diff) {
+        diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Title &amp; Office</span>`;
+      } else if (m.has_position_diff) {
+        diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap"><i class="fa-solid fa-bolt mr-1"></i>Position Diff</span>`;
+      } else {
+        diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 whitespace-nowrap"><i class="fa-solid fa-building mr-1"></i>Office Transfer</span>`;
+      }
+    } else {
+      diffPill = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 whitespace-nowrap"><i class="fa-solid fa-check mr-1"></i>In Sync</span>`;
+    }
+
+    // Action button presentation
+    let actionHtml = "";
+    if (m.is_matched && m.is_outdated && !m.is_inactive) {
+      actionHtml = `
+        <button type="button" onclick="syncSingleHrisMember(${m.id})" class="px-2.5 py-1 rounded-lg bg-move-orange-500 hover:bg-move-orange-600 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-xs ml-auto whitespace-nowrap">
+          <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Apply
+        </button>
+      `;
+    } else if (m.is_inactive) {
+      actionHtml = `
+        <button type="button" onclick="syncSingleHrisMember(${m.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 text-[10px] font-bold transition flex items-center gap-1 ml-auto whitespace-nowrap" title="Sync details and flag inactive in MOVE">
+          <i class="fa-solid fa-user-pen text-[9px]"></i> Sync &amp; Flag
+        </button>
+      `;
+    } else if (m.is_matched) {
+      actionHtml = `<span class="text-xs text-emerald-400 font-semibold flex items-center justify-end gap-1 whitespace-nowrap"><i class="fa-solid fa-circle-check"></i> Clean</span>`;
+    } else {
+      actionHtml = `<span class="text-[11px] text-slate-500 italic flex items-center justify-end">Unlinked</span>`;
+    }
+
+    return `
+      <tr class="hover:bg-slate-800/40 transition">
+        <!-- 0. Selection Checkbox -->
+        <td class="py-2.5 px-3 text-center">
+          <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleHrisMemberSelect(${m.id}, this.checked)" class="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-0 cursor-pointer">
+        </td>
+
+        <!-- 1. Index -->
+        <td class="py-2.5 px-2 text-slate-500 font-mono text-[11px] text-center">${idx + 1}</td>
+
+        <!-- 2. Personnel Full Name & Role -->
+        <td class="py-2.5 px-3 whitespace-nowrap">
+          <div class="font-bold text-white text-xs">${escapeHtml(m.full_name)}</div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-[10px] font-semibold text-move-orange-400">${escapeHtml(m.move_role || 'Member (Cadre)')}</span>
+            ${m.is_matched 
+              ? `<span class="text-[9px] font-mono text-slate-400 bg-slate-800/80 px-1 rounded border border-slate-700">HRIS #${m.hris_id}</span>` 
+              : `<span class="text-[9px] font-mono text-rose-400/90 bg-rose-950/40 px-1 rounded border border-rose-800/40">Unmatched</span>`
+            }
+          </div>
+        </td>
+
+        <!-- 3. Current in MOVE (Position & Office) -->
+        <td class="py-2.5 px-3">
+          <div class="${m.has_position_diff ? 'line-through text-slate-400 decoration-rose-500/60' : 'text-slate-200'} font-medium text-xs">
+            ${escapeHtml(m.current_position || '-')}
+          </div>
+          <div class="${m.has_office_diff ? 'line-through text-slate-400 decoration-rose-500/60' : 'text-slate-400'} text-[11px] mt-0.5">
+            ${escapeHtml(m.current_office || '-')}
+          </div>
+        </td>
+
+        <!-- 4. Official in HRIS API (Position & Standardized Office) -->
+        <td class="py-2.5 px-3">
+          ${m.is_matched ? `
+            <div class="${m.has_position_diff ? 'text-amber-300 font-bold' : 'text-slate-200'} font-medium text-xs flex items-center gap-1.5">
+              <span>${escapeHtml(m.hris_position || '-')}</span>
+              ${m.has_position_diff ? '<i class="fa-solid fa-arrow-trend-up text-[10px] text-amber-400" title="Updated Position"></i>' : ''}
+            </div>
+            <div class="${m.has_office_diff ? 'text-amber-300 font-bold' : 'text-slate-400'} text-[11px] mt-0.5 flex items-center gap-1.5">
+              <span>${escapeHtml(m.hris_office_formatted || m.hris_office_code || '-')}</span>
+              ${m.has_office_diff ? '<i class="fa-solid fa-building-circle-arrow-right text-[10px] text-cyan-400" title="Updated Office"></i>' : ''}
+            </div>
+            <div class="mt-1">
+              <span class="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold ${m.is_inactive ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">
+                ${escapeHtml(m.hris_status)} ${m.hris_appointment ? '• ' + escapeHtml(m.hris_appointment) : ''}
+              </span>
+            </div>
+          ` : `
+            <!-- Inline HRIS Linker for Unmatched Personnel -->
+            <div class="space-y-1">
+              <div class="text-[11px] text-slate-400">Match by exact HRIS Employee ID:</div>
+              <div class="flex items-center gap-1.5">
+                <input type="number" id="inputManualHris_${m.id}" placeholder="HRIS ID #" class="w-24 px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono">
+                <button type="button" onclick="submitManualHrisLink(${m.id})" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition shadow-xs flex items-center gap-1">
+                  <i class="fa-solid fa-link text-[10px]"></i> Link
+                </button>
+              </div>
+            </div>
+          `}
+        </td>
+
+        <!-- 5. Status Diff Pill -->
+        <td class="py-2.5 px-3 text-center">
+          ${diffPill}
+        </td>
+
+        <!-- 6. Action Button -->
+        <td class="py-2.5 px-3 text-right">
+          ${actionHtml}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  updateHrisSelectedUi();
+}
+
+function toggleHrisMemberSelect(id, checked) {
+  if (checked) {
+    appState.hrisCompare.selectedIds.add(id);
+  } else {
+    appState.hrisCompare.selectedIds.delete(id);
+  }
+  updateHrisSelectedUi();
+}
+
+function toggleHrisSelectAll(checked) {
+  const items = appState.hrisCompare.data || [];
+  const tab = appState.hrisCompare.activeTab || 'differences';
+  const query = appState.hrisCompare.search || "";
+
+  // Filter same as table
+  let visible = items.filter(m => {
+    if (tab === 'differences') return m.is_outdated && !m.is_inactive;
+    if (tab === 'in_sync') return m.is_matched && !m.is_outdated && !m.is_inactive;
+    if (tab === 'inactive') return m.is_inactive;
+    if (tab === 'not_found') return !m.is_matched;
+    return true;
+  });
+
+  if (query) {
+    visible = visible.filter(m => {
+      const name = (m.full_name || "").toLowerCase();
+      const currPos = (m.current_position || "").toLowerCase();
+      const currOff = (m.current_office || "").toLowerCase();
+      const hrisPos = (m.hris_position || "").toLowerCase();
+      const hrisOff = (m.hris_office_formatted || m.hris_office_code || "").toLowerCase();
+      const hrisId = String(m.hris_id || "");
+      const status = (m.hris_status || "").toLowerCase();
+      return name.includes(query) || currPos.includes(query) || currOff.includes(query) ||
+             hrisPos.includes(query) || hrisOff.includes(query) || hrisId.includes(query) || status.includes(query);
+    });
+  }
+
+  visible.forEach(m => {
+    if (checked) {
+      appState.hrisCompare.selectedIds.add(m.id);
+    } else {
+      appState.hrisCompare.selectedIds.delete(m.id);
+    }
+  });
+
+  renderHrisCompareTable();
+}
+
+function selectAllHrisOutdated(select = true) {
+  if (select) {
+    appState.hrisCompare.selectedIds.clear();
+    (appState.hrisCompare.data || []).forEach(m => {
+      if (m.is_outdated && !m.is_inactive) {
+        appState.hrisCompare.selectedIds.add(m.id);
+      }
+    });
+  } else {
+    appState.hrisCompare.selectedIds.clear();
+  }
+  renderHrisCompareTable();
+}
+
+function updateHrisSelectedUi() {
+  const count = appState.hrisCompare.selectedIds.size;
+  const lbl = document.getElementById("lblHrisSelectedCount");
+  const btnCount = document.getElementById("btnHrisSelectedCountText");
+  const btnUpdate = document.getElementById("btnHrisUpdateSelected");
+  const chkAll = document.getElementById("chkHrisSelectAll");
+
+  if (lbl) lbl.textContent = count;
+  if (btnCount) btnCount.textContent = count;
+  if (btnUpdate) btnUpdate.disabled = (count === 0);
+
+  if (chkAll) {
+    const totalVisible = document.querySelectorAll("#hrisCompareTableBody input[type='checkbox']").length;
+    chkAll.checked = (totalVisible > 0 && count >= totalVisible);
+  }
+}
+
+async function syncSingleHrisMember(memberId) {
+  const chkPos = document.getElementById("chkHrisSyncPosition");
+  const chkOff = document.getElementById("chkHrisSyncOffice");
+  const updatePos = chkPos ? chkPos.checked : true;
+  const updateOff = chkOff ? chkOff.checked : true;
+
+  if (!updatePos && !updateOff) {
+    showToast("Please select at least one field to sync (Position Title or Office / Dept).", "warning");
+    return;
+  }
+
+  const member = (appState.hrisCompare.data || []).find(m => Number(m.id) === Number(memberId));
+  const memberName = member ? member.full_name : `ID #${memberId}`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/sync-single`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: memberId,
+        update_position: updatePos,
+        update_office: updateOff
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      appState.hrisCompare.selectedIds.delete(memberId);
+      await loadHrisComparison(false);
+      await loadRoster();
+    } else {
+      showToast("Sync failed: " + (data.error || "Unknown error"), "error");
+    }
+  } catch (err) {
+    showToast("Error synchronizing personnel: : " + err, "error");
+  }
+}
+
+async function syncSelectedHrisMembers() {
+  const ids = Array.from(appState.hrisCompare.selectedIds);
+  if (ids.length === 0) {
+    showToast("No personnel selected. Check the box next to personnel you want to update.", "warning");
+    return;
+  }
+
+  const chkPos = document.getElementById("chkHrisSyncPosition");
+  const chkOff = document.getElementById("chkHrisSyncOffice");
+  const updatePos = chkPos ? chkPos.checked : true;
+  const updateOff = chkOff ? chkOff.checked : true;
+
+  if (!updatePos && !updateOff) {
+    showToast("Please select at least one field to sync (Position Title or Office / Dept).", "warning");
+    return;
+  }
+
+  if (!confirm(`Apply official HRIS updates to ${ids.length} selected personnel?\n\nAdvocacy roles, membership flags, and contact details will remain completely intact.`)) {
+    return;
+  }
+
+  const btn = document.getElementById("btnHrisUpdateSelected");
+  const origHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Updating...</span>`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/sync-roster`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ids: ids,
+        update_position: updatePos,
+        update_office: updateOff
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      appState.hrisCompare.selectedIds.clear();
+      showToast(`Successfully synchronized ${data.updated_count} personnel records with Central City HRIS!`, "success");
+      await loadHrisComparison(false);
+      await loadRoster();
+    } else {
+      showToast("Batch sync failed: " + (data.error || "Unknown error"), "error");
+    }
+  } catch (err) {
+    showToast("Error during batch sync: : " + err, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+}
+
+async function syncAllOutdatedHrisMembers() {
+  const chkPos = document.getElementById("chkHrisSyncPosition");
+  const chkOff = document.getElementById("chkHrisSyncOffice");
+  const updatePos = chkPos ? chkPos.checked : true;
+  const updateOff = chkOff ? chkOff.checked : true;
+
+  if (!updatePos && !updateOff) {
+    showToast("Please select at least one field to sync (Position Title or Office / Dept).", "warning");
+    return;
+  }
+
+  const outdatedCount = appState.hrisCompare.metrics?.diff_count || 0;
+  if (outdatedCount === 0) {
+    showToast("All matched active personnel are already completely in sync with City HRIS!", "info");
+    return;
+  }
+
+  if (!confirm(`Synchronize all ${outdatedCount} active personnel whose government positions or offices have changed in Central City HRIS?\n\nAdvocacy roles and MOVE membership remain untouched.`)) {
+    return;
+  }
+
+  const btn = document.getElementById("btnHrisUpdateAll");
+  const origHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Updating All...</span>`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/sync-roster`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        all_outdated: true,
+        update_position: updatePos,
+        update_office: updateOff
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      appState.hrisCompare.selectedIds.clear();
+      showToast(`Successfully synchronized all ${data.updated_count} outdated personnel with official City HRIS records!`, "success");
+      await loadHrisComparison(false);
+      await loadRoster();
+    } else {
+      showToast("Update all failed: " + (data.error || "Unknown error"), "error");
+    }
+  } catch (err) {
+    showToast("Error updating all outdated personnel: : " + err, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+}
+
+async function submitManualHrisLink(memberId) {
+  const input = document.getElementById(`inputManualHris_${memberId}`);
+  if (!input) return;
+
+  const hrisId = parseInt(input.value.trim(), 10);
+  if (isNaN(hrisId) || hrisId <= 0) {
+    showToast("Please enter a valid numeric City HRIS Employee ID.", "warning");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/hris/link-id`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        member_id: memberId,
+        hris_id: hrisId,
+        apply_sync: true
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Successfully linked and updated from HRIS Employee #${hrisId}!`, "success");
+      await loadHrisComparison(false);
+      await loadRoster();
+    } else {
+      showToast("Failed to link HRIS ID: " + (data.error || "Employee not found in HRIS"), "error");
+    }
+  } catch (err) {
+    showToast("Error linking HRIS ID: : " + err, "error");
   }
 }
 
@@ -616,7 +1532,7 @@ async function copyPoolToMove(employeeId) {
       loadRoster();
     }
   } catch (err) {
-    alert("Error copying employee: " + err);
+    showToast("Error copying employee: : " + err, "error");
   }
 }
 
@@ -680,10 +1596,15 @@ function renderActivitiesGrid() {
         </div>
 
         <div class="mt-5 pt-4 border-t border-slate-800 space-y-3">
-          <!-- Attendance Progress -->
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-slate-400 font-semibold">Attendance:</span>
-            <span class="font-bold text-emerald-400">${present} / ${total} Present (${rate}%)</span>
+          <!-- Attendance Progress with Visual Bar -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400 font-semibold">Attendance:</span>
+              <span class="font-bold text-emerald-400">${present} / ${total} Present (${rate}%)</span>
+            </div>
+            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/80">
+              <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: ${rate}%;"></div>
+            </div>
           </div>
 
           <div class="grid grid-cols-3 gap-2">
@@ -795,7 +1716,7 @@ async function submitEditActivity(e) {
         }
       }
     } else {
-      alert("Failed to update activity: " + (data.message || "Unknown error"));
+      showToast("Failed to update activity: " + (data.message || "Unknown error"), "error");
     }
   } catch (err) {
     console.error("Error updating activity:", err);
@@ -830,7 +1751,7 @@ async function deleteCurrentEditActivity() {
       }
       switchView("activities");
     } else {
-      alert("Failed to delete activity: " + (data.message || "Unknown error"));
+      showToast("Failed to delete activity: " + (data.message || "Unknown error"), "error");
     }
   } catch (err) {
     console.error("Error deleting activity:", err);
@@ -880,7 +1801,7 @@ async function saveStudioActivityDetails() {
         }, 2000);
       }
     } else {
-      alert("Error saving activity details: " + (data.message || "Failed"));
+      showToast("Error saving activity details: " + (data.message || "Failed"), "error");
       if (btn) btn.disabled = false;
     }
   } catch (err) {
@@ -917,7 +1838,7 @@ async function submitCreateActivity(e) {
       openActivityAttendance(data.id);
     }
   } catch (err) {
-    alert("Error creating activity: " + err);
+    showToast("Error creating activity: : " + err, "error");
   }
 }
 
@@ -1136,7 +2057,7 @@ async function toggleAttendeeAttendance(attendeeId, currentPresent) {
       loadAttendance(appState.currentActivityId);
     }
   } catch (err) {
-    alert("Error updating attendance: " + err);
+    showToast("Error updating attendance: : " + err, "error");
   }
 }
 
@@ -1177,7 +2098,7 @@ async function submitAddAttendee(e) {
   e.preventDefault();
   const fullName = document.getElementById("attNewName").value.trim().toUpperCase();
   if (!fullName) {
-    alert("Please enter attendee full name.");
+    showToast("Please enter attendee full name.", "warning");
     return;
   }
 
@@ -1214,13 +2135,13 @@ async function submitAddAttendee(e) {
       checkDuplicateAttendeeInput("");
       loadAttendance(appState.currentActivityId);
     } else {
-      alert(data.message || "Failed to enroll attendee.");
+      showToast(data.message || "Failed to enroll attendee.", "error");
       if (data.duplicate) {
         checkDuplicateAttendeeInput(fullName);
       }
     }
   } catch (err) {
-    alert("Error adding attendee: " + err);
+    showToast("Error adding attendee: : " + err, "error");
   }
 }
 
@@ -1467,7 +2388,7 @@ async function removeFacilitator(facId) {
       alert("Failed to remove facilitator: " + (data.message || "Error"));
     }
   } catch (err) {
-    alert("Error removing facilitator: " + err);
+    showToast("Error removing facilitator: : " + err, "error");
   }
 }
 
@@ -1521,7 +2442,7 @@ async function submitAddFacilitator(e) {
   e.preventDefault();
   const fullName = document.getElementById("facNewName").value.trim().toUpperCase();
   if (!fullName) {
-    alert("Please enter facilitator full name.");
+    showToast("Please enter facilitator full name.", "warning");
     return;
   }
 
@@ -1558,13 +2479,13 @@ async function submitAddFacilitator(e) {
       await loadFacilitators(appState.currentActivityId);
       switchActivitySubTab('facilitators');
     } else {
-      alert(data.message || "Failed to enroll facilitator.");
+      showToast(data.message || "Failed to enroll facilitator.", "error");
       if (data.duplicate) {
         checkDuplicateFacilitatorInput(fullName);
       }
     }
   } catch (err) {
-    alert("Error adding facilitator: " + err);
+    showToast("Error adding facilitator: : " + err, "error");
   }
 }
 
@@ -1619,11 +2540,11 @@ async function submitEditAttendee(e) {
   const notes = document.getElementById("editAttNotes").value.trim();
 
   if (!fullName) {
-    alert("Please enter attendee full name.");
+    showToast("Please enter attendee full name.", "warning");
     return;
   }
   if (!position) {
-    alert("Please enter attendee position title.");
+    showToast("Please enter attendee position title.", "warning");
     return;
   }
 
@@ -1652,10 +2573,10 @@ async function submitEditAttendee(e) {
         await loadEligibleCertificates(actId);
       }
     } else {
-      alert("Failed to update attendee: " + (data.message || "Error"));
+      showToast("Failed to update attendee: " + (data.message || "Error"), "error");
     }
   } catch (err) {
-    alert("Error updating attendee: " + err);
+    showToast("Error updating attendee: : " + err, "error");
   }
 }
 
@@ -1709,11 +2630,11 @@ async function submitEditFacilitator(e) {
   const notes = document.getElementById("editFacNotes").value.trim();
 
   if (!fullName) {
-    alert("Please enter facilitator full name.");
+    showToast("Please enter facilitator full name.", "warning");
     return;
   }
   if (!position) {
-    alert("Please enter facilitator position title.");
+    showToast("Please enter facilitator position title.", "warning");
     return;
   }
 
@@ -1743,10 +2664,10 @@ async function submitEditFacilitator(e) {
         await loadEligibleCertificates(actId);
       }
     } else {
-      alert("Failed to update facilitator: " + (data.message || "Error"));
+      showToast("Failed to update facilitator: " + (data.message || "Error"), "error");
     }
   } catch (err) {
-    alert("Error updating facilitator: " + err);
+    showToast("Error updating facilitator: : " + err, "error");
   }
 }
 
@@ -2043,7 +2964,7 @@ async function toggleCurrentRecipientAttendance() {
       }
     }
   } catch (err) {
-    alert("Error updating attendance: " + err);
+    showToast("Error updating attendance: : " + err, "error");
   }
 }
 
@@ -2383,7 +3304,7 @@ function toggleSignatures(checked) {
   appState.showSignatures = checked;
   const grp = document.getElementById("sigSizeControlsWrapper");
   if (grp) grp.classList.toggle("opacity-40", !checked);
-  const chkSide = document.getElementById("certToggleSignatures");
+  const chkSide = document.getElementById("certToggleSignatures") || document.getElementById("certToggleSigImages");
   if (chkSide) chkSide.checked = checked;
   const chkQuick = document.getElementById("stageQuickChkEsig");
   if (chkQuick) chkQuick.checked = checked;
@@ -2931,6 +3852,28 @@ function updateCertHeaderInputs() {
     }
   }
 
+  // Populate CA Template Formula Textarea
+  const caInp = document.getElementById("certCaTemplateInput");
+  if (caInp) {
+    caInp.value = cs.ca_template_formula || DEFAULT_CA_TEMPLATE_FORMULA;
+  }
+
+  // Populate Header Spacing & Logo Distance Sliders
+  if (cs.header_spacing !== undefined) appState.headerSpacing = parseInt(cs.header_spacing, 10) || 0;
+  if (cs.logo_distance !== undefined) appState.logoDistance = parseInt(cs.logo_distance, 10) || 0;
+
+  const hSpacingSlider = document.getElementById("certHeaderSpacingSlider");
+  const lblHSpacing = document.getElementById("lblHeaderSpacing");
+  if (hSpacingSlider) hSpacingSlider.value = appState.headerSpacing || 0;
+  if (lblHSpacing) lblHSpacing.textContent = `${appState.headerSpacing > 0 ? '+' : ''}${appState.headerSpacing || 0}px`;
+
+  const lDistSlider = document.getElementById("certLogoDistanceSlider");
+  const lblLDist = document.getElementById("lblLogoDistance");
+  if (lDistSlider) lDistSlider.value = appState.logoDistance || 0;
+  if (lblLDist) lblLDist.textContent = `${appState.logoDistance > 0 ? '+' : ''}${appState.logoDistance || 0}px`;
+
+  updateCaFormulaLivePreview();
+
   if (ctx) {
     ctx.textContent = appState.currentTemplate === 'appreciation' ? 'APPRECIATION' : (appState.currentTemplate === 'appearance' ? 'APPEARANCE' : 'PARTICIPATION');
   }
@@ -3044,14 +3987,29 @@ async function saveCertField(fieldKey, isDebounce = false) {
       key = 'participation_citation';
       labelName = "Participation Citation";
     }
+  } else if (fieldKey === 'ca_template_formula') {
+    inpId = "certCaTemplateInput";
+    statusId = "caTemplateSaveStatus";
+    labelName = "CA Body Paragraph Formula";
+    key = "ca_template_formula";
+  } else if (fieldKey === 'header_spacing') {
+    inpId = "certHeaderSpacingSlider";
+    statusId = null;
+    labelName = "Header Vertical Spacing";
+    key = "header_spacing";
+  } else if (fieldKey === 'logo_distance') {
+    inpId = "certLogoDistanceSlider";
+    statusId = null;
+    labelName = "Header Logo Distance";
+    key = "logo_distance";
   }
 
   const inp = document.getElementById(inpId);
   const val = (inp ? inp.value : (appState.certSettings ? appState.certSettings[key] : "")).trim();
-  const statusSpan = document.getElementById(statusId);
+  const statusSpan = statusId ? document.getElementById(statusId) : null;
 
-  if (!val) {
-    if (!isDebounce) alert(`${labelName} cannot be empty.`);
+  if (!val && fieldKey !== 'header_spacing' && fieldKey !== 'logo_distance') {
+    if (!isDebounce) showToast(`${labelName} cannot be empty.`, 'warning');
     return;
   }
 
@@ -3074,12 +4032,12 @@ async function saveCertField(fieldKey, isDebounce = false) {
         statusSpan.classList.remove("hidden");
         setTimeout(() => statusSpan.classList.add("hidden"), 2500);
       }
-      showToastNotification(`Saved: ${labelName} saved to database!`);
+      showToast(`Saved: ${labelName} saved to database!`, 'success');
     } else {
-      alert("Error saving: " + (data.message || "Unknown error"));
+      showToast("Error saving: " + (data.message || "Unknown error"), 'error');
     }
   } catch (err) {
-    alert("Error saving certificate setting: " + err);
+    showToast("Error saving certificate setting: " + err, 'error');
   }
 }
 
@@ -3123,7 +4081,7 @@ async function saveAllCertificateSettings() {
       alert("Error saving certificate settings: " + (data.message || "Unknown error"));
     }
   } catch (err) {
-    alert("Error communicating with server: " + err);
+    showToast("Error communicating with server: : " + err, "error");
   }
 }
 
@@ -3142,7 +4100,7 @@ async function resetCertificateSettings() {
       showToastNotification("Reset: Certificate headers and titles restored to official defaults!");
     }
   } catch (err) {
-    alert("Error resetting certificate settings: " + err);
+    showToast("Error resetting certificate settings: : " + err, "error");
   }
 }
 
@@ -3243,6 +4201,265 @@ function buildSignatoryFooterHtml(sig1, sig2, showSig1Img, showSig2Img, isCA = f
   }
 }
 
+// ==========================================================================
+// STUDIO ACCORDIONS, VIEWPORT ZOOM & CA FORMULA ENGINE
+// ==========================================================================
+
+const DEFAULT_CA_TEMPLATE_FORMULA = "This is to certify that {title_prefix} {full_name}, {position} of {office}, was duly verified to have attended and participated in the activity entitled “{activity_title}: {activity_theme},” held on {activity_date}, at the {activity_venue}.";
+
+// 1. Studio Accordion Controller
+function toggleStudioAccordion(name) {
+  const body = document.getElementById(`acc-body-${name}`);
+  const icon = document.getElementById(`acc-icon-${name}`);
+  if (!body) return;
+  const isCollapsed = body.classList.toggle('collapsed');
+  if (icon) {
+    icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+  }
+}
+
+function expandAllStudioAccordions() {
+  ['content', 'signatories', 'typography', 'watermark'].forEach(name => {
+    const body = document.getElementById(`acc-body-${name}`);
+    const icon = document.getElementById(`acc-icon-${name}`);
+    if (body) body.classList.remove('collapsed');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  });
+}
+
+function collapseAllStudioAccordions() {
+  ['content', 'signatories', 'typography', 'watermark'].forEach(name => {
+    const body = document.getElementById(`acc-body-${name}`);
+    const icon = document.getElementById(`acc-icon-${name}`);
+    if (body) body.classList.add('collapsed');
+    if (icon) icon.style.transform = 'rotate(-90deg)';
+  });
+}
+
+// 2. Studio In-App Viewport Zoom Controller
+function applyStudioCanvasZoom() {
+  const stage = document.getElementById("certViewportStage");
+  const display = document.getElementById("certZoomDisplay");
+  if (!stage) return;
+  const zoom = appState.certZoom || 100;
+  const scale = zoom / 100;
+  stage.style.transform = `scale(${scale})`;
+  if (display) {
+    display.textContent = `${Math.round(zoom)}%`;
+  }
+}
+
+function setStudioCanvasZoom(val) {
+  appState.certZoom = Math.max(30, Math.min(200, Number(val)));
+  applyStudioCanvasZoom();
+}
+
+function adjustStudioCanvasZoom(delta) {
+  setStudioCanvasZoom((appState.certZoom || 100) + delta);
+}
+
+function autoFitStudioCanvas() {
+  const container = document.querySelector(".cert-viewport-container");
+  const canvas = document.getElementById("certStageCanvas");
+  if (!container || !canvas) return;
+
+  const containerWidth = container.clientWidth - 20;
+  const canvasWidth = 850;
+  if (containerWidth > 0) {
+    const idealZoom = Math.min(100, Math.max(40, Math.round((containerWidth / canvasWidth) * 100)));
+    setStudioCanvasZoom(idealZoom);
+    showToast(`Canvas view fitted to ${idealZoom}%`, 'info', 1800);
+  }
+}
+
+function toggleStudioFocusMode() {
+  const sidebar = document.getElementById("studioControlsSidebar");
+  const canvasCol = document.getElementById("studioCanvasArea");
+  const focusBtn = document.getElementById("certZoomFocusBtn");
+  if (!sidebar || !canvasCol) return;
+
+  appState.isFocusMode = !appState.isFocusMode;
+  if (appState.isFocusMode) {
+    sidebar.classList.add("hidden");
+    canvasCol.classList.remove("lg:col-span-8");
+    canvasCol.classList.add("lg:col-span-12");
+    if (focusBtn) {
+      focusBtn.innerHTML = '<i class="fa-solid fa-compress text-[9px]"></i>';
+      focusBtn.classList.add("bg-move-gold-500", "text-slate-950");
+      focusBtn.classList.remove("bg-slate-800", "text-slate-300");
+    }
+    showToast("Focus Mode Activated (Controls hidden)", "info", 2000);
+  } else {
+    sidebar.classList.remove("hidden");
+    canvasCol.classList.remove("lg:col-span-12");
+    canvasCol.classList.add("lg:col-span-8");
+    if (focusBtn) {
+      focusBtn.innerHTML = '<i class="fa-solid fa-expand text-[9px]"></i>';
+      focusBtn.classList.remove("bg-move-gold-500", "text-slate-950");
+      focusBtn.classList.add("bg-slate-800", "text-slate-300");
+    }
+    showToast("Standard Two-Column View Restored", "info", 1500);
+  }
+  setTimeout(() => {
+    if (appState.isFocusMode) {
+      setStudioCanvasZoom(100);
+    } else {
+      autoFitStudioCanvas();
+    }
+  }, 100);
+}
+
+// 3. Header Top Spacing & Logo Distance Controllers
+function onHeaderSpacingChange(val) {
+  appState.headerSpacing = parseInt(val, 10) || 0;
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings.header_spacing = appState.headerSpacing;
+  const lbl = document.getElementById("lblHeaderSpacing");
+  if (lbl) lbl.textContent = `${appState.headerSpacing > 0 ? '+' : ''}${appState.headerSpacing}px`;
+  renderCertificateCanvas();
+}
+
+function nudgeHeaderSpacing(delta) {
+  const cur = appState.headerSpacing || 0;
+  const next = Math.max(-30, Math.min(50, cur + delta));
+  const slider = document.getElementById("certHeaderSpacingSlider");
+  if (slider) slider.value = next;
+  onHeaderSpacingChange(next);
+}
+
+function setHeaderSpacing(val) {
+  const slider = document.getElementById("certHeaderSpacingSlider");
+  if (slider) slider.value = val;
+  onHeaderSpacingChange(val);
+}
+
+function onLogoDistanceChange(val) {
+  appState.logoDistance = parseInt(val, 10) || 0;
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings.logo_distance = appState.logoDistance;
+  const lbl = document.getElementById("lblLogoDistance");
+  if (lbl) lbl.textContent = `${appState.logoDistance > 0 ? '+' : ''}${appState.logoDistance}px`;
+  renderCertificateCanvas();
+}
+
+function nudgeLogoDistance(delta) {
+  const cur = appState.logoDistance || 0;
+  const next = Math.max(-20, Math.min(60, cur + delta));
+  const slider = document.getElementById("certLogoDistanceSlider");
+  if (slider) slider.value = next;
+  onLogoDistanceChange(next);
+}
+
+function setLogoDistance(val) {
+  const slider = document.getElementById("certLogoDistanceSlider");
+  if (slider) slider.value = val;
+  onLogoDistanceChange(val);
+}
+
+// 4. CA Body Paragraph Formula Engine
+function compileCaParagraphHtml(formula, attendee, act, isEditable = false, attendeeIdx = 0) {
+  const str = (formula && formula.trim()) ? formula : DEFAULT_CA_TEMPLATE_FORMULA;
+  const sex = String(attendee?.gender || attendee?.sex || '').trim().toUpperCase();
+  const prefix = (sex === 'F' || sex === 'FEMALE') ? 'MS.' : 'MR.';
+  const pos = attendee?.role_title || attendee?.position || 'Employee / Participant';
+  const off = attendee?.office || 'City Government of Baguio';
+  const pron = (sex === 'F' || sex === 'FEMALE') ? 'her' : 'his';
+
+  let html = escapeHtml(str);
+
+  if (isEditable) {
+    const editName = `<strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('full_name', this.innerText, ${attendeeIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.72)}px;" title="Click to edit recipient name (auto-saves)">${escapeHtml(attendee?.full_name || '')}</strong>`;
+    const editPos = `<strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('position', this.innerText, ${attendeeIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit position (auto-saves)">${escapeHtml(pos)}</strong>`;
+    const editOff = `<strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('office', this.innerText, ${attendeeIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit office (auto-saves)">${escapeHtml(off)}</strong>`;
+    const editTitle = `<strong contenteditable="true" onblur="saveStudioActivityField('title', this.innerText)" class="cert-editable font-bold cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity title">${escapeHtml(act?.title || '')}</strong>`;
+    const editTheme = `<strong contenteditable="true" onblur="saveStudioActivityField('theme', this.innerText)" class="cert-editable font-bold cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity theme">${escapeHtml(act?.theme || '')}</strong>`;
+    const editDate = `<strong contenteditable="true" onblur="saveStudioActivityField('date', this.innerText)" class="cert-editable font-bold cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit date">${escapeHtml(act?.date || '')}</strong>`;
+    const editVenue = `<strong contenteditable="true" onblur="saveStudioActivityField('venue', this.innerText)" class="cert-editable font-bold cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit venue">${escapeHtml(act?.venue || '')}</strong>`;
+
+    html = html
+      .replace(/\{title_prefix\}/g, `<span class="font-bold text-slate-950">${prefix}</span>`)
+      .replace(/\{full_name\}/g, editName)
+      .replace(/\{position\}/g, editPos)
+      .replace(/\{office\}/g, editOff)
+      .replace(/\{activity_title\}/g, editTitle)
+      .replace(/\{activity_theme\}/g, editTheme)
+      .replace(/\{activity_date\}/g, editDate)
+      .replace(/\{activity_venue\}/g, editVenue)
+      .replace(/\{his\/her\}/gi, pron);
+  } else {
+    html = html
+      .replace(/\{title_prefix\}/g, `<strong>${prefix}</strong>`)
+      .replace(/\{full_name\}/g, `<strong>${escapeHtml(attendee?.full_name || '')}</strong>`)
+      .replace(/\{position\}/g, `<strong>${escapeHtml(pos)}</strong>`)
+      .replace(/\{office\}/g, `<strong>${escapeHtml(off)}</strong>`)
+      .replace(/\{activity_title\}/g, `<strong>${escapeHtml(act?.title || '')}</strong>`)
+      .replace(/\{activity_theme\}/g, `<strong>${escapeHtml(act?.theme || '')}</strong>`)
+      .replace(/\{activity_date\}/g, `<strong>${escapeHtml(act?.date || '')}</strong>`)
+      .replace(/\{activity_venue\}/g, `<strong>${escapeHtml(act?.venue || '')}</strong>`)
+      .replace(/\{his\/her\}/gi, pron);
+  }
+
+  return html;
+}
+
+function insertCaToken(token) {
+  const textarea = document.getElementById("certCaTemplateInput");
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const val = textarea.value;
+  textarea.value = val.substring(0, start) + token + val.substring(end);
+  textarea.selectionStart = textarea.selectionEnd = start + token.length;
+  textarea.focus();
+  onCaTemplateFormulaInput(textarea.value);
+}
+
+function onCaTemplateFormulaInput(val) {
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings.ca_template_formula = val;
+  updateCaFormulaLivePreview();
+  renderCertificateCanvas();
+}
+
+async function saveCaTemplateFormula() {
+  const val = document.getElementById("certCaTemplateInput")?.value?.trim() || "";
+  if (!appState.certSettings) appState.certSettings = {};
+  appState.certSettings.ca_template_formula = val;
+  await saveCertField('ca_template_formula');
+  const status = document.getElementById("caTemplateSaveStatus");
+  if (status) {
+    status.classList.remove("hidden");
+    setTimeout(() => status.classList.add("hidden"), 2000);
+  }
+}
+
+function resetCaTemplateFormula() {
+  const textarea = document.getElementById("certCaTemplateInput");
+  if (textarea) textarea.value = DEFAULT_CA_TEMPLATE_FORMULA;
+  onCaTemplateFormulaInput(DEFAULT_CA_TEMPLATE_FORMULA);
+  showToast("CA formula reset to official standard format", "info");
+}
+
+function updateCaFormulaLivePreview() {
+  const previewEl = document.getElementById("caFormulaLivePreview");
+  if (!previewEl) return;
+  const recipients = getActiveCertRecipients();
+  const attendee = (recipients && recipients[appState.currentCertIndex]) || {
+    full_name: "DIAZEN, MICHAEL M.",
+    position: "ENGINEER II (SANITARY ENGINEER)",
+    office: "CEPMO",
+    gender: "M"
+  };
+  const act = appState.customCertFields || {
+    title: "Men in the Kitchen 2",
+    theme: "Love Served in the Kitchen",
+    date: "October 20, 2026",
+    venue: "CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City"
+  };
+  const formula = appState.certSettings?.ca_template_formula || DEFAULT_CA_TEMPLATE_FORMULA;
+  previewEl.innerHTML = compileCaParagraphHtml(formula, attendee, act, false, 0);
+}
+
 // -------------------------------------------------------------
 // CERTIFICATE CANVAS RENDERING (1 UNIFIED ENGINE, 3 TEMPLATES)
 // -------------------------------------------------------------
@@ -3313,12 +4530,12 @@ function renderCertificateCanvas() {
       ${watermarkHtml}
 
       <!-- Certificate Header -->
-      <div class="text-center relative z-10">
+      <div class="text-center relative z-10" style="transform: translateY(${appState.headerSpacing || 0}px); transition: transform 0.1s ease;">
         ${appState.showLogos ? `
-          <div class="absolute left-0 top-0 flex items-center">
+          <div class="absolute top-0 flex items-center" style="left: ${appState.logoDistance || 0}px;">
             <img src="/CITY HALL LOGO.png" class="w-14 h-14 object-contain">
           </div>
-          <div class="absolute right-0 top-0 flex items-center">
+          <div class="absolute top-0 flex items-center" style="right: ${appState.logoDistance || 0}px;">
             <img src="/MOVE BAGUIO LOGO.png" class="w-14 h-14 object-contain">
           </div>
         ` : ''}
@@ -3392,12 +4609,12 @@ function renderCertificateCanvas() {
       ${watermarkHtml}
 
       <!-- CA Header -->
-      <div class="relative z-10 text-center border-b pb-4">
+      <div class="relative z-10 text-center border-b pb-4" style="transform: translateY(${appState.headerSpacing || 0}px); transition: transform 0.1s ease;">
         ${appState.showLogos ? `
-          <div class="absolute left-0 top-0">
+          <div class="absolute top-0" style="left: ${appState.logoDistance || 0}px;">
             <img src="/CITY HALL LOGO.png" class="w-12 h-12 object-contain">
           </div>
-          <div class="absolute right-0 top-0">
+          <div class="absolute top-0" style="right: ${appState.logoDistance || 0}px;">
             <img src="/MOVE BAGUIO LOGO.png" class="w-12 h-12 object-contain">
           </div>
         ` : ''}
@@ -3411,8 +4628,8 @@ function renderCertificateCanvas() {
         </h2>
       </div>
 
-      <!-- Formal Body -->
-      <div class="group/recip my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+      <!-- Formal Body (Compiled via CA Formula Engine) -->
+      <div class="group/recip my-auto py-3 space-y-2 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
         <!-- Quick on-canvas body nudge & font size pill on hover (hidden during print) -->
         <div class="no-print absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover/recip:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
           <div class="flex items-center gap-1">
@@ -3430,32 +4647,13 @@ function renderCertificateCanvas() {
             <button type="button" onclick="adjustBodyFontSize(0.5)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make body text larger">A+</button>
           </div>
           <span class="text-slate-600">|</span>
-          <div class="flex items-center gap-1">
-            <span class="text-slate-400">Name Font:</span>
-            <button type="button" onclick="adjustNameFontSize(-2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font smaller">A-</button>
-            <span class="text-move-gold-400 font-semibold">${appState.nameFontSize || 26}px</span>
-            <button type="button" onclick="adjustNameFontSize(2)" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded" title="Make name font larger">A+</button>
-          </div>
-          <span class="text-slate-600">|</span>
           <button type="button" onclick="openModalEditAttendeeFromStudio(${appState.currentCertIndex})" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded text-move-gold-400 flex items-center gap-1" title="Open full edit form">
             <i class="fa-solid fa-pen-to-square text-[9px]"></i> Edit Details
           </button>
         </div>
-        <p class="leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px;">
-          <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_intro', this.innerText)" onblur="saveCanvasCertField('appearance_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit intro line (auto-saves to database)">${escapeHtml(appState.certSettings?.appearance_intro || 'This is to certify that')}</span> 
-          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('full_name', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.72)}px;" title="Click to edit recipient name (auto-saves)">${escapeHtml(attendee.full_name)}</strong>, holding the position / assignment of 
-          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('position', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit position / assignment (auto-saves)">${escapeHtml(attendee.role_title || attendee.position || 'Employee / Participant')}</strong> under the 
-          <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('office', this.innerText, ${appState.currentCertIndex})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit office / agency (auto-saves)">${escapeHtml(attendee.office || 'City Government of Baguio')}</strong>, 
-          <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_citation', this.innerText)" onblur="saveCanvasCertField('appearance_citation', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text hover:bg-amber-100/40 px-1 rounded transition" title="Click to edit certification statement (auto-saves to database)">${escapeHtml(getAppearanceCitation(attendee))}</span> the activity entitled:
-        </p>
-
-        <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(18, (appState.bodyFontSize || 12) + 2)}px;">
-          “<span contenteditable="true" onblur="saveStudioActivityField('title', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity title">${escapeHtml(act.title)}</span>: <span contenteditable="true" onblur="saveStudioActivityField('theme', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity theme">${escapeHtml(act.theme)}</span>”
-        </p>
-
-        <p style="font-size: ${appState.bodyFontSize || 12}px;">
-          held on <strong contenteditable="true" onblur="saveStudioActivityField('date', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit date">${escapeHtml(act.date)}</strong> at the <strong contenteditable="true" onblur="saveStudioActivityField('venue', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit venue">${escapeHtml(act.venue)}</strong>.
-        </p>
+        <div class="leading-relaxed text-justify transition-all">
+          ${compileCaParagraphHtml(appState.certSettings?.ca_template_formula, attendee, act, true, appState.currentCertIndex)}
+        </div>
       </div>
 
       <!-- Accrediting Signatory -->
@@ -3483,12 +4681,12 @@ function renderCertificateCanvas() {
         ${watermarkHtml}
 
         <!-- CA Header -->
-        <div class="relative z-10 text-center border-b pb-4">
+        <div class="relative z-10 text-center border-b pb-4" style="transform: translateY(${appState.headerSpacing || 0}px); transition: transform 0.1s ease;">
           ${appState.showLogos ? `
-            <div class="absolute left-0 top-0">
+            <div class="absolute top-0" style="left: ${appState.logoDistance || 0}px;">
               <img src="/CITY HALL LOGO.png" class="w-12 h-12 object-contain">
             </div>
-            <div class="absolute right-0 top-0">
+            <div class="absolute top-0" style="right: ${appState.logoDistance || 0}px;">
               <img src="/MOVE BAGUIO LOGO.png" class="w-12 h-12 object-contain">
             </div>
           ` : ''}
@@ -3502,29 +4700,17 @@ function renderCertificateCanvas() {
           </h2>
         </div>
 
-        <!-- Formal Body -->
-        <div class="group/recipbot my-auto py-3 space-y-3 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px);">
+        <!-- Formal Body (Bottom Slip) -->
+        <div class="group/recipbot my-auto py-3 space-y-2 leading-relaxed text-justify text-slate-800 relative z-10 transition-transform duration-100" style="transform: translateY(${appState.recipientYOffset || 0}px); font-size: ${appState.bodyFontSize || 12}px;">
           <div class="no-print absolute -top-7 left-1/2 -translate-x-1/2 opacity-0 group-hover/recipbot:opacity-100 transition-all duration-150 bg-slate-950/90 text-white rounded-md px-2.5 py-1 text-[9px] font-mono flex items-center gap-2 shadow-xl z-30 border border-slate-700 pointer-events-auto backdrop-blur-sm">
             <span class="text-emerald-400 font-bold">Bottom Slip:</span>
             <button type="button" onclick="openModalEditAttendeeFromStudio(${bottomIdx})" class="hover:text-move-gold-400 px-1.5 font-bold cursor-pointer bg-slate-800 rounded text-move-gold-400 flex items-center gap-1" title="Open full edit form">
               <i class="fa-solid fa-pen-to-square text-[9px]"></i> Edit Details
             </button>
           </div>
-          <p class="leading-relaxed transition-all" style="font-size: ${appState.bodyFontSize || 12}px;">
-            <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_intro', this.innerText)" onblur="saveCanvasCertField('appearance_intro', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit intro line (auto-saves to database)">${escapeHtml(appState.certSettings?.appearance_intro || 'This is to certify that')}</span> 
-            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('full_name', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable uppercase font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" style="font-size: ${Math.round((appState.nameFontSize || 26) * 0.72)}px;" title="Click to edit recipient name (auto-saves)">${escapeHtml(bottomAttendee.full_name)}</strong>, holding the position / assignment of 
-            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('position', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit position / assignment (auto-saves)">${escapeHtml(bottomAttendee.role_title || bottomAttendee.position || 'Employee / Participant')}</strong> under the 
-            <strong contenteditable="true" onblur="onCanvasAttendeeFieldBlur('office', this.innerText, ${bottomIdx})" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable font-bold text-slate-950 cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit office / agency (auto-saves)">${escapeHtml(bottomAttendee.office || 'City Government of Baguio')}</strong>, 
-            <span contenteditable="true" oninput="onCanvasCertFieldInput('appearance_citation', this.innerText)" onblur="saveCanvasCertField('appearance_citation', this.innerText, this)" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}" class="cert-editable cursor-text hover:bg-amber-100/40 px-1 rounded transition" title="Click to edit certification statement (auto-saves to database)">${escapeHtml(getAppearanceCitation(bottomAttendee))}</span> the activity entitled:
-          </p>
-
-          <p class="text-center font-bold text-slate-950 py-1" style="font-size: ${Math.min(18, (appState.bodyFontSize || 12) + 2)}px;">
-            “<span contenteditable="true" onblur="saveStudioActivityField('title', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity title">${escapeHtml(act.title)}</span>: <span contenteditable="true" onblur="saveStudioActivityField('theme', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit activity theme">${escapeHtml(act.theme)}</span>”
-          </p>
-
-          <p style="font-size: ${appState.bodyFontSize || 12}px;">
-            held on <strong contenteditable="true" onblur="saveStudioActivityField('date', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit date">${escapeHtml(act.date)}</strong> at the <strong contenteditable="true" onblur="saveStudioActivityField('venue', this.innerText)" class="cert-editable cursor-text px-1 rounded hover:bg-amber-100/60 transition" title="Click to edit venue">${escapeHtml(act.venue)}</strong>.
-          </p>
+          <div class="leading-relaxed text-justify transition-all">
+            ${compileCaParagraphHtml(appState.certSettings?.ca_template_formula, bottomAttendee, act, true, bottomIdx)}
+          </div>
         </div>
 
         <!-- Accrediting Signatory -->
@@ -3543,12 +4729,12 @@ function renderCertificateCanvas() {
       ${watermarkHtml}
 
       <!-- Certificate Header -->
-      <div class="text-center relative z-10">
+      <div class="text-center relative z-10" style="transform: translateY(${appState.headerSpacing || 0}px); transition: transform 0.1s ease;">
         ${appState.showLogos ? `
-          <div class="absolute left-0 top-0 flex items-center">
+          <div class="absolute top-0 flex items-center" style="left: ${appState.logoDistance || 0}px;">
             <img src="/CITY HALL LOGO.png" class="w-14 h-14 object-contain">
           </div>
-          <div class="absolute right-0 top-0 flex items-center">
+          <div class="absolute top-0 flex items-center" style="right: ${appState.logoDistance || 0}px;">
             <img src="/MOVE BAGUIO LOGO.png" class="w-14 h-14 object-contain">
           </div>
         ` : ''}
@@ -3606,6 +4792,8 @@ function renderCertificateCanvas() {
   }
 
   updateCaPrintModeUI();
+  applyStudioCanvasZoom();
+  updateCaFormulaLivePreview();
 }
 
 // ==========================================================================
@@ -3752,7 +4940,7 @@ function batchPrintAllCertificates() {
   const recipients = getActiveCertRecipients();
   if (!printBox || recipients.length === 0) {
     const poolLabel = appState.certRecipientPool === 'facilitators' ? 'facilitators' : 'attendees';
-    alert(`No present ${poolLabel} available to print.`);
+    showToast(`No present ${poolLabel} available to print.`, "warning");
     return;
   }
 
@@ -3901,7 +5089,7 @@ async function saveSignatoryTitle(sigNum) {
   const statusSpan = document.getElementById(sigNum === 1 ? "sig1SaveStatus" : "sig2SaveStatus");
 
   if (!title) {
-    alert("Signatory position title cannot be empty.");
+    showToast("Signatory position title cannot be empty.", "warning");
     return;
   }
 
@@ -3945,10 +5133,10 @@ async function saveSignatoryTitle(sigNum) {
       }
       showToastNotification(`Saved: ${sig ? sig.name : 'Signatory'} details updated in database!`);
     } else {
-      alert("Error saving signatory: " + (data.message || "Unknown error"));
+      showToast("Error saving signatory: " + (data.message || "Unknown error"), "error");
     }
   } catch (err) {
-    alert("Failed to save signatory: " + err);
+    showToast("Failed to save signatory: : " + err, "error");
   }
 }
 
@@ -4026,22 +5214,40 @@ async function onCanvasSigNameBlur(sigNum, text) {
   }
 }
 
-function showToastNotification(message) {
-  let toast = document.getElementById("appToastNotification");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "appToastNotification";
-    toast.className = "fixed top-6 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 transition-all duration-300 pointer-events-none border border-emerald-400";
-    document.body.appendChild(toast);
+function showToast(message, type = 'success', duration = 3000) {
+  const container = document.getElementById("toastContainer");
+  if (!container) {
+    showToastNotification(message);
+    return;
   }
-  toast.innerHTML = `<i class="fa-solid fa-circle-check text-base text-white"></i> <span>${escapeHtml(message)}</span>`;
-  toast.style.opacity = "1";
-  toast.style.transform = "translate(-50%, 0)";
-  if (window._toastTimer) clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translate(-50%, -10px)";
-  }, 2800);
+  const toast = document.createElement("div");
+  let bgClass = "bg-slate-900/95 text-white border-slate-700";
+  let iconHtml = '<i class="fa-solid fa-circle-info text-sky-400 text-sm shrink-0"></i>';
+  if (type === 'success') {
+    bgClass = "bg-emerald-950/95 text-emerald-100 border-emerald-500/50 shadow-emerald-950/50";
+    iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400 text-sm shrink-0"></i>';
+  } else if (type === 'error') {
+    bgClass = "bg-rose-950/95 text-rose-100 border-rose-500/50 shadow-rose-950/50";
+    iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-400 text-sm shrink-0"></i>';
+  } else if (type === 'warning') {
+    bgClass = "bg-amber-950/95 text-amber-100 border-amber-500/50 shadow-amber-950/50";
+    iconHtml = '<i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm shrink-0"></i>';
+  }
+  toast.className = `app-toast-item border ${bgClass}`;
+  toast.innerHTML = `
+    ${iconHtml}
+    <div class="flex-1 leading-snug break-words">${escapeHtml(message)}</div>
+    <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white ml-1 text-xs shrink-0 cursor-pointer">✕</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-leave');
+    setTimeout(() => toast.remove(), 220);
+  }, duration);
+}
+
+function showToastNotification(message) {
+  showToast(message, 'success', 2800);
 }
 
 function showCanvasSaveIndicator(element, text) {
@@ -4153,7 +5359,7 @@ function syncSignatoryChooserUI() {
   const qChkEsig = document.getElementById("stageQuickChkEsig");
   const qChkTitle = document.getElementById("stageQuickChkTitle");
   const qChkOffice = document.getElementById("stageQuickChkOffice");
-  const sideChkEsig = document.getElementById("certToggleSignatures");
+  const sideChkEsig = document.getElementById("certToggleSignatures") || document.getElementById("certToggleSigImages");
 
   if (chkName) chkName.checked = appState.showSigName !== false;
   if (chkTitle) chkTitle.checked = appState.showSigTitle !== false;
