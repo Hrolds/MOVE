@@ -83,13 +83,14 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
 * **Quick Action Hub Cards**: 1-click shortcuts to explore the Chapter Roster, Officers Protocol hierarchy, Activities & Seminars, and Certificate Studio.
 
 ### 1. 👥 Dedicated MOVE Roster, Left Nav Panel & Selective Status Manager
-* **Ergonomic Category Navigation Panel**:
+* **Ergonomic Category Navigation Panel & Streamlined Quick Tools**:
   * **Manage Personnel** (`fa-users-gear`): Central administrative hub where all personnel are displayed and selective status flags are managed.
   * **Members (Cadre)**: Dedicated directory view of active chapter members.
   * **Officers**: Executive board members.
   * **Committees**: Standing committee leaders and members.
   * **Participants**: Designated training trainees.
-  * Displays dynamic count badges and docked quick tool shortcut (*Compare with HRIS API*).
+  * **Consolidated Quick Tools**: Centralized the **Compare with HRIS API** tool directly within the Left Nav Panel with live diff count indicators, eliminating redundant triggers from the top navbar header and table toolbar banner.
+  * **Streamlined UI**: Removed redundant search pool buttons and duplicate "Add Person" triggers from the sidebar to keep focus on core roster navigation.
 * **Officers Protocol Hierarchy & Arrangement Manager**:
   * Dedicated ordering system for executive board officers adhering to official government protocol: **President &rarr; Vice President &rarr; Secretary &rarr; Assistant Secretary &rarr; Treasurer &rarr; Assistant Treasurer &rarr; Public Relations Officer &rarr; Assistant P.R.O.**
   * **Interactive Arrangement Modal (`#modalArrangeOfficers`)**: Drag-and-drop or use Up/Down arrows to customize order, with a 1-click **Reset to Protocol Order** button and persistent SQLite saving (`/api/move-roster/reorder-officers`).
@@ -100,12 +101,13 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
 * **Locked to 10 Rows Per Page (Pagination)**:
   * Avoids whole-page vertical scrolling with clean, instant pagination controls (`[ < ] [ 1 ] [ 2 ] ... [ > ]`).
   * Displays real-time range indicators (e.g. `Showing 1 – 10 of 59 personnel`).
-* **Clean Distinct Column Layout**:
+* **Clean Distinct Column Layout & Minimalist Data Grid**:
   * **Full Name**: Clean personnel name in bold (no address text clutter underneath).
   * **MOVE Position Title**: Distinct badge (e.g. `Member (Cadre)`, `Assistant Treasurer`, `Auditor`).
   * **Office Position Title**: Official government / plantilla designation (`Administrative Assistant II`, etc.) with quick edit pencil.
-  * **Office / Dept**: Official municipal office or agency.
-  * Plus **Sex**, **Civil Status**, and **Actions**.
+  * **Office / Dept**: Streamlined without outer border boxes for a clean, cohesive data grid.
+  * **Civil Status**: Text styled cleanly without outer box borders.
+  * Plus **Sex** and **Actions**.
 * **In-Place Member Editing**: Click `[ ✏️ Edit ]` on any row to open `#modalEditMember` and update name, MOVE role, government position title, or office with immediate SQLite persistence.
 * **Standardized Office & Department Conventions**: Clean, concise department and division naming across all roster and facilitator records (e.g. City Mayor's Office - Library streamlined to avoid verbose repetitions, and Department of Education (DEPED) synchronized with attendance rosters).
 * **High-Resolution Transparent Logo**: `MOVE BAGUIO LOGO.png` is an anti-aliased RGBA PNG that floats transparently on dark headers, cards, and certificate watermarks.
@@ -265,6 +267,10 @@ Comprehensive signatory customization available via both the **Quick Bar** above
 | `POST` | `/api/certificate-settings/reset` | Reset certificate headers, titles, intros, and citations to official defaults |
 | `GET` | `/api/signatories` | Get list of available executive signatories |
 | `PUT` | `/api/signatories/{id}` | Update signatory position title, name, or office in SQLite |
+| `POST` | `/api/move-roster/reorder-officers` | Persist reordered executive officers ranking in SQLite (`officer_order`) |
+| `GET` | `/api/hris/compare` | Compare MOVE chapter roster against City HRIS API for diffs |
+| `POST` | `/api/hris/sync-single` | Sync single member details directly from HRIS API |
+| `POST` | `/api/hris/sync-roster` | Batch sync selected or all outdated members with HRIS API |
 
 ---
 
