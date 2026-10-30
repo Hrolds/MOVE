@@ -68,18 +68,32 @@ def ensure_hris_columns():
     conn.close()
 
 
+import unicodedata
+
+
+def clean_ph_name(s: str) -> str:
+    """Normalize Philippine name characters, mapping Ñ/ñ to N/n and stripping accents."""
+    if not s:
+        return ""
+    s = str(s).replace("Ñ", "N").replace("ñ", "n")
+    s = "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+    return s
+
+
 def norm_str(val: Any) -> str:
-    """Normalize string by removing non-alphanumeric chars for robust fuzzy matching."""
+    """Normalize string by converting Ñ->N and removing non-alphanumerics for robust fuzzy matching."""
     if val is None:
         return ""
-    return re.sub(r"[^A-Z0-9]", "", str(val).upper())
+    cleaned = clean_ph_name(str(val))
+    return re.sub(r"[^A-Z0-9]", "", cleaned.upper())
 
 
 def extract_name_tokens(name: str) -> set:
-    """Extract individual significant words from a name string."""
+    """Extract individual significant words from a name string with Philippine character support."""
     if not name:
         return set()
-    cleaned = re.sub(r"[^A-Za-z]", " ", name).upper()
+    cleaned = clean_ph_name(name)
+    cleaned = re.sub(r"[^A-Za-z0-9]", " ", cleaned).upper()
     return set(token for token in cleaned.split() if len(token) >= 2)
 
 
