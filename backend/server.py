@@ -121,7 +121,10 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 sql += " AND (full_name LIKE ? OR position LIKE ? OR office LIKE ?)"
                 params.extend([f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"])
 
-            sql += " ORDER BY full_name ASC"
+            if status_filter == "officer":
+                sql += " ORDER BY CASE WHEN officer_order IS NOT NULL AND officer_order > 0 THEN officer_order ELSE 999 END ASC, id ASC"
+            else:
+                sql += " ORDER BY full_name ASC"
             cursor = conn.execute(sql, params)
             roster = [dict(row) for row in cursor.fetchall()]
             conn.close()
@@ -341,6 +344,28 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 result = hris_service.link_manual_hris_id(int(member_id), int(hris_id), apply_sync=apply_sync)
                 self.send_json(result)
             except Exception as e:
+                self.send_json({"success": False, "error": str(e)}, 500)
+            return
+
+        # 0d. API: Save Officers Arrangement / Hierarchy Order
+        if path == "/api/move-roster/reorder-officers":
+            ordered_ids = body.get("ordered_ids", [])
+            if not ordered_ids or not isinstance(ordered_ids, list):
+                self.send_json({"success": False, "message": "ordered_ids array required"}, 400)
+                return
+
+            conn = get_connection()
+            try:
+                for rank, member_id in enumerate(ordered_ids, start=1):
+                    conn.execute(
+                        "UPDATE move_roster SET officer_order = ? WHERE id = ?;",
+                        (rank, int(member_id))
+                    )
+                conn.commit()
+                conn.close()
+                self.send_json({"success": True, "message": f"Successfully saved arrangement for {len(ordered_ids)} officers", "count": len(ordered_ids)})
+            except Exception as e:
+                conn.close()
                 self.send_json({"success": False, "error": str(e)}, 500)
             return
 
@@ -641,7 +666,21 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             conn = get_connection()
-            conn.execute(f"UPDATE move_roster SET {field} = ? WHERE id = ?;", (val, roster_id))
+            if field == "is_officer" and val == 1:
+                conn.execute("""
+                    UPDATE move_roster 
+                    SET is_officer = 1,
+                        officer_order = CASE 
+                            WHEN officer_order IS NULL OR officer_order = 999 
+                            THEN (SELECT COALESCE(MAX(officer_order), 0) + 1 FROM move_roster WHERE is_officer = 1)
+                            ELSE officer_order 
+                        END
+                    WHERE id = ?;
+                """, (roster_id,))
+            elif field == "is_officer" and val == 0:
+                conn.execute("UPDATE move_roster SET is_officer = 0, officer_order = 999 WHERE id = ?;", (roster_id,))
+            else:
+                conn.execute(f"UPDATE move_roster SET {field} = ? WHERE id = ?;", (val, roster_id))
             conn.commit()
             conn.close()
             self.send_json({"success": True, "message": f"Updated {field} = {val} for roster ID {roster_id}"})

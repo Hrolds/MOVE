@@ -48,7 +48,8 @@ def init_db():
         is_participant INTEGER DEFAULT 0,
         notes TEXT,
         hris_id INTEGER,
-        hris_status TEXT DEFAULT 'ACTIVE'
+        hris_status TEXT DEFAULT 'ACTIVE',
+        officer_order INTEGER DEFAULT 999
     );
     """)
 
@@ -58,6 +59,8 @@ def init_db():
         cursor.execute("ALTER TABLE move_roster ADD COLUMN hris_id INTEGER")
     if "hris_status" not in mr_cols:
         cursor.execute("ALTER TABLE move_roster ADD COLUMN hris_status TEXT DEFAULT 'ACTIVE'")
+    if "officer_order" not in mr_cols:
+        cursor.execute("ALTER TABLE move_roster ADD COLUMN officer_order INTEGER DEFAULT 999")
 
     # 3. Activities / Seminars table
     cursor.execute("""
