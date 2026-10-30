@@ -436,10 +436,8 @@ function renderRosterTable() {
         </td>
 
         <!-- 2. Civil Status -->
-        <td class="py-3 px-3 min-w-[120px]">
-          <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${r.civil_status === 'Single' ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30' : (r.civil_status === 'Married' ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30' : 'bg-slate-800 text-slate-300 border border-slate-700')}">
-            ${escapeHtml(r.civil_status || 'Married')}
-          </span>
+        <td class="py-3 px-3 min-w-[120px] text-xs font-medium text-slate-300">
+          ${escapeHtml(r.civil_status || 'Married')}
         </td>
 
         <!-- 3. Move Position -->
@@ -462,11 +460,9 @@ function renderRosterTable() {
           </div>
         </td>
 
-        <!-- 4. Office (use office code) -->
-        <td class="py-3 px-3 min-w-[110px]">
-          <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-950 text-amber-300 border border-amber-500/30 shadow-2xs group-hover:border-amber-400/60 transition inline-block text-center" title="${escapeHtml(officeInfo.fullName)}">
-            ${escapeHtml(officeInfo.code)}
-          </span>
+        <!-- 4. Office -->
+        <td class="py-3 px-3 min-w-[110px] text-xs font-medium text-slate-200" title="${escapeHtml(officeInfo.fullName)}">
+          ${escapeHtml(officeInfo.code || r.office || '-')}
         </td>
 
         <!-- 5. Actions -->
