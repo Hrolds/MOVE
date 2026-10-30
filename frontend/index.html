@@ -77,9 +77,7 @@
           <span>HRIS Compare</span>
           <span id="badgeTopNavHrisCount" class="px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] hidden">0</span>
         </button>
-        <button onclick="openModal('modalSearchPool')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-xs">
-          <i class="fa-solid fa-magnifying-glass text-slate-400"></i> Search Pool (748)
-        </button>
+
       </div>
     </div>
   </header>
@@ -105,12 +103,7 @@
         
         <!-- LEFT: Category Navigation Panel (w-full lg:w-64 shrink-0) -->
         <aside class="w-full lg:w-64 shrink-0 bg-slate-900/90 rounded-2xl border border-slate-800 p-4 space-y-4 shadow-xl">
-          <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <span class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <i class="fa-solid fa-layer-group text-move-orange-400"></i> Roster Nav Panel
-            </span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono" id="navPanelTotalBadge">0</span>
-          </div>
+
 
           <nav class="space-y-1.5" id="rosterNavPanel">
             <button onclick="filterRosterByStatus('all')" id="rosterFilter-all" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-md border-move-orange-400/50">
@@ -167,14 +160,8 @@
                 <span id="badgeHrisDiffCountText">HRIS</span>
               </span>
             </button>
-            <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium border border-slate-800 transition flex items-center gap-2">
-              <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
-              <span>Search Municipal Pool (748)</span>
-            </button>
-            <button onclick="openModal('modalAddMember')" class="w-full px-3 py-2 rounded-xl bg-move-orange-500/10 hover:bg-move-orange-500/20 text-move-orange-300 text-xs font-semibold border border-move-orange-500/30 transition flex items-center gap-2">
-              <i class="fa-solid fa-plus text-xs"></i>
-              <span>Add Person to MOVE</span>
-            </button>
+
+
           </div>
         </aside>
 
@@ -1569,8 +1556,6 @@
     </div>
   </div>
 
-
-
   <!-- MODAL: Edit MOVE Member (Modern Studio Profile View) -->
   <div id="modalEditMember" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 hidden">
     <div class="bg-[#0b1320]/95 border border-slate-700/80 rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl space-y-4 max-h-[92vh] flex flex-col overflow-y-auto text-slate-100">
@@ -2536,48 +2521,6 @@
     </div>
   </div>
 
-  <!-- MODAL: Search Municipal Pool (748) -->
-  <div id="modalSearchPool" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-magnifying-glass text-slate-400"></i> Municipal Employee Search Pool (748)
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-move-orange-500/20 text-move-orange-400 border border-move-orange-500/30">Locked to 10 Results</span>
-          </h3>
-          <p class="text-[11px] text-slate-400">Showing top 10 matching employees from the 748 municipal pool.</p>
-        </div>
-        <button onclick="closeModal('modalSearchPool')" class="text-slate-400 hover:text-white">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <!-- Search Input -->
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-        <input type="text" id="poolSearchInput" oninput="onSearchPool(this.value)" placeholder="Search any municipal employee by name or position..." class="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
-      </div>
-
-      <!-- Pool Results Table -->
-      <div class="flex-1 overflow-y-auto border border-slate-800 rounded-xl bg-slate-950/60">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] sticky top-0 border-b border-slate-800">
-            <tr>
-              <th class="py-2.5 px-3">Full Name</th>
-              <th class="py-2.5 px-3">Position</th>
-              <th class="py-2.5 px-3">Office</th>
-              <th class="py-2.5 px-3">Appt</th>
-              <th class="py-2.5 px-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody id="poolTableBody" class="divide-y divide-slate-800/40 font-medium">
-            <!-- Populated via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: Compare Personnel with HRIS API -->
   <div id="modalHrisCompare" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 hidden">
     <div class="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-6xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[94vh] flex flex-col text-slate-200">
@@ -2746,6 +2689,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261030-1520"></script>
+  <script src="/frontend/js/app.js?v=20261030-1535"></script>
 </body>
 </html>

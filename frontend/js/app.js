@@ -216,8 +216,7 @@ async function updateRosterCounts() {
       document.getElementById("count-officer").textContent = all.filter(r => r.is_officer).length;
       document.getElementById("count-committee").textContent = all.filter(r => r.is_committee).length;
       document.getElementById("count-participant").textContent = all.filter(r => r.is_participant).length;
-      const totalBadge = document.getElementById("navPanelTotalBadge");
-      if (totalBadge) totalBadge.textContent = all.length;
+
     }
   } catch (err) {
     console.warn("Count update failed:", err);
@@ -5768,9 +5767,7 @@ function openModal(id) {
     initQuickPickFacilitatorModal();
   }
 
-  if (id === 'modalSearchPool') {
-    onSearchPool('');
-  }
+
 }
 
 function closeModal(id) {

@@ -77,7 +77,7 @@ The primary data store is a lightweight, zero-configuration **SQLite database**:
   * **Officers**: Executive board members.
   * **Committees**: Standing committee leaders and members.
   * **Participants**: Designated training trainees.
-  * Displays dynamic count badges and docked quick tool shortcuts (*Search Municipal Pool 748* and *Add Person to MOVE*).
+  * Displays dynamic count badges and docked quick tool shortcut (*Compare with HRIS API*).
 * **Selective Status Column Exclusivity**:
   * The interactive status toggle buttons (`[✓ Member]`, `[★ Officer]`, `[◈ Committee]`, `[● Participant]`) are exclusively available under **Manage Personnel**.
   * The status column is automatically hidden on the Members, Officers, Committees, and Participants views to provide clean, uncluttered directory tables.
