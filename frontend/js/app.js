@@ -297,7 +297,7 @@ function switchView(viewName) {
     const labelMap = {
       all: 'Manage Personnel',
       officer: 'Executive Officers',
-      member: 'Members (Cadre)',
+      member: 'Members',
       committee: 'Committees',
       participant: 'Participants'
     };
@@ -382,7 +382,7 @@ function filterRosterByStatus(status) {
   appState.rosterPage = 1;
   const statuses = [
     { key: 'all', label: 'Manage Personnel', icon: 'fa-users-gear' },
-    { key: 'member', label: 'Members (Cadre)', icon: 'fa-shield-halved' },
+    { key: 'member', label: 'Members', icon: 'fa-shield-halved' },
     { key: 'officer', label: 'Executive Officers', icon: 'fa-star' },
     { key: 'committee', label: 'Committees', icon: 'fa-diagram-project' },
     { key: 'participant', label: 'Participants', icon: 'fa-user-check' }
@@ -608,7 +608,7 @@ function renderRosterTable() {
           <div class="flex items-center justify-between gap-1.5">
             <div class="flex items-center gap-1.5 min-w-0">
               <span class="w-1.5 h-1.5 rounded-full ${appState.rosterFilter === 'officer' ? 'bg-amber-500' : 'bg-emerald-600'} shrink-0"></span>
-              <span class="font-semibold text-slate-800 text-xs truncate">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
+              <span class="font-semibold text-slate-800 text-xs truncate">${escapeHtml(r.role_title || 'Member')}</span>
             </div>
             ${appState.rosterFilter === 'officer' ? `
               <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0" onclick="event.stopPropagation()">
@@ -1200,7 +1200,7 @@ function openModalEditMember(id) {
 
   if (idInput) idInput.value = member.id;
   if (nameInput) nameInput.value = member.full_name || "";
-  if (roleInput) roleInput.value = member.role_title || "Member (Cadre)";
+  if (roleInput) roleInput.value = member.role_title || "Member";
   if (posInput) posInput.value = member.position || "";
   if (offInput) offInput.value = member.office || "";
   if (genInput) genInput.value = member.gender === 'F' ? 'F' : 'M';
@@ -1636,7 +1636,7 @@ function renderHrisCompareTable() {
         <td class="py-2.5 px-3 whitespace-nowrap">
           <div class="font-bold text-white text-xs">${escapeHtml(m.full_name)}</div>
           <div class="flex items-center gap-2 mt-0.5">
-            <span class="text-[10px] font-semibold text-emerald-700">${escapeHtml(m.move_role || 'Member (Cadre)')}</span>
+            <span class="text-[10px] font-semibold text-emerald-700">${escapeHtml(m.move_role || 'Member')}</span>
             ${m.is_matched 
               ? `<span class="text-[9px] font-mono text-slate-400 bg-slate-800/80 px-1 rounded border border-slate-700">HRIS #${m.hris_id}</span>` 
               : `<span class="text-[9px] font-mono text-rose-400/90 bg-rose-950/40 px-1 rounded border border-rose-800/40">Unmatched</span>`
