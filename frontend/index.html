@@ -599,6 +599,9 @@
           <button onclick="openModal('modalAddAttendee')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus text-slate-400"></i> Add Attendee
           </button>
+          <button onclick="openActivityDocumentation(appState.currentActivityId)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5" title="View Activity Documentation, Photos, and Comments">
+            <i class="fa-solid fa-camera text-slate-400"></i> Documentation
+          </button>
           <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
             <i class="fa-solid fa-chalkboard-user text-slate-400"></i> Add Facilitator
           </button>
@@ -2323,6 +2326,241 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Activity Documentation (Photos & Comments / Field Notes) -->
+  <div id="modalActivityDocumentation" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl max-h-[92vh] flex flex-col text-slate-900 dark:text-white">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between border-b border-slate-200 dark:border-[#18352b] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 shadow-xs shrink-0">
+            <i class="fa-solid fa-camera text-base"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>Activity Documentation</span>
+              </h3>
+              <span id="docBadgePhotosCount" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-mono">0 Photos</span>
+              <span id="docBadgeCommentsCount" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b] font-mono">0 Comments</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <span id="docModalActivityTitle" class="font-bold text-slate-800 dark:text-slate-200">Activity Title</span> &bull; 
+              <span id="docModalActivityMeta">Date &bull; Venue</span>
+            </p>
+          </div>
+        </div>
+
+        <button onclick="closeModal('modalActivityDocumentation')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg transition" title="Close Documentation">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs: Photos vs Comments -->
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pt-3 px-1">
+        <div class="flex items-center gap-2">
+          <button 
+            id="tabDocPhotosBtn" 
+            onclick="switchDocTab('photos')" 
+            class="px-4 py-2 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition"
+          >
+            <i class="fa-solid fa-images text-sm"></i>
+            <span>Photos &amp; Media</span>
+            <span id="tabDocPhotoPill" class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">0</span>
+          </button>
+          <button 
+            id="tabDocCommentsBtn" 
+            onclick="switchDocTab('comments')" 
+            class="px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition"
+          >
+            <i class="fa-solid fa-comments text-sm text-slate-400"></i>
+            <span>Comments &amp; Notes</span>
+            <span id="tabDocCommentPill" class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400">0</span>
+          </button>
+        </div>
+
+        <div class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
+          <span id="docTabHint">Upload photos from cameras or phones &bull; JPG, PNG, WEBP</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Tab Content Container -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+
+        <!-- TAB 1: PHOTOS & MEDIA -->
+        <div id="docTabPhotosContent" class="space-y-4">
+          
+          <!-- Upload Photo Box -->
+          <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <i class="fa-solid fa-cloud-arrow-up text-slate-400"></i> Add Photos to Documentation
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Select pictures of participants, lectures, food preparation, or group ceremonies.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input 
+                  type="file" 
+                  id="docPhotoFileInput" 
+                  accept="image/jpeg,image/png,image/webp,image/gif" 
+                  multiple 
+                  class="hidden" 
+                  onchange="handleDocPhotosSelected(event)"
+                >
+                <button 
+                  type="button" 
+                  onclick="document.getElementById('docPhotoFileInput').click()" 
+                  class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <i class="fa-solid fa-plus"></i> Choose Photos
+                </button>
+              </div>
+            </div>
+
+            <!-- Optional Caption Input for Upload -->
+            <div class="flex items-center gap-2">
+              <input 
+                type="text" 
+                id="docPhotoCaptionInput" 
+                placeholder="Optional caption / tag (e.g. Culinary Demo, Certificate Awarding, Cadre Group Photo)..." 
+                class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition"
+              >
+            </div>
+
+            <!-- Selected Files Pending Upload Strip (hidden when empty) -->
+            <div id="docPendingUploadsContainer" class="hidden p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-500/30 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span id="docPendingUploadsText" class="font-bold text-emerald-800 dark:text-emerald-300">Ready to upload 0 photos</span>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="cancelPendingPhotos()" class="text-xs text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 font-semibold">Cancel</button>
+                  <button type="button" id="btnUploadPendingPhotos" onclick="uploadPendingPhotos()" class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-upload"></i> Upload Now
+                  </button>
+                </div>
+              </div>
+              <div id="docPendingPreviews" class="flex items-center gap-2 overflow-x-auto py-1"></div>
+            </div>
+          </div>
+
+          <!-- Photos Grid -->
+          <div id="docPhotosGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Empty State Photos -->
+          <div id="docPhotosEmptyState" class="hidden text-center py-12 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-[#18352b] bg-[#f4f7f5]/50 dark:bg-[#07110e]/50">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] flex items-center justify-center text-slate-400 mx-auto mb-3">
+              <i class="fa-solid fa-camera text-xl"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Documentation Photos Yet</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+              Add event photos, group pictures, or workshop moments to keep a permanent visual record of this activity.
+            </p>
+            <button type="button" onclick="document.getElementById('docPhotoFileInput').click()" class="mt-3.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition inline-flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-plus"></i> Upload First Photo
+            </button>
+          </div>
+
+        </div>
+
+        <!-- TAB 2: COMMENTS & FIELD NOTES -->
+        <div id="docTabCommentsContent" class="space-y-4 hidden">
+          
+          <!-- Add Comment Composer -->
+          <form id="formDocComment" onsubmit="submitDocComment(event)" class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-pen-nib text-slate-400"></i> Post Field Note or Activity Comment
+              </h4>
+              <span class="text-[10px] text-slate-400">Visible to MOVE officers &amp; organizers</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div class="sm:col-span-1">
+                <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Author Name / Role</label>
+                <input 
+                  type="text" 
+                  id="docCommentAuthor" 
+                  value="MOVE Facilitator" 
+                  required 
+                  placeholder="e.g. Dan Ricky M. Ong (President)" 
+                  class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition"
+                >
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-[11px] font-bold text-slate-600 dark:text-slate-400 block mb-1">Observation / Note Content *</label>
+                <input 
+                  type="text" 
+                  id="docCommentText" 
+                  required 
+                  placeholder="Record summary of discussion, participant engagement, notable feedback, or logistics..." 
+                  class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition"
+                >
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end">
+              <button type="submit" id="btnSubmitDocComment" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-paper-plane text-xs"></i> Post Comment
+              </button>
+            </div>
+          </form>
+
+          <!-- Comments Feed -->
+          <div id="docCommentsList" class="space-y-2.5">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Empty State Comments -->
+          <div id="docCommentsEmptyState" class="hidden text-center py-12 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-[#18352b] bg-[#f4f7f5]/50 dark:bg-[#07110e]/50">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] flex items-center justify-center text-slate-400 mx-auto mb-3">
+              <i class="fa-solid fa-comments text-xl"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Comments or Notes Yet</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mt-1">
+              Share observations, activity milestones, post-event evaluations, or attendee feedback using the form above.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-[#18352b]">
+        <div class="text-[11px] text-slate-500 dark:text-slate-400">
+          <i class="fa-solid fa-shield-halved text-emerald-600 mr-1"></i> Documentation saved to Baguio MOVE database
+        </div>
+        <button type="button" onclick="closeModal('modalActivityDocumentation')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: Documentation Photo Lightbox -->
+  <div id="modalDocPhotoLightbox" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 hidden" onclick="if(event.target === this) closeModal('modalDocPhotoLightbox')">
+    <div class="max-w-4xl w-full flex flex-col items-center space-y-3">
+      <div class="w-full flex items-center justify-between text-white px-2">
+        <div>
+          <h4 id="docLightboxCaption" class="text-sm font-bold">Photo Caption</h4>
+          <p id="docLightboxMeta" class="text-xs text-slate-400">Date &bull; Filename</p>
+        </div>
+        <button onclick="closeModal('modalDocPhotoLightbox')" class="text-slate-400 hover:text-white text-lg p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="bg-black/40 rounded-2xl p-2 border border-white/10 max-h-[75vh] flex items-center justify-center overflow-hidden">
+        <img id="docLightboxImg" src="" alt="Documentation Photo" class="max-h-[72vh] max-w-full object-contain rounded-xl shadow-2xl">
+      </div>
     </div>
   </div>
 

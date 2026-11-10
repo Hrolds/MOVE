@@ -702,7 +702,8 @@ html.dark #modalEditActivity .bg-white,
 html.dark #modalAddAttendee .bg-white,
 html.dark #modalAddFacilitator .bg-white,
 html.dark #modalEditFacilitator .bg-white,
-html.dark #modalEditAttendee .bg-white {
+html.dark #modalEditAttendee .bg-white,
+html.dark #modalActivityDocumentation .bg-white {
   background-color: #0c1c17 !important;
   border-color: #18352b !important;
   color: #ffffff !important;
@@ -713,9 +714,11 @@ html.dark #modalEditActivity .bg-\[\#f4f7f5\],
 html.dark #modalAddAttendee .bg-\[\#f4f7f5\],
 html.dark #modalAddFacilitator .bg-\[\#f4f7f5\],
 html.dark #modalEditFacilitator .bg-\[\#f4f7f5\],
-html.dark #modalEditAttendee .bg-\[\#f4f7f5\] {
+html.dark #modalEditAttendee .bg-\[\#f4f7f5\],
+html.dark #modalActivityDocumentation .bg-\[\#f4f7f5\] {
   background-color: #07110e !important;
   border-color: #18352b !important;
   color: #ffffff !important;
 }
+
 

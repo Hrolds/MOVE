@@ -194,7 +194,9 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             cursor = conn.execute("""
             SELECT a.*, 
                    COUNT(att.id) as total_attendees,
-                   SUM(CASE WHEN att.is_present = 1 THEN 1 ELSE 0 END) as present_count
+                   SUM(CASE WHEN att.is_present = 1 THEN 1 ELSE 0 END) as present_count,
+                   (SELECT COUNT(*) FROM activity_photos WHERE activity_id = a.id) as photo_count,
+                   (SELECT COUNT(*) FROM activity_comments WHERE activity_id = a.id) as comment_count
             FROM activities a
             LEFT JOIN activity_attendees att ON a.id = att.activity_id
             GROUP BY a.id
@@ -203,6 +205,35 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             activities = [dict(row) for row in cursor.fetchall()]
             conn.close()
             self.send_json({"success": True, "activities": activities})
+            return
+
+        # 4b. API: Activity Documentation (Photos & Comments)
+        m_doc = re.match(r"^/api/activities/(\d+)/documentation$", path)
+        if m_doc:
+            act_id = int(m_doc.group(1))
+            conn = get_connection()
+            act = conn.execute("SELECT * FROM activities WHERE id = ?;", (act_id,)).fetchone()
+            if not act:
+                conn.close()
+                self.send_json({"success": False, "message": "Activity not found"}, 404)
+                return
+            photos = conn.execute(
+                "SELECT * FROM activity_photos WHERE activity_id = ? ORDER BY id DESC;", (act_id,)
+            ).fetchall()
+            comments = conn.execute(
+                "SELECT * FROM activity_comments WHERE activity_id = ? ORDER BY id DESC;", (act_id,)
+            ).fetchall()
+            conn.close()
+            self.send_json({
+                "success": True,
+                "activity": dict(act),
+                "photos": [dict(p) for p in photos],
+                "comments": [dict(c) for c in comments],
+                "stats": {
+                    "photo_count": len(photos),
+                    "comment_count": len(comments)
+                }
+            })
             return
 
         # 5. API: Activity Attendees (Checklist)
@@ -452,6 +483,93 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
             self.send_json({"success": True, "message": "Activity created successfully", "id": act_id})
+            return
+
+        # 3b. API: Upload Photo for Activity Documentation
+        m_add_photo = re.match(r"^/api/activities/(\d+)/photos$", path)
+        if m_add_photo:
+            act_id = int(m_add_photo.group(1))
+            image_data = body.get("image_data", "")
+            file_name = str(body.get("file_name", "photo.jpg")).strip() or "photo.jpg"
+            caption = str(body.get("caption", "")).strip()
+
+            if not image_data:
+                self.send_json({"success": False, "message": "image_data is required"}, 400)
+                return
+
+            import base64
+            import uuid
+            if "," in image_data:
+                _, b64_str = image_data.split(",", 1)
+            else:
+                b64_str = image_data
+
+            try:
+                raw_bytes = base64.b64decode(b64_str)
+            except Exception as e:
+                self.send_json({"success": False, "message": f"Invalid base64 image data: {e}"}, 400)
+                return
+
+            docs_dir = os.path.join(BASE_DIR, "data", "activity_docs")
+            os.makedirs(docs_dir, exist_ok=True)
+
+            ext = os.path.splitext(file_name)[1].lower()
+            if ext not in [".jpg", ".jpeg", ".png", ".webp", ".gif"]:
+                ext = ".jpg"
+
+            unique_name = f"act_{act_id}_{int(datetime.now().timestamp())}_{uuid.uuid4().hex[:8]}{ext}"
+            target_path = os.path.join(docs_dir, unique_name)
+            with open(target_path, "wb") as f:
+                f.write(raw_bytes)
+
+            relative_url = f"/data/activity_docs/{unique_name}"
+            file_size = len(raw_bytes)
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO activity_photos (activity_id, file_name, file_path, file_size, caption) VALUES (?, ?, ?, ?, ?);",
+                (act_id, file_name, relative_url, file_size, caption)
+            )
+            photo_id = cursor.lastrowid
+            conn.commit()
+            new_photo = conn.execute("SELECT * FROM activity_photos WHERE id = ?;", (photo_id,)).fetchone()
+            conn.close()
+
+            self.send_json({
+                "success": True,
+                "message": "Photo uploaded successfully",
+                "photo": dict(new_photo)
+            }, 201)
+            return
+
+        # 3c. API: Add Comment to Activity Documentation
+        m_add_comment = re.match(r"^/api/activities/(\d+)/comments$", path)
+        if m_add_comment:
+            act_id = int(m_add_comment.group(1))
+            author_name = str(body.get("author_name", "MOVE Facilitator")).strip() or "MOVE Facilitator"
+            comment_text = str(body.get("comment_text", "")).strip()
+
+            if not comment_text:
+                self.send_json({"success": False, "message": "comment_text cannot be empty"}, 400)
+                return
+
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO activity_comments (activity_id, author_name, comment_text) VALUES (?, ?, ?);",
+                (act_id, author_name, comment_text)
+            )
+            comment_id = cursor.lastrowid
+            conn.commit()
+            new_comment = conn.execute("SELECT * FROM activity_comments WHERE id = ?;", (comment_id,)).fetchone()
+            conn.close()
+
+            self.send_json({
+                "success": True,
+                "message": "Comment posted successfully",
+                "comment": dict(new_comment)
+            }, 201)
             return
 
         # 4. API: Add Attendee to Activity (from MOVE or custom)
@@ -1070,17 +1188,73 @@ class HRISApiHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": True, "message": f"Facilitator {fac_id} removed from activity {activity_id}"})
             return
 
-        # 3. API: Delete Activity (and all its attendees and facilitators)
+        # 2c. API: Delete Photo from Activity Documentation
+        m_del_photo = re.match(r"^/api/activities/(\d+)/photos/(\d+)$", path)
+        if m_del_photo:
+            act_id = int(m_del_photo.group(1))
+            photo_id = int(m_del_photo.group(2))
+            conn = get_connection()
+            photo = conn.execute(
+                "SELECT * FROM activity_photos WHERE id = ? AND activity_id = ?;", (photo_id, act_id)
+            ).fetchone()
+            if not photo:
+                conn.close()
+                self.send_json({"success": False, "message": "Photo not found"}, 404)
+                return
+
+            file_path = photo["file_path"]
+            if file_path.startswith("/"):
+                local_path = os.path.join(BASE_DIR, file_path.lstrip("/"))
+            else:
+                local_path = os.path.join(BASE_DIR, file_path)
+
+            if os.path.exists(local_path):
+                try:
+                    os.remove(local_path)
+                except Exception as e:
+                    print(f"Error removing photo file: {e}")
+
+            conn.execute("DELETE FROM activity_photos WHERE id = ?;", (photo_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True, "message": "Photo deleted successfully"})
+            return
+
+        # 2d. API: Delete Comment from Activity Documentation
+        m_del_comment = re.match(r"^/api/activities/(\d+)/comments/(\d+)$", path)
+        if m_del_comment:
+            act_id = int(m_del_comment.group(1))
+            comment_id = int(m_del_comment.group(2))
+            conn = get_connection()
+            conn.execute("DELETE FROM activity_comments WHERE id = ? AND activity_id = ?;", (comment_id, act_id))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True, "message": "Comment deleted successfully"})
+            return
+
+        # 3. API: Delete Activity (and all its attendees, facilitators, and documentation)
         m_del_act = re.match(r"^/api/activities/(\d+)$", path)
         if m_del_act:
             activity_id = int(m_del_act.group(1))
             conn = get_connection()
+            # Clean up photos from disk
+            photos = conn.execute("SELECT file_path FROM activity_photos WHERE activity_id = ?;", (activity_id,)).fetchall()
+            for p in photos:
+                fp = p["file_path"]
+                lp = os.path.join(BASE_DIR, fp.lstrip("/")) if fp.startswith("/") else os.path.join(BASE_DIR, fp)
+                if os.path.exists(lp):
+                    try:
+                        os.remove(lp)
+                    except Exception:
+                        pass
+            conn.execute("DELETE FROM activity_photos WHERE activity_id = ?;", (activity_id,))
+            conn.execute("DELETE FROM activity_comments WHERE activity_id = ?;", (activity_id,))
             conn.execute("DELETE FROM activity_attendees WHERE activity_id = ?;", (activity_id,))
             conn.execute("DELETE FROM activity_facilitators WHERE activity_id = ?;", (activity_id,))
             conn.execute("DELETE FROM activities WHERE id = ?;", (activity_id,))
             conn.commit()
             conn.close()
-            self.send_json({"success": True, "message": f"Activity {activity_id}, attendees, and facilitators deleted successfully"})
+            self.send_json({"success": True, "message": f"Activity {activity_id}, attendees, facilitators, and documentation deleted successfully"})
             return
 
         self.send_json({"success": False, "message": "Endpoint not found"}, 404)

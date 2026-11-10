@@ -193,6 +193,30 @@ def init_db():
     );
     """)
 
+    # 8. Activity Documentation Photos & Media Gallery
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS activity_photos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        file_size INTEGER DEFAULT 0,
+        caption TEXT DEFAULT '',
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
+    # 9. Activity Documentation Comments & Field Notes
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS activity_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        author_name TEXT NOT NULL,
+        comment_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    """)
+
     conn.commit()
     conn.close()
     print("SQLite database initialized at:", DB_PATH)

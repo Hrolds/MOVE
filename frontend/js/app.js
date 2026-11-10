@@ -2056,6 +2056,8 @@ function renderActivitiesGrid() {
     const total = act.total_attendees || 0;
     const present = act.present_count || 0;
     const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
+    const photoCount = act.photo_count || 0;
+    const commentCount = act.comment_count || 0;
 
     return `
       <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-emerald-500/50 transition">
@@ -2091,7 +2093,7 @@ function renderActivitiesGrid() {
         </div>
 
         <div class="mt-5 pt-4 border-t border-slate-200 dark:border-[#18352b] space-y-3">
-          <!-- Attendance Progress with Visual Bar -->
+          <!-- Attendance & Documentation Progress with Visual Bar -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-500 dark:text-slate-400 font-semibold">Attendance:</span>
@@ -2100,16 +2102,24 @@ function renderActivitiesGrid() {
             <div class="w-full bg-[#f4f7f5] dark:bg-[#07110e] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#18352b]">
               <div class="bg-emerald-600 h-full rounded-full transition-all duration-300" style="width: ${rate}%;"></div>
             </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+              <span class="flex items-center gap-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition" onclick="openActivityDocumentation(${act.id})" title="View documentation photos"><i class="fa-solid fa-camera text-slate-400"></i> ${photoCount} photo${photoCount === 1 ? '' : 's'}</span>
+              <span class="flex items-center gap-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition" onclick="openActivityDocumentation(${act.id})" title="View documentation notes"><i class="fa-solid fa-comments text-slate-400"></i> ${commentCount} note${commentCount === 1 ? '' : 's'}</span>
+            </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="openModalEditActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="Edit Venue, Date, Trainer, and Details">
+          <!-- Action Buttons (Edit, Attendance, Documentation, Certificates) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button onclick="openModalEditActivity(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="Edit Venue, Date, Trainer, and Details">
               <i class="fa-solid fa-pen-to-square text-slate-400"></i> Edit
             </button>
-            <button onclick="openActivityAttendance(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5">
+            <button onclick="openActivityAttendance(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="Manage Attendance">
               <i class="fa-solid fa-clipboard-user text-slate-400"></i> Attendance
             </button>
-            <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm">
+            <button onclick="openActivityDocumentation(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="View & Add Photos and Comments">
+              <i class="fa-solid fa-camera text-slate-400"></i> Documentation
+            </button>
+            <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm" title="Generate Certificates">
               <i class="fa-solid fa-certificate"></i> Certificates
             </button>
           </div>
@@ -6279,4 +6289,418 @@ function initHomeKeyListeners() {
       cycleFrontHero(-1);
     }
   });
+}
+
+
+// ==========================================================================
+// 4c. ACTIVITY DOCUMENTATION (PHOTOS & COMMENTS / FIELD NOTES)
+// ==========================================================================
+
+appState.currentDocActivityId = null;
+appState.currentDocData = null;
+appState.currentDocTab = 'photos';
+appState.pendingDocPhotos = [];
+
+async function openActivityDocumentation(activityId) {
+  const actId = Number(activityId || appState.currentActivityId);
+  if (!actId) {
+    if (appState.activities && appState.activities.length > 0) {
+      appState.currentDocActivityId = Number(appState.activities[0].id);
+    } else {
+      alert("Please select or create an activity first.");
+      return;
+    }
+  } else {
+    appState.currentDocActivityId = actId;
+  }
+
+  appState.pendingDocPhotos = [];
+  cancelPendingPhotos();
+
+  openModal('modalActivityDocumentation');
+  switchDocTab(appState.currentDocTab || 'photos');
+  await loadActivityDocumentation(appState.currentDocActivityId);
+}
+
+async function loadActivityDocumentation(activityId) {
+  const actId = Number(activityId || appState.currentDocActivityId);
+  if (!actId) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/documentation`);
+    const data = await res.json();
+    if (data.success) {
+      appState.currentDocData = data;
+      renderDocumentationUI(data);
+    } else {
+      showToast(data.message || "Failed to load documentation", "error");
+    }
+  } catch (err) {
+    console.error("Documentation load error:", err);
+    showToast("Network error loading documentation: " + err, "error");
+  }
+}
+
+function renderDocumentationUI(data) {
+  const act = data.activity || {};
+  const photos = data.photos || [];
+  const comments = data.comments || [];
+
+  // Update Header
+  const titleEl = document.getElementById("docModalActivityTitle");
+  const metaEl = document.getElementById("docModalActivityMeta");
+  const photoBadge = document.getElementById("docBadgePhotosCount");
+  const commentBadge = document.getElementById("docBadgeCommentsCount");
+  const photoPill = document.getElementById("tabDocPhotoPill");
+  const commentPill = document.getElementById("tabDocCommentPill");
+
+  if (titleEl) titleEl.textContent = act.title || `Activity #${act.id}`;
+  if (metaEl) {
+    metaEl.textContent = `${act.activity_date || 'No Date'} • ${act.venue || 'Baguio City'}`;
+  }
+  if (photoBadge) photoBadge.textContent = `${photos.length} Photo${photos.length === 1 ? '' : 's'}`;
+  if (commentBadge) commentBadge.textContent = `${comments.length} Comment${comments.length === 1 ? '' : 's'}`;
+  if (photoPill) photoPill.textContent = photos.length;
+  if (commentPill) commentPill.textContent = comments.length;
+
+  renderDocPhotosGrid(photos);
+  renderDocCommentsList(comments);
+}
+
+function switchDocTab(tabName) {
+  appState.currentDocTab = tabName;
+  const btnPhotos = document.getElementById("tabDocPhotosBtn");
+  const btnComments = document.getElementById("tabDocCommentsBtn");
+  const contentPhotos = document.getElementById("docTabPhotosContent");
+  const contentComments = document.getElementById("docTabCommentsContent");
+  const hintEl = document.getElementById("docTabHint");
+
+  if (tabName === 'comments') {
+    if (btnPhotos) {
+      btnPhotos.className = "px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition";
+    }
+    if (btnComments) {
+      btnComments.className = "px-4 py-2 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition";
+    }
+    if (contentPhotos) contentPhotos.classList.add("hidden");
+    if (contentComments) contentComments.classList.remove("hidden");
+    if (hintEl) hintEl.textContent = "Log remarks, outcomes, feedback, and post-activity observations";
+  } else {
+    if (btnPhotos) {
+      btnPhotos.className = "px-4 py-2 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition";
+    }
+    if (btnComments) {
+      btnComments.className = "px-4 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition";
+    }
+    if (contentPhotos) contentPhotos.classList.remove("hidden");
+    if (contentComments) contentComments.classList.add("hidden");
+    if (hintEl) hintEl.textContent = "Upload photos from cameras or phones • JPG, PNG, WEBP";
+  }
+}
+
+function renderDocPhotosGrid(photos) {
+  const grid = document.getElementById("docPhotosGrid");
+  const emptyState = document.getElementById("docPhotosEmptyState");
+  if (!grid || !emptyState) return;
+
+  if (!photos || photos.length === 0) {
+    grid.innerHTML = "";
+    emptyState.classList.remove("hidden");
+    return;
+  }
+
+  emptyState.classList.add("hidden");
+  grid.innerHTML = photos.map(p => {
+    const rawCaption = p.caption || p.file_name || "Event Photo";
+    const dateStr = p.uploaded_at ? new Date(p.uploaded_at).toLocaleDateString() : '';
+
+    return `
+      <div class="group relative bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] rounded-2xl overflow-hidden shadow-xs hover:border-emerald-500/50 transition flex flex-col">
+        <!-- Thumbnail Clickable to Lightbox -->
+        <div class="relative w-full aspect-4/3 overflow-hidden bg-slate-900/20 cursor-pointer" onclick="openDocPhotoLightbox('${escapeHtml(p.file_path)}', '${escapeHtml(rawCaption)}', '${escapeHtml(dateStr)}')">
+          <img src="${escapeHtml(p.file_path)}" alt="${escapeHtml(rawCaption)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy">
+          <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+            <i class="fa-solid fa-magnifying-glass-plus text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Caption & Metadata Strip -->
+        <div class="p-2.5 flex-1 flex flex-col justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-900 dark:text-white line-clamp-1" title="${escapeHtml(rawCaption)}">
+              ${escapeHtml(rawCaption)}
+            </p>
+            <p class="text-[10px] text-slate-400 font-mono mt-0.5">
+              ${escapeHtml(dateStr)}
+            </p>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 mt-1 border-t border-slate-200 dark:border-[#18352b]">
+            <button type="button" onclick="openDocPhotoLightbox('${escapeHtml(p.file_path)}', '${escapeHtml(rawCaption)}', '${escapeHtml(dateStr)}')" class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-eye text-xs"></i> View
+            </button>
+            <button type="button" onclick="deleteDocPhoto(${p.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Photo">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function openDocPhotoLightbox(imgUrl, caption, meta) {
+  const modal = document.getElementById("modalDocPhotoLightbox");
+  const img = document.getElementById("docLightboxImg");
+  const captionEl = document.getElementById("docLightboxCaption");
+  const metaEl = document.getElementById("docLightboxMeta");
+
+  if (img) img.src = imgUrl;
+  if (captionEl) captionEl.textContent = caption || "Activity Documentation Photo";
+  if (metaEl) metaEl.textContent = meta || "";
+
+  if (modal) modal.classList.remove("hidden");
+}
+
+function handleDocPhotosSelected(event) {
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
+
+  const validFiles = files.filter(f => f.type.startsWith("image/"));
+  if (validFiles.length === 0) {
+    showToast("Please choose valid image files (JPG, PNG, WEBP, GIF).", "warning");
+    return;
+  }
+
+  appState.pendingDocPhotos = validFiles;
+
+  const container = document.getElementById("docPendingUploadsContainer");
+  const textEl = document.getElementById("docPendingUploadsText");
+  const previewsEl = document.getElementById("docPendingPreviews");
+
+  if (container) container.classList.remove("hidden");
+  if (textEl) textEl.textContent = `Ready to upload ${validFiles.length} photo${validFiles.length === 1 ? '' : 's'}`;
+
+  if (previewsEl) {
+    previewsEl.innerHTML = "";
+    validFiles.slice(0, 8).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const thumb = document.createElement("img");
+        thumb.src = e.target.result;
+        thumb.className = "w-12 h-12 object-cover rounded-lg border border-emerald-300 dark:border-emerald-500/40 shrink-0";
+        previewsEl.appendChild(thumb);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+}
+
+function cancelPendingPhotos() {
+  appState.pendingDocPhotos = [];
+  const fileInput = document.getElementById("docPhotoFileInput");
+  const container = document.getElementById("docPendingUploadsContainer");
+  const previewsEl = document.getElementById("docPendingPreviews");
+  if (fileInput) fileInput.value = "";
+  if (container) container.classList.add("hidden");
+  if (previewsEl) previewsEl.innerHTML = "";
+}
+
+async function uploadPendingPhotos() {
+  const actId = appState.currentDocActivityId;
+  const files = appState.pendingDocPhotos || [];
+  if (!actId || files.length === 0) return;
+
+  const btn = document.getElementById("btnUploadPendingPhotos");
+  const captionInput = document.getElementById("docPhotoCaptionInput");
+  const defaultCaption = captionInput ? captionInput.value.trim() : "";
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
+  }
+
+  let successCount = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    try {
+      const base64Data = await readFileAsBase64(file);
+      const res = await fetch(`${API_BASE}/api/activities/${actId}/photos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_name: file.name,
+          caption: defaultCaption || file.name,
+          image_data: base64Data
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        successCount++;
+      }
+    } catch (err) {
+      console.error("Failed uploading photo:", file.name, err);
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-upload"></i> Upload Now`;
+  }
+
+  if (captionInput) captionInput.value = "";
+  cancelPendingPhotos();
+
+  if (successCount > 0) {
+    showToast(`Successfully uploaded ${successCount} photo${successCount === 1 ? '' : 's'}!`, "success");
+    await loadActivityDocumentation(actId);
+    await loadActivities();
+  } else {
+    showToast("Failed to upload photos. Please check the image file size and format.", "error");
+  }
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function deleteDocPhoto(photoId) {
+  const actId = appState.currentDocActivityId;
+  if (!actId || !photoId) return;
+
+  if (!confirm("Are you sure you want to delete this documentation photo?")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/photos/${photoId}`, {
+      method: "DELETE"
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("Photo removed from documentation", "info");
+      await loadActivityDocumentation(actId);
+      await loadActivities();
+    } else {
+      showToast(data.message || "Failed to delete photo", "error");
+    }
+  } catch (err) {
+    alert("Delete error: " + err);
+  }
+}
+
+function renderDocCommentsList(comments) {
+  const container = document.getElementById("docCommentsList");
+  const emptyState = document.getElementById("docCommentsEmptyState");
+  if (!container || !emptyState) return;
+
+  if (!comments || comments.length === 0) {
+    container.innerHTML = "";
+    emptyState.classList.remove("hidden");
+    return;
+  }
+
+  emptyState.classList.add("hidden");
+  container.innerHTML = comments.map(c => {
+    const initials = (c.author_name || 'Facilitator')
+      .split(' ')
+      .map(w => w[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    const dateStr = c.created_at ? new Date(c.created_at).toLocaleString() : '';
+
+    return `
+      <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 flex items-center justify-center text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+              ${escapeHtml(initials)}
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(c.author_name || 'MOVE Facilitator')}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${escapeHtml(dateStr)}</div>
+            </div>
+          </div>
+          <button type="button" onclick="deleteDocComment(${c.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Note">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+        <p class="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed pl-9">
+          ${escapeHtml(c.comment_text)}
+        </p>
+      </div>
+    `;
+  }).join("");
+}
+
+async function submitDocComment(e) {
+  e.preventDefault();
+  const actId = appState.currentDocActivityId;
+  if (!actId) return;
+
+  const authorInput = document.getElementById("docCommentAuthor");
+  const textInput = document.getElementById("docCommentText");
+  const authorName = authorInput ? authorInput.value.trim() : "MOVE Facilitator";
+  const commentText = textInput ? textInput.value.trim() : "";
+
+  if (!commentText) return;
+
+  const btn = document.getElementById("btnSubmitDocComment");
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        author_name: authorName,
+        comment_text: commentText
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (textInput) textInput.value = "";
+      showToast("Comment added to activity documentation", "success");
+      await loadActivityDocumentation(actId);
+      await loadActivities();
+    } else {
+      showToast(data.message || "Failed to post comment", "error");
+    }
+  } catch (err) {
+    showToast("Error posting comment: " + err, "error");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function deleteDocComment(commentId) {
+  const actId = appState.currentDocActivityId;
+  if (!actId || !commentId) return;
+
+  if (!confirm("Are you sure you want to delete this field note?")) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/activities/${actId}/comments/${commentId}`, {
+      method: "DELETE"
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast("Note removed from documentation", "info");
+      await loadActivityDocumentation(actId);
+      await loadActivities();
+    } else {
+      showToast(data.message || "Failed to delete comment", "error");
+    }
+  } catch (err) {
+    alert("Delete error: " + err);
+  }
 }
