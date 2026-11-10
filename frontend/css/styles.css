@@ -672,3 +672,50 @@ html.dark #view-attendance .bg-white {
   background-color: #0c1c17 !important;
   border-color: #18352b !important;
 }
+
+html.dark #view-activities .bg-\[\#f4f7f5\],
+html.dark #view-attendance .bg-\[\#f4f7f5\] {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+}
+
+html.dark #view-activities .text-slate-900,
+html.dark #view-attendance .text-slate-900 {
+  color: #ffffff !important;
+}
+
+html.dark #view-activities .text-slate-600,
+html.dark #view-activities .text-slate-500,
+html.dark #view-attendance .text-slate-600,
+html.dark #view-attendance .text-slate-500 {
+  color: #8da196 !important;
+}
+
+html.dark #view-activities .border-\[\#dce6e0\],
+html.dark #view-attendance .border-\[\#dce6e0\] {
+  border-color: #18352b !important;
+}
+
+/* Modals Dark Theme Surface Overrides */
+html.dark #modalCreateActivity .bg-white,
+html.dark #modalEditActivity .bg-white,
+html.dark #modalAddAttendee .bg-white,
+html.dark #modalAddFacilitator .bg-white,
+html.dark #modalEditFacilitator .bg-white,
+html.dark #modalEditAttendee .bg-white {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+  color: #ffffff !important;
+}
+
+html.dark #modalCreateActivity .bg-\[\#f4f7f5\],
+html.dark #modalEditActivity .bg-\[\#f4f7f5\],
+html.dark #modalAddAttendee .bg-\[\#f4f7f5\],
+html.dark #modalAddFacilitator .bg-\[\#f4f7f5\],
+html.dark #modalEditFacilitator .bg-\[\#f4f7f5\],
+html.dark #modalEditAttendee .bg-\[\#f4f7f5\] {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+  color: #ffffff !important;
+}
+

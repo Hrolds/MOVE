@@ -2058,58 +2058,58 @@ function renderActivitiesGrid() {
     const rate = total > 0 ? ((present / total) * 100).toFixed(0) : 0;
 
     return `
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between hover:border-slate-700 transition">
+      <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:border-emerald-500/50 transition">
         <div>
           <div class="flex items-center justify-between gap-2 mb-2">
-            <span class="text-[10px] font-bold text-move-gold-400 bg-move-gold-500/10 px-2 py-0.5 rounded border border-move-gold-500/20">
+            <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/30">
               ${escapeHtml(act.duration_hours || '8 Hours')}
             </span>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 font-mono">${escapeHtml(act.activity_date || '')}</span>
-              <button onclick="openModalEditActivity(${act.id})" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-move-gold-400 text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="Edit Activity (Venue, Date, Trainer, Details)">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">${escapeHtml(act.activity_date || '')}</span>
+              <button onclick="openModalEditActivity(${act.id})" class="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Edit Activity (Venue, Date, Trainer, Details)">
                 <i class="fa-solid fa-pen-to-square text-[10px] text-slate-400"></i> Edit
               </button>
             </div>
           </div>
 
-          <h3 class="text-base font-black text-white hover:text-move-gold-400 transition cursor-pointer" onclick="openModalEditActivity(${act.id})" title="Click to edit activity details">
+          <h3 class="text-base font-black text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition cursor-pointer" onclick="openModalEditActivity(${act.id})" title="Click to edit activity details">
             ${escapeHtml(act.title)}
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5 italic cursor-pointer hover:text-slate-300 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit theme">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 italic cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit theme">
             "${escapeHtml(act.theme || '')}"
           </p>
           
-          <div class="mt-3 text-xs text-slate-300 space-y-1">
-            <div class="cursor-pointer hover:text-move-gold-400 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit venue">
-              <i class="fa-solid fa-location-dot w-4 text-slate-500"></i> ${escapeHtml(act.venue || 'Baguio City')}
+          <div class="mt-3 text-xs text-slate-600 dark:text-slate-300 space-y-1">
+            <div class="cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit venue">
+              <i class="fa-solid fa-location-dot w-4 text-slate-400"></i> ${escapeHtml(act.venue || 'Baguio City')}
             </div>
-            <div class="cursor-pointer hover:text-move-gold-400 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit trainer">
-              <i class="fa-solid fa-user-tie w-4 text-slate-500"></i> ${escapeHtml(act.trainer_name || 'Resource Speaker')}${act.trainer_position ? ` <span class="text-slate-400">(${escapeHtml(act.trainer_position)})</span>` : ''}
+            <div class="cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit trainer">
+              <i class="fa-solid fa-user-tie w-4 text-slate-400"></i> ${escapeHtml(act.trainer_name || 'Resource Speaker')}${act.trainer_position ? ` <span class="text-slate-400 dark:text-slate-500">(${escapeHtml(act.trainer_position)})</span>` : ''}
             </div>
-            ${act.target_notes ? `<div class="text-[11px] text-slate-400 bg-slate-950 p-2 rounded-lg mt-2 border border-slate-800/80 cursor-pointer hover:border-slate-700 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit target notes"><strong>Target:</strong> ${escapeHtml(act.target_notes)}</div>` : ''}
+            ${act.target_notes ? `<div class="text-[11px] text-slate-600 dark:text-slate-400 bg-[#f4f7f5] dark:bg-[#07110e] p-2 rounded-lg mt-2 border border-[#dce6e0] dark:border-[#18352b] cursor-pointer hover:border-emerald-500/40 transition" onclick="openModalEditActivity(${act.id})" title="Click to edit target notes"><strong>Target:</strong> ${escapeHtml(act.target_notes)}</div>` : ''}
           </div>
         </div>
 
-        <div class="mt-5 pt-4 border-t border-slate-800 space-y-3">
+        <div class="mt-5 pt-4 border-t border-slate-200 dark:border-[#18352b] space-y-3">
           <!-- Attendance Progress with Visual Bar -->
           <div class="space-y-1.5">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 font-semibold">Attendance:</span>
-              <span class="font-bold text-emerald-400">${present} / ${total} Present (${rate}%)</span>
+              <span class="text-slate-500 dark:text-slate-400 font-semibold">Attendance:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400">${present} / ${total} Present (${rate}%)</span>
             </div>
-            <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/80">
-              <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: ${rate}%;"></div>
+            <div class="w-full bg-[#f4f7f5] dark:bg-[#07110e] h-2 rounded-full overflow-hidden border border-slate-200 dark:border-[#18352b]">
+              <div class="bg-emerald-600 h-full rounded-full transition-all duration-300" style="width: ${rate}%;"></div>
             </div>
           </div>
 
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="openModalEditActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 hover:text-white transition text-center flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm" title="Edit Venue, Date, Trainer, and Details">
+            <button onclick="openModalEditActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="Edit Venue, Date, Trainer, and Details">
               <i class="fa-solid fa-pen-to-square text-slate-400"></i> Edit
             </button>
-            <button onclick="openActivityAttendance(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm">
+            <button onclick="openActivityAttendance(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5">
               <i class="fa-solid fa-clipboard-user text-slate-400"></i> Attendance
             </button>
-            <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-xs font-black text-slate-950 transition text-center flex items-center justify-center gap-1.5 shadow">
+            <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm">
               <i class="fa-solid fa-certificate"></i> Certificates
             </button>
           </div>
@@ -2437,7 +2437,7 @@ function renderAttendanceTable() {
   if (badgeAtt) badgeAtt.textContent = total;
 
   if (total === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500">No attendees enrolled yet. Click "Enroll All MOVE Participants" or "Add Attendee".</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 dark:text-slate-400">No attendees enrolled yet. Click "Enroll All MOVE Participants" or "Add Attendee".</td></tr>`;
     const countEl = document.getElementById("attendanceFilteredCount");
     if (countEl) countEl.textContent = "0 enrolled attendees";
     return;
@@ -2466,7 +2466,7 @@ function renderAttendanceTable() {
   const countEl = document.getElementById("attendanceFilteredCount");
   if (countEl) {
     if (q || statusFilter !== "all") {
-      countEl.innerHTML = `<span class="text-move-gold-400 font-bold">${filtered.length}</span> of ${total} attendees found`;
+      countEl.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-bold">${filtered.length}</span> of ${total} attendees found`;
     } else {
       countEl.textContent = `${total} enrolled attendees`;
     }
@@ -2475,9 +2475,9 @@ function renderAttendanceTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-8 text-slate-500">
+        <td colspan="8" class="text-center py-8 text-slate-500 dark:text-slate-400">
           No attendees match "${escapeHtml(q)}".
-          <button type="button" onclick="clearAttendanceSearch()" class="text-move-gold-400 underline font-bold ml-1.5 hover:text-white transition">
+          <button type="button" onclick="clearAttendanceSearch()" class="text-emerald-600 dark:text-emerald-400 underline font-bold ml-1.5 hover:text-emerald-700 dark:hover:text-emerald-300 transition">
             Clear search
           </button>
         </td>
@@ -2488,29 +2488,29 @@ function renderAttendanceTable() {
 
   tbody.innerHTML = filtered.map((att, idx) => {
     return `
-      <tr class="hover:bg-slate-800/40 transition">
-        <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${idx + 1}</td>
-        <td class="py-3 px-4 font-bold text-white">${escapeHtml(att.full_name)}</td>
-        <td class="py-3 px-4 text-slate-300">
+      <tr class="hover:bg-slate-50 dark:hover:bg-[#122822] transition">
+        <td class="py-3 px-4 text-slate-400 font-mono text-[11px]">${idx + 1}</td>
+        <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">${escapeHtml(att.full_name)}</td>
+        <td class="py-3 px-4 text-slate-700 dark:text-slate-300">
           <div class="flex items-center justify-between gap-1 group">
-            <span class="font-medium text-slate-200">${escapeHtml(att.position || '-')}</span>
-            <button onclick="openModalEditAttendee(${att.id})" class="text-amber-400/80 hover:text-amber-300 transition p-1 rounded" title="Edit Attendee Position Title">
+            <span class="font-medium">${escapeHtml(att.position || '-')}</span>
+            <button onclick="openModalEditAttendee(${att.id})" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition p-1 rounded" title="Edit Attendee Position Title">
               <i class="fa-solid fa-pen text-xs"></i>
             </button>
           </div>
         </td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(att.office || '-')}</td>
+        <td class="py-3 px-4 text-slate-700 dark:text-slate-300">${escapeHtml(att.office || '-')}</td>
         <td class="py-3 px-4 text-center">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${att.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'}">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${att.gender === 'F' ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30' : 'bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b]'}">
             ${att.gender || 'M'}
           </span>
         </td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(att.civil_status || 'Married')}</td>
+        <td class="py-3 px-4 text-slate-700 dark:text-slate-300">${escapeHtml(att.civil_status || 'Married')}</td>
         
         <!-- Attendance Toggle Button (The Gating Mechanism) -->
         <td class="py-3 px-4 text-center">
           <button onclick="toggleAttendeeAttendance(${att.id}, ${att.is_present})" 
-            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 mx-auto border shadow-sm ${att.is_present ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}">
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 mx-auto border shadow-xs ${att.is_present ? 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40' : 'bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30'}">
             ${att.is_present ? '<i class="fa-solid fa-check"></i> PRESENT' : '<i class="fa-solid fa-xmark"></i> ABSENT'}
           </button>
         </td>
@@ -2518,18 +2518,18 @@ function renderAttendanceTable() {
         <td class="py-3 px-4 text-right">
           <div class="flex items-center justify-end gap-1.5">
             ${att.is_present ? `
-              <button onclick="launchStudioForAttendee(${att.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-move-gold-400 hover:text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="Generate Participation / Appearance Certificate for this Attendee">
+              <button onclick="launchStudioForAttendee(${att.id})" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-[#07110e] dark:hover:bg-[#152e25] text-emerald-800 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Generate Participation / Appearance Certificate for this Attendee">
                 <i class="fa-solid fa-graduation-cap text-xs"></i> Cert
               </button>
             ` : `
-              <button disabled class="px-2 py-1 rounded-lg bg-slate-900 text-slate-600 text-[11px] font-bold border border-slate-800 cursor-not-allowed opacity-50 flex items-center gap-1" title="Mark as Present to generate certificates">
+              <button disabled class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#07110e] text-slate-400 dark:text-slate-600 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] cursor-not-allowed opacity-50 flex items-center gap-1" title="Mark as Present to generate certificates">
                 <i class="fa-solid fa-lock text-xs"></i>
               </button>
             `}
-            <button onclick="openModalEditAttendee(${att.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 text-[11px] font-bold border border-amber-500/30 transition flex items-center gap-1 shadow-xs" title="Edit Attendee Position, Office and Details">
+            <button onclick="openModalEditAttendee(${att.id})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#152e25] text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Edit Attendee Position, Office and Details">
               <i class="fa-solid fa-pen-to-square text-xs text-slate-400"></i> Edit
             </button>
-            <button onclick="removeAttendee(${att.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Remove Attendee">
+            <button onclick="removeAttendee(${att.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 transition" title="Remove Attendee">
               <i class="fa-regular fa-trash-can"></i>
             </button>
           </div>
@@ -2667,10 +2667,10 @@ function switchActivitySubTab(subTab) {
 
   if (subTab === 'facilitators') {
     if (btnAtt) {
-      btnAtt.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition";
+      btnAtt.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition";
     }
     if (btnFac) {
-      btnFac.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 transition";
+      btnFac.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition";
     }
     if (containerAtt) containerAtt.classList.add("hidden");
     if (containerFac) containerFac.classList.remove("hidden");
@@ -2678,10 +2678,10 @@ function switchActivitySubTab(subTab) {
     renderFacilitatorsTable();
   } else {
     if (btnAtt) {
-      btnAtt.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-move-gold-500 text-move-gold-400 flex items-center gap-2 transition";
+      btnAtt.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition";
     }
     if (btnFac) {
-      btnFac.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition";
+      btnFac.className = "px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition";
     }
     if (containerAtt) containerAtt.classList.remove("hidden");
     if (containerFac) containerFac.classList.add("hidden");
@@ -2731,7 +2731,7 @@ function renderFacilitatorsTable() {
   const countEl = document.getElementById("facilitatorFilteredCount");
   if (countEl) {
     if (q) {
-      countEl.innerHTML = `<span class="text-indigo-400 font-bold">${filtered.length}</span> of ${total} found`;
+      countEl.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-bold">${filtered.length}</span> of ${total} found`;
     } else {
       countEl.textContent = `${total} enrolled`;
     }
@@ -2740,11 +2740,11 @@ function renderFacilitatorsTable() {
   if (total === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-10 text-slate-400">
+        <td colspan="8" class="text-center py-10 text-slate-500 dark:text-slate-400">
           <div class="max-w-md mx-auto space-y-3">
-            <i class="fa-solid fa-chalkboard-user text-3xl text-slate-600 block"></i>
-            <p class="text-xs text-slate-400 font-medium">No facilitators or trainers assigned to this event yet.</p>
-            <button onclick="openModal('modalAddFacilitator')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition inline-flex items-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-chalkboard-user text-3xl text-slate-400 block"></i>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">No facilitators or trainers assigned to this event yet.</p>
+            <button onclick="openModal('modalAddFacilitator')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition inline-flex items-center gap-1.5 shadow-sm">
               <i class="fa-solid fa-plus"></i> Add Event Facilitator / Trainer
             </button>
           </div>
@@ -2757,9 +2757,9 @@ function renderFacilitatorsTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center py-8 text-slate-500">
+        <td colspan="8" class="text-center py-8 text-slate-500 dark:text-slate-400">
           No facilitators match "${escapeHtml(q)}".
-          <button type="button" onclick="clearFacilitatorSearch()" class="text-indigo-400 underline font-bold ml-1.5 hover:text-white transition">
+          <button type="button" onclick="clearFacilitatorSearch()" class="text-emerald-600 dark:text-emerald-400 underline font-bold ml-1.5 hover:text-emerald-700 dark:hover:text-emerald-300 transition">
             Clear search
           </button>
         </td>
@@ -2770,28 +2770,28 @@ function renderFacilitatorsTable() {
 
   tbody.innerHTML = filtered.map((fac, idx) => {
     return `
-      <tr class="hover:bg-slate-800/40 transition">
-        <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${idx + 1}</td>
+      <tr class="hover:bg-slate-50 dark:hover:bg-[#122822] transition">
+        <td class="py-3 px-4 text-slate-400 font-mono text-[11px]">${idx + 1}</td>
         <td class="py-3 px-4">
-          <div class="font-bold text-white text-xs">${escapeHtml(fac.full_name)}</div>
-          ${fac.notes ? `<div class="text-[10px] text-slate-400 font-normal italic">${escapeHtml(fac.notes)}</div>` : ''}
+          <div class="font-bold text-slate-900 dark:text-white text-xs">${escapeHtml(fac.full_name)}</div>
+          ${fac.notes ? `<div class="text-[10px] text-slate-500 dark:text-slate-400 font-normal italic">${escapeHtml(fac.notes)}</div>` : ''}
         </td>
         <td class="py-3 px-4">
-          <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b]">
             ${escapeHtml(fac.role_title || 'Facilitator')}
           </span>
         </td>
-        <td class="py-3 px-4 text-slate-300">
+        <td class="py-3 px-4 text-slate-700 dark:text-slate-300">
           <div class="flex items-center justify-between gap-1 group">
-            <span class="font-medium text-slate-200">${escapeHtml(fac.position || '-')}</span>
-            <button onclick="openModalEditFacilitator(${fac.id})" class="text-amber-400/80 hover:text-amber-300 transition p-1 rounded" title="Edit Facilitator Position Title">
+            <span class="font-medium">${escapeHtml(fac.position || '-')}</span>
+            <button onclick="openModalEditFacilitator(${fac.id})" class="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition p-1 rounded" title="Edit Facilitator Position Title">
               <i class="fa-solid fa-pen text-xs"></i>
             </button>
           </div>
         </td>
-        <td class="py-3 px-4 text-slate-300">${escapeHtml(fac.office || '-')}</td>
+        <td class="py-3 px-4 text-slate-700 dark:text-slate-300">${escapeHtml(fac.office || '-')}</td>
         <td class="py-3 px-4 text-center">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${fac.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'}">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${fac.gender === 'F' ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30' : 'bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b]'}">
             ${fac.gender || 'M'}
           </span>
         </td>
@@ -2799,7 +2799,7 @@ function renderFacilitatorsTable() {
         <!-- Facilitator Attendance Toggle Button -->
         <td class="py-3 px-4 text-center">
           <button onclick="toggleFacilitatorAttendance(${fac.id}, ${fac.is_present})" 
-            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 mx-auto border shadow-sm ${fac.is_present ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}">
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 mx-auto border shadow-xs ${fac.is_present ? 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40' : 'bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30'}">
             ${fac.is_present ? '<i class="fa-solid fa-check"></i> PRESENT' : '<i class="fa-solid fa-xmark"></i> ABSENT'}
           </button>
         </td>
@@ -2807,18 +2807,18 @@ function renderFacilitatorsTable() {
         <td class="py-3 px-4 text-right">
           <div class="flex items-center justify-end gap-1.5">
             ${fac.is_present ? `
-              <button onclick="launchStudioForFacilitator(${fac.id})" class="px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 hover:text-white text-[11px] font-bold border border-indigo-500/40 transition flex items-center gap-1 shadow-xs" title="Award Certificate of Appreciation to this Facilitator">
+              <button onclick="launchStudioForFacilitator(${fac.id})" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-[#07110e] dark:hover:bg-[#152e25] text-emerald-800 dark:text-emerald-300 text-[11px] font-bold border border-emerald-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Award Certificate of Appreciation to this Facilitator">
                 <i class="fa-solid fa-award text-xs text-slate-400"></i> Appreciation Cert
               </button>
             ` : `
-              <button disabled class="px-2 py-1 rounded-lg bg-slate-900 text-slate-600 text-[11px] font-bold border border-slate-800 cursor-not-allowed opacity-50 flex items-center gap-1" title="Mark Facilitator as Present to award Certificate of Appreciation">
+              <button disabled class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#07110e] text-slate-400 dark:text-slate-600 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] cursor-not-allowed opacity-50 flex items-center gap-1" title="Mark Facilitator as Present to award Certificate of Appreciation">
                 <i class="fa-solid fa-lock text-xs"></i>
               </button>
             `}
-            <button onclick="openModalEditFacilitator(${fac.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 text-[11px] font-bold border border-amber-500/30 transition flex items-center gap-1 shadow-xs" title="Edit Facilitator Position and Details">
+            <button onclick="openModalEditFacilitator(${fac.id})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#152e25] text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Edit Facilitator Position and Details">
               <i class="fa-solid fa-pen-to-square text-xs text-slate-400"></i> Edit
             </button>
-            <button onclick="removeFacilitator(${fac.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Remove Facilitator">
+            <button onclick="removeFacilitator(${fac.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 transition" title="Remove Facilitator">
               <i class="fa-regular fa-trash-can"></i>
             </button>
           </div>
@@ -2826,23 +2826,6 @@ function renderFacilitatorsTable() {
       </tr>
     `;
   }).join("");
-}
-
-function onFacilitatorSearch(val) {
-  appState.facilitatorSearch = val;
-  const clearBtn = document.getElementById("btnClearFacilitatorSearch");
-  if (clearBtn) clearBtn.classList.toggle("hidden", !(val && val.trim().length > 0));
-  renderFacilitatorsTable();
-}
-
-function clearFacilitatorSearch() {
-  appState.facilitatorSearch = '';
-  const input = document.getElementById("facilitatorSearchInput");
-  const clearBtn = document.getElementById("btnClearFacilitatorSearch");
-  if (input) input.value = '';
-  if (clearBtn) clearBtn.classList.add("hidden");
-  renderFacilitatorsTable();
-  if (input) input.focus();
 }
 
 async function toggleFacilitatorAttendance(facId, currentStatus) {

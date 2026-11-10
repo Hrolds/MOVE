@@ -519,16 +519,16 @@
     <!-- ==================================================================== -->
     <section id="view-activities" class="space-y-6 hidden">
       
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#18352b]">
         <div>
-          <h2 class="text-xl font-black text-white flex items-center gap-2">
+          <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
             <i class="fa-solid fa-calendar-days text-slate-400"></i> Activities & Capacity-Building Seminars
           </h2>
-          <p class="text-xs text-slate-400 mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Create events, define target participant descriptions, and track verified attendance.
           </p>
         </div>
-        <button onclick="openModal('modalCreateActivity')" class="px-4 py-2 rounded-xl bg-move-gold-600 hover:bg-move-gold-500 text-slate-950 text-xs font-black shadow transition flex items-center gap-2">
+        <button onclick="openModal('modalCreateActivity')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-2">
           <i class="fa-solid fa-plus"></i> Create New Activity
         </button>
       </div>
@@ -545,107 +545,107 @@
     <section id="view-attendance" class="space-y-6 hidden">
       
       <!-- Back to Activities Navigation Bar -->
-      <div class="flex items-center justify-between pb-1 border-b border-slate-800/80">
-        <button onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-200 hover:text-white transition flex items-center gap-2 border border-slate-700 shadow-sm" title="Return to Activities Grid">
+      <div class="flex items-center justify-between pb-1 border-b border-slate-200 dark:border-[#18352b]">
+        <button onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-[#0c1c17] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 border border-[#dce6e0] dark:border-[#18352b] shadow-xs" title="Return to Activities Grid">
           <i class="fa-solid fa-arrow-left text-slate-400"></i>
           <span>Back to Activities</span>
         </button>
-        <span class="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+        <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1.5">
           <i class="fa-solid fa-clipboard-user text-slate-400"></i>
           <span>Activity Attendance Roster</span>
         </span>
       </div>
 
       <!-- Attendance Header -->
-      <div class="bg-gradient-to-r from-move-navy-900 to-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="bg-white dark:bg-[#0c1c17] p-5 rounded-2xl border border-[#dce6e0] dark:border-[#18352b] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2">
-            <span class="text-[10px] font-black uppercase tracking-wider text-move-gold-400 bg-move-gold-500/10 px-2 py-0.5 rounded border border-move-gold-500/20">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/30">
               Selected Activity
             </span>
-            <button onclick="openModalEditActivity(appState.currentActivityId)" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-move-gold-400 text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="Edit this Activity's Venue, Date, Trainer, and details">
+            <button onclick="openModalEditActivity(appState.currentActivityId)" class="px-2.5 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 text-[11px] font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1 shadow-xs" title="Edit this Activity's Venue, Date, Trainer, and details">
               <i class="fa-solid fa-pen-to-square text-[10px] text-slate-400"></i> Edit Details
             </button>
           </div>
-          <h2 id="attendanceActivityTitle" class="text-xl font-black text-white mt-1 cursor-pointer hover:text-move-gold-400 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit activity details">Men in the Kitchen 2</h2>
-          <p id="attendanceActivityMeta" class="text-xs text-slate-400 mt-0.5 cursor-pointer hover:text-slate-200 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit date and venue">
+          <h2 id="attendanceActivityTitle" class="text-xl font-black text-slate-900 dark:text-white mt-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit activity details">Men in the Kitchen 2</h2>
+          <p id="attendanceActivityMeta" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition" onclick="openModalEditActivity(appState.currentActivityId)" title="Click to edit date and venue">
             <i class="fa-regular fa-calendar mr-1"></i> October 20, 2026 &bull; <i class="fa-solid fa-location-dot mr-1"></i> CDRRMO Building, Lower Rock Quarry
           </p>
         </div>
 
         <!-- Attendance Stats Pill -->
         <div class="flex items-center gap-3">
-          <div class="bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800 text-center">
-            <div id="statTotalAttendees" class="text-base font-black text-white">50</div>
-            <div class="text-[10px] font-bold text-slate-400 uppercase">Enrolled</div>
+          <div class="bg-[#f4f7f5] dark:bg-[#07110e] px-4 py-2 rounded-xl border border-[#dce6e0] dark:border-[#18352b] text-center min-w-[85px]">
+            <div id="statTotalAttendees" class="text-base font-black text-slate-900 dark:text-white">50</div>
+            <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Enrolled</div>
           </div>
-          <div class="bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-500/30 text-center">
-            <div id="statPresentCount" class="text-base font-black text-emerald-400">47</div>
-            <div class="text-[10px] font-bold text-emerald-400 uppercase">Present (Certified)</div>
+          <div class="bg-emerald-50 dark:bg-emerald-950/40 px-4 py-2 rounded-xl border border-emerald-200 dark:border-emerald-500/30 text-center min-w-[85px]">
+            <div id="statPresentCount" class="text-base font-black text-emerald-700 dark:text-emerald-400">47</div>
+            <div class="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">Present</div>
           </div>
-          <div class="bg-rose-950/40 px-4 py-2 rounded-xl border border-rose-500/30 text-center">
-            <div id="statAbsentCount" class="text-base font-black text-rose-400">3</div>
-            <div class="text-[10px] font-bold text-rose-400 uppercase">Absent</div>
+          <div class="bg-rose-50 dark:bg-rose-950/40 px-4 py-2 rounded-xl border border-rose-200 dark:border-rose-500/30 text-center min-w-[85px]">
+            <div id="statAbsentCount" class="text-base font-black text-rose-700 dark:text-rose-400">3</div>
+            <div class="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase">Absent</div>
           </div>
         </div>
       </div>
 
       <!-- Action Toolbar -->
-      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-        <div class="flex items-center gap-2">
-          <button onclick="bulkEnrollMoveRoster()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0c1c17] p-3 rounded-2xl border border-[#dce6e0] dark:border-[#18352b] shadow-xs">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="bulkEnrollMoveRoster()" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
             <i class="fa-solid fa-users-gear text-slate-400"></i> Enroll All MOVE Participants
           </button>
-          <button onclick="openModal('modalAddAttendee')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+          <button onclick="openModal('modalAddAttendee')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus text-slate-400"></i> Add Attendee
           </button>
-          <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-indigo-950/70 hover:bg-indigo-900/70 text-xs font-semibold text-indigo-300 border border-indigo-500/30 transition flex items-center gap-1.5 shadow-sm">
+          <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
             <i class="fa-solid fa-chalkboard-user text-slate-400"></i> Add Facilitator
           </button>
-          <button onclick="batchSetAttendance(true)" class="px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/50 text-xs font-semibold text-emerald-300 border border-emerald-500/30 transition">
+          <button onclick="batchSetAttendance(true)" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 transition">
             Mark All Present
           </button>
         </div>
 
         <!-- The Big Gated Action Button -->
-        <button onclick="launchStudioForActivity()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-emerald-600 hover:from-move-gold-600 hover:to-emerald-700 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-2">
+        <button onclick="launchStudioForActivity()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-2">
           <i class="fa-solid fa-certificate"></i> Generate Certificates for Present Attendees (<span id="btnPresentCertCount">47</span>)
         </button>
       </div>
 
       <!-- Sub-Tabs: Attendees (Participants) vs Facilitators (Resource Speakers / Trainers) -->
-      <div class="flex items-center justify-between border-b border-slate-800 px-1 pt-1">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] px-1 pt-1">
         <div class="flex items-center gap-1">
           <button 
             id="subTabBtnAttendees" 
             onclick="switchActivitySubTab('attendees')" 
-            class="px-4 py-2.5 text-xs font-bold border-b-2 border-move-gold-500 text-move-gold-400 flex items-center gap-2 transition"
+            class="px-4 py-2.5 text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center gap-2 transition"
           >
             <i class="fa-solid fa-users text-sm"></i>
             <span>Attendees</span>
-            <span id="badgeAttendeeCount" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono font-bold">50</span>
+            <span id="badgeAttendeeCount" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 dark:bg-[#07110e] text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-[#18352b] font-mono font-bold">50</span>
           </button>
           <button 
             id="subTabBtnFacilitators" 
             onclick="switchActivitySubTab('facilitators')" 
-            class="px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition"
+            class="px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-2 transition"
           >
             <i class="fa-solid fa-chalkboard-user text-sm text-slate-400"></i>
             <span>Facilitators</span>
-            <span id="badgeFacilitatorCount" class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-950/80 text-indigo-300 border border-indigo-500/30 font-mono font-bold">1</span>
+            <span id="badgeFacilitatorCount" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b] font-mono font-bold">1</span>
           </button>
         </div>
 
-        <div id="subTabContextHint" class="text-[11px] text-slate-400 font-medium hidden sm:block">
+        <div id="subTabContextHint" class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
           <span id="subTabHintText">Showing attendee checklist for certificate gating</span>
         </div>
       </div>
 
       <!-- Attendees Checklist Table Container -->
-      <div id="containerAttendeesTable" class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+      <div id="containerAttendeesTable" class="bg-white dark:bg-[#0c1c17] rounded-2xl border border-[#dce6e0] dark:border-[#18352b] overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
+            <thead class="bg-[#f4f7f5] dark:bg-[#07110e] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-[#18352b]">
               <tr>
                 <th class="py-3 px-4 w-12">#</th>
                 <th class="py-3 px-4">Attendee Full Name</th>
@@ -657,27 +657,27 @@
                 <th class="py-3 px-4 text-right">Action</th>
               </tr>
               <!-- Live Search Row Directly Below Attendee Full Name -->
-              <tr class="bg-slate-950/60 border-t border-slate-800/80">
-                <th class="py-2.5 px-4 text-center text-slate-500 font-mono text-[10px]">
-                  <i class="fa-solid fa-magnifying-glass text-slate-600"></i>
+              <tr class="bg-slate-50/70 dark:bg-[#091512] border-t border-slate-200 dark:border-[#18352b]">
+                <th class="py-2.5 px-4 text-center text-slate-400 font-mono text-[10px]">
+                  <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
                 </th>
                 <th class="py-2.5 px-4">
                   <div class="relative w-full max-w-sm">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                     <input 
                       type="text" 
                       id="attendanceSearchInput" 
                       oninput="onAttendanceSearch(this.value)" 
                       onkeydown="if(event.key === 'Escape') clearAttendanceSearch()"
                       placeholder="Search attendee by name..." 
-                      class="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 font-medium normal-case focus:outline-none focus:border-move-gold-500 transition shadow-inner"
+                      class="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium normal-case focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition shadow-inner"
                       autocomplete="off"
                     >
                     <button 
                       type="button" 
                       id="btnClearAttendanceSearch" 
                       onclick="clearAttendanceSearch()" 
-                      class="hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-300 text-xs p-0.5" 
+                      class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs p-0.5" 
                       title="Clear search"
                     >
                       <i class="fa-solid fa-circle-xmark"></i>
@@ -685,10 +685,10 @@
                   </div>
                 </th>
                 <th class="py-2.5 px-4" colspan="4">
-                  <span id="attendanceFilteredCount" class="text-[11px] font-normal normal-case text-slate-400"></span>
+                  <span id="attendanceFilteredCount" class="text-[11px] font-normal normal-case text-slate-500 dark:text-slate-400"></span>
                 </th>
                 <th class="py-2.5 px-4 text-center">
-                  <select id="attendanceStatusFilter" onchange="onAttendanceStatusFilter(this.value)" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-[11px] text-slate-300 font-medium normal-case focus:outline-none focus:border-move-gold-500">
+                  <select id="attendanceStatusFilter" onchange="onAttendanceStatusFilter(this.value)" class="px-2.5 py-1 rounded-lg bg-white dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-[11px] text-slate-700 dark:text-slate-300 font-medium normal-case focus:outline-none focus:border-emerald-600">
                     <option value="all">All Attendees</option>
                     <option value="present">Present Only</option>
                     <option value="absent">Absent Only</option>
@@ -697,7 +697,7 @@
                 <th class="py-2.5 px-4 text-right"></th>
               </tr>
             </thead>
-            <tbody id="attendanceTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <tbody id="attendanceTableBody" class="divide-y divide-slate-200 dark:divide-[#18352b] font-medium">
               <!-- Populated via JS -->
             </tbody>
           </table>
@@ -705,42 +705,42 @@
       </div>
 
       <!-- Facilitators Table Container -->
-      <div id="containerFacilitatorsTable" class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl hidden">
+      <div id="containerFacilitatorsTable" class="bg-white dark:bg-[#0c1c17] rounded-2xl border border-[#dce6e0] dark:border-[#18352b] overflow-hidden shadow-xs hidden">
         <!-- Facilitators Header Row with Search & Quick Add -->
-        <div class="p-3 bg-slate-950/60 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div class="p-3 bg-[#f4f7f5] dark:bg-[#07110e] border-b border-slate-200 dark:border-[#18352b] flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <i class="fa-solid fa-chalkboard-user text-slate-400"></i> Event Facilitators & Trainers
             </span>
-            <span id="facilitatorFilteredCount" class="text-[10px] text-slate-400 font-mono"></span>
+            <span id="facilitatorFilteredCount" class="text-[10px] text-slate-500 dark:text-slate-400 font-mono"></span>
           </div>
 
           <div class="flex items-center gap-2">
             <!-- Search Facilitator Box -->
             <div class="relative">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
               <input 
                 type="text" 
                 id="facilitatorSearchInput" 
                 oninput="onFacilitatorSearch(this.value)" 
                 placeholder="Search facilitator by name..." 
-                class="w-56 pl-8 pr-7 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition shadow-inner"
+                class="w-56 pl-8 pr-7 py-1.5 rounded-xl bg-white dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition shadow-inner"
               >
               <button 
                 type="button" 
                 id="btnClearFacilitatorSearch" 
                 onclick="clearFacilitatorSearch()" 
-                class="hidden absolute right-2 top-2 text-slate-500 hover:text-slate-300 text-xs" 
+                class="hidden absolute right-2 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs" 
                 title="Clear search"
               >
                 <i class="fa-solid fa-circle-xmark"></i>
               </button>
             </div>
 
-            <button onclick="launchStudioForFacilitatorsBatch()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-move-gold-500 to-amber-500 hover:from-move-gold-600 hover:to-amber-600 text-slate-950 text-xs font-black shadow-md transition flex items-center gap-1.5" title="Generate Certificate of Appreciation for Present Facilitators">
+            <button onclick="launchStudioForFacilitatorsBatch()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5" title="Generate Certificate of Appreciation for Present Facilitators">
               <i class="fa-solid fa-award"></i> Award Appreciation Certs (<span id="btnFacilitatorCertCount">1</span>)
             </button>
-            <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+            <button onclick="openModal('modalAddFacilitator')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#122822] dark:hover:bg-[#18352b] text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5">
               <i class="fa-solid fa-plus"></i> Add Facilitator
             </button>
           </div>
@@ -748,7 +748,7 @@
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-slate-950/80 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800">
+            <thead class="bg-[#f4f7f5] dark:bg-[#07110e] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-[#18352b]">
               <tr>
                 <th class="py-3 px-4 w-12">#</th>
                 <th class="py-3 px-4">Facilitator Full Name</th>
@@ -760,7 +760,7 @@
                 <th class="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody id="facilitatorsTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <tbody id="facilitatorsTableBody" class="divide-y divide-slate-200 dark:divide-[#18352b] font-medium">
               <!-- Populated via JS -->
             </tbody>
           </table>
@@ -2184,66 +2184,66 @@
   </div>
 
   <!-- MODAL: Create New Activity -->
-  <div id="modalCreateActivity" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+  <div id="modalCreateActivity" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-calendar-plus text-slate-400"></i> Create New Activity
         </h3>
-        <button onclick="closeModal('modalCreateActivity')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('modalCreateActivity')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
       <form id="formCreateActivity" onsubmit="submitCreateActivity(event)" class="space-y-3">
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Activity Title *</label>
-          <input type="text" id="actNewTitle" required placeholder="e.g. Men in the Kitchen 3" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Activity Title *</label>
+          <input type="text" id="actNewTitle" required placeholder="e.g. Men in the Kitchen 3" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Theme / Short Description</label>
-          <input type="text" id="actNewTheme" placeholder="e.g. Modern Husbands in Gender Partnership" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Theme / Short Description</label>
+          <input type="text" id="actNewTheme" placeholder="e.g. Modern Husbands in Gender Partnership" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Event Date *</label>
-            <input type="text" id="actNewDate" required placeholder="e.g. November 25, 2026" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Event Date *</label>
+            <input type="text" id="actNewDate" required placeholder="e.g. November 25, 2026" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Duration</label>
-            <input type="text" id="actNewHours" value="8 Hours" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Duration</label>
+            <input type="text" id="actNewHours" value="8 Hours" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Venue / Location</label>
-          <input type="text" id="actNewVenue" placeholder="e.g. Baguio Convention and Cultural Center" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Venue / Location</label>
+          <input type="text" id="actNewVenue" placeholder="e.g. Baguio Convention and Cultural Center" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer / Resource Speaker</label>
-            <input type="text" id="actNewTrainer" placeholder="e.g. Atty. Maria Santos" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Trainer / Resource Speaker</label>
+            <input type="text" id="actNewTrainer" placeholder="e.g. Atty. Maria Santos" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer Designation</label>
-            <input type="text" id="actNewTrainerPos" placeholder="e.g. CHR Legal Consultant" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Trainer Designation</label>
+            <input type="text" id="actNewTrainerPos" placeholder="e.g. CHR Legal Consultant" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <!-- Target Participants Text Field (as requested: kept as simple text) -->
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Target Participants (Notes / Quota Description)</label>
-          <textarea id="actNewTargetNotes" rows="2" placeholder="e.g. Target 50 male personnel across all City Hall departments." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"></textarea>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Participants (Notes / Quota Description)</label>
+          <textarea id="actNewTargetNotes" rows="2" placeholder="e.g. Target 50 male personnel across all City Hall departments." class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"></textarea>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalCreateActivity')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="closeModal('modalCreateActivity')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow">
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition">
             Create Activity
           </button>
         </div>
@@ -2252,13 +2252,13 @@
   </div>
 
   <!-- MODAL: Edit Activity & Event Details -->
-  <div id="modalEditActivity" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+  <div id="modalEditActivity" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-slate-400"></i> Edit Activity / Training Details
         </h3>
-        <button onclick="closeModal('modalEditActivity')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('modalEditActivity')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -2267,57 +2267,57 @@
         <input type="hidden" id="actEditId">
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Activity Title *</label>
-          <input type="text" id="actEditTitle" required placeholder="e.g. Men in the Kitchen 2" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Activity Title *</label>
+          <input type="text" id="actEditTitle" required placeholder="e.g. Men in the Kitchen 2" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Theme / Short Description</label>
-          <input type="text" id="actEditTheme" placeholder="e.g. Love Served in the Kitchen" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Theme / Short Description</label>
+          <input type="text" id="actEditTheme" placeholder="e.g. Love Served in the Kitchen" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Event Date *</label>
-            <input type="text" id="actEditDate" required placeholder="e.g. October 20, 2026" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Event Date *</label>
+            <input type="text" id="actEditDate" required placeholder="e.g. October 20, 2026" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Duration</label>
-            <input type="text" id="actEditHours" placeholder="e.g. 8 Hours" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Duration</label>
+            <input type="text" id="actEditHours" placeholder="e.g. 8 Hours" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Venue / Location</label>
-          <input type="text" id="actEditVenue" placeholder="e.g. CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Venue / Location</label>
+          <input type="text" id="actEditVenue" placeholder="e.g. CDRRMO Building, Motorpool Compound, Lower Rock Quarry, Baguio City" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer / Resource Speaker</label>
-            <input type="text" id="actEditTrainer" placeholder="e.g. Chef Ramon Dela Rosa" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Trainer / Resource Speaker</label>
+            <input type="text" id="actEditTrainer" placeholder="e.g. Chef Ramon Dela Rosa" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Trainer Designation</label>
-            <input type="text" id="actEditTrainerPos" placeholder="e.g. Master Trainer & Culinary Specialist" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Trainer Designation</label>
+            <input type="text" id="actEditTrainerPos" placeholder="e.g. Master Trainer & Culinary Specialist" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <!-- Target Participants Text Field (as requested: kept as simple text) -->
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Target Participants (Notes / Quota Description)</label>
-          <textarea id="actEditTargetNotes" rows="2" placeholder="e.g. 50 target participants from various municipal departments" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"></textarea>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Participants (Notes / Quota Description)</label>
+          <textarea id="actEditTargetNotes" rows="2" placeholder="e.g. 50 target participants from various municipal departments" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"></textarea>
         </div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-          <button type="button" onclick="deleteCurrentEditActivity()" class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5" title="Delete this Activity">
+        <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="deleteCurrentEditActivity()" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-bold transition flex items-center gap-1.5" title="Delete this Activity">
             <i class="fa-solid fa-trash-can"></i> Delete
           </button>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="closeModal('modalEditActivity')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+            <button type="button" onclick="closeModal('modalEditActivity')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
               Cancel
             </button>
-            <button type="submit" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow flex items-center gap-1.5">
+            <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
               <i class="fa-solid fa-check"></i> Save Changes
             </button>
           </div>
@@ -2327,13 +2327,13 @@
   </div>
 
   <!-- MODAL: Add Attendee to Activity -->
-  <div id="modalAddAttendee" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+  <div id="modalAddAttendee" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-user-plus text-slate-400"></i> Enroll Attendee to Activity
         </h3>
-        <button onclick="closeModal('modalAddAttendee')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('modalAddAttendee')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -2342,7 +2342,7 @@
         <!-- Quick Pick from MOVE Roster with Search Box -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-bold text-slate-300 block">Quick Select from MOVE Roster (Optional)</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">Quick Select from MOVE Roster (Optional)</label>
             <span id="quickRosterMatchCount" class="text-[10px] text-slate-400 font-mono"></span>
           </div>
 
@@ -2355,7 +2355,7 @@
               oninput="onFilterQuickPickRoster(this.value)" 
               onkeydown="onQuickRosterSearchKey(event)" 
               placeholder="Search by name, office, or position..." 
-              class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-gold-500 transition" 
+              class="w-full pl-8 pr-8 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition" 
               autocomplete="off"
             >
             <button 
@@ -2373,21 +2373,21 @@
           <select 
             id="quickPickMoveRoster" 
             onchange="onQuickPickMoveAttendee(this.value)" 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
           >
             <option value="">-- Choose from MOVE Roster or Type Below --</option>
           </select>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Attendee Full Name *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Attendee Full Name *</label>
           <input 
             type="text" 
             id="attNewName" 
             required 
             placeholder="e.g. DELA CRUZ, JUAN" 
             oninput="checkDuplicateAttendeeInput(this.value)"
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 uppercase transition"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 uppercase transition"
           >
           <!-- Live Duplicate Detection Warning Banner -->
           <div id="attDuplicateWarning" class="hidden mt-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
@@ -2401,26 +2401,26 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Position Title</label>
-            <input type="text" id="attNewPosition" placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Position Title</label>
+            <input type="text" id="attNewPosition" placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department</label>
-            <input type="text" id="attNewOffice" placeholder="e.g. CMO, CBAO" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Office / Department</label>
+            <input type="text" id="attNewOffice" placeholder="e.g. CMO, CBAO" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
-            <select id="attNewGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Gender</label>
+            <select id="attNewGender" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="M">Male (M)</option>
               <option value="F">Female (F)</option>
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="attNewCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Civil Status</label>
+            <select id="attNewCivil" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="Married">Married</option>
               <option value="Single">Single</option>
             </select>
@@ -2434,11 +2434,11 @@
           </label>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalAddAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="closeModal('modalAddAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitAddAttendee" class="px-4 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-slate-950 text-xs font-black shadow transition disabled:opacity-40 disabled:cursor-not-allowed">
+          <button type="submit" id="btnSubmitAddAttendee" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed">
             Enroll Attendee
           </button>
         </div>
@@ -2447,13 +2447,13 @@
   </div>
 
   <!-- MODAL: Add Facilitator / Trainer to Activity -->
-  <div id="modalAddFacilitator" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+  <div id="modalAddFacilitator" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-chalkboard-user text-slate-400"></i> Add Facilitator / Trainer to Activity
         </h3>
-        <button onclick="closeModal('modalAddFacilitator')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('modalAddFacilitator')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -2462,7 +2462,7 @@
         <!-- Quick Pick from MOVE Roster / Pool with Search Box -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-bold text-slate-300 block">Quick Select from MOVE Roster / Pool (Optional)</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">Quick Select from MOVE Roster / Pool (Optional)</label>
             <span id="quickFacilitatorMatchCount" class="text-[10px] text-slate-400 font-mono"></span>
           </div>
 
@@ -2474,7 +2474,7 @@
               id="quickFacilitatorSearch" 
               oninput="onFilterQuickPickFacilitator(this.value)" 
               placeholder="Search by name, office, or position..." 
-              class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition" 
+              class="w-full pl-8 pr-8 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition" 
               autocomplete="off"
             >
             <button 
@@ -2491,21 +2491,21 @@
           <select 
             id="quickPickFacilitator" 
             onchange="onQuickPickFacilitatorSelect(this.value)" 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
           >
             <option value="">-- Choose from MOVE Roster or Type Below --</option>
           </select>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Facilitator Full Name *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Facilitator Full Name *</label>
           <input 
             type="text" 
             id="facNewName" 
             required 
             placeholder="e.g. DELA ROSA, RAMON" 
             oninput="checkDuplicateFacilitatorInput(this.value)"
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 uppercase transition"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 uppercase transition"
           >
           <!-- Duplicate Detection Warning Banner -->
           <div id="facDuplicateWarning" class="hidden mt-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs flex items-start gap-2.5 animate-fadeIn">
@@ -2519,14 +2519,14 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Role / Assignment *</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Role / Assignment *</label>
             <input 
               type="text" 
               id="facNewRole" 
               required
               list="facilitatorRolePresets"
               placeholder="e.g. Resource Speaker, Master Trainer" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
             <datalist id="facilitatorRolePresets">
               <option value="Lead Facilitator">
@@ -2540,27 +2540,27 @@
             </datalist>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Position Title</label>
-            <input type="text" id="facNewPosition" placeholder="e.g. Culinary Specialist, Attorney IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Position Title</label>
+            <input type="text" id="facNewPosition" placeholder="e.g. Culinary Specialist, Attorney IV" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Agency / Organization</label>
-          <input type="text" id="facNewOffice" placeholder="e.g. City Mayor's Office, CDRRMO, TESDA" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Office / Agency / Organization</label>
+          <input type="text" id="facNewOffice" placeholder="e.g. City Mayor's Office, CDRRMO, TESDA" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
-            <select id="facNewGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Gender</label>
+            <select id="facNewGender" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="M">Male (M)</option>
               <option value="F">Female (F)</option>
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="facNewCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Civil Status</label>
+            <select id="facNewCivil" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="Married">Married</option>
               <option value="Single">Single</option>
             </select>
@@ -2574,11 +2574,11 @@
           </label>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalAddFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="closeModal('modalAddFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitAddFacilitator" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow transition disabled:opacity-40 disabled:cursor-not-allowed">
+          <button type="submit" id="btnSubmitAddFacilitator" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed">
             Enroll Facilitator
           </button>
         </div>
@@ -2587,13 +2587,13 @@
   </div>
 
   <!-- MODAL: Edit Facilitator / Trainer Details -->
-  <div id="modalEditFacilitator" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+  <div id="modalEditFacilitator" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-user-pen text-slate-400"></i> Edit Facilitator / Trainer Details
         </h3>
-        <button type="button" onclick="closeModal('modalEditFacilitator')" class="text-slate-400 hover:text-white">
+        <button type="button" onclick="closeModal('modalEditFacilitator')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -2602,26 +2602,26 @@
         <input type="hidden" id="editFacId">
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Facilitator Full Name *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Facilitator Full Name *</label>
           <input 
             type="text" 
             id="editFacName" 
             required 
             placeholder="e.g. DELMENDO, RHEY J." 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 uppercase transition"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 uppercase transition"
           >
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Role / Assignment *</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Role / Assignment *</label>
             <input 
               type="text" 
               id="editFacRole" 
               required
               list="editFacilitatorRolePresets"
               placeholder="e.g. Lead Facilitator, Master Trainer" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
             <datalist id="editFacilitatorRolePresets">
               <option value="Lead Facilitator">
@@ -2641,39 +2641,39 @@
             </datalist>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Position Title *</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Position Title *</label>
             <input 
               type="text" 
               id="editFacPosition" 
               required
               placeholder="e.g. Tourism Operations Officer I" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 font-medium"
             >
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Agency / Organization *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Office / Agency / Organization *</label>
           <input 
             type="text" 
             id="editFacOffice" 
             required
             placeholder="e.g. City Tourism Operations Office (TOURISM)" 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
           >
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
-            <select id="editFacGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Gender</label>
+            <select id="editFacGender" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="M">Male (M)</option>
               <option value="F">Female (F)</option>
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="editFacCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Civil Status</label>
+            <select id="editFacCivil" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="Married">Married</option>
               <option value="Single">Single</option>
             </select>
@@ -2682,30 +2682,30 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Contact Number</label>
             <input 
               type="text" 
               id="editFacContact" 
               placeholder="e.g. 0917-123-4567" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Assignment Details</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Notes / Assignment Details</label>
             <input 
               type="text" 
               id="editFacNotes" 
               placeholder="e.g. Training Committee Facilitator" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalEditFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="closeModal('modalEditFacilitator')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitEditFacilitator" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow transition flex items-center gap-1.5">
+          <button type="submit" id="btnSubmitEditFacilitator" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i> Save Position &amp; Details
           </button>
         </div>
@@ -2714,16 +2714,16 @@
   </div>
 
   <!-- MODAL: Edit Attendee (Position, Office, Name, Details) -->
-  <div id="modalEditAttendee" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+  <div id="modalEditAttendee" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-[#18352b] pb-3">
         <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <i class="fa-solid fa-pen-to-square text-slate-400"></i> Edit Attendee Details
           </h3>
           <p class="text-[11px] text-slate-400">Update this participant's official position, office, and record details.</p>
         </div>
-        <button onclick="closeModal('modalEditAttendee')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('modalEditAttendee')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
@@ -2732,49 +2732,49 @@
         <input type="hidden" id="editAttId">
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Attendee Full Name *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Attendee Full Name *</label>
           <input 
             type="text" 
             id="editAttName" 
             required 
             placeholder="e.g. DELA CRUZ, JUAN A." 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 uppercase font-semibold"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 uppercase font-semibold"
           >
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Position Title *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Position Title *</label>
           <input 
             type="text" 
             id="editAttPosition" 
             required
             placeholder="e.g. Administrative Aide IV / Driver" 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500 font-medium"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 font-medium"
           >
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department / Agency *</label>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Office / Department / Agency *</label>
           <input 
             type="text" 
             id="editAttOffice" 
             required
             placeholder="e.g. City General Services Office (GSO)" 
-            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+            class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
           >
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Gender</label>
-            <select id="editAttGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Gender</label>
+            <select id="editAttGender" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="M">Male (M)</option>
               <option value="F">Female (F)</option>
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="editAttCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Civil Status</label>
+            <select id="editAttCivil" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
               <option value="Married">Married</option>
               <option value="Single">Single</option>
             </select>
@@ -2783,30 +2783,30 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Contact Number</label>
             <input 
               type="text" 
               id="editAttContact" 
               placeholder="e.g. 0917-123-4567" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-300 block mb-1">Notes / Remarks</label>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Notes / Remarks</label>
             <input 
               type="text" 
               id="editAttNotes" 
               placeholder="e.g. Participant Batch 2" 
-              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-gold-500"
+              class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
             >
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-          <button type="button" onclick="closeModal('modalEditAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-[#18352b]">
+          <button type="button" onclick="closeModal('modalEditAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#122822] transition">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitEditAttendee" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-emerald-600 hover:from-move-gold-600 hover:to-emerald-700 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
+          <button type="submit" id="btnSubmitEditAttendee" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i> Save Position &amp; Details
           </button>
         </div>
