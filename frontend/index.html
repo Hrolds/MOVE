@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1420">
+  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1450">
 
   <script>
     tailwind.config = {
@@ -33,7 +33,7 @@
     }
   </script>
 </head>
-<body class="bg-[#080d16] text-slate-100 h-screen flex flex-col overflow-hidden font-sans antialiased selection:bg-move-gold-500/30 selection:text-white">
+<body class="bg-[#f4f7f5] text-slate-900 h-screen flex flex-col overflow-hidden font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-950">
 
   <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer"></div>
@@ -52,21 +52,21 @@
   <div id="appShellWrapper" class="flex-1 flex min-h-0 overflow-hidden relative no-print">
 
     <!-- PERSISTENT COLLAPSIBLE LEFT SIDEBAR (#appSidebar) -->
-    <aside id="appSidebar" class="w-64 bg-[#0b111e] border-r border-slate-800/90 flex flex-col justify-between shrink-0 transition-all duration-200 select-none z-30">
+    <aside id="appSidebar" class="w-64 bg-white border-r border-[#dce6e0] flex flex-col justify-between shrink-0 transition-all duration-200 select-none z-30">
       
       <!-- Sidebar Top Brand Header -->
-      <div class="h-14 px-3.5 border-b border-slate-800/90 flex items-center justify-between gap-2 shrink-0">
+      <div class="h-14 px-3.5 border-b border-[#dce6e0] flex items-center justify-between gap-2 shrink-0">
         <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="switchView('home')" title="Go to Chapter Overview">
           <div class="flex items-center -space-x-1.5 shrink-0">
-            <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-7 h-7 object-contain drop-shadow">
-            <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-7 h-7 object-contain drop-shadow">
+            <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-7 h-7 object-contain drop-shadow-sm">
+            <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-7 h-7 object-contain drop-shadow-sm">
           </div>
           <div class="min-w-0 sidebar-label">
-            <div class="text-xs font-black tracking-wide text-white uppercase truncate">MOVE Baguio</div>
-            <div class="text-[10px] text-slate-400 font-medium truncate">Chapter Admin &bull; HRIS</div>
+            <div class="text-xs font-black tracking-wide text-slate-900 uppercase truncate">MOVE Baguio</div>
+            <div class="text-[10px] text-slate-500 font-medium truncate">Chapter Admin &bull; HRIS</div>
           </div>
         </div>
-        <button type="button" onclick="toggleAppSidebar()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center justify-center transition shrink-0" title="Collapse / Expand Sidebar">
+        <button type="button" onclick="toggleAppSidebar()" class="w-7 h-7 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center transition shrink-0" title="Collapse / Expand Sidebar">
           <i class="fa-solid fa-table-columns text-xs"></i>
         </button>
       </div>
@@ -76,8 +76,8 @@
         
         <!-- Group 1: Overview -->
         <div class="space-y-1">
-          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Overview</div>
-          <button onclick="switchView('home')" id="sidebarNav-home" class="w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50" title="Chapter Overview">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Overview</div>
+          <button onclick="switchView('home')" id="sidebarNav-home" class="w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-emerald-600 text-white shadow-sm border-emerald-600/50" title="Chapter Overview">
             <span class="flex items-center gap-2.5">
               <i class="fa-solid fa-house w-4 text-center"></i>
               <span class="sidebar-label">Home &amp; Mandate</span>
@@ -87,90 +87,90 @@
 
         <!-- Group 2: Personnel Directory -->
         <div class="space-y-1" id="rosterNavPanel">
-          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between sidebar-label">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between sidebar-label">
             <span>Personnel Directory</span>
-            <span class="text-[10px] font-mono text-slate-400" id="sidebarTotalBadge">58</span>
+            <span class="text-[10px] font-mono text-slate-600 font-bold" id="sidebarTotalBadge">58</span>
           </div>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('all');" id="rosterFilter-all" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Manage Personnel">
+          <button onclick="switchView('roster'); filterRosterByStatus('all');" id="rosterFilter-all" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Manage Personnel">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-users-gear w-4 text-center text-move-orange-400"></i>
+              <i class="fa-solid fa-users-gear w-4 text-center text-emerald-600"></i>
               <span class="sidebar-label">Manage Personnel</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 sidebar-label" id="count-all">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 sidebar-label" id="count-all">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('officer');" id="rosterFilter-officer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Executive Officers">
+          <button onclick="switchView('roster'); filterRosterByStatus('officer');" id="rosterFilter-officer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Executive Officers">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-star w-4 text-center text-amber-400"></i>
+              <i class="fa-solid fa-star w-4 text-center text-amber-500"></i>
               <span class="sidebar-label">Executive Officers</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/25 sidebar-label" id="count-officer">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 sidebar-label" id="count-officer">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('member');" id="rosterFilter-member" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Members (Cadre)">
+          <button onclick="switchView('roster'); filterRosterByStatus('member');" id="rosterFilter-member" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Members (Cadre)">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-400"></i>
+              <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-600"></i>
               <span class="sidebar-label">Members (Cadre)</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 sidebar-label" id="count-member">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 sidebar-label" id="count-member">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('committee');" id="rosterFilter-committee" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Standing Committees">
+          <button onclick="switchView('roster'); filterRosterByStatus('committee');" id="rosterFilter-committee" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Standing Committees">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-diagram-project w-4 text-center text-purple-400"></i>
+              <i class="fa-solid fa-diagram-project w-4 text-center text-purple-600"></i>
               <span class="sidebar-label">Committees</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/25 sidebar-label" id="count-committee">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200 sidebar-label" id="count-committee">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('participant');" id="rosterFilter-participant" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Participants">
+          <button onclick="switchView('roster'); filterRosterByStatus('participant');" id="rosterFilter-participant" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Participants">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-user-check w-4 text-center text-cyan-400"></i>
+              <i class="fa-solid fa-user-check w-4 text-center text-teal-600"></i>
               <span class="sidebar-label">Participants</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/25 sidebar-label" id="count-participant">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-teal-50 text-teal-800 border border-teal-200 sidebar-label" id="count-participant">0</span>
           </button>
         </div>
 
         <!-- Group 3: Operations & Studio -->
         <div class="space-y-1">
-          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Operations &amp; Studio</div>
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Operations &amp; Studio</div>
 
-          <button onclick="switchView('activities')" id="sidebarNav-activities" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Activities & Seminars">
+          <button onclick="switchView('activities')" id="sidebarNav-activities" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Activities & Seminars">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-calendar-check w-4 text-center text-cyan-400"></i>
+              <i class="fa-solid fa-calendar-check w-4 text-center text-emerald-600"></i>
               <span class="sidebar-label">Activities &amp; Seminars</span>
             </span>
           </button>
 
-          <button onclick="switchView('studio')" id="sidebarNav-studio" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Unified Certificate Studio">
+          <button onclick="switchView('studio')" id="sidebarNav-studio" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Unified Certificate Studio">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-certificate w-4 text-center text-move-gold-400"></i>
+              <i class="fa-solid fa-certificate w-4 text-center text-amber-500"></i>
               <span class="sidebar-label">Certificate Studio</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase bg-move-gold-500/15 text-move-gold-400 border border-move-gold-500/30 sidebar-label">Studio</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase bg-amber-50 text-amber-800 border border-amber-200 sidebar-label">Studio</span>
           </button>
         </div>
 
         <!-- Group 4: Integrations & Audit -->
-        <div class="space-y-1 pt-2 border-t border-slate-800/80">
-          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Integrations</div>
+        <div class="space-y-1 pt-2 border-t border-[#dce6e0]">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Integrations</div>
 
-          <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-blue-500/25 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white group" title="Compare with HRIS API">
+          <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-800 group" title="Compare with HRIS API">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-400 group-hover:rotate-12 transition-transform"></i>
+              <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-600 group-hover:rotate-12 transition-transform"></i>
               <span class="sidebar-label">HRIS Sync &amp; Audit</span>
             </span>
-            <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300 font-mono sidebar-label">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 font-mono sidebar-label">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span id="badgeHrisDiffCountText">HRIS</span>
             </span>
           </button>
 
-          <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/70" title="Search Employee Pool">
+          <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Search Employee Pool">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-magnifying-glass w-4 text-center text-slate-400"></i>
+              <i class="fa-solid fa-magnifying-glass w-4 text-center text-slate-500"></i>
               <span class="sidebar-label">Employee Pool (748)</span>
             </span>
           </button>
@@ -179,63 +179,63 @@
       </div>
 
       <!-- Sidebar Bottom Status Footer -->
-      <div class="p-3 border-t border-slate-800/90 bg-slate-950/60 flex items-center justify-between text-[11px]">
+      <div class="p-3 border-t border-[#dce6e0] bg-[#edf3f0] flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 truncate">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-          <span class="text-slate-300 font-bold truncate sidebar-label">SQLite &amp; SFTP Live</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span class="text-slate-700 font-bold truncate sidebar-label">SQLite &amp; SFTP Live</span>
         </div>
-        <span class="text-[10px] font-mono text-slate-500 sidebar-label">100%</span>
+        <span class="text-[10px] font-mono text-slate-500 font-bold sidebar-label">100%</span>
       </div>
 
     </aside>
 
     <!-- RIGHT WORKSPACE COLUMN (Top Header + Main Stage) -->
-    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#080d16]">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#f4f7f5]">
 
       <!-- TOP HEADER BAR (#topNavbar) -->
-      <header id="topNavbar" class="h-14 bg-[#0b111e]/95 border-b border-slate-800/90 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-20 backdrop-blur-md">
+      <header id="topNavbar" class="h-14 bg-white/95 border-b border-[#dce6e0] px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-20 backdrop-blur-md">
         
         <!-- Left: Sidebar Toggle & Breadcrumb Path -->
         <div class="flex items-center gap-3 min-w-0">
-          <button type="button" onclick="toggleAppSidebar()" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center transition shrink-0" title="Toggle Sidebar">
+          <button type="button" onclick="toggleAppSidebar()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition shrink-0" title="Toggle Sidebar">
             <i class="fa-solid fa-bars-staggered text-xs"></i>
           </button>
           <div class="flex items-center gap-2 text-xs truncate">
-            <span class="text-slate-400 font-medium hidden sm:inline">MOVE Baguio</span>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600 hidden sm:inline"></i>
-            <span id="topBreadcrumbSection" class="text-slate-400 font-medium">Overview</span>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
-            <span id="topBreadcrumbActive" class="text-white font-bold bg-slate-800/90 px-2.5 py-0.5 rounded-lg border border-slate-700/80 truncate">Home &amp; Mandate</span>
+            <span class="text-slate-500 font-medium hidden sm:inline">MOVE Baguio</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 hidden sm:inline"></i>
+            <span id="topBreadcrumbSection" class="text-slate-500 font-medium">Overview</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
+            <span id="topBreadcrumbActive" class="text-emerald-950 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 truncate">Home &amp; Mandate</span>
           </div>
         </div>
 
         <!-- Center: Global Command Search Input -->
         <div class="hidden md:flex items-center flex-1 max-w-md mx-2">
           <div class="relative w-full">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-            <input type="text" id="globalTopSearchInput" oninput="onGlobalTopSearch(this.value)" placeholder="Quick search personnel by name, ID, or office..." class="w-full pl-8 pr-10 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500 transition">
-            <kbd class="absolute right-2.5 top-1.5 px-1.5 py-0.2 text-[10px] font-mono font-bold text-slate-400 bg-slate-900 border border-slate-800 rounded">/</kbd>
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="globalTopSearchInput" oninput="onGlobalTopSearch(this.value)" placeholder="Quick search personnel by name, ID, or office..." class="w-full pl-8 pr-10 py-1.5 rounded-xl bg-[#f4f7f5] border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition">
+            <kbd class="absolute right-2.5 top-1.5 px-1.5 py-0.2 text-[10px] font-mono font-bold text-slate-500 bg-white border border-slate-200 rounded shadow-2xs">/</kbd>
           </div>
         </div>
 
         <!-- Right: Segmented View Switcher & Quick Action -->
         <div class="flex items-center gap-2 shrink-0">
-          <nav class="hidden xl:flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/90">
-            <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-move-orange-500 text-white shadow">
+          <nav class="hidden xl:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow">
               <i class="fa-solid fa-house text-[10px]"></i> Home
             </button>
-            <button id="navTab-roster" onclick="switchView('roster')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+            <button id="navTab-roster" onclick="switchView('roster')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
               <i class="fa-solid fa-users text-[10px]"></i> Roster
             </button>
-            <button id="navTab-activities" onclick="switchView('activities')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+            <button id="navTab-activities" onclick="switchView('activities')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
               <i class="fa-solid fa-calendar-check text-[10px]"></i> Activities
             </button>
-            <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
-              <i class="fa-solid fa-certificate text-move-gold-400 text-[10px]"></i> Studio
+            <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
+              <i class="fa-solid fa-certificate text-amber-500 text-[10px]"></i> Studio
             </button>
           </nav>
 
-          <button onclick="openModal('modalAddMember')" class="px-3 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5" title="Add Person to MOVE Roster">
+          <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="Add Person to MOVE Roster">
             <i class="fa-solid fa-user-plus text-xs"></i>
             <span class="hidden sm:inline">Add Person</span>
           </button>
@@ -252,25 +252,25 @@
           <!-- ==================================================================== -->
           <section id="view-home"  class="space-y-6">
 
-      <!-- 1. Hero Banner: MOVE Baguio Chapter -->
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-move-orange-950/30 border border-slate-800 p-6 sm:p-8 shadow-2xl">
+      <!-- 1. Hero Banner: MOVE Baguio Chapter (Light Emerald) -->
+      <div class="relative overflow-hidden rounded-3xl bg-white border border-[#dce6e0] p-6 sm:p-8 shadow-sm">
         <!-- Background Watermark Emblem -->
         <img src="/MOVE BAGUIO LOGO.png" alt="" class="absolute -right-10 -bottom-10 w-80 h-80 opacity-5 pointer-events-none select-none">
         
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div class="flex items-start gap-4">
             <div class="flex items-center gap-2 shrink-0">
-              <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-14 h-14 object-contain drop-shadow-md">
-              <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-14 h-14 object-contain drop-shadow-md">
+              <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-14 h-14 object-contain drop-shadow-sm">
+              <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-14 h-14 object-contain drop-shadow-sm">
             </div>
             <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 text-[10px] font-black uppercase tracking-wider mb-2">
+              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-black uppercase tracking-wider mb-2">
                 <i class="fa-solid fa-landmark"></i> City Government of Baguio &bull; GAD Council
               </div>
-              <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+              <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
                 Men Opposed to Violence Against Women Everywhere
               </h1>
-              <p class="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-3xl leading-relaxed">
+              <p class="text-xs sm:text-sm text-slate-600 font-medium mt-1 max-w-3xl leading-relaxed">
                 Baguio City Chapter &bull; Mobilizing male public servants, leaders, and advocates as active allies in eliminating gender-based violence, protecting homes, and fostering equality across public service.
               </p>
             </div>
@@ -278,17 +278,17 @@
 
           <!-- Quick Metrics Ribbon -->
           <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start md:self-center">
-            <div class="px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center min-w-[95px] shadow-sm">
-              <div class="text-xl font-black text-move-orange-400 font-mono" id="homeStatMembers">58</div>
-              <div class="text-[10px] uppercase font-bold text-slate-400">Members</div>
+            <div class="px-4 py-2.5 rounded-2xl bg-[#f4f7f5] border border-[#dce6e0] text-center min-w-[95px] shadow-2xs">
+              <div class="text-xl font-black text-emerald-700 font-mono" id="homeStatMembers">58</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">Members</div>
             </div>
-            <div class="px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center min-w-[95px] shadow-sm">
-              <div class="text-xl font-black text-amber-400 font-mono" id="homeStatOfficers">9</div>
-              <div class="text-[10px] uppercase font-bold text-slate-400">Officers</div>
+            <div class="px-4 py-2.5 rounded-2xl bg-[#f4f7f5] border border-[#dce6e0] text-center min-w-[95px] shadow-2xs">
+              <div class="text-xl font-black text-amber-600 font-mono" id="homeStatOfficers">9</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">Officers</div>
             </div>
-            <div class="px-4 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center min-w-[95px] shadow-sm">
-              <div class="text-xl font-black text-emerald-400 font-mono" id="homeStatActivities">1</div>
-              <div class="text-[10px] uppercase font-bold text-slate-400">Seminars</div>
+            <div class="px-4 py-2.5 rounded-2xl bg-[#f4f7f5] border border-[#dce6e0] text-center min-w-[95px] shadow-2xs">
+              <div class="text-xl font-black text-emerald-600 font-mono" id="homeStatActivities">1</div>
+              <div class="text-[10px] uppercase font-bold text-slate-500">Seminars</div>
             </div>
           </div>
         </div>
@@ -300,7 +300,7 @@
         <!-- Showcase Header & Step Indicators -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
           <div>
-            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-move-orange-400 mb-1">
+            <div class="flex items-center gap-2 text-[11px] font-black uppercase tracking-wider text-emerald-700 mb-1">
               <i class="fa-solid fa-compass"></i>
               <span>Interactive Guided Showcase</span>
               <span class="text-slate-600">&bull;</span>
@@ -314,7 +314,7 @@
 
           <!-- Step Selector Pills -->
           <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none" id="homeStepPills">
-            <button type="button" onclick="goToHomeSlide(1)" id="homePill-1" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-move-orange-500 text-white shadow-sm">
+            <button type="button" onclick="goToHomeSlide(1)" id="homePill-1" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-emerald-600 text-white shadow-sm">
               <i class="fa-solid fa-scale-balanced text-[11px]"></i>
               <span>1. Mandate</span>
             </button>
@@ -360,14 +360,14 @@
                 Established under the guidance of the <strong>Philippine Commission on Women (PCW)</strong> and institutionalized by the <strong>City Government of Baguio GAD Council</strong>, MOVE stands on the firm conviction that violence against women is not solely a women's struggle—it is a societal crisis that demands the active, vocal commitment of men.
               </p>
               <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 flex items-start gap-3">
-                <i class="fa-solid fa-quote-left text-move-orange-400 text-base mt-0.5"></i>
+                <i class="fa-solid fa-quote-left text-emerald-700 text-base mt-0.5"></i>
                 <span>"When good men remain silent, violence thrives. MOVE transforms male public servants into proactive advocates, mentors, and defenders of human dignity."</span>
               </div>
             </div>
 
             <div class="lg:col-span-5 grid grid-cols-1 gap-3">
               <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition space-y-1.5">
-                <div class="w-8 h-8 rounded-xl bg-move-orange-500/20 text-move-orange-400 flex items-center justify-center text-xs font-bold mb-1">
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs font-bold mb-1">
                   <i class="fa-solid fa-handshake-angle"></i>
                 </div>
                 <div class="text-xs font-bold text-white">Men as Active Allies</div>
@@ -589,7 +589,7 @@
                   <i class="fa-solid fa-calendar-check"></i>
                   <span>Manage Activities</span>
                 </button>
-                <button onclick="switchView('studio');" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white font-bold text-xs transition flex items-center gap-2 shadow">
+                <button onclick="switchView('studio');" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-2 shadow">
                   <i class="fa-solid fa-certificate"></i>
                   <span>Open Certificate Studio</span>
                 </button>
@@ -647,7 +647,7 @@
 
             <!-- Call to Action Buttons -->
             <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
-              <button onclick="switchView('roster');" class="px-5 py-2.5 rounded-2xl bg-move-orange-500 hover:bg-move-orange-600 text-white font-extrabold text-xs shadow-lg transition flex items-center gap-2 hover:scale-105">
+              <button onclick="switchView('roster');" class="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg transition flex items-center gap-2 hover:scale-105">
                 <i class="fa-solid fa-users"></i>
                 <span>Explore Chapter Roster (58)</span>
               </button>
@@ -672,14 +672,14 @@
 
           <!-- Middle Progress Dots -->
           <div class="flex items-center gap-2">
-            <span onclick="goToHomeSlide(1)" class="w-2.5 h-2.5 rounded-full bg-move-orange-500 cursor-pointer transition-all" id="homeDot-1" title="1. Mandate"></span>
+            <span onclick="goToHomeSlide(1)" class="w-2.5 h-2.5 rounded-full bg-emerald-600 cursor-pointer transition-all" id="homeDot-1" title="1. Mandate"></span>
             <span onclick="goToHomeSlide(2)" class="w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all" id="homeDot-2" title="2. Principles"></span>
             <span onclick="goToHomeSlide(3)" class="w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all" id="homeDot-3" title="3. Officers"></span>
             <span onclick="goToHomeSlide(4)" class="w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all" id="homeDot-4" title="4. Activities"></span>
             <span onclick="goToHomeSlide(5)" class="w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all" id="homeDot-5" title="5. Cadre Pledge"></span>
           </div>
 
-          <button type="button" onclick="nextHomeSlide()" id="btnNextHomeSlide" class="px-5 py-2.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-extrabold shadow-md transition flex items-center gap-2">
+          <button type="button" onclick="nextHomeSlide()" id="btnNextHomeSlide" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md transition flex items-center gap-2">
             <span id="btnNextHomeSlideLabel">Next: Core Principles</span>
             <i class="fa-solid fa-arrow-right text-xs"></i>
           </button>
@@ -691,12 +691,12 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- Hub Card 1: MOVE Roster -->
-        <div onclick="switchView('roster')" class="p-5 rounded-3xl bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-move-orange-500/50 transition cursor-pointer group shadow-xl space-y-3">
-          <div class="w-10 h-10 rounded-2xl bg-move-orange-500/15 border border-move-orange-500/30 flex items-center justify-center text-move-orange-400 text-base group-hover:scale-110 transition-transform">
+        <div onclick="switchView('roster')" class="p-5 rounded-3xl bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-300 transition cursor-pointer group shadow-xl space-y-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-base group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-users"></i>
           </div>
           <div>
-            <div class="text-sm font-bold text-white group-hover:text-move-orange-400 transition flex items-center justify-between">
+            <div class="text-sm font-bold text-white group-hover:text-emerald-700 transition flex items-center justify-between">
               <span>Chapter Roster</span>
               <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
             </div>
@@ -704,7 +704,7 @@
               58 registered personnel across Cadre Members, Officers, Standing Committees, and Trainees.
             </p>
           </div>
-          <div class="text-[11px] font-bold text-move-orange-400">Open Roster &rarr;</div>
+          <div class="text-[11px] font-bold text-emerald-700">Open Roster &rarr;</div>
         </div>
 
         <!-- Hub Card 2: Executive Officers -->
@@ -763,7 +763,7 @@
     </section>
 
     <!-- ==================================================================== -->
-    <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER (LINEAR / SHADCN)     -->
+    <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER (LINEAR / SHADCN LIGHT) -->
     <!-- ==================================================================== -->
     <section id="view-roster" class="space-y-5 hidden">
 
@@ -771,52 +771,52 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         
         <!-- KPI 1: Total Personnel -->
-        <div onclick="filterRosterByStatus('all')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-move-orange-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+        <div onclick="filterRosterByStatus('all')" class="p-4 rounded-2xl bg-white hover:bg-emerald-50/40 border border-[#dce6e0] hover:border-emerald-500/50 transition cursor-pointer shadow-sm flex items-center justify-between group">
           <div>
-            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Total Roster</div>
-            <div class="text-2xl font-black text-white font-mono mt-0.5" id="kpiCountAll">58</div>
-            <div class="text-[11px] text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-800">Total Roster</div>
+            <div class="text-2xl font-black text-slate-900 font-mono mt-0.5" id="kpiCountAll">58</div>
+            <div class="text-[11px] text-emerald-700 font-semibold mt-0.5 flex items-center gap-1">
               <i class="fa-solid fa-circle-check text-[10px]"></i>
               <span>100% HRIS &amp; Photo Linked</span>
             </div>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-users-gear"></i>
           </div>
         </div>
 
         <!-- KPI 2: Executive Officers -->
-        <div onclick="filterRosterByStatus('officer')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-amber-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+        <div onclick="filterRosterByStatus('officer')" class="p-4 rounded-2xl bg-white hover:bg-amber-50/40 border border-[#dce6e0] hover:border-amber-500/50 transition cursor-pointer shadow-sm flex items-center justify-between group">
           <div>
-            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Executive Officers</div>
-            <div class="text-2xl font-black text-amber-400 font-mono mt-0.5" id="kpiCountOfficer">9</div>
-            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Protocol Hierarchy Active</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-800">Executive Officers</div>
+            <div class="text-2xl font-black text-amber-600 font-mono mt-0.5" id="kpiCountOfficer">9</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Protocol Hierarchy Active</div>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-star"></i>
           </div>
         </div>
 
         <!-- KPI 3: Members (Cadre) -->
-        <div onclick="filterRosterByStatus('member')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+        <div onclick="filterRosterByStatus('member')" class="p-4 rounded-2xl bg-white hover:bg-emerald-50/40 border border-[#dce6e0] hover:border-emerald-500/50 transition cursor-pointer shadow-sm flex items-center justify-between group">
           <div>
-            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Members (Cadre)</div>
-            <div class="text-2xl font-black text-emerald-400 font-mono mt-0.5" id="kpiCountMember">42</div>
-            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Active Chapter Advocates</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-800">Members (Cadre)</div>
+            <div class="text-2xl font-black text-emerald-700 font-mono mt-0.5" id="kpiCountMember">42</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Active Chapter Advocates</div>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
         </div>
 
         <!-- KPI 4: Standing Committees -->
-        <div onclick="filterRosterByStatus('committee')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-purple-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+        <div onclick="filterRosterByStatus('committee')" class="p-4 rounded-2xl bg-white hover:bg-purple-50/40 border border-[#dce6e0] hover:border-purple-500/50 transition cursor-pointer shadow-sm flex items-center justify-between group">
           <div>
-            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Committees</div>
-            <div class="text-2xl font-black text-purple-400 font-mono mt-0.5" id="kpiCountCommittee">4</div>
-            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Specialized Task Forces</div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-800">Committees</div>
+            <div class="text-2xl font-black text-purple-700 font-mono mt-0.5" id="kpiCountCommittee">4</div>
+            <div class="text-[11px] text-slate-500 font-medium mt-0.5">Specialized Task Forces</div>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+          <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
             <i class="fa-solid fa-diagram-project"></i>
           </div>
         </div>
@@ -824,14 +824,14 @@
       </div>
 
       <!-- 2. Unified Action & Filter Toolbar -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#0b111e] p-3.5 rounded-2xl border border-slate-800/90 shadow-md">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-[#dce6e0] shadow-sm">
         <div class="flex flex-wrap items-center gap-2.5">
-          <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/80 flex items-center gap-2 shadow-2xs">
-            <i class="fa-solid fa-users-gear text-move-orange-400"></i> Manage Personnel
+          <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-emerald-950 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-2 shadow-2xs">
+            <i class="fa-solid fa-users-gear text-emerald-600"></i> Manage Personnel
           </span>
-          <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Click any personnel row to open their profile drawer on the right</span>
-          <button type="button" onclick="openModalArrangeOfficers()" id="btnToolbarArrangeOfficers" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1.5 shadow-2xs hidden">
-            <i class="fa-solid fa-arrow-down-wide-short text-amber-400"></i>
+          <span id="lblActiveNavCount" class="text-xs text-slate-500 font-medium">Click any personnel row to open their profile drawer on the right</span>
+          <button type="button" onclick="openModalArrangeOfficers()" id="btnToolbarArrangeOfficers" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200 transition flex items-center gap-1.5 shadow-2xs hidden">
+            <i class="fa-solid fa-arrow-down-wide-short text-amber-600"></i>
             <span>Arrange Officers Order</span>
           </button>
         </div>
@@ -839,14 +839,14 @@
         <!-- Right: Search, HRIS Audit & Add Actions -->
         <div class="flex flex-wrap items-center gap-2">
           <div class="relative flex-1 sm:w-64">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-            <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Filter by name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Filter by name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#f4f7f5] border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white">
           </div>
-          <button onclick="openHrisCompareModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-blue-300 hover:text-white text-xs font-semibold border border-slate-800 transition flex items-center gap-1.5 shrink-0" title="Compare Roster with Official HRIS">
-            <i class="fa-solid fa-scale-balanced text-blue-400 text-xs"></i>
+          <button onclick="openHrisCompareModal()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-blue-800 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5 shrink-0" title="Compare Roster with Official HRIS">
+            <i class="fa-solid fa-scale-balanced text-blue-600 text-xs"></i>
             <span class="hidden md:inline">HRIS Audit</span>
           </button>
-          <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0" title="Add Person to MOVE">
+          <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 shrink-0" title="Add Person to MOVE">
             <i class="fa-solid fa-user-plus text-xs"></i>
             <span>Add Person</span>
           </button>
@@ -854,33 +854,33 @@
       </div>
 
       <!-- 3. Enterprise Data Table Card -->
-      <div class="bg-[#0b111e] rounded-2xl border border-slate-800/90 overflow-hidden shadow-2xl flex flex-col">
+      <div class="bg-white rounded-2xl border border-[#dce6e0] overflow-hidden shadow-sm flex flex-col">
         <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-19rem)] roster-scroll-container">
           <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-950/95 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800/90 sticky top-0 z-10 shadow-xs">
+            <thead class="bg-[#edf3f0] text-slate-700 font-bold uppercase tracking-wider text-[10px] border-b border-[#dce6e0] sticky top-0 z-10 shadow-xs">
               <tr>
-                <th class="py-3 px-3 w-12 text-slate-500 font-mono text-center bg-slate-950">#</th>
-                <th class="py-3 px-4 min-w-[240px] bg-slate-950">Full Name</th>
-                <th class="py-3 px-3 min-w-[120px] bg-slate-950">Civil Status</th>
-                <th class="py-3 px-4 min-w-[200px] bg-slate-950">Move Position</th>
-                <th class="py-3 px-3 min-w-[110px] bg-slate-950">Office</th>
-                <th class="py-3 px-4 text-right whitespace-nowrap w-28 bg-slate-950">Actions</th>
+                <th class="py-3 px-3 w-12 text-slate-500 font-mono text-center bg-[#edf3f0]">#</th>
+                <th class="py-3 px-4 min-w-[240px] bg-[#edf3f0]">Full Name</th>
+                <th class="py-3 px-3 min-w-[120px] bg-[#edf3f0]">Civil Status</th>
+                <th class="py-3 px-4 min-w-[200px] bg-[#edf3f0]">Move Position</th>
+                <th class="py-3 px-3 min-w-[110px] bg-[#edf3f0]">Office</th>
+                <th class="py-3 px-4 text-right whitespace-nowrap w-28 bg-[#edf3f0]">Actions</th>
               </tr>
             </thead>
-            <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
+            <tbody id="rosterTableBody" class="divide-y divide-[#e6ede9] font-medium text-slate-800">
               <!-- Dynamically populated via JS -->
             </tbody>
           </table>
         </div>
 
         <!-- Bottom Info Counter Bar -->
-        <div class="flex items-center justify-between px-4 py-2.5 bg-slate-950/90 border-t border-slate-800/90 text-xs text-slate-400">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-[#f8faf9] border-t border-[#dce6e0] text-xs text-slate-500">
           <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="rosterTotalCountLabel" class="font-semibold text-slate-300">Showing all personnel</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="rosterTotalCountLabel" class="font-semibold text-slate-700">Showing all personnel</span>
           </div>
           <div class="text-[11px] text-slate-500 flex items-center gap-2">
-            <span><i class="fa-solid fa-hand-pointer text-move-orange-400 mr-1"></i> Click any row to open Slide-Over Profile Drawer</span>
+            <span><i class="fa-solid fa-hand-pointer text-emerald-600 mr-1"></i> Click any row to open Slide-Over Profile Drawer</span>
           </div>
         </div>
       </div>
@@ -967,7 +967,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
           <button onclick="bulkEnrollMoveRoster()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-users-gear text-move-orange-400"></i> Enroll All MOVE Participants
+            <i class="fa-solid fa-users-gear text-emerald-700"></i> Enroll All MOVE Participants
           </button>
           <button onclick="openModal('modalAddAttendee')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus text-move-gold-400"></i> Add Attendee
@@ -981,7 +981,7 @@
         </div>
 
         <!-- The Big Gated Action Button -->
-        <button onclick="launchStudioForActivity()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-move-orange-500 hover:from-move-gold-600 hover:to-move-orange-600 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-2">
+        <button onclick="launchStudioForActivity()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-emerald-600 hover:from-move-gold-600 hover:to-emerald-700 text-slate-950 text-xs font-black shadow-lg transition flex items-center gap-2">
           <i class="fa-solid fa-certificate"></i> Generate Certificates for Present Attendees (<span id="btnPresentCertCount">47</span>)
         </button>
       </div>
@@ -1490,7 +1490,7 @@
           <div class="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
             <button type="button" onclick="toggleStudioAccordion('signatories')" class="w-full px-4 py-3 bg-slate-900 hover:bg-slate-800/80 transition flex items-center justify-between text-left text-xs font-bold text-white border-b border-slate-800/60">
               <div class="flex items-center gap-2">
-                <i class="fa-solid fa-signature text-move-orange-400"></i>
+                <i class="fa-solid fa-signature text-emerald-700"></i>
                 <span>2. Signatories &amp; Seals</span>
               </div>
               <div class="flex items-center gap-2">
@@ -2084,7 +2084,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-user-plus text-move-orange-500"></i> Add Person to MOVE Roster
+          <i class="fa-solid fa-user-plus text-emerald-600"></i> Add Person to MOVE Roster
         </h3>
         <button onclick="closeModal('modalAddMember')" class="text-slate-400 hover:text-white">
           <i class="fa-solid fa-xmark text-lg"></i>
@@ -2094,31 +2094,31 @@
       <form id="formAddMember" onsubmit="submitAddMember(event)" class="space-y-3">
         <div>
           <label class="text-xs font-bold text-slate-300 block mb-1">Full Name (SURNAME, FIRSTNAME M.I.) *</label>
-          <input type="text" id="addMemberName" required placeholder="e.g. DELA CRUZ, JUAN A." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500 uppercase">
+          <input type="text" id="addMemberName" required placeholder="e.g. DELA CRUZ, JUAN A." class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600 uppercase">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-bold text-slate-300 block mb-1">Position Title *</label>
-            <input type="text" id="addMemberPosition" required placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+            <input type="text" id="addMemberPosition" required placeholder="e.g. Administrative Aide IV" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600">
           </div>
           <div>
             <label class="text-xs font-bold text-slate-300 block mb-1">Office / Department *</label>
-            <input type="text" id="addMemberOffice" required placeholder="e.g. CMO, CBAO, GSO" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+            <input type="text" id="addMemberOffice" required placeholder="e.g. CMO, CBAO, GSO" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-bold text-slate-300 block mb-1">Gender / Sex</label>
-            <select id="addMemberGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+            <select id="addMemberGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600">
               <option value="M">Male (M)</option>
               <option value="F">Female (F)</option>
             </select>
           </div>
           <div>
             <label class="text-xs font-bold text-slate-300 block mb-1">Civil Status</label>
-            <select id="addMemberCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+            <select id="addMemberCivil" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600">
               <option value="Married">Married</option>
               <option value="Single">Single</option>
               <option value="Widowed">Widowed</option>
@@ -2128,7 +2128,7 @@
 
         <div>
           <label class="text-xs font-bold text-slate-300 block mb-1">Contact Number</label>
-          <input type="text" id="addMemberContact" placeholder="e.g. 09171234567" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-move-orange-500">
+          <input type="text" id="addMemberContact" placeholder="e.g. 09171234567" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-600">
         </div>
 
         <!-- Selective Status Flags -->
@@ -2136,16 +2136,16 @@
           <label class="text-xs font-bold text-move-gold-400 block">Selective Status Flags</label>
           <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="addStatusMember" checked class="rounded text-move-orange-500"> is_member
+              <input type="checkbox" id="addStatusMember" checked class="rounded text-emerald-600"> is_member
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="addStatusOfficer" class="rounded text-move-orange-500"> is_officer
+              <input type="checkbox" id="addStatusOfficer" class="rounded text-emerald-600"> is_officer
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="addStatusCommittee" class="rounded text-move-orange-500"> is_committee
+              <input type="checkbox" id="addStatusCommittee" class="rounded text-emerald-600"> is_committee
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="addStatusParticipant" checked class="rounded text-move-orange-500"> is_participant
+              <input type="checkbox" id="addStatusParticipant" checked class="rounded text-emerald-600"> is_participant
             </label>
           </div>
         </div>
@@ -2154,7 +2154,7 @@
           <button type="button" onclick="closeModal('modalAddMember')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow">
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow">
             Save to MOVE Roster
           </button>
         </div>
@@ -2168,7 +2168,7 @@
       
       <!-- Top Bar -->
       <div class="w-full flex items-center justify-between pb-3 border-b border-slate-800">
-        <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-move-orange-400">
+        <div class="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-emerald-700">
           <i class="fa-solid fa-id-badge text-sm"></i>
           <span>Official Portrait Photo</span>
         </div>
@@ -2203,10 +2203,10 @@
       <!-- Action Buttons -->
       <div class="w-full flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
         <a id="btnDownloadPhoto" href="#" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold transition flex items-center gap-1.5 border border-slate-700 shadow-xs">
-          <i class="fa-solid fa-up-right-from-square text-xs text-move-orange-400"></i>
+          <i class="fa-solid fa-up-right-from-square text-xs text-emerald-700"></i>
           <span>Open Full Image</span>
         </a>
-        <button type="button" onclick="closeEnlargedPhoto()" class="px-5 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white font-bold transition shadow-sm">
+        <button type="button" onclick="closeEnlargedPhoto()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-sm">
           Close
         </button>
       </div>
@@ -2214,26 +2214,26 @@
     </div>
   </div>
 
-  <!-- DRAWER: Edit MOVE Member (Linear / Shadcn Right Slide-Over Profile Drawer) -->
-  <div id="modalEditMember" onclick="if(event.target === this) closeModal('modalEditMember')" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end hidden">
-    <div id="editMemberDrawerPanel" class="bg-[#0b111e] border-l border-slate-800 w-full max-w-2xl h-full p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col overflow-y-auto text-slate-100 slide-over-drawer">
+  <!-- DRAWER: Edit MOVE Member (Linear / Shadcn Right Slide-Over Profile Drawer Light) -->
+  <div id="modalEditMember" onclick="if(event.target === this) closeModal('modalEditMember')" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-end hidden">
+    <div id="editMemberDrawerPanel" class="bg-white border-l border-[#dce6e0] w-full max-w-2xl h-full p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col overflow-y-auto text-slate-800 slide-over-drawer">
       
       <!-- Drawer Top Navigation Bar -->
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800/90 shrink-0">
+      <div class="flex items-center justify-between pb-3 border-b border-[#dce6e0] shrink-0">
         <div class="flex items-center gap-2.5">
-          <span class="w-8 h-8 rounded-xl bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 flex items-center justify-center shadow-inner">
+          <span class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shadow-2xs">
             <i class="fa-solid fa-id-card-clip text-sm"></i>
           </span>
           <div>
-            <h3 class="text-sm sm:text-base font-black text-white tracking-tight uppercase">Personnel Profile Drawer</h3>
-            <p class="text-[11px] text-slate-400">Inspect details, edit chapter roles, or double-click photo to zoom</p>
+            <h3 class="text-sm sm:text-base font-black text-slate-900 tracking-tight uppercase">Personnel Profile Drawer</h3>
+            <p class="text-[11px] text-slate-500">Inspect details, edit chapter roles, or double-click photo to zoom</p>
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-          <button type="button" onclick="toggleProfileDrawerExpand()" id="btnExpandProfileDrawer" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition text-xs" title="Expand / Restore Drawer Width">
+          <button type="button" onclick="toggleProfileDrawerExpand()" id="btnExpandProfileDrawer" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition text-xs" title="Expand / Restore Drawer Width">
             <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
           </button>
-          <button type="button" onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition" title="Close Drawer (Esc)">
+          <button type="button" onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition" title="Close Drawer (Esc)">
             <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </div>
@@ -2254,7 +2254,7 @@
             <!-- Hover overlay indicator showing expand icon -->
             <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center pointer-events-none">
               <span class="px-2 py-1 rounded-lg bg-black/75 text-white text-[10px] font-bold backdrop-blur-xs shadow-md border border-white/20 flex items-center gap-1">
-                <i class="fa-solid fa-magnifying-glass-plus text-move-orange-400"></i>
+                <i class="fa-solid fa-magnifying-glass-plus text-emerald-700"></i>
                 <span>Enlarge</span>
               </span>
             </div>
@@ -2293,7 +2293,7 @@
               <!-- CARD 1: Personal Info -->
               <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                  <i class="fa-regular fa-address-card text-move-orange-400"></i>
+                  <i class="fa-regular fa-address-card text-emerald-700"></i>
                   <span>Personal Info</span>
                 </h4>
 
@@ -2302,14 +2302,14 @@
                   <div class="relative">
                     <i class="fa-regular fa-user absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                     <input type="text" id="editMemberName" required placeholder="SURNAME, FIRSTNAME M.I." oninput="syncEditHeroName(this.value)"
-                      class="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950/90 border border-move-orange-500/80 ring-1 ring-move-orange-500/40 text-xs text-white uppercase font-bold focus:outline-none focus:border-move-orange-400 focus:ring-2 focus:ring-move-orange-400/50 shadow-inner">
+                      class="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950/90 border border-move-orange-500/80 ring-1 ring-emerald-500/40 text-xs text-white uppercase font-bold focus:outline-none focus:border-move-orange-400 focus:ring-2 focus:ring-move-orange-400/50 shadow-inner">
                   </div>
                 </div>
 
                 <div>
                   <label class="text-[11px] font-bold text-slate-400 block mb-1">Civil Status</label>
                   <div class="relative">
-                    <select id="editMemberCivil" class="w-full pl-3 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white appearance-none focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                    <select id="editMemberCivil" class="w-full pl-3 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white appearance-none focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500/40">
                       <option value="Married">Married</option>
                       <option value="Single">Single</option>
                       <option value="Widowed">Widowed</option>
@@ -2322,14 +2322,14 @@
                 <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/60">
                   <div>
                     <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Sex</label>
-                    <select id="editMemberGender" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-move-orange-500">
+                    <select id="editMemberGender" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-600">
                       <option value="M">Male (M)</option>
                       <option value="F">Female (F)</option>
                     </select>
                   </div>
                   <div>
                     <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Contact No.</label>
-                    <input type="text" id="editMemberContact" placeholder="0917..." class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-move-orange-500">
+                    <input type="text" id="editMemberContact" placeholder="0917..." class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-200 focus:outline-none focus:border-emerald-600">
                   </div>
                 </div>
               </div>
@@ -2346,7 +2346,7 @@
                   <div class="relative">
                     <i class="fa-solid fa-trophy absolute left-3 top-2.5 text-amber-400 text-xs"></i>
                     <input type="text" id="editMemberRole" list="listMoveRoles" required placeholder="e.g. Chair, Committee on..." 
-                      class="w-full pl-8 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                      class="w-full pl-8 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500/40">
                     <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-slate-500 text-[10px] pointer-events-none"></i>
                   </div>
                 </div>
@@ -2368,7 +2368,7 @@
                 <!-- Notes / Remarks -->
                 <div class="pt-1 border-t border-slate-800/60">
                   <label class="text-[10px] font-bold text-slate-500 block mb-0.5">Remarks / Survey Address</label>
-                  <input type="text" id="editMemberNotes" placeholder="e.g. Baguio City" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 focus:outline-none focus:border-move-orange-500">
+                  <input type="text" id="editMemberNotes" placeholder="e.g. Baguio City" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-300 focus:outline-none focus:border-emerald-600">
                 </div>
               </div>
 
@@ -2387,7 +2387,7 @@
                   <div class="relative">
                     <i class="fa-solid fa-briefcase absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                     <input type="text" id="editMemberPosition" required placeholder="e.g. Administrative Officer IV" 
-                      class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                      class="w-full pl-8 pr-8 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500/40">
                     <span id="editPosVerifiedCheck" class="absolute right-2.5 top-2.5 text-emerald-400 text-xs" title="Official Government Title">
                       <i class="fa-solid fa-circle-check"></i>
                     </span>
@@ -2398,7 +2398,7 @@
                   <label class="text-[11px] font-bold text-slate-400 block mb-1">Office / Department</label>
                   <div class="relative">
                     <input type="text" id="editMemberOffice" list="listMoveOffices" required placeholder="e.g. City Mayor's Office (CMO)" 
-                      class="w-full px-3 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-move-orange-500 focus:ring-1 focus:ring-move-orange-500/40">
+                      class="w-full px-3 pr-7 py-2 rounded-xl bg-slate-950/90 border border-slate-700/80 text-xs text-white font-medium focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500/40">
                     <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-slate-500 text-[10px] pointer-events-none"></i>
                   </div>
                 </div>
@@ -2461,7 +2461,7 @@
                 <span class="text-xs font-semibold text-slate-300 group-hover:text-white transition">Executive Officer</span>
                 <div class="relative inline-flex items-center">
                   <input type="checkbox" id="editToggleOfficer" onchange="syncEditToggleWithPills()" class="sr-only peer">
-                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-move-orange-500 border border-slate-700 shadow-inner"></div>
+                  <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 border border-slate-700 shadow-inner"></div>
                 </div>
               </label>
 
@@ -3179,7 +3179,7 @@
           <button type="button" onclick="closeModal('modalEditAttendee')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">
             Cancel
           </button>
-          <button type="submit" id="btnSubmitEditAttendee" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-move-orange-500 hover:from-move-gold-600 hover:to-move-orange-600 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
+          <button type="submit" id="btnSubmitEditAttendee" class="px-4 py-2 rounded-xl bg-gradient-to-r from-move-gold-500 to-emerald-600 hover:from-move-gold-600 hover:to-emerald-700 text-slate-950 text-xs font-black shadow transition flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i> Save Position &amp; Details
           </button>
         </div>
@@ -3238,7 +3238,7 @@
           <button type="button" onclick="closeModal('modalArrangeOfficers')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition">
             Cancel
           </button>
-          <button type="button" onclick="saveOfficersOrder()" id="btnSaveOfficersOrder" class="px-4 py-2 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
+          <button type="button" onclick="saveOfficersOrder()" id="btnSaveOfficersOrder" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
             <i class="fa-solid fa-check"></i>
             <span>Save Officers Order</span>
           </button>
@@ -3401,7 +3401,7 @@
             <i class="fa-solid fa-cloud-arrow-up"></i>
             <span>Update Selected (<span id="btnHrisSelectedCountText">0</span>)</span>
           </button>
-          <button type="button" onclick="syncAllOutdatedHrisMembers()" id="btnHrisUpdateAll" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-move-orange-500 hover:from-amber-600 hover:to-move-orange-600 text-slate-950 text-xs font-black shadow-md transition flex items-center gap-2">
+          <button type="button" onclick="syncAllOutdatedHrisMembers()" id="btnHrisUpdateAll" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-slate-950 text-xs font-black shadow-md transition flex items-center gap-2">
             <i class="fa-solid fa-bolt-lightning"></i>
             <span>Update All Outdated (<span id="btnHrisAllOutdatedCountText">0</span>)</span>
           </button>
@@ -3416,6 +3416,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261110-1420"></script>
+  <script src="/frontend/js/app.js?v=20261110-1450"></script>
 </body>
 </html>

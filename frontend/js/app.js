@@ -207,14 +207,14 @@ function switchView(viewName) {
     if (tab) {
       const isActive = (v === viewName) || (viewName === 'attendance' && v === 'activities');
       if (isActive) {
-        tab.className = "nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-move-orange-500 text-white shadow";
+        tab.className = "nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow";
       } else {
-        tab.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800";
+        tab.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70";
       }
     }
   });
 
-  // Update Left Sidebar Navigation Buttons
+  // Update Left Sidebar Navigation Buttons (Baguio Emerald Light)
   const sidebarViews = [
     { id: 'sidebarNav-home', match: viewName === 'home' },
     { id: 'sidebarNav-activities', match: viewName === 'activities' || viewName === 'attendance' },
@@ -224,9 +224,9 @@ function switchView(viewName) {
     const btn = document.getElementById(sv.id);
     if (btn) {
       if (sv.match) {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-emerald-600 text-white shadow-sm border-emerald-600/50";
       } else {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]";
       }
     }
   });
@@ -237,9 +237,9 @@ function switchView(viewName) {
     const btn = document.getElementById(`rosterFilter-${k}`);
     if (btn) {
       if (viewName === 'roster' && (appState.rosterFilter || 'all') === k) {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-emerald-600 text-white shadow-sm border-emerald-600/50";
       } else {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]";
       }
     }
   });
@@ -353,9 +353,9 @@ function filterRosterByStatus(status) {
     const btn = document.getElementById(`rosterFilter-${s.key}`);
     if (btn) {
       if (s.key === status && appState.activeView === 'roster') {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-emerald-600 text-white shadow-sm border-emerald-600/50";
       } else {
-        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]";
       }
     }
   });
@@ -365,7 +365,7 @@ function filterRosterByStatus(status) {
 
   const lblCat = document.getElementById("lblActiveNavCategory");
   if (lblCat) {
-    lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-move-orange-400"></i> ${escapeHtml(activeObj.label)}`;
+    lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-emerald-600"></i> ${escapeHtml(activeObj.label)}`;
   }
   const lblCount = document.getElementById("lblActiveNavCount");
   if (lblCount) {
@@ -522,36 +522,36 @@ function renderRosterTable() {
     const officeInfo = getOfficeDetails(r.office, hrisDiff);
 
     return `
-      <tr onclick="openModalEditMember(${r.id})" class="hover:bg-slate-800/60 transition cursor-pointer group border-b border-slate-800/40">
-        <td class="py-3 px-3 text-slate-500 font-mono text-[11px] text-center w-10">${globalIdx}</td>
+      <tr onclick="openModalEditMember(${r.id})" class="hover:bg-emerald-50/50 transition cursor-pointer group border-b border-[#e6ede9]">
+        <td class="py-3 px-3 text-slate-400 font-mono text-[11px] text-center w-10">${globalIdx}</td>
         
         <!-- 1. Full Name (Clickable Row opens Member Profile) -->
         <td class="py-3 px-4 min-w-[220px]">
           <div class="flex items-center gap-3">
-            <div class="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-700/80 bg-slate-950 flex items-center justify-center">
+            <div class="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 shadow-2xs border border-[#dce6e0] bg-white flex items-center justify-center">
               <img src="/api/move-roster/${r.id}/photo" alt="${escapeHtml(r.full_name)}" loading="lazy" class="w-full h-full object-cover"
                 onerror="this.style.display='none'; if (this.nextElementSibling) this.nextElementSibling.style.display='flex';">
-              <div class="w-full h-full ${r.gender === 'F' ? 'bg-pink-500/20 text-pink-300' : 'bg-blue-500/20 text-blue-300'} items-center justify-center font-bold text-sm hidden">
+              <div class="w-full h-full ${r.gender === 'F' ? 'bg-pink-100 text-pink-700' : 'bg-emerald-100 text-emerald-800'} items-center justify-center font-bold text-sm hidden">
                 ${escapeHtml(getInitials(r.full_name))}
               </div>
             </div>
             <div class="min-w-0">
-              <div class="font-bold text-white text-xs group-hover:text-move-orange-400 transition flex items-center gap-1.5">
+              <div class="font-bold text-slate-900 text-xs group-hover:text-emerald-700 transition flex items-center gap-1.5">
                 <span class="truncate">${escapeHtml(r.full_name)}</span>
                 ${hasHrisDiff ? `
-                  <button type="button" onclick="event.stopPropagation(); openHrisCompareModal(${r.id})" class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.2 rounded-md ${hrisDiff.is_inactive ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} hover:scale-105 transition" title="HRIS Diff: ${escapeHtml(hrisDiff.is_inactive ? hrisDiff.hris_status : 'Click to sync')}">
+                  <button type="button" onclick="event.stopPropagation(); openHrisCompareModal(${r.id})" class="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.2 rounded-md ${hrisDiff.is_inactive ? 'bg-rose-100 text-rose-800 border border-rose-300' : 'bg-amber-100 text-amber-800 border border-amber-300'} hover:scale-105 transition" title="HRIS Diff: ${escapeHtml(hrisDiff.is_inactive ? hrisDiff.hris_status : 'Click to sync')}">
                     <i class="fa-solid fa-arrows-rotate text-[8px]"></i>
                     <span>${hrisDiff.is_inactive ? escapeHtml(hrisDiff.hris_status) : 'Diff'}</span>
                   </button>
                 ` : ((!hasHrisDiff && hrisDiff?.is_matched) ? `
-                  <span class="text-emerald-400 text-[10px]" title="In Sync with HRIS">
+                  <span class="text-emerald-600 text-[10px]" title="In Sync with HRIS">
                     <i class="fa-solid fa-circle-check"></i>
                   </span>
                 ` : '')}
               </div>
               <div class="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-id-badge text-[9px] text-slate-500"></i>
-                <span>ID: <strong class="text-slate-300">${r.hris_id ? '#' + r.hris_id : (hrisDiff?.hris_id ? '#' + hrisDiff.hris_id : 'Not Linked')}</strong></span>
+                <i class="fa-solid fa-id-badge text-[9px] text-slate-400"></i>
+                <span>ID: <strong class="text-slate-600">${r.hris_id ? '#' + r.hris_id : (hrisDiff?.hris_id ? '#' + hrisDiff.hris_id : 'Not Linked')}</strong></span>
               </div>
             </div>
           </div>
@@ -559,7 +559,7 @@ function renderRosterTable() {
 
         <!-- 2. Civil Status -->
         <td class="py-3 px-3 min-w-[120px] text-xs font-medium">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${(r.civil_status || '').toLowerCase().includes('single') ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/25' : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/25'}">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${(r.civil_status || '').toLowerCase().includes('single') ? 'bg-cyan-50 text-cyan-800 border-cyan-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">
             ${escapeHtml(r.civil_status || 'Married')}
           </span>
         </td>
@@ -568,15 +568,15 @@ function renderRosterTable() {
         <td class="py-3 px-4 min-w-[180px]">
           <div class="flex items-center justify-between gap-1.5">
             <div class="flex items-center gap-1.5 min-w-0">
-              <span class="w-1.5 h-1.5 rounded-full ${appState.rosterFilter === 'officer' ? 'bg-amber-400' : 'bg-move-orange-400'} shrink-0"></span>
-              <span class="font-semibold text-slate-200 text-xs truncate">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
+              <span class="w-1.5 h-1.5 rounded-full ${appState.rosterFilter === 'officer' ? 'bg-amber-500' : 'bg-emerald-600'} shrink-0"></span>
+              <span class="font-semibold text-slate-800 text-xs truncate">${escapeHtml(r.role_title || 'Member (Cadre)')}</span>
             </div>
             ${appState.rosterFilter === 'officer' ? `
               <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0" onclick="event.stopPropagation()">
-                <button type="button" onclick="moveOfficerInline(${r.id}, 'up')" ${idx === 0 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-600"' : 'class="p-1 text-slate-400 hover:text-amber-300 transition"'} title="Move Up in Protocol Hierarchy">
+                <button type="button" onclick="moveOfficerInline(${r.id}, 'up')" ${idx === 0 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-400"' : 'class="p-1 text-slate-400 hover:text-amber-600 transition"'} title="Move Up in Protocol Hierarchy">
                   <i class="fa-solid fa-chevron-up text-[10px]"></i>
                 </button>
-                <button type="button" onclick="moveOfficerInline(${r.id}, 'down')" ${idx === items.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-600"' : 'class="p-1 text-slate-400 hover:text-amber-300 transition"'} title="Move Down in Protocol Hierarchy">
+                <button type="button" onclick="moveOfficerInline(${r.id}, 'down')" ${idx === items.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed p-1 text-slate-400"' : 'class="p-1 text-slate-400 hover:text-amber-600 transition"'} title="Move Down in Protocol Hierarchy">
                   <i class="fa-solid fa-chevron-down text-[10px]"></i>
                 </button>
               </div>
@@ -586,7 +586,7 @@ function renderRosterTable() {
 
         <!-- 4. Office -->
         <td class="py-3 px-3 min-w-[110px] text-xs font-medium" title="${escapeHtml(officeInfo.fullName)}">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold font-mono bg-amber-500/10 text-amber-300 border border-amber-500/25">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
             ${escapeHtml(officeInfo.code || r.office || '-')}
           </span>
         </td>
@@ -594,13 +594,13 @@ function renderRosterTable() {
         <!-- 5. Actions -->
         <td class="py-3 px-3 text-right whitespace-nowrap w-28" onclick="event.stopPropagation()">
           <div class="flex items-center justify-end gap-1.5">
-            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-semibold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="View Profile">
-              <i class="fa-solid fa-id-badge text-move-orange-400 text-xs"></i> View
+            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-[11px] font-semibold border border-slate-200 transition flex items-center gap-1 shadow-2xs" title="View Profile">
+              <i class="fa-solid fa-id-badge text-emerald-600 text-xs"></i> View
             </button>
-            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition" title="Edit Profile Details">
+            <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition" title="Edit Profile Details">
               <i class="fa-solid fa-pen text-xs"></i>
             </button>
-            <button onclick="event.stopPropagation(); deleteRosterMember(${r.id})" class="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 border border-slate-700/60 transition" title="Delete Person">
+            <button onclick="event.stopPropagation(); deleteRosterMember(${r.id})" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition" title="Delete Person">
               <i class="fa-regular fa-trash-can text-xs"></i>
             </button>
           </div>
@@ -1010,17 +1010,17 @@ function syncEditToggleWithPills() {
 
   if (btnActive) {
     if (isMember) {
-      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition shadow-2xs";
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 transition shadow-2xs";
     } else {
-      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition";
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-800 transition";
     }
   }
 
   if (btnOfficer) {
     if (isOfficer) {
-      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition shadow-2xs";
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300 transition shadow-2xs";
     } else {
-      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition";
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-800 transition";
     }
   }
 
@@ -1567,7 +1567,7 @@ function renderHrisCompareTable() {
     let actionHtml = "";
     if (m.is_matched && m.is_outdated && !m.is_inactive) {
       actionHtml = `
-        <button type="button" onclick="syncSingleHrisMember(${m.id})" class="px-2.5 py-1 rounded-lg bg-move-orange-500 hover:bg-move-orange-600 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-xs ml-auto whitespace-nowrap">
+        <button type="button" onclick="syncSingleHrisMember(${m.id})" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-xs ml-auto whitespace-nowrap">
           <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Apply
         </button>
       `;
@@ -1597,7 +1597,7 @@ function renderHrisCompareTable() {
         <td class="py-2.5 px-3 whitespace-nowrap">
           <div class="font-bold text-white text-xs">${escapeHtml(m.full_name)}</div>
           <div class="flex items-center gap-2 mt-0.5">
-            <span class="text-[10px] font-semibold text-move-orange-400">${escapeHtml(m.move_role || 'Member (Cadre)')}</span>
+            <span class="text-[10px] font-semibold text-emerald-700">${escapeHtml(m.move_role || 'Member (Cadre)')}</span>
             ${m.is_matched 
               ? `<span class="text-[9px] font-mono text-slate-400 bg-slate-800/80 px-1 rounded border border-slate-700">HRIS #${m.hris_id}</span>` 
               : `<span class="text-[9px] font-mono text-rose-400/90 bg-rose-950/40 px-1 rounded border border-rose-800/40">Unmatched</span>`
@@ -1963,7 +1963,7 @@ function renderPoolTable(employees) {
         <td class="py-2.5 px-3 text-slate-300">${escapeHtml(emp.office || '-')}</td>
         <td class="py-2.5 px-3 text-slate-400 text-[10px]">${escapeHtml(emp.appointment || 'PERMANENT')}</td>
         <td class="py-2.5 px-3 text-right">
-          <button onclick="copyPoolToMove(${emp.id})" class="px-2.5 py-1 rounded-lg bg-move-orange-500 hover:bg-move-orange-600 text-white text-[10px] font-bold shadow transition">
+          <button onclick="copyPoolToMove(${emp.id})" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shadow transition">
             + Copy to MOVE
           </button>
         </td>
@@ -6220,7 +6220,7 @@ function renderHomeSlide(slideIndex) {
     const pill = document.getElementById(`homePill-${i}`);
     if (pill) {
       if (i === idx) {
-        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-move-orange-500 text-white shadow-sm border border-move-orange-400";
+        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-emerald-600 text-white shadow-sm border border-emerald-500";
       } else {
         pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800";
       }
@@ -6232,7 +6232,7 @@ function renderHomeSlide(slideIndex) {
     const dot = document.getElementById(`homeDot-${i}`);
     if (dot) {
       if (i === idx) {
-        dot.className = "w-3 h-3 rounded-full bg-move-orange-500 cursor-pointer transition-all shadow-xs ring-2 ring-move-orange-500/40";
+        dot.className = "w-3 h-3 rounded-full bg-emerald-600 cursor-pointer transition-all shadow-xs ring-2 ring-emerald-500/40";
       } else if (i < idx) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500/70 cursor-pointer transition-all";
       } else {
