@@ -1,0 +1,14 @@
+# ============================================================
+# MOVE Baguio Chapter — Unified HRIS & Portal Requirements
+# ============================================================
+#
+# CORE APPLICATION:
+# The core application runs with ZERO external pip packages!
+# It uses 100% standard Python libraries (sqlite3, http.server,
+# json, urllib, base64, os, uuid, socketserver, etc.).
+# Any computer with Python 3.8+ installed can run it immediately.
+#
+# OPTIONAL INTEGRATION:
+# Required only if this PC is connected to City Hall's internal
+# network and needs to fetch live biometric ID photos via SFTP:
+paramiko>=3.0.0

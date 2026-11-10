@@ -85,6 +85,13 @@ INSERT INTO "activity_attendees" VALUES(109,1,NULL,'KEITH JESTER A. REYES','Admi
 INSERT INTO "activity_attendees" VALUES(110,1,NULL,'EMMANUEL S. GANADEN JR.','Laborer II','M','Single','City Engineering Office (CEO)','',1,'09:35 AM','');
 INSERT INTO "activity_attendees" VALUES(111,1,NULL,'KENT F. BASINGA','Laborer II','M','Married','City Engineering Office (CEO)','',1,'12:29 PM','');
 INSERT INTO "activity_attendees" VALUES(112,1,NULL,'ARIEL L. VALDEZ','Electrician I','M','Married','City Engineering Office (CEO)','',1,'12:30 PM','');
+CREATE TABLE activity_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        author_name TEXT NOT NULL,
+        comment_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 CREATE TABLE activity_facilitators (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
@@ -116,6 +123,15 @@ INSERT INTO "activity_facilitators" VALUES(18,1,31,'PROTACIO P. TANGALIN JR.','M
 INSERT INTO "activity_facilitators" VALUES(19,1,NULL,'MS. ROSELLA C. BAHNI','Resource Speaker','Senior Gender and Development Specialist','City Planning, Development, and Sustainability Office','F','Married','',1,'09:41 AM','');
 INSERT INTO "activity_facilitators" VALUES(20,1,NULL,'MR. CHRISTIAN PHILIP D. TAMAYO','CHEF','MASTER TRAINER','VENUS PARK VIEW HOTEL','M','Single','',1,'09:49 AM','');
 INSERT INTO "activity_facilitators" VALUES(21,1,NULL,'VENUS PARK VIEW HOTEL','PROVIDER','PROVIDER','9 Kisad Road, Burnham Park, Baguio City','M','Married','',1,'12:24 PM','');
+CREATE TABLE activity_photos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id INTEGER NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        file_size INTEGER DEFAULT 0,
+        caption TEXT DEFAULT '',
+        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 CREATE TABLE certificate_settings (
         id INTEGER PRIMARY KEY DEFAULT 1,
         header_line_1 TEXT DEFAULT 'Republic of the Philippines • City Government of Baguio',
@@ -997,4 +1013,6 @@ INSERT INTO "sqlite_sequence" VALUES('signatories',7);
 INSERT INTO "sqlite_sequence" VALUES('activities',1);
 INSERT INTO "sqlite_sequence" VALUES('activity_attendees',112);
 INSERT INTO "sqlite_sequence" VALUES('activity_facilitators',21);
+INSERT INTO "sqlite_sequence" VALUES('activity_comments',2);
+INSERT INTO "sqlite_sequence" VALUES('activity_photos',1);
 COMMIT;
