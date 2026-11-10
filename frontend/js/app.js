@@ -634,7 +634,7 @@ function renderRosterTable() {
         <td class="py-3 px-3 text-right whitespace-nowrap w-28" onclick="event.stopPropagation()">
           <div class="flex items-center justify-end gap-1.5">
             <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-[11px] font-semibold border border-slate-200 transition flex items-center gap-1 shadow-2xs" title="View Profile">
-              <i class="fa-solid fa-id-badge text-emerald-600 text-xs"></i> View
+              <i class="fa-solid fa-id-badge text-slate-400 text-xs"></i> View
             </button>
             <button onclick="event.stopPropagation(); openModalEditMember(${r.id})" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition" title="Edit Profile Details">
               <i class="fa-solid fa-pen text-xs"></i>
@@ -1088,7 +1088,7 @@ async function syncCurrentEditWithHris() {
   const originalHtml = btnSync ? btnSync.innerHTML : "";
   if (btnSync) {
     btnSync.disabled = true;
-    btnSync.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-teal-400"></i><span>Syncing...</span>`;
+    btnSync.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-slate-400"></i><span>Syncing...</span>`;
   }
 
   try {
@@ -1391,7 +1391,7 @@ async function reScanHrisCompare() {
   const origHtml = btn ? btn.innerHTML : "";
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-400"></i><span>Scanning HRIS...</span>`;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-slate-400"></i><span>Scanning HRIS...</span>`;
   }
 
   try {
@@ -1411,7 +1411,7 @@ async function loadHrisComparison(force = false) {
       <tr>
         <td colspan="7" class="text-center py-12 text-slate-400">
           <div class="flex flex-col items-center justify-center gap-2">
-            <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-400"></i>
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-slate-400"></i>
             <span class="text-xs font-semibold text-slate-300">Reconciling MOVE Roster with Central City HRIS API...</span>
             <span class="text-[11px] text-slate-500 font-mono">Host: 192.168.3.43:5000</span>
           </div>
@@ -1659,11 +1659,11 @@ function renderHrisCompareTable() {
           ${m.is_matched ? `
             <div class="${m.has_position_diff ? 'text-amber-300 font-bold' : 'text-slate-200'} font-medium text-xs flex items-center gap-1.5">
               <span>${escapeHtml(m.hris_position || '-')}</span>
-              ${m.has_position_diff ? '<i class="fa-solid fa-arrow-trend-up text-[10px] text-amber-400" title="Updated Position"></i>' : ''}
+              ${m.has_position_diff ? '<i class="fa-solid fa-arrow-trend-up text-[10px] text-slate-400" title="Updated Position"></i>' : ''}
             </div>
             <div class="${m.has_office_diff ? 'text-amber-300 font-bold' : 'text-slate-400'} text-[11px] mt-0.5 flex items-center gap-1.5">
               <span>${escapeHtml(m.hris_office_formatted || m.hris_office_code || '-')}</span>
-              ${m.has_office_diff ? '<i class="fa-solid fa-building-circle-arrow-right text-[10px] text-cyan-400" title="Updated Office"></i>' : ''}
+              ${m.has_office_diff ? '<i class="fa-solid fa-building-circle-arrow-right text-[10px] text-slate-400" title="Updated Office"></i>' : ''}
             </div>
             <div class="mt-1">
               <span class="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold ${m.is_inactive ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}">
@@ -2066,7 +2066,7 @@ function renderActivitiesGrid() {
             <div class="flex items-center gap-2">
               <span class="text-xs text-slate-400 font-mono">${escapeHtml(act.activity_date || '')}</span>
               <button onclick="openModalEditActivity(${act.id})" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-move-gold-400 text-[11px] font-bold border border-slate-700 transition flex items-center gap-1 shadow-xs" title="Edit Activity (Venue, Date, Trainer, Details)">
-                <i class="fa-solid fa-pen-to-square text-[10px] text-move-gold-400"></i> Edit
+                <i class="fa-solid fa-pen-to-square text-[10px] text-slate-400"></i> Edit
               </button>
             </div>
           </div>
@@ -2103,10 +2103,10 @@ function renderActivitiesGrid() {
 
           <div class="grid grid-cols-3 gap-2">
             <button onclick="openModalEditActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 hover:text-white transition text-center flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm" title="Edit Venue, Date, Trainer, and Details">
-              <i class="fa-solid fa-pen-to-square text-move-gold-400"></i> Edit
+              <i class="fa-solid fa-pen-to-square text-slate-400"></i> Edit
             </button>
             <button onclick="openActivityAttendance(${act.id})" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm">
-              <i class="fa-solid fa-clipboard-user text-emerald-400"></i> Attendance
+              <i class="fa-solid fa-clipboard-user text-slate-400"></i> Attendance
             </button>
             <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2.5 py-2 rounded-xl bg-move-gold-500 hover:bg-move-gold-600 text-xs font-black text-slate-950 transition text-center flex items-center justify-center gap-1.5 shadow">
               <i class="fa-solid fa-certificate"></i> Certificates
@@ -2286,7 +2286,7 @@ async function saveStudioActivityDetails() {
       await loadActivities();
       if (btn) {
         const originalHtml = btn.innerHTML;
-        btn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Saved to Database!`;
+        btn.innerHTML = `<i class="fa-solid fa-check text-slate-400"></i> Saved to Database!`;
         btn.classList.add("text-emerald-400", "border-emerald-500/50");
         setTimeout(() => {
           btn.innerHTML = originalHtml;
@@ -2526,7 +2526,7 @@ function renderAttendanceTable() {
               </button>
             `}
             <button onclick="openModalEditAttendee(${att.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 text-[11px] font-bold border border-amber-500/30 transition flex items-center gap-1 shadow-xs" title="Edit Attendee Position, Office and Details">
-              <i class="fa-solid fa-pen-to-square text-xs text-amber-400"></i> Edit
+              <i class="fa-solid fa-pen-to-square text-xs text-slate-400"></i> Edit
             </button>
             <button onclick="removeAttendee(${att.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Remove Attendee">
               <i class="fa-regular fa-trash-can"></i>
@@ -2807,7 +2807,7 @@ function renderFacilitatorsTable() {
           <div class="flex items-center justify-end gap-1.5">
             ${fac.is_present ? `
               <button onclick="launchStudioForFacilitator(${fac.id})" class="px-2.5 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 hover:text-white text-[11px] font-bold border border-indigo-500/40 transition flex items-center gap-1 shadow-xs" title="Award Certificate of Appreciation to this Facilitator">
-                <i class="fa-solid fa-award text-xs text-move-gold-400"></i> Appreciation Cert
+                <i class="fa-solid fa-award text-xs text-slate-400"></i> Appreciation Cert
               </button>
             ` : `
               <button disabled class="px-2 py-1 rounded-lg bg-slate-900 text-slate-600 text-[11px] font-bold border border-slate-800 cursor-not-allowed opacity-50 flex items-center gap-1" title="Mark Facilitator as Present to award Certificate of Appreciation">
@@ -2815,7 +2815,7 @@ function renderFacilitatorsTable() {
               </button>
             `}
             <button onclick="openModalEditFacilitator(${fac.id})" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 text-[11px] font-bold border border-amber-500/30 transition flex items-center gap-1 shadow-xs" title="Edit Facilitator Position and Details">
-              <i class="fa-solid fa-pen-to-square text-xs text-amber-400"></i> Edit
+              <i class="fa-solid fa-pen-to-square text-xs text-slate-400"></i> Edit
             </button>
             <button onclick="removeFacilitator(${fac.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition" title="Remove Facilitator">
               <i class="fa-regular fa-trash-can"></i>
@@ -3211,7 +3211,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
     html += `<option value="">-- Choose from MOVE Roster (${roster.length}) or Search Above --</option>`;
     html += filteredRoster.slice(0, 10).map(r => {
       const isEnrolled = enrolledFacNames.has((r.full_name || '').trim().toUpperCase());
-      const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
+      const label = isEnrolled ? `[ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
       return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
     }).join("");
   } else {
@@ -3223,7 +3223,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
         html += `<optgroup label="MOVE Chapter Roster (${filteredRoster.length})">`;
         html += filteredRoster.slice(0, 10).map(r => {
           const isEnrolled = enrolledFacNames.has((r.full_name || '').trim().toUpperCase());
-          const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}`;
+          const label = isEnrolled ? `[ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')}`;
           return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
         }).join("");
         html += `</optgroup>`;
@@ -3232,7 +3232,7 @@ function renderQuickPickFacilitatorOptions(query, poolMatches = []) {
         html += `<optgroup label="City Municipal Employee Pool (${poolMatches.length})">`;
         html += poolMatches.slice(0, 10).map(p => {
           const isEnrolled = enrolledFacNames.has((p.full_name || '').trim().toUpperCase());
-          const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)}` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')}`;
+          const label = isEnrolled ? `[ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)}` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')}`;
           return `<option value="pool_${p.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
         }).join("");
         html += `</optgroup>`;
@@ -4967,7 +4967,7 @@ function renderCertificateCanvas() {
     const poolLabel = appState.certRecipientPool === 'facilitators' ? 'Facilitators' : 'Attendees';
     canvas.innerHTML = `
       <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-500">
-        <i class="fa-solid fa-triangle-exclamation text-4xl text-amber-500 mb-3"></i>
+        <i class="fa-solid fa-triangle-exclamation text-4xl text-slate-400 mb-3"></i>
         <h3 class="text-base font-bold text-slate-700">No Eligible ${poolLabel} to Issue Certificates</h3>
         <p class="text-xs text-slate-500 mt-1 max-w-sm">
           Certificates are strictly gated! Only persons marked as <strong>Present</strong> in the Checklist can be issued certificates.
@@ -5716,16 +5716,16 @@ function showToast(message, type = 'success', duration = 3000) {
   }
   const toast = document.createElement("div");
   let bgClass = "bg-slate-900/95 text-white border-slate-700";
-  let iconHtml = '<i class="fa-solid fa-circle-info text-sky-400 text-sm shrink-0"></i>';
+  let iconHtml = '<i class="fa-solid fa-circle-info text-slate-400 text-sm shrink-0"></i>';
   if (type === 'success') {
     bgClass = "bg-emerald-950/95 text-emerald-100 border-emerald-500/50 shadow-emerald-950/50";
-    iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400 text-sm shrink-0"></i>';
+    iconHtml = '<i class="fa-solid fa-circle-check text-slate-400 text-sm shrink-0"></i>';
   } else if (type === 'error') {
     bgClass = "bg-rose-950/95 text-rose-100 border-rose-500/50 shadow-rose-950/50";
-    iconHtml = '<i class="fa-solid fa-circle-xmark text-rose-400 text-sm shrink-0"></i>';
+    iconHtml = '<i class="fa-solid fa-circle-xmark text-slate-400 text-sm shrink-0"></i>';
   } else if (type === 'warning') {
     bgClass = "bg-amber-950/95 text-amber-100 border-amber-500/50 shadow-amber-950/50";
-    iconHtml = '<i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm shrink-0"></i>';
+    iconHtml = '<i class="fa-solid fa-triangle-exclamation text-slate-400 text-sm shrink-0"></i>';
   }
   toast.className = `app-toast-item border ${bgClass}`;
   toast.innerHTML = `
@@ -5804,15 +5804,15 @@ function syncSignatoryLayoutDynamicLabels() {
     if (!sel) return;
     Array.from(sel.options).forEach(opt => {
       if (opt.value === 'both') {
-        opt.textContent = `👥 Dual Signatories (${s1Short} & ${s2Short})`;
+        opt.textContent = `Dual Signatories (${s1Short} & ${s2Short})`;
       } else if (opt.value === 'sig2_right') {
-        opt.textContent = `👤 Single: ${s2Short} — Right-Aligned`;
+        opt.textContent = `Single: ${s2Short} — Right-Aligned`;
       } else if (opt.value === 'sig2_center') {
-        opt.textContent = `👤 Single: ${s2Short} — Centered`;
+        opt.textContent = `Single: ${s2Short} — Centered`;
       } else if (opt.value === 'sig1_right') {
-        opt.textContent = `👤 Single: ${s1Short} — Right-Aligned`;
+        opt.textContent = `Single: ${s1Short} — Right-Aligned`;
       } else if (opt.value === 'sig1_center') {
-        opt.textContent = `👤 Single: ${s1Short} — Centered`;
+        opt.textContent = `Single: ${s1Short} — Centered`;
       }
     });
   });
@@ -5874,7 +5874,7 @@ function populateSignatorySelects() {
   const qSel2 = document.getElementById("stageQuickSig2Person");
 
   const officialOptions = appState.signatories.map(s => {
-    return `<option value="${s.id}">⭐ ${escapeHtml(s.name)} (${escapeHtml(s.title)})</option>`;
+    return `<option value="${s.id}">${escapeHtml(s.name)} (${escapeHtml(s.title)})</option>`;
   }).join("");
 
   // Also allow choosing any Officer or Member from the MOVE Roster as a Signatory
@@ -5885,10 +5885,10 @@ function populateSignatorySelects() {
 
   let optionsHtml = `<optgroup label="Official Signatories (With E-Signature Support)">${officialOptions}</optgroup>`;
   if (officers.length > 0) {
-    optionsHtml += `<optgroup label="MOVE Chapter Officers">${officers.map(r => `<option value="roster_${r.id}">🎖️ ${escapeHtml(r.full_name)} (${escapeHtml(r.position || 'MOVE Officer')})</option>`).join("")}</optgroup>`;
+    optionsHtml += `<optgroup label="MOVE Chapter Officers">${officers.map(r => `<option value="roster_${r.id}">${escapeHtml(r.full_name)} (${escapeHtml(r.position || 'MOVE Officer')})</option>`).join("")}</optgroup>`;
   }
   if (otherMembers.length > 0) {
-    optionsHtml += `<optgroup label="MOVE Roster & Directory">${otherMembers.map(r => `<option value="roster_${r.id}">👤 ${escapeHtml(r.full_name)} (${escapeHtml(r.position || r.office || 'Member')})</option>`).join("")}</optgroup>`;
+    optionsHtml += `<optgroup label="MOVE Roster & Directory">${otherMembers.map(r => `<option value="roster_${r.id}">${escapeHtml(r.full_name)} (${escapeHtml(r.position || r.office || 'Member')})</option>`).join("")}</optgroup>`;
   }
 
   [sel1, sel2, qSel1, qSel2].forEach(sel => {
@@ -5991,7 +5991,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
     html += `<option value="">-- Choose from MOVE Roster (${roster.length}) or Search Above --</option>`;
     html += filteredRoster.slice(0, 10).map(r => {
       const isEnrolled = enrolledNames.has((r.full_name || '').trim().toUpperCase());
-      const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
+      const label = isEnrolled ? `[ALREADY ENROLLED] ${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} (${escapeHtml(r.office || '-')})`;
       return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
     }).join("");
   } else {
@@ -6003,7 +6003,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
         html += `<optgroup label="MOVE Chapter Roster (${filteredRoster.length})">`;
         html += filteredRoster.slice(0, 10).map(r => {
           const isEnrolled = enrolledNames.has((r.full_name || '').trim().toUpperCase());
-          const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})`;
+          const label = isEnrolled ? `[ALREADY ENROLLED] ${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})` : `${escapeHtml(r.full_name)} &bull; ${escapeHtml(r.position || 'Member')} (${escapeHtml(r.office || '-')})`;
           return `<option value="${r.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
         }).join("");
         html += `</optgroup>`;
@@ -6012,7 +6012,7 @@ function renderQuickPickOptions(query, poolMatches = []) {
         html += `<optgroup label="City Municipal Employee Pool (${poolMatches.length})">`;
         html += poolMatches.slice(0, 10).map(p => {
           const isEnrolled = enrolledNames.has((p.full_name || '').trim().toUpperCase());
-          const label = isEnrolled ? `⚠️ [ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})`;
+          const label = isEnrolled ? `[ALREADY ENROLLED] [City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})` : `[City Pool] ${escapeHtml(p.full_name)} &bull; ${escapeHtml(p.position || '-')} (${escapeHtml(p.office || '-')})`;
           return `<option value="pool_${p.id}" ${isEnrolled ? 'class="text-amber-400 font-medium"' : ''}>${label}</option>`;
         }).join("");
         html += `</optgroup>`;
