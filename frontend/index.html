@@ -187,6 +187,27 @@
           </button>
         </div>
 
+        <!-- Group: Official Channels -->
+        <div class="space-y-1 pt-2 border-t border-[#dce6e0]/60 dark:border-[#18352b]/60">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Public Channels</div>
+          
+          <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-emerald-700 hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Official Membership Application (Google Forms)">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-id-card w-4 text-center text-emerald-600"></i>
+              <span class="sidebar-label">Member Form</span>
+            </span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400 sidebar-label"></i>
+          </a>
+
+          <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-[#1877f2] hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="MOVE Baguio Facebook Page">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-brands fa-facebook w-4 text-center text-[#1877f2]"></i>
+              <span class="sidebar-label">Facebook Page</span>
+            </span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400 sidebar-label"></i>
+          </a>
+        </div>
+
       </div>
 
       <!-- Sidebar Bottom Status Footer -->
@@ -228,10 +249,23 @@
             <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Mandate</button>
             <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Principles</button>
             <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Cadre Pledge</button>
+            <a href="#homeActivitiesSection" onclick="document.getElementById('homeActivitiesSection')?.scrollIntoView({behavior:'smooth'}); return false;" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Activities</a>
+            <a href="#homeContactFooter" onclick="document.getElementById('homeContactFooter')?.scrollIntoView({behavior:'smooth'}); return false;" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Contact</a>
           </nav>
 
-          <!-- Right: Theme Switcher & Prominent Login Button -->
-          <div class="flex items-center gap-3">
+          <!-- Right: Social, Register, Theme Switcher & Prominent Login Button -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Official Facebook Link Button -->
+            <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-[#1877f2]/10 dark:bg-[#0c1c17] dark:hover:bg-[#1877f2]/20 text-slate-600 hover:text-[#1877f2] dark:text-slate-300 dark:hover:text-[#1877f2] border border-slate-200 dark:border-[#18352b] flex items-center justify-center transition shadow-2xs" title="Visit MOVE Baguio on Facebook (cgobmove)">
+              <i class="fa-brands fa-facebook-f text-xs"></i>
+            </a>
+
+            <!-- Member Registration Button (Google Forms) -->
+            <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Official Cadre Member Registration Form">
+              <i class="fa-solid fa-id-card text-xs text-emerald-600 dark:text-emerald-400"></i>
+              <span class="hidden sm:inline">Register</span>
+            </a>
+
             <!-- Theme Toggle -->
             <button type="button" id="btnThemeToggle" onclick="toggleColorTheme()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-[#18352b] bg-slate-100 dark:bg-[#0c1c17] text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Toggle Dark / Light Theme">
               <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-slate-500 dark:text-slate-400"></i>
@@ -239,7 +273,7 @@
             </button>
 
             <!-- Prominent Login Button (Veterans Bank Style) -->
-            <button type="button" onclick="openLoginModal()" class="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-2">
+            <button type="button" onclick="openLoginModal()" class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-2">
               <i class="fa-solid fa-right-to-bracket text-xs text-emerald-200"></i>
               <span>Login</span>
             </button>
@@ -327,13 +361,35 @@
 
                   <!-- Action Buttons -->
                   <div class="flex flex-wrap items-center gap-3 pt-2">
-                    <button type="button" onclick="openModal('modalAboutMove')" class="px-6 py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-md transition">
-                      Learn More
+                    <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-md hover:shadow-lg transition flex items-center gap-2 active:scale-95 group">
+                      <i class="fa-solid fa-id-card text-xs"></i>
+                      <span>Register as Member</span>
+                      <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                    </a>
+                    <button type="button" onclick="openModal('modalAboutMove')" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-2">
+                      <i class="fa-solid fa-circle-info text-xs"></i>
+                      <span>Learn More</span>
                     </button>
-                    <button type="button" onclick="openLoginModal()" class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-2">
+                    <button type="button" onclick="openLoginModal()" class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-2">
                       <span>Access Portal</span>
                       <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
+                  </div>
+
+                  <!-- Quick Official Contact Channels Strip -->
+                  <div class="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2 text-xs text-emerald-200/90 font-medium">
+                    <a href="tel:09277840269" class="hover:text-white transition flex items-center gap-1.5" title="Call or SMS MOVE Baguio">
+                      <i class="fa-solid fa-phone text-emerald-300 text-[11px]"></i>
+                      <span>0927 784 0269</span>
+                    </a>
+                    <a href="mailto:move.baguio@gmail.com" class="hover:text-white transition flex items-center gap-1.5" title="Email MOVE Baguio">
+                      <i class="fa-solid fa-envelope text-emerald-300 text-[11px]"></i>
+                      <span>move.baguio@gmail.com</span>
+                    </a>
+                    <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center gap-1.5" title="Visit MOVE Baguio Facebook Page">
+                      <i class="fa-brands fa-facebook text-emerald-300 text-[12px]"></i>
+                      <span>facebook.com/cgobmove</span>
+                    </a>
                   </div>
                 </div>
 
@@ -388,7 +444,7 @@
             <!-- ============================================================ -->
             <!-- 2. RECENT ACTIVITIES & CAPACITY-BUILDING (VETERANS BANK STYLE) -->
             <!-- ============================================================ -->
-            <div class="space-y-6 pt-2">
+            <div id="homeActivitiesSection" class="space-y-6 pt-2">
               
               <!-- Section Eyebrow & Main Question Heading -->
               <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -468,17 +524,174 @@
 
             </div>
 
-            <!-- 3. PUBLIC FRONT PAGE FOOTER -->
-            <div class="pt-8 border-t border-[#dce6e0] dark:border-[#18352b] text-center space-y-2">
-              <div class="flex items-center justify-center gap-3">
-                <img src="/CITY HALL LOGO.png" alt="City Hall" class="w-6 h-6 object-contain opacity-80">
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">City Government of Baguio &bull; GAD Council &bull; MOVE Baguio Chapter</span>
-                <img src="/MOVE BAGUIO LOGO.png" alt="MOVE" class="w-6 h-6 object-contain opacity-80">
+            <!-- ============================================================ -->
+            <!-- 3. CADRE REGISTRATION & CALLOUT BANNER                       -->
+            <!-- ============================================================ -->
+            <div class="rounded-3xl p-8 sm:p-12 bg-gradient-to-br from-[#0b3326] via-[#08281e] to-[#04120e] text-white border border-emerald-800/40 shadow-xl relative overflow-hidden">
+              <!-- Subtle Background Shield Icon Watermark -->
+              <div class="absolute right-6 -bottom-6 opacity-5 pointer-events-none select-none">
+                <i class="fa-solid fa-shield-halved text-[240px]"></i>
               </div>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                Men Opposed to Violence Against Women Everywhere &bull; Institutionalized under Republic Act 9262
-              </p>
+
+              <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Left: Motivation & Contact Details -->
+                <div class="lg:col-span-8 space-y-4">
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Official Membership Application &bull; RA 9262</span>
+                  </div>
+
+                  <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight">
+                    Be a Cadre Advocate.<br>
+                    Stand with MOVE Baguio.
+                  </h3>
+
+                  <p class="text-xs sm:text-sm text-emerald-100/85 max-w-2xl leading-relaxed">
+                    Join male public servants, officials, and community leaders across Baguio City. Register today to take part in gender-sensitivity training, mentor youth, protect homes, and uphold peaceful, respectful communities free from violence.
+                  </p>
+
+                  <!-- Direct Official Contact Channels -->
+                  <div class="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 text-xs text-emerald-200">
+                    <a href="tel:09277840269" class="inline-flex items-center gap-2 hover:text-white transition bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10" title="Call or SMS">
+                      <i class="fa-solid fa-phone text-emerald-400 text-xs"></i>
+                      <span class="font-bold">0927 784 0269</span>
+                    </a>
+                    <a href="mailto:move.baguio@gmail.com" class="inline-flex items-center gap-2 hover:text-white transition bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10" title="Send Official Email">
+                      <i class="fa-solid fa-envelope text-emerald-400 text-xs"></i>
+                      <span class="font-bold">move.baguio@gmail.com</span>
+                    </a>
+                    <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 hover:text-white transition bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10" title="Visit Facebook Page">
+                      <i class="fa-brands fa-facebook text-emerald-400 text-xs"></i>
+                      <span class="font-bold">facebook.com/cgobmove</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Right: High-Impact Registration Button -->
+                <div class="lg:col-span-4 flex flex-col items-stretch sm:items-center lg:items-end justify-center gap-3">
+                  <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm tracking-wide shadow-xl hover:shadow-2xl transition flex items-center justify-center gap-3 active:scale-95 text-center group">
+                    <i class="fa-solid fa-id-card text-base"></i>
+                    <span>Register as Member</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-75 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                  </a>
+                  <span class="text-[11px] text-emerald-200/70 text-center lg:text-right">
+                    Official Baguio City GAD Council Registration Form
+                  </span>
+                </div>
+              </div>
             </div>
+
+            <!-- ============================================================ -->
+            <!-- 4. RICH INSTITUTIONAL FOOTER (VETERANS BANK STYLE)           -->
+            <!-- ============================================================ -->
+            <footer id="homeContactFooter" class="pt-12 pb-6 border-t border-[#dce6e0] dark:border-[#18352b] space-y-10">
+              
+              <!-- 4-Column Directory Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 text-xs">
+                
+                <!-- Col 1: Chapter Brand & Mandate (4 cols) -->
+                <div class="lg:col-span-4 space-y-4">
+                  <div class="flex items-center gap-3">
+                    <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-10 h-10 object-contain drop-shadow-xs">
+                    <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-10 h-10 object-contain drop-shadow-xs">
+                    <div>
+                      <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">MOVE Baguio</h4>
+                      <p class="text-[11px] text-slate-500 dark:text-slate-400">City Government of Baguio &bull; GAD Council</p>
+                    </div>
+                  </div>
+                  <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
+                    Men Opposed to Violence Against Women Everywhere (MOVE) Baguio City Chapter. Mobilizing men as proactive allies and community advocates to end gender-based violence and foster respectful public service across Baguio City.
+                  </p>
+                  <div class="flex items-center gap-2">
+                    <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-[#1877f2]/10 dark:bg-[#0c1c17] dark:hover:bg-[#1877f2]/20 text-slate-600 hover:text-[#1877f2] dark:text-slate-300 dark:hover:text-[#1877f2] border border-slate-200 dark:border-[#18352b] flex items-center justify-center transition shadow-2xs" title="Official Facebook Page (cgobmove)">
+                      <i class="fa-brands fa-facebook-f text-xs"></i>
+                    </a>
+                    <a href="mailto:move.baguio@gmail.com" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-[#0c1c17] dark:hover:bg-emerald-950/40 text-slate-600 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 border border-slate-200 dark:border-[#18352b] flex items-center justify-center transition shadow-2xs" title="Send Email">
+                      <i class="fa-solid fa-envelope text-xs"></i>
+                    </a>
+                    <a href="tel:09277840269" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-[#0c1c17] dark:hover:bg-emerald-950/40 text-slate-600 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 border border-slate-200 dark:border-[#18352b] flex items-center justify-center transition shadow-2xs" title="Call Hotline">
+                      <i class="fa-solid fa-phone text-xs"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Col 2: Movement & Framework (3 cols) -->
+                <div class="lg:col-span-3 space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Organization</h4>
+                  <ul class="space-y-2 text-slate-600 dark:text-slate-400 text-[11px]">
+                    <li><button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">About MOVE Baguio</button></li>
+                    <li><button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Mandate &amp; RA 9262</button></li>
+                    <li><button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Core Principles</button></li>
+                    <li><button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">The Cadre Pledge</button></li>
+                    <li><button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Institutional Governance</button></li>
+                  </ul>
+                </div>
+
+                <!-- Col 3: Member Services & Registration (2 cols) -->
+                <div class="lg:col-span-2 space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Membership</h4>
+                  <ul class="space-y-2 text-slate-600 dark:text-slate-400 text-[11px]">
+                    <li>
+                      <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                        <span>Register as Member</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                      </a>
+                    </li>
+                    <li><span class="text-slate-500">Cadre Orientation</span></li>
+                    <li><span class="text-slate-500">128 Barangays Outreach</span></li>
+                    <li><span class="text-slate-500">Capacity Seminars</span></li>
+                    <li><button type="button" onclick="openLoginModal()" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Admin Portal Login</button></li>
+                  </ul>
+                </div>
+
+                <!-- Col 4: Official Contact Info (3 cols) -->
+                <div class="lg:col-span-3 space-y-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Contact Info</h4>
+                  <div class="space-y-2.5 text-[11px] text-slate-600 dark:text-slate-400">
+                    <div class="flex items-start gap-2.5">
+                      <i class="fa-solid fa-phone text-emerald-600 dark:text-emerald-400 text-xs mt-0.5 shrink-0"></i>
+                      <div>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block">Mobile / Hotline</span>
+                        <a href="tel:09277840269" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition font-mono font-medium">0927 784 0269</a>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <i class="fa-solid fa-envelope text-emerald-600 dark:text-emerald-400 text-xs mt-0.5 shrink-0"></i>
+                      <div>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block">Official Email</span>
+                        <a href="mailto:move.baguio@gmail.com" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition break-all font-medium">move.baguio@gmail.com</a>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <i class="fa-brands fa-facebook text-[#1877f2] text-xs mt-0.5 shrink-0"></i>
+                      <div>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block">Facebook Page</span>
+                        <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition font-medium">facebook.com/cgobmove</a>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <i class="fa-solid fa-location-dot text-emerald-600 dark:text-emerald-400 text-xs mt-0.5 shrink-0"></i>
+                      <div>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 block">Office Location</span>
+                        <span>Gender and Development (GAD) Council, Baguio City Hall, Baguio City</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Bottom Legal / Copyright Strip -->
+              <div class="pt-6 border-t border-[#dce6e0] dark:border-[#18352b] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                <p>&copy; 2026 City Government of Baguio &bull; Gender and Development (GAD) Council &bull; MOVE Baguio Chapter.</p>
+                <div class="flex items-center gap-4">
+                  <span>Republic Act 9262 (Anti-VAWC)</span>
+                  <span>&bull;</span>
+                  <span>Safe Spaces Act (RA 11313)</span>
+                </div>
+              </div>
+
+            </footer>
 
           </div><!-- /max-w-7xl centered container -->
 
@@ -2573,6 +2786,7 @@
 
         </div>
 
+
       </div>
 
       <!-- Modal Footer -->
@@ -3314,6 +3528,7 @@
           </button>
         </div>
 
+
       </div>
 
     </div>
@@ -3428,6 +3643,37 @@
           <blockquote class="italic border-l-2 border-emerald-500 pl-3 text-slate-700 dark:text-slate-200">
             "When good men remain silent, violence thrives. MOVE transforms male public servants into proactive advocates, mentors, and defenders of human dignity."
           </blockquote>
+        </div>
+
+        <!-- Official Membership & Contact Channels -->
+        <div class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 space-y-3">
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-emerald-600"></i> Join MOVE Baguio &amp; Contact Us
+          </h4>
+          <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+            Ready to stand with MOVE as a Cadre member? Submit your membership application via Google Forms or contact our chapter coordinators directly:
+          </p>
+          <div class="flex flex-wrap items-center gap-2.5 pt-1">
+            <a href="https://forms.gle/NhezRGVRXACn2EWm8" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-2 shadow-sm">
+              <i class="fa-solid fa-user-plus text-xs"></i>
+              <span>Member Registration Form</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75"></i>
+            </a>
+            <a href="https://www.facebook.com/cgobmove" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-white dark:bg-[#0c1c17] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] font-bold text-xs hover:bg-slate-50 transition flex items-center gap-2 shadow-2xs">
+              <i class="fa-brands fa-facebook text-[#1877f2] text-xs"></i>
+              <span>facebook.com/cgobmove</span>
+            </a>
+          </div>
+          <div class="flex flex-wrap items-center gap-4 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
+            <a href="tel:09277840269" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition flex items-center gap-1.5 font-mono">
+              <i class="fa-solid fa-phone text-emerald-600 text-xs"></i>
+              <span>0927 784 0269</span>
+            </a>
+            <a href="mailto:move.baguio@gmail.com" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-envelope text-emerald-600 text-xs"></i>
+              <span>move.baguio@gmail.com</span>
+            </a>
+          </div>
         </div>
       </div>
 
