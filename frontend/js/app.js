@@ -6257,7 +6257,7 @@ function renderHomeSlide(slideIndex) {
       if (i === idx) {
         pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-emerald-600 text-white shadow-sm border border-emerald-500";
       } else {
-        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800";
+        pill.className = "home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]";
       }
     }
   }
@@ -6271,7 +6271,7 @@ function renderHomeSlide(slideIndex) {
       } else if (i < idx) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500/70 cursor-pointer transition-all";
       } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-800 cursor-pointer transition-all hover:bg-slate-700";
+        dot.className = "home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all hover:bg-slate-400 dark:hover:bg-[#275243]";
       }
     }
   }
@@ -6293,9 +6293,9 @@ function renderHomeSlide(slideIndex) {
   if (btnPrev) {
     btnPrev.disabled = (idx === 1);
     if (idx === 1) {
-      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-900/60 text-slate-600 text-xs font-bold border border-slate-800/80 transition flex items-center gap-2 cursor-not-allowed";
+      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#07110e] text-slate-400 dark:text-slate-600 text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-2 cursor-not-allowed opacity-50";
     } else {
-      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-bold border border-slate-700 transition flex items-center gap-2 active:scale-95";
+      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-2 active:scale-95 shadow-2xs";
     }
   }
 
