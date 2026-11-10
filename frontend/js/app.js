@@ -120,6 +120,7 @@ const appState = {
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", async () => {
+  initColorTheme();
   await checkServerHealth();
   await loadSignatories();
   await loadActivities();
@@ -155,6 +156,40 @@ async function checkServerHealth() {
   } catch (e) {
     if (banner) banner.classList.remove("hidden");
     return false;
+  }
+}
+
+// --- COLOR THEME CONTROLLER (DARK / LIGHT MODE) ---
+function initColorTheme() {
+  const saved = localStorage.getItem('move_theme');
+  // Default to light or saved preference
+  const isDark = (saved === 'dark');
+  applyTheme(isDark);
+}
+
+function toggleColorTheme() {
+  const isCurrentlyDark = document.documentElement.classList.contains('dark');
+  const nextIsDark = !isCurrentlyDark;
+  localStorage.setItem('move_theme', nextIsDark ? 'dark' : 'light');
+  applyTheme(nextIsDark);
+  showToast(`Switched to ${nextIsDark ? 'Dark (Baguio Pine Obsidian)' : 'Light (Daylight Mist)'} theme`, "info");
+}
+
+function applyTheme(isDark) {
+  const icon = document.getElementById("themeToggleIcon");
+  const text = document.getElementById("themeToggleText");
+  const btn = document.getElementById("btnThemeToggle");
+
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+    if (icon) icon.className = "fa-solid fa-sun text-xs text-amber-400";
+    if (text) text.textContent = "Light";
+    if (btn) btn.title = "Switch to Light Theme";
+  } else {
+    document.documentElement.classList.remove('dark');
+    if (icon) icon.className = "fa-solid fa-moon text-xs text-emerald-600";
+    if (text) text.textContent = "Dark";
+    if (btn) btn.title = "Switch to Dark Theme";
   }
 }
 

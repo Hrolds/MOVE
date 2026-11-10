@@ -15,17 +15,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1450">
+  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1505">
 
   <script>
+    // Immediate Theme Pre-loader (prevent white/dark flicker)
+    (function() {
+      const savedTheme = localStorage.getItem('move_theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
             move: {
               navy: { 800: '#0f1f3d', 900: '#09152b', 950: '#060d1a' },
               gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-              orange: { 500: '#f97316', 600: '#ea580c' }
+              emerald: { 500: '#10b981', 600: '#059669', 700: '#047857' }
             }
           }
         }
@@ -220,6 +231,13 @@
 
         <!-- Right: Segmented View Switcher & Quick Action -->
         <div class="flex items-center gap-2 shrink-0">
+          
+          <!-- Theme Mode Switcher (Dark / Light) -->
+          <button type="button" id="btnThemeToggle" onclick="toggleColorTheme()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Toggle Dark / Light Theme">
+            <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-emerald-600"></i>
+            <span id="themeToggleText" class="hidden sm:inline">Dark</span>
+          </button>
+
           <nav class="hidden xl:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow">
               <i class="fa-solid fa-house text-[10px]"></i> Home
@@ -3416,6 +3434,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261110-1450"></script>
+  <script src="/frontend/js/app.js?v=20261110-1505"></script>
 </body>
 </html>

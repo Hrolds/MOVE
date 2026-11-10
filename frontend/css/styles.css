@@ -420,3 +420,255 @@ body {
     flex-shrink: 0 !important;
   }
 }
+
+
+/* ========================================================================== */
+/* BAGUIO PINE & EMERALD DARK THEME EXTENSION                                */
+/* ========================================================================== */
+
+html.dark body {
+  background-color: #07110e !important;
+  color: #f0fdf4 !important;
+}
+
+html.dark #appShellWrapper {
+  background-color: #07110e !important;
+}
+
+html.dark #appShellWrapper > div {
+  background-color: #07110e !important;
+}
+
+/* Custom Scrollbars in Dark Theme */
+html.dark ::-webkit-scrollbar-track {
+  background: #091511 !important;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #18352b !important;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #10b981 !important;
+}
+html.dark * {
+  scrollbar-color: #18352b #091511 !important;
+}
+html.dark .roster-scroll-container::-webkit-scrollbar-track {
+  background: #07110e !important;
+}
+html.dark .roster-scroll-container::-webkit-scrollbar-thumb {
+  background: #18352b !important;
+  border-color: #07110e !important;
+}
+html.dark .roster-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #10b981 !important;
+}
+
+/* Left Sidebar in Dark Theme */
+html.dark #appSidebar {
+  background-color: #0b1915 !important;
+  border-color: #163027 !important;
+  color: #f0fdf4 !important;
+}
+html.dark #appSidebar .border-b,
+html.dark #appSidebar .border-t {
+  border-color: #163027 !important;
+}
+html.dark #appSidebar .sidebar-label.text-slate-900,
+html.dark #appSidebar .text-slate-900 {
+  color: #f0fdf4 !important;
+}
+html.dark #appSidebar .text-slate-500,
+html.dark #appSidebar .text-slate-400 {
+  color: #8da196 !important;
+}
+html.dark #appSidebar button:not(.bg-emerald-600) {
+  color: #cbd5e1 !important;
+}
+html.dark #appSidebar button:not(.bg-emerald-600):hover {
+  background-color: #122822 !important;
+  color: #ffffff !important;
+}
+html.dark #appSidebar .bg-\[\#edf3f0\] {
+  background-color: #091511 !important;
+  border-color: #163027 !important;
+}
+html.dark #appSidebar #sidebarTotalBadge {
+  color: #6ee7b7 !important;
+}
+html.dark #appSidebar span.bg-slate-100 {
+  background-color: #122822 !important;
+  color: #cbd5e1 !important;
+  border-color: #18352b !important;
+}
+
+/* Top Navbar in Dark Theme */
+html.dark #topNavbar {
+  background-color: rgba(11, 25, 21, 0.95) !important;
+  border-color: #163027 !important;
+  color: #f0fdf4 !important;
+}
+html.dark #topNavbar button.bg-slate-100 {
+  background-color: #122822 !important;
+  border-color: #18352b !important;
+  color: #cbd5e1 !important;
+}
+html.dark #topNavbar button.bg-slate-100:hover {
+  background-color: #18352b !important;
+  color: #ffffff !important;
+}
+html.dark #globalTopSearchInput {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+  color: #f0fdf4 !important;
+}
+html.dark #globalTopSearchInput::placeholder {
+  color: #64748b !important;
+}
+html.dark #topNavbar kbd {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+  color: #8da196 !important;
+}
+html.dark #topNavbar nav.bg-slate-100 {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+}
+html.dark #topNavbar nav button:not(.bg-emerald-600) {
+  color: #8da196 !important;
+}
+html.dark #topNavbar nav button:not(.bg-emerald-600):hover {
+  background-color: #122822 !important;
+  color: #ffffff !important;
+}
+html.dark #topBreadcrumbActive {
+  background-color: rgba(5, 150, 105, 0.18) !important;
+  border-color: rgba(5, 150, 105, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+
+/* View 1: Roster in Dark Theme */
+html.dark #view-roster .bg-white {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+}
+html.dark #view-roster .border-\[\#dce6e0\] {
+  border-color: #18352b !important;
+}
+html.dark #view-roster .text-slate-900,
+html.dark #view-roster .text-slate-800 {
+  color: #f0fdf4 !important;
+}
+html.dark #view-roster .text-slate-500,
+html.dark #view-roster .text-slate-600 {
+  color: #8da196 !important;
+}
+html.dark #view-roster #lblActiveNavCategory {
+  background-color: rgba(5, 150, 105, 0.2) !important;
+  border-color: rgba(5, 150, 105, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+html.dark #view-roster #rosterSearchInput {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+  color: #f0fdf4 !important;
+}
+html.dark #view-roster thead {
+  background-color: #091511 !important;
+  border-color: #18352b !important;
+}
+html.dark #view-roster thead tr th {
+  background-color: #091511 !important;
+  border-color: #18352b !important;
+  color: #8da196 !important;
+}
+html.dark #view-roster tbody tr {
+  border-color: #142a22 !important;
+  color: #f0fdf4 !important;
+}
+html.dark #view-roster tbody tr:hover {
+  background-color: rgba(18, 40, 34, 0.7) !important;
+}
+html.dark #view-roster tbody tr td .bg-white {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+}
+html.dark #view-roster tbody button.bg-slate-100 {
+  background-color: #122822 !important;
+  border-color: #18352b !important;
+  color: #cbd5e1 !important;
+}
+html.dark #view-roster tbody button.bg-slate-100:hover {
+  background-color: #18352b !important;
+  color: #ffffff !important;
+}
+html.dark #view-roster .bg-\[\#f8faf9\] {
+  background-color: #091511 !important;
+  border-color: #18352b !important;
+  color: #8da196 !important;
+}
+
+/* Slide-Over Profile Drawer in Dark Theme */
+html.dark #modalEditMember {
+  background-color: rgba(3, 8, 7, 0.75) !important;
+}
+html.dark #editMemberDrawerPanel {
+  background-color: #0b1915 !important;
+  border-color: #163027 !important;
+  color: #f0fdf4 !important;
+}
+html.dark #editMemberDrawerPanel .border-b,
+html.dark #editMemberDrawerPanel .border-t,
+html.dark #editMemberDrawerPanel .border-\[\#dce6e0\] {
+  border-color: #163027 !important;
+}
+html.dark #editMemberDrawerPanel .bg-\[\#f4f7f5\],
+html.dark #editMemberDrawerPanel .bg-white {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+}
+html.dark #editMemberDrawerPanel .text-slate-900 {
+  color: #ffffff !important;
+}
+html.dark #editMemberDrawerPanel .text-slate-500,
+html.dark #editMemberDrawerPanel .text-slate-600 {
+  color: #8da196 !important;
+}
+html.dark #editMemberDrawerPanel input,
+html.dark #editMemberDrawerPanel select,
+html.dark #editMemberDrawerPanel textarea {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+  color: #f0fdf4 !important;
+}
+
+/* Home Overview & Hub in Dark Theme */
+html.dark #view-home .bg-white {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+}
+html.dark #view-home .bg-\[\#f4f7f5\] {
+  background-color: #07110e !important;
+  border-color: #18352b !important;
+}
+html.dark #view-home .text-slate-900 {
+  color: #ffffff !important;
+}
+html.dark #view-home .text-slate-600,
+html.dark #view-home .text-slate-500 {
+  color: #8da196 !important;
+}
+html.dark #view-home .border-\[\#dce6e0\] {
+  border-color: #18352b !important;
+}
+html.dark #view-home #btnPrevHomeSlide.bg-slate-100 {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+  color: #8da196 !important;
+}
+
+/* Activities and Attendance in Dark Theme */
+html.dark #view-activities .bg-white,
+html.dark #view-attendance .bg-white {
+  background-color: #0c1c17 !important;
+  border-color: #18352b !important;
+}
