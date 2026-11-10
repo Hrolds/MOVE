@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1510">
+  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1540">
 
   <script>
     // Immediate Theme Pre-loader (prevent white/dark flicker)
@@ -100,47 +100,47 @@
         <div class="space-y-1" id="rosterNavPanel">
           <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between sidebar-label">
             <span>Personnel Directory</span>
-            <span class="text-[10px] font-mono text-slate-600 font-bold" id="sidebarTotalBadge">58</span>
+            <span class="text-[10px] font-mono text-slate-500 font-bold" id="sidebarTotalBadge">58</span>
           </div>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('all');" id="rosterFilter-all" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Manage Personnel">
+          <button onclick="switchView('roster'); filterRosterByStatus('all');" id="rosterFilter-all" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Manage Personnel">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-users-gear w-4 text-center text-emerald-600"></i>
+              <i class="fa-solid fa-users-gear w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Manage Personnel</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 sidebar-label" id="count-all">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label" id="count-all">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('officer');" id="rosterFilter-officer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Executive Officers">
+          <button onclick="switchView('roster'); filterRosterByStatus('officer');" id="rosterFilter-officer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Executive Officers">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-star w-4 text-center text-amber-500"></i>
+              <i class="fa-solid fa-star w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Executive Officers</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 sidebar-label" id="count-officer">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label" id="count-officer">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('member');" id="rosterFilter-member" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Members (Cadre)">
+          <button onclick="switchView('roster'); filterRosterByStatus('member');" id="rosterFilter-member" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Members (Cadre)">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-600"></i>
+              <i class="fa-solid fa-shield-halved w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Members (Cadre)</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 sidebar-label" id="count-member">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label" id="count-member">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('committee');" id="rosterFilter-committee" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Standing Committees">
+          <button onclick="switchView('roster'); filterRosterByStatus('committee');" id="rosterFilter-committee" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Standing Committees">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-diagram-project w-4 text-center text-purple-600"></i>
+              <i class="fa-solid fa-diagram-project w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Committees</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-purple-50 text-purple-800 border border-purple-200 sidebar-label" id="count-committee">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label" id="count-committee">0</span>
           </button>
 
-          <button onclick="switchView('roster'); filterRosterByStatus('participant');" id="rosterFilter-participant" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Participants">
+          <button onclick="switchView('roster'); filterRosterByStatus('participant');" id="rosterFilter-participant" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Participants">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-user-check w-4 text-center text-teal-600"></i>
+              <i class="fa-solid fa-user-check w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Participants</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-teal-50 text-teal-800 border border-teal-200 sidebar-label" id="count-participant">0</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label" id="count-participant">0</span>
           </button>
         </div>
 
@@ -148,40 +148,40 @@
         <div class="space-y-1">
           <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Operations &amp; Studio</div>
 
-          <button onclick="switchView('activities')" id="sidebarNav-activities" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Activities & Seminars">
+          <button onclick="switchView('activities')" id="sidebarNav-activities" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Activities & Seminars">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-calendar-check w-4 text-center text-emerald-600"></i>
+              <i class="fa-solid fa-calendar-check w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Activities &amp; Seminars</span>
             </span>
           </button>
 
-          <button onclick="switchView('studio')" id="sidebarNav-studio" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Unified Certificate Studio">
+          <button onclick="switchView('studio')" id="sidebarNav-studio" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Unified Certificate Studio">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-certificate w-4 text-center text-amber-500"></i>
+              <i class="fa-solid fa-certificate w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Certificate Studio</span>
             </span>
-            <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase bg-amber-50 text-amber-800 border border-amber-200 sidebar-label">Studio</span>
+            <span class="px-1.5 py-0.2 rounded-md text-[9px] font-bold uppercase bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] sidebar-label">Studio</span>
           </button>
         </div>
 
         <!-- Group 4: Integrations & Audit -->
-        <div class="space-y-1 pt-2 border-t border-[#dce6e0]">
+        <div class="space-y-1 pt-2 border-t border-[#dce6e0] dark:border-[#18352b]">
           <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 sidebar-label">Integrations</div>
 
-          <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-800 group" title="Compare with HRIS API">
+          <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822] group" title="Compare with HRIS API">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-600 group-hover:rotate-12 transition-transform"></i>
+              <i class="fa-solid fa-scale-balanced w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">HRIS Sync &amp; Audit</span>
             </span>
-            <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 font-mono sidebar-label">
+            <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] font-mono sidebar-label">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span id="badgeHrisDiffCountText">HRIS</span>
             </span>
           </button>
 
-          <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 hover:text-slate-900 hover:bg-[#edf3f0]" title="Search Employee Pool">
+          <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#edf3f0] dark:hover:bg-[#122822]" title="Search Employee Pool">
             <span class="flex items-center gap-2.5">
-              <i class="fa-solid fa-magnifying-glass w-4 text-center text-slate-500"></i>
+              <i class="fa-solid fa-magnifying-glass w-4 text-center text-slate-400 dark:text-slate-400"></i>
               <span class="sidebar-label">Employee Pool (748)</span>
             </span>
           </button>
@@ -234,7 +234,7 @@
           
           <!-- Theme Mode Switcher (Dark / Light) -->
           <button type="button" id="btnThemeToggle" onclick="toggleColorTheme()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Toggle Dark / Light Theme">
-            <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-emerald-600"></i>
+            <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-slate-500 dark:text-slate-400"></i>
             <span id="themeToggleText" class="hidden sm:inline">Dark</span>
           </button>
 
@@ -249,7 +249,7 @@
               <i class="fa-solid fa-calendar-check text-[10px]"></i> Activities
             </button>
             <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
-              <i class="fa-solid fa-certificate text-amber-500 text-[10px]"></i> Studio
+              <i class="fa-solid fa-certificate text-[10px]"></i> Studio
             </button>
           </nav>
 
@@ -3431,6 +3431,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261110-1510"></script>
+  <script src="/frontend/js/app.js?v=20261110-1540"></script>
 </body>
 </html>

@@ -187,7 +187,7 @@ function applyTheme(isDark) {
     if (btn) btn.title = "Switch to Light Theme";
   } else {
     document.documentElement.classList.remove('dark');
-    if (icon) icon.className = "fa-solid fa-moon text-xs text-emerald-600";
+    if (icon) icon.className = "fa-solid fa-moon text-xs text-slate-500";
     if (text) text.textContent = "Dark";
     if (btn) btn.title = "Switch to Dark Theme";
   }
@@ -400,7 +400,7 @@ function filterRosterByStatus(status) {
 
   const lblCat = document.getElementById("lblActiveNavCategory");
   if (lblCat) {
-    lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-emerald-600"></i> ${escapeHtml(activeObj.label)}`;
+    lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-slate-400"></i> ${escapeHtml(activeObj.label)}`;
   }
   const lblCount = document.getElementById("lblActiveNavCount");
   if (lblCount) {
