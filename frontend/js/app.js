@@ -359,12 +359,6 @@ async function updateRosterCounts() {
       setTxt("count-participant", participantCount);
       setTxt("sidebarTotalBadge", totalCount);
 
-      // Update Executive KPI Cards in Roster View
-      setTxt("kpiCountAll", totalCount);
-      setTxt("kpiCountOfficer", officerCount);
-      setTxt("kpiCountMember", memberCount);
-      setTxt("kpiCountCommittee", committeeCount);
-
       setTxt("homeStatMembers", totalCount);
       setTxt("homeStatOfficers", officerCount);
     }
