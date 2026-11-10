@@ -368,9 +368,6 @@ async function updateRosterCounts() {
       setTxt("count-committee", committeeCount);
       setTxt("count-participant", participantCount);
       setTxt("sidebarTotalBadge", totalCount);
-
-      setTxt("homeStatMembers", totalCount);
-      setTxt("homeStatOfficers", officerCount);
     }
   } catch (err) {
     console.warn("Count update failed:", err);
@@ -2039,8 +2036,6 @@ async function loadActivities() {
     if (data.success) {
       appState.activities = data.activities;
       renderActivitiesGrid();
-      const homeA = document.getElementById("homeStatActivities");
-      if (homeA) homeA.textContent = appState.activities.length;
     }
   } catch (err) {
     console.error("Failed to load activities:", err);
