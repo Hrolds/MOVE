@@ -259,6 +259,11 @@ function switchView(viewName) {
   if (topNavPublic) topNavPublic.classList.toggle("hidden", !isHome);
   if (topNavAdmin) topNavAdmin.classList.toggle("hidden", isHome);
 
+  const adminContainer = document.getElementById("adminWorkspaceContainer");
+  if (adminContainer) {
+    adminContainer.classList.toggle("hidden", isHome);
+  }
+
   const views = ['home', 'roster', 'activities', 'attendance', 'studio'];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);

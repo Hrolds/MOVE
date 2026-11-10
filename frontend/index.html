@@ -290,16 +290,15 @@
       </header>
 
       <!-- MAIN SCROLLABLE WORKSPACE CONTAINER -->
-      <main id="nonPrintableContent" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
-        <div class="max-w-[1650px] w-full mx-auto">
+      <main id="nonPrintableContent" class="flex-1 overflow-y-auto">
 
           <!-- ==================================================================== -->
           <!-- VIEW 0: HOME / LANDING FRONT PAGE                                    -->
           <!-- ==================================================================== -->
-          <section id="view-home" class="space-y-8 max-w-7xl mx-auto pb-12">
+          <section id="view-home" class="w-full pb-16">
 
             <!-- 1. SPLIT HERO SECTION (PHILIPPINE VETERANS BANK STYLE) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 rounded-3xl overflow-hidden shadow-xl border border-[#dce6e0] dark:border-[#18352b] bg-white dark:bg-[#0c1c17]">
+            <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-0 border-b border-[#dce6e0] dark:border-[#18352b] bg-white dark:bg-[#0c1c17]">
               
               <!-- Left Column: Forest Emerald Content Panel -->
               <div class="lg:col-span-7 bg-[#0b3326] dark:bg-[#06241b] text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-between relative min-h-[460px]">
@@ -365,8 +364,8 @@
                 <div class="absolute inset-0 bg-radial from-emerald-600/15 via-transparent to-transparent pointer-events-none"></div>
 
                 <!-- High-Resolution Clear Breathe Baguio Artwork -->
-                <div class="relative z-10 w-full max-w-[440px] flex items-center justify-center">
-                  <img src="/BREATHE_BAGUIO.png" alt="Breathe Baguio" class="w-full h-auto max-h-[290px] object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105 select-none">
+                <div class="relative z-10 w-full max-w-[500px] flex items-center justify-center">
+                  <img src="/BREATHE_BAGUIO.png" alt="Breathe Baguio" class="w-full h-auto max-h-[340px] object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105 select-none">
                 </div>
 
                 <!-- Centered Play Action Pill -->
@@ -384,6 +383,8 @@
 
             </div>
 
+          <!-- Centered Body Content (Recent Activities, Pillars, Footer) -->
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pt-10">
             <!-- ============================================================ -->
             <!-- 2. RECENT ACTIVITIES & CAPACITY-BUILDING (VETERANS BANK STYLE) -->
             <!-- ============================================================ -->
@@ -479,7 +480,12 @@
               </p>
             </div>
 
-          </section>
+          </div><!-- /max-w-7xl centered container -->
+
+        </section>
+
+        <!-- ADMIN WORKSPACE CONTAINER (MAX-W-[1650px] WITH PADDING FOR ROSTER, ACTIVITIES, STUDIO) -->
+        <div id="adminWorkspaceContainer" class="max-w-[1650px] w-full mx-auto p-4 sm:p-6 lg:p-7 hidden">
 
     <!-- ==================================================================== -->
     <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER (LINEAR / SHADCN LIGHT) -->
