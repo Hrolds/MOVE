@@ -176,21 +176,21 @@ function toggleColorTheme() {
 }
 
 function applyTheme(isDark) {
-  const icon = document.getElementById("themeToggleIcon");
-  const text = document.getElementById("themeToggleText");
-  const btn = document.getElementById("btnThemeToggle");
-
   if (isDark) {
     document.documentElement.classList.add('dark');
-    if (icon) icon.className = "fa-solid fa-sun text-xs text-amber-400";
-    if (text) text.textContent = "Light";
-    if (btn) btn.title = "Switch to Light Theme";
   } else {
     document.documentElement.classList.remove('dark');
-    if (icon) icon.className = "fa-solid fa-moon text-xs text-slate-500";
-    if (text) text.textContent = "Dark";
-    if (btn) btn.title = "Switch to Dark Theme";
   }
+  ['themeToggleIcon', 'themeToggleIconPublic', 'themeToggleIconAdmin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = isDark ? "fa-solid fa-sun text-xs text-slate-400" : "fa-solid fa-moon text-xs text-slate-500";
+  });
+  ['themeToggleText', 'themeToggleTextPublic', 'themeToggleTextAdmin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = isDark ? "Light" : "Dark";
+  });
+  const btn = document.getElementById("btnThemeToggle");
+  if (btn) btn.title = isDark ? "Switch to Light Theme" : "Switch to Dark Theme";
 }
 
 // --- NAVIGATION & APP SHELL CONTROLLER (LINEAR / SHADCN) ---
@@ -243,20 +243,26 @@ function handleLoginPlaceholder() {
 
 function switchView(viewName) {
   appState.activeView = viewName;
+  const isHome = (viewName === 'home');
+
+  // If on Home (Public Front Page mode):
+  // 1. Hide the left sidebar (#appSidebar)
+  // 2. Hide other admin views, show #view-home
+  // 3. Switch #topNavbar into Public mode
+  const sidebar = document.getElementById("appSidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("hidden", isHome);
+  }
+
+  const topNavPublic = document.getElementById("topNavPublic");
+  const topNavAdmin = document.getElementById("topNavAdmin");
+  if (topNavPublic) topNavPublic.classList.toggle("hidden", !isHome);
+  if (topNavAdmin) topNavAdmin.classList.toggle("hidden", isHome);
+
   const views = ['home', 'roster', 'activities', 'attendance', 'studio'];
-  
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
-    const tab = document.getElementById(`navTab-${v}`);
     if (el) el.classList.toggle('hidden', v !== viewName);
-    if (tab) {
-      const isActive = (v === viewName) || (viewName === 'attendance' && v === 'activities');
-      if (isActive) {
-        tab.className = "nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow";
-      } else {
-        tab.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70";
-      }
-    }
   });
 
   // Update Left Sidebar Navigation Buttons (Baguio Emerald Light)
@@ -291,7 +297,7 @@ function switchView(viewName) {
 
   if (viewName === 'home') {
     updateTopBreadcrumbs('Overview', 'Home & Mandate');
-    renderHomeSlide(appState.homeSlide || 1);
+    renderFrontHero();
   }
   if (viewName === 'roster') {
     const labelMap = {
@@ -6208,115 +6214,86 @@ function escapeHtml(str) {
 // HOME / FRONT PAGE INTERACTIVE SHOWCASE CONTROLLER
 // ============================================================================
 
-const HOME_SLIDE_DATA = [
-  { id: 1, title: "1. Mandate", nextLabel: "Next: Core Principles" },
-  { id: 2, title: "2. Principles", nextLabel: "Next: Leadership Hierarchy" },
-  { id: 3, title: "3. Officers", nextLabel: "Next: Training Activities" },
-  { id: 4, title: "4. Activities", nextLabel: "Next: Cadre Pledge" },
-  { id: 5, title: "5. Cadre Pledge", nextLabel: "Explore Chapter Roster" }
+
+// ==========================================================================
+// FRONT HERO SLIDER & PORTAL LOGIN CONTROLLER (VETERANS BANK STYLE)
+// ==========================================================================
+
+const FRONT_HERO_SLIDES = [
+  {
+    title: "Active Allies.<br>Safer Communities.",
+    desc: "Men Opposed to Violence Against Women Everywhere (MOVE) Baguio City Chapter mobilizes male public servants and community leaders to eliminate gender-based violence, protect homes, and champion equality across public service."
+  },
+  {
+    title: "Non-Violent Homes.<br>Respect for All.",
+    desc: "Standing on Republic Act 9262 and the Safe Spaces Act RA 11313, MOVE transforms male public servants into champions of dignity, peace, and family well-being throughout Baguio's 128 barangays."
+  },
+  {
+    title: "Empowering Men.<br>Defending Dignity.",
+    desc: "Promoting positive masculinity, shared accountability, and moral courage within the City Government of Baguio and throughout the Cordillera community."
+  }
 ];
 
-function goToHomeSlide(slideIndex) {
-  const target = Math.max(1, Math.min(5, parseInt(slideIndex, 10) || 1));
-  appState.homeSlide = target;
-  renderHomeSlide(target);
+let currentFrontHeroIndex = 0;
+
+function cycleFrontHero(dir) {
+  currentFrontHeroIndex = (currentFrontHeroIndex + dir + FRONT_HERO_SLIDES.length) % FRONT_HERO_SLIDES.length;
+  renderFrontHero();
 }
 
-function nextHomeSlide() {
-  const current = appState.homeSlide || 1;
-  if (current < 5) {
-    goToHomeSlide(current + 1);
-  } else {
-    switchView('roster');
-  }
-}
+function renderFrontHero() {
+  const slide = FRONT_HERO_SLIDES[currentFrontHeroIndex];
+  const titleEl = document.getElementById("frontHeroTitle");
+  const descEl = document.getElementById("frontHeroDesc");
+  if (titleEl) titleEl.innerHTML = slide.title;
+  if (descEl) descEl.textContent = slide.desc;
 
-function prevHomeSlide() {
-  const current = appState.homeSlide || 1;
-  if (current > 1) {
-    goToHomeSlide(current - 1);
-  }
-}
-
-function renderHomeSlide(slideIndex) {
-  const idx = Math.max(1, Math.min(5, parseInt(slideIndex, 10) || 1));
-
-  // 1. Show active slide, hide others
-  for (let i = 1; i <= 5; i++) {
-    const el = document.getElementById(`homeSlide-${i}`);
-    if (el) {
-      el.classList.toggle("hidden", i !== idx);
-    }
-  }
-
-  // 2. Update step selector pills
-  for (let i = 1; i <= 5; i++) {
-    const pill = document.getElementById(`homePill-${i}`);
-    if (pill) {
-      if (i === idx) {
-        pill.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-emerald-600 text-white shadow-sm border border-emerald-500";
+  for (let i = 0; i < 3; i++) {
+    const ind = document.getElementById(`heroInd-${i}`);
+    if (ind) {
+      if (i === currentFrontHeroIndex) {
+        ind.className = "w-8 h-1 bg-emerald-400 rounded-full transition-all duration-300";
       } else {
-        pill.className = "home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]";
+        ind.className = "w-2 h-1 bg-white/30 rounded-full transition-all duration-300";
       }
     }
   }
-
-  // 3. Update Progress Dots
-  for (let i = 1; i <= 5; i++) {
-    const dot = document.getElementById(`homeDot-${i}`);
-    if (dot) {
-      if (i === idx) {
-        dot.className = "w-3 h-3 rounded-full bg-emerald-600 cursor-pointer transition-all shadow-xs ring-2 ring-emerald-500/40";
-      } else if (i < idx) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500/70 cursor-pointer transition-all";
-      } else {
-        dot.className = "home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all hover:bg-slate-400 dark:hover:bg-[#275243]";
-      }
-    }
-  }
-
-  // 4. Update Progress Bar
-  const pBar = document.getElementById("homeProgressBar");
-  if (pBar) {
-    pBar.style.width = `${(idx / 5) * 100}%`;
-  }
-
-  // 5. Update Counter Label
-  const lblCounter = document.getElementById("homeSlideCounterLabel");
-  if (lblCounter) {
-    lblCounter.textContent = `(Topic ${idx} of 5)`;
-  }
-
-  // 6. Update Previous & Next Buttons
-  const btnPrev = document.getElementById("btnPrevHomeSlide");
-  if (btnPrev) {
-    btnPrev.disabled = (idx === 1);
-    if (idx === 1) {
-      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#07110e] text-slate-400 dark:text-slate-600 text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-2 cursor-not-allowed opacity-50";
-    } else {
-      btnPrev.className = "px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-2 active:scale-95 shadow-2xs";
-    }
-  }
-
-  const btnNextLabel = document.getElementById("btnNextHomeSlideLabel");
-  const slideMeta = HOME_SLIDE_DATA[idx - 1] || HOME_SLIDE_DATA[0];
-  if (btnNextLabel) {
-    btnNextLabel.textContent = slideMeta.nextLabel;
-  }
 }
 
-let homeKeyListenersAttached = false;
+function openLoginModal() {
+  openModal('modalLoginPortal');
+}
+
+function handlePortalLoginSubmit(e) {
+  if (e) e.preventDefault();
+  loginAndOpenDashboard();
+}
+
+function loginAndOpenDashboard() {
+  closeModal('modalLoginPortal');
+  appState.isLoggedIn = true;
+  if (typeof showToast === 'function') {
+    showToast("Welcome to MOVE Baguio Management Portal!", "success");
+  }
+  switchView('roster');
+}
+
+function logoutToFrontPage() {
+  appState.isLoggedIn = false;
+  if (typeof showToast === 'function') {
+    showToast("Returned to public front page.", "info");
+  }
+  switchView('home');
+}
+
 function initHomeKeyListeners() {
-  if (homeKeyListenersAttached) return;
-  homeKeyListenersAttached = true;
   document.addEventListener("keydown", (e) => {
     if (appState.activeView !== 'home') return;
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-
     if (e.key === "ArrowRight") {
-      nextHomeSlide();
+      cycleFrontHero(1);
     } else if (e.key === "ArrowLeft") {
-      prevHomeSlide();
+      cycleFrontHero(-1);
     }
   });
 }

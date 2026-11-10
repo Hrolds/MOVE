@@ -204,52 +204,87 @@
     <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#f4f7f5]">
 
       <!-- TOP HEADER BAR (#topNavbar) -->
-      <header id="topNavbar" class="h-14 bg-white/95 border-b border-[#dce6e0] px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-20 backdrop-blur-md">
+      <header id="topNavbar" class="h-16 bg-white/95 dark:bg-[#07110e]/95 border-b border-[#dce6e0] dark:border-[#18352b] px-4 sm:px-8 flex items-center justify-between shrink-0 backdrop-blur-md z-20">
         
-        <!-- Left: Sidebar Toggle & Breadcrumb Path -->
-        <div class="flex items-center gap-3 min-w-0">
-          <button type="button" onclick="toggleAppSidebar()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 flex items-center justify-center transition shrink-0" title="Toggle Sidebar">
-            <i class="fa-solid fa-bars-staggered text-xs"></i>
-          </button>
-          <div class="flex items-center gap-2 text-xs truncate">
-            <span class="text-slate-500 font-medium hidden sm:inline">MOVE Baguio</span>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 hidden sm:inline"></i>
-            <span id="topBreadcrumbSection" class="text-slate-500 font-medium">Overview</span>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
-            <span id="topBreadcrumbActive" class="text-emerald-950 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 truncate">Home &amp; Mandate</span>
+        <!-- ============================================================ -->
+        <!-- PUBLIC NAVBAR: Shown on Front Page (Home)                    -->
+        <!-- ============================================================ -->
+        <div id="topNavPublic" class="w-full flex items-center justify-between">
+          <!-- Left: Dual Logos & Movement Title -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 shrink-0">
+              <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-9 h-9 object-contain drop-shadow-xs">
+              <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-9 h-9 object-contain drop-shadow-xs">
+            </div>
+            <div class="flex flex-col">
+              <span class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight">MOVE Baguio</span>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">Men Opposed to Violence Against Women Everywhere</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Center: Global Command Search Input -->
-        <div class="hidden md:flex items-center flex-1 max-w-md mx-2">
-          <div class="relative w-full">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-            <input type="text" id="globalTopSearchInput" oninput="onGlobalTopSearch(this.value)" placeholder="Quick search personnel by name, ID, or office..." class="w-full pl-8 pr-10 py-1.5 rounded-xl bg-[#f4f7f5] border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition">
-            <kbd class="absolute right-2.5 top-1.5 px-1.5 py-0.2 text-[10px] font-mono font-bold text-slate-500 bg-white border border-slate-200 rounded shadow-2xs">/</kbd>
-          </div>
-        </div>
-
-        <!-- Right: Segmented View Switcher & Quick Action -->
-        <div class="flex items-center gap-2 shrink-0">
-          
-          <!-- Theme Mode Switcher (Dark / Light) -->
-          <button type="button" id="btnThemeToggle" onclick="toggleColorTheme()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Toggle Dark / Light Theme">
-            <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-slate-500 dark:text-slate-400"></i>
-            <span id="themeToggleText" class="hidden sm:inline">Dark</span>
-          </button>
-
-          <nav class="hidden xl:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-            <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow">
-              <i class="fa-solid fa-house text-[10px]"></i> Home
-            </button>
-            <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
-              <i class="fa-solid fa-certificate text-[10px]"></i> Studio
-            </button>
+          <!-- Center: Informational Navigation Links (Matching Sample Website) -->
+          <nav class="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">About Us</button>
+            <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Mandate</button>
+            <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Principles</button>
+            <button type="button" onclick="openModal('modalAboutMove')" class="hover:text-emerald-700 dark:hover:text-emerald-400 transition">Cadre Pledge</button>
           </nav>
 
-          <button type="button" id="btnTopLogin" onclick="handleLoginPlaceholder()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition" title="Login (Future Feature)">
-            Login
-          </button>
+          <!-- Right: Theme Switcher & Prominent Login Button -->
+          <div class="flex items-center gap-3">
+            <!-- Theme Toggle -->
+            <button type="button" id="btnThemeToggle" onclick="toggleColorTheme()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-[#18352b] bg-slate-100 dark:bg-[#0c1c17] text-slate-700 dark:text-slate-300 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs" title="Toggle Dark / Light Theme">
+              <i id="themeToggleIcon" class="fa-solid fa-moon text-xs text-slate-500 dark:text-slate-400"></i>
+              <span id="themeToggleText" class="hidden sm:inline">Dark</span>
+            </button>
+
+            <!-- Prominent Login Button (Veterans Bank Style) -->
+            <button type="button" onclick="openLoginModal()" class="px-5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-2">
+              <i class="fa-solid fa-right-to-bracket text-xs text-emerald-200"></i>
+              <span>Login</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- ADMIN NAVBAR: Shown when logged in / managing UI             -->
+        <!-- ============================================================ -->
+        <div id="topNavAdmin" class="w-full flex items-center justify-between hidden">
+          <!-- Left: Sidebar Toggle & Page Title Breadcrumbs -->
+          <div class="flex items-center gap-3">
+            <button type="button" onclick="toggleAppSidebar()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-[#0c1c17] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-[#18352b] flex items-center justify-center transition shrink-0" title="Toggle Sidebar">
+              <i class="fa-solid fa-bars-staggered text-xs"></i>
+            </button>
+            <div class="flex items-center gap-2 text-xs truncate">
+              <span class="text-slate-500 font-medium hidden sm:inline">MOVE Baguio</span>
+              <i class="fa-solid fa-chevron-right text-[9px] text-slate-400 hidden sm:inline"></i>
+              <span id="topBreadcrumbSection" class="text-slate-500 font-medium">Operations</span>
+              <i class="fa-solid fa-chevron-right text-[9px] text-slate-400"></i>
+              <span id="topBreadcrumbActive" class="text-emerald-950 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200 truncate">Personnel Directory</span>
+            </div>
+          </div>
+
+          <!-- Center: Global Command Search Input -->
+          <div class="hidden md:flex items-center flex-1 max-w-md mx-4">
+            <div class="relative w-full">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="globalTopSearchInput" oninput="onGlobalTopSearch(this.value)" placeholder="Quick search personnel by name, ID, or office..." class="w-full pl-8 pr-10 py-1.5 rounded-xl bg-[#f4f7f5] dark:bg-[#0c1c17] border border-slate-200 dark:border-[#18352b] text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-600 transition">
+              <kbd class="absolute right-2.5 top-1.5 px-1.5 py-0.2 text-[10px] font-mono font-bold text-slate-500 bg-white dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] rounded shadow-2xs">/</kbd>
+            </div>
+          </div>
+
+          <!-- Right: Theme Switcher & Return to Front Page / Logout -->
+          <div class="flex items-center gap-2 shrink-0">
+            <!-- Front Page Button -->
+            <button type="button" onclick="switchView('home')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#0c1c17] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-1.5 shadow-2xs" title="Return to Public Front Page">
+              <i class="fa-solid fa-globe text-xs"></i>
+              <span class="hidden sm:inline">Front Page</span>
+            </button>
+            <!-- Logout Button -->
+            <button type="button" onclick="logoutToFrontPage()" class="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 transition" title="Logout">
+              <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+            </button>
+          </div>
         </div>
 
       </header>
@@ -261,487 +296,147 @@
           <!-- ==================================================================== -->
           <!-- VIEW 0: HOME / LANDING FRONT PAGE                                    -->
           <!-- ==================================================================== -->
-          <section id="view-home" class="space-y-6">
+          <section id="view-home" class="space-y-8 max-w-7xl mx-auto pb-12">
 
-      <!-- 1. Hero Banner: MOVE Baguio Chapter (Unified Light / Dark) -->
-      <div class="relative overflow-hidden rounded-3xl bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] p-6 sm:p-8 shadow-sm">
-        <div class="flex items-center gap-4 sm:gap-5">
-          <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-            <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-sm">
-            <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-sm">
-          </div>
-          <div>
-            <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Men Opposed to Violence Against Women Everywhere
-            </h1>
-            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium mt-1 max-w-4xl leading-relaxed">
-              Baguio City Chapter &bull; Mobilizing male public servants, leaders, and advocates as active allies in eliminating gender-based violence, protecting homes, and fostering equality across public service.
-            </p>
-          </div>
-        </div>
-      </div>
+            <!-- 1. SPLIT HERO SECTION (PHILIPPINE VETERANS BANK STYLE) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-0 rounded-3xl overflow-hidden shadow-xl border border-[#dce6e0] dark:border-[#18352b] bg-white dark:bg-[#0c1c17]">
+              
+              <!-- Left Column: Forest Emerald Content Panel -->
+              <div class="lg:col-span-7 bg-[#0b3326] dark:bg-[#06241b] text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-between relative min-h-[460px]">
+                <!-- Subtle Background Watermark Shield -->
+                <div class="absolute right-4 bottom-4 opacity-5 pointer-events-none select-none">
+                  <i class="fa-solid fa-shield-halved text-[220px]"></i>
+                </div>
 
-      <!-- 2. Interactive "About MOVE" Guided Walkthrough Card (Unified Light / Dark) -->
-      <div class="bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 relative overflow-hidden">
-        
-        <!-- Showcase Header & Step Indicators -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#dce6e0] dark:border-[#18352b]">
-          <div>
-            <h2 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>About the Movement</span>
-              <span class="text-xs font-mono text-slate-500 dark:text-slate-400 font-normal" id="homeSlideCounterLabel">(Topic 1 of 5)</span>
-            </h2>
-          </div>
+                <div class="space-y-6 relative z-10">
+                  <!-- Institutional Tag -->
+                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold uppercase tracking-wider">
+                    <i class="fa-solid fa-landmark text-emerald-300"></i>
+                    <span>Republic Act 9262 &bull; Baguio GAD Council</span>
+                  </div>
 
-          <!-- Step Selector Pills -->
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none" id="homeStepPills">
-            <button type="button" onclick="goToHomeSlide(1)" id="homePill-1" class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-emerald-600 text-white shadow-sm border border-emerald-500">
-              <i class="fa-solid fa-scale-balanced text-[11px]"></i>
-              <span>1. Mandate</span>
-            </button>
-            <button type="button" onclick="goToHomeSlide(2)" id="homePill-2" class="home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]">
-              <i class="fa-solid fa-shield-heart text-[11px]"></i>
-              <span>2. Principles</span>
-            </button>
-            <button type="button" onclick="goToHomeSlide(3)" id="homePill-3" class="home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]">
-              <i class="fa-solid fa-sitemap text-[11px]"></i>
-              <span>3. Officers</span>
-            </button>
-            <button type="button" onclick="goToHomeSlide(4)" id="homePill-4" class="home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]">
-              <i class="fa-solid fa-graduation-cap text-[11px]"></i>
-              <span>4. Activities</span>
-            </button>
-            <button type="button" onclick="goToHomeSlide(5)" id="homePill-5" class="home-pill-inactive px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-100 dark:bg-[#07110e] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-[#122822] border border-slate-200 dark:border-[#18352b]">
-              <i class="fa-solid fa-hand-holding-heart text-[11px]"></i>
-              <span>5. Cadre Pledge</span>
-            </button>
-          </div>
-        </div>
+                  <!-- Dynamic Headline -->
+                  <h1 id="frontHeroTitle" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.12]">
+                    Active Allies.<br>
+                    Safer Communities.
+                  </h1>
 
-        <!-- Progress Bar Indicator -->
-        <div class="w-full bg-slate-200 dark:bg-[#07110e] rounded-full h-1.5 overflow-hidden border border-[#dce6e0] dark:border-[#18352b]">
-          <div id="homeProgressBar" class="bg-emerald-600 h-1.5 rounded-full transition-all duration-300 w-1/5"></div>
-        </div>
+                  <!-- Dynamic Subtitle -->
+                  <p id="frontHeroDesc" class="text-sm sm:text-base text-emerald-100/85 max-w-xl leading-relaxed font-normal">
+                    Men Opposed to Violence Against Women Everywhere (MOVE) Baguio City Chapter mobilizes male public servants and community leaders to eliminate gender-based violence, protect homes, and champion equality across public service.
+                  </p>
 
-        <!-- SLIDE 1: What is MOVE? (Mandate & Movement) -->
-        <div id="homeSlide-1" class="home-slide-item space-y-6">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div class="lg:col-span-7 space-y-3">
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold">
-                <i class="fa-solid fa-scale-balanced text-xs"></i>
-                <span>Republic Act 9262 &bull; Anti-VAWC Act</span>
+                  <!-- Action Buttons -->
+                  <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <button type="button" onclick="openModal('modalAboutMove')" class="px-6 py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-md transition">
+                      Learn More
+                    </button>
+                    <button type="button" onclick="openLoginModal()" class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition flex items-center gap-2">
+                      <span>Access Portal</span>
+                      <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Bottom Slider Indicator & Navigation (Matching Sample Layout) -->
+                <div class="flex items-center justify-between pt-8 mt-8 border-t border-white/10 relative z-10 text-xs text-white/70">
+                  <!-- Slide Indicator Line & Dots -->
+                  <div class="flex items-center gap-2" id="frontHeroIndicators">
+                    <span id="heroInd-0" class="w-8 h-1 bg-emerald-400 rounded-full transition-all duration-300"></span>
+                    <span id="heroInd-1" class="w-2 h-1 bg-white/30 rounded-full transition-all duration-300"></span>
+                    <span id="heroInd-2" class="w-2 h-1 bg-white/30 rounded-full transition-all duration-300"></span>
+                  </div>
+                  <!-- Arrow Controls -->
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="cycleFrontHero(-1)" class="w-8 h-8 rounded-full border border-white/20 hover:bg-white/15 flex items-center justify-center text-white transition active:scale-95" title="Previous Slide">
+                      <i class="fa-solid fa-arrow-left text-xs"></i>
+                    </button>
+                    <button type="button" onclick="cycleFrontHero(1)" class="w-8 h-8 rounded-full border border-white/20 hover:bg-white/15 flex items-center justify-center text-white transition active:scale-95" title="Next Slide">
+                      <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                A Pioneering Movement of Men for Gender Justice
-              </h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                <strong>Men Opposed to Violence Against Women Everywhere (MOVE)</strong> is an organized vanguard of male government employees and leaders dedicated to eliminating all forms of violence against women and their children.
-              </p>
-              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Established under the guidance of the <strong>Philippine Commission on Women (PCW)</strong> and institutionalized by the <strong>City Government of Baguio GAD Council</strong>, MOVE stands on the firm conviction that violence against women is not solely a women's struggle—it is a societal crisis that demands the active, vocal commitment of men.
-              </p>
-              <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] text-xs text-slate-700 dark:text-slate-300 flex items-start gap-3">
-                <i class="fa-solid fa-quote-left text-slate-400 text-base mt-0.5"></i>
-                <span>"When good men remain silent, violence thrives. MOVE transforms male public servants into proactive advocates, mentors, and defenders of human dignity."</span>
+
+              <!-- Right Column: Visual Showcase Imagery with Centered Play Button (Matching Sample Layout) -->
+              <div class="lg:col-span-5 relative min-h-[340px] sm:min-h-[460px] bg-slate-950 overflow-hidden flex items-center justify-center group cursor-pointer" onclick="openModal('modalAboutMove')">
+                <img src="/breathe-baguio.png" alt="Baguio City Scenery" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/20"></div>
+
+                <!-- Centered Play / Interactive Action Icon (Directly matching sample layout) -->
+                <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-800/80 hover:bg-emerald-700/90 text-white backdrop-blur-md border border-white/30 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110">
+                  <i class="fa-solid fa-play text-xl sm:text-2xl ml-1 text-white"></i>
+                </div>
+
+                <!-- Bottom Badge on Right Image -->
+                <div class="absolute bottom-4 right-4 z-10 px-3 py-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold flex items-center gap-2">
+                  <i class="fa-solid fa-mountain-sun text-slate-300"></i>
+                  <span>Baguio City &bull; GAD Council</span>
+                </div>
               </div>
+
             </div>
 
-            <div class="lg:col-span-5 grid grid-cols-1 gap-3">
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] transition space-y-1.5">
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold mb-1">
-                  <i class="fa-solid fa-handshake-angle"></i>
-                </div>
-                <div class="text-xs font-bold text-slate-900 dark:text-white">Men as Active Allies</div>
-                <div class="text-[11px] text-slate-500 dark:text-slate-400">Mobilizing men to speak out, break traditional stereotypes, and protect women and children in every neighborhood.</div>
-              </div>
-
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] transition space-y-1.5">
-                <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400 flex items-center justify-center text-xs font-bold mb-1">
+            <!-- 2. THREE INSTITUTIONAL PILLARS OF MOVE -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <!-- Pillar 1: Mandate & PCW Charter -->
+              <div class="p-6 rounded-3xl bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] shadow-xs space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-lg shadow-2xs">
                   <i class="fa-solid fa-landmark"></i>
                 </div>
-                <div class="text-xs font-bold text-slate-900 dark:text-white">Institutional Accountability</div>
-                <div class="text-[11px] text-slate-500 dark:text-slate-400">Embedding gender-responsive governance and zero tolerance within City Hall offices and municipal departments.</div>
-              </div>
-
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] transition space-y-1.5">
-                <div class="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-400 flex items-center justify-center text-xs font-bold mb-1">
-                  <i class="fa-solid fa-people-roof"></i>
-                </div>
-                <div class="text-xs font-bold text-slate-900 dark:text-white">Community Partnership</div>
-                <div class="text-[11px] text-slate-500 dark:text-slate-400">Extending anti-VAWC education and peaceful conflict resolution directly to Baguio's 128 barangays.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SLIDE 2: Core Principles & Safe Spaces (RA 11313) -->
-        <div id="homeSlide-2" class="home-slide-item space-y-6 hidden">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div class="lg:col-span-7 space-y-3">
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold">
-                <i class="fa-solid fa-shield-heart text-xs"></i>
-                <span>Republic Act 11313 &bull; Safe Spaces Act</span>
-              </div>
-              <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Zero Tolerance, Respect &amp; Positive Masculinity
-              </h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                MOVE Baguio Chapter upholds the <strong>Safe Spaces Act (Bawal Bastos Law)</strong> in every city corridor, office, and public facility. We promote an organizational culture where catcalling, sexist remarks, and unwanted advances are condemned.
-              </p>
-              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                We believe that authentic male strength lies in compassion, emotional maturity, accountability, and the courage to challenge toxic behaviors among peers.
-              </p>
-              <div class="grid grid-cols-2 gap-3 pt-1">
-                <div class="p-3 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b]">
-                  <div class="text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 mb-1">
-                    <i class="fa-solid fa-check"></i> Safe Workplaces
-                  </div>
-                  <div class="text-[11px] text-slate-500 dark:text-slate-400">Strict zero-tolerance policies protecting every woman in public service.</div>
-                </div>
-                <div class="p-3 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b]">
-                  <div class="text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 mb-1">
-                    <i class="fa-solid fa-check"></i> Non-Violent Homes
-                  </div>
-                  <div class="text-[11px] text-slate-500 dark:text-slate-400">Empowering men as protective, nurturing partners and fathers.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="lg:col-span-5 space-y-3">
-              <div class="p-5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-emerald-200 dark:border-emerald-500/30 space-y-3">
-                <div class="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-                  <i class="fa-solid fa-heart-pulse"></i> The Pillars of Positive Masculinity
-                </div>
-                <ul class="space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
-                  <li class="flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-check text-slate-400 text-xs mt-0.5"></i>
-                    <span><strong>Respectful Partnership:</strong> Treating women as equal decision-makers in public administration and domestic life.</span>
-                  </li>
-                  <li class="flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-check text-slate-400 text-xs mt-0.5"></i>
-                    <span><strong>Peer Intervention:</strong> Refusing to laugh at sexist jokes or stay silent when harassment occurs.</span>
-                  </li>
-                  <li class="flex items-start gap-2.5">
-                    <i class="fa-solid fa-circle-check text-slate-400 text-xs mt-0.5"></i>
-                    <span><strong>Survivor Support:</strong> Working with social workers and legal advocates to ensure safe, confidential reporting.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SLIDE 3: Executive Officers Hierarchy -->
-        <div id="homeSlide-3" class="home-slide-item space-y-6 hidden">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 text-[11px] font-bold mb-1">
-                <i class="fa-solid fa-sitemap text-xs"></i>
-                <span>Executive Governance &bull; Protocol Precedence</span>
-              </div>
-              <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                MOVE Baguio Chapter Executive Board
-              </h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                Official protocol order established by the chapter, leading our 58 male members.
-              </p>
-            </div>
-            <button onclick="switchView('roster'); filterRosterByStatus('officer');" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition flex items-center gap-2 shadow-sm shrink-0 self-start sm:self-auto">
-              <i class="fa-solid fa-users"></i>
-              <span>View Full Directory</span>
-            </button>
-          </div>
-
-          <!-- 9 Officers Mini-Cards Grid in Protocol Order -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-            
-            <!-- 1. President -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-amber-300 dark:border-amber-500/40 shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xs shrink-0 shadow">#1</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">MARIO D. GANGA JR.</div>
-                <div class="text-[10px] font-bold text-amber-600 dark:text-amber-400">President</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Disability Affairs &bull; CMO</div>
-              </div>
-            </div>
-
-            <!-- 2. Vice President -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 text-slate-900 font-bold flex items-center justify-center text-xs shrink-0 shadow">#2</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">FLORENTINO N. DELA CRUZ JR.</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Vice President</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Admin Aide III &bull; Library</div>
-              </div>
-            </div>
-
-            <!-- 3. Secretary -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-amber-300 dark:border-amber-500/40 shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-amber-700 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow">#3</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">RUPERTO D. GUADAÑA JR.</div>
-                <div class="text-[10px] font-bold text-amber-700 dark:text-amber-300">Secretary</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Records Officer I &bull; SP</div>
-              </div>
-            </div>
-
-            <!-- 4. Assistant Secretary -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#4</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">RHEY J. DELMENDO</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Assistant Secretary</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Tourism Operations Officer I</div>
-              </div>
-            </div>
-
-            <!-- 5. Treasurer -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#5</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">REGINO G. RAGUDO</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Treasurer</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Collection Officer I &bull; CTO</div>
-              </div>
-            </div>
-
-            <!-- 6. Assistant Treasurer -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#6</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">AVELINO G. CABADING JR.</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Assistant Treasurer</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Admin Aide III &bull; ACCTG</div>
-              </div>
-            </div>
-
-            <!-- 7. Public Relations Officer -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#7</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">HAROLD P. MALLORCA</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Public Relations Officer</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Systems Admin &bull; CHRMO</div>
-              </div>
-            </div>
-
-            <!-- 8. Assistant P.R.O. -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#8</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">JUDAH F. SUMCAD</div>
-                <div class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Assistant P.R.O.</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Admin Aide VI &bull; Library</div>
-              </div>
-            </div>
-
-            <!-- 9. Focal Person / Co-Facilitator -->
-            <div class="p-3.5 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] shadow-2xs flex items-center gap-3">
-              <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center text-xs shrink-0">#9</div>
-              <div class="min-w-0">
-                <div class="font-bold text-slate-900 dark:text-white truncate">JACQUELINE C. TUPONG</div>
-                <div class="text-[10px] font-bold text-pink-600 dark:text-pink-400">Focal Person on Women</div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">Social Welfare Officer III &bull; OCSWDO</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- SLIDE 4: Seminars, Capacity Building & Certificate Studio -->
-        <div id="homeSlide-4" class="home-slide-item space-y-6 hidden">
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div class="lg:col-span-7 space-y-3">
-              <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/15 border border-cyan-200 dark:border-cyan-500/30 text-cyan-800 dark:text-cyan-300 text-[11px] font-bold">
-                <i class="fa-solid fa-graduation-cap text-xs"></i>
-                <span>Action-Driven Capacity Building</span>
-              </div>
-              <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Skills Training, Live Attendance &amp; Verified Certificates
-              </h3>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Advocacy requires hands-on empowerment. MOVE Baguio Chapter conducts culinary workshops, gender sensitivity orientations, and leadership seminars that transform public servants and family heads.
-              </p>
-              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                Our system integrates a strict <strong>live attendance checklist</strong>. Only participants confirmed as present unlock certificate issuance in the <strong>Unified Certificate Studio</strong>, complete with automated A5 dual printing, QR verification, and authenticated digital e-signatures.
-              </p>
-              <div class="flex items-center gap-3 pt-2">
-                <button onclick="switchView('activities');" class="px-4 py-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/20 hover:bg-cyan-100 dark:hover:bg-cyan-500/30 text-cyan-800 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-500/40 font-bold text-xs transition flex items-center gap-2">
-                  <i class="fa-solid fa-calendar-check"></i>
-                  <span>Manage Activities</span>
-                </button>
-                <button onclick="switchView('studio');" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-2 shadow-sm">
-                  <i class="fa-solid fa-certificate"></i>
-                  <span>Open Certificate Studio</span>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Institutional Mandate</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Established under the Philippine Commission on Women (PCW) and institutionalized by the City Government of Baguio GAD Council to eliminate gender-based violence.
+                </p>
+                <button type="button" onclick="openModal('modalAboutMove')" class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline pt-1 inline-flex items-center gap-1">
+                  <span>Read Mandate</span> &rarr;
                 </button>
               </div>
-            </div>
 
-            <div class="lg:col-span-5 space-y-3">
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
-                <div class="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 font-bold text-xs">
-                  <i class="fa-solid fa-utensils"></i>
-                  <span>Livelihood &amp; Culinary Empowerment</span>
+              <!-- Pillar 2: Safe Spaces & Dignity -->
+              <div class="p-6 rounded-3xl bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] shadow-xs space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-lg shadow-2xs">
+                  <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <div class="text-[11px] text-slate-600 dark:text-slate-300">Teaching practical skills like Asian Culinary Arts &amp; Baking at Venus Parkview Hotel to foster economic resilience.</div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Safe Spaces &amp; Non-Violence</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Upholding RA 9262 and RA 11313 (Safe Spaces Act) with zero tolerance for harassment, discrimination, or abuse across City Hall offices and municipal departments.
+                </p>
+                <button type="button" onclick="openModal('modalAboutMove')" class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline pt-1 inline-flex items-center gap-1">
+                  <span>Core Principles</span> &rarr;
+                </button>
               </div>
 
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
-                <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
-                  <i class="fa-solid fa-user-check"></i>
-                  <span>Live Gatekeeper Attendance</span>
+              <!-- Pillar 3: Active Allies & Cadre Network -->
+              <div class="p-6 rounded-3xl bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] shadow-xs space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-lg shadow-2xs">
+                  <i class="fa-solid fa-users"></i>
                 </div>
-                <div class="text-[11px] text-slate-600 dark:text-slate-300">One-click check-in ensuring only verified attendees receive legitimate government certifications.</div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Active Allied Leadership</h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Transforming male public servants into advocates, mentors, and defenders of human dignity who lead by example across Baguio's 128 barangays.
+                </p>
+                <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline pt-1 inline-flex items-center gap-1">
+                  <span>Management Portal</span> &rarr;
+                </button>
               </div>
 
-              <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
-                <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-xs">
-                  <i class="fa-solid fa-award"></i>
-                  <span>Unified Certificate Studio</span>
-                </div>
-                <div class="text-[11px] text-slate-600 dark:text-slate-300">Instant PDF generation with dual A5 landscape paper-saving print runs, custom signatories, and layout fine-tuning.</div>
+            </div>
+
+            <!-- 3. PUBLIC FRONT PAGE FOOTER -->
+            <div class="pt-8 border-t border-[#dce6e0] dark:border-[#18352b] text-center space-y-2">
+              <div class="flex items-center justify-center gap-3">
+                <img src="/CITY HALL LOGO.png" alt="City Hall" class="w-6 h-6 object-contain opacity-80">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">City Government of Baguio &bull; GAD Council &bull; MOVE Baguio Chapter</span>
+                <img src="/MOVE BAGUIO LOGO.png" alt="MOVE" class="w-6 h-6 object-contain opacity-80">
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SLIDE 5: The MOVE Cadre Pledge & Call to Action -->
-        <div id="homeSlide-5" class="home-slide-item space-y-6 hidden">
-          <div class="max-w-3xl mx-auto text-center space-y-4">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-500/15 border border-purple-200 dark:border-purple-500/30 text-purple-800 dark:text-purple-300 text-xs font-bold">
-              <i class="fa-solid fa-hand-holding-heart text-xs"></i>
-              <span>The Solemn Cadre Commitment</span>
-            </div>
-            
-            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              The MOVE Advocate's Pledge
-            </h3>
-
-            <!-- Golden Oath Blockquote -->
-            <div class="p-6 sm:p-8 rounded-3xl bg-[#f4f7f5] dark:bg-[#07110e] border border-purple-200 dark:border-purple-500/40 shadow-sm relative">
-              <i class="fa-solid fa-quote-left text-2xl text-slate-400 absolute left-4 top-4"></i>
-              <p class="text-sm sm:text-base text-slate-800 dark:text-slate-100 font-medium italic leading-relaxed px-4">
-                "As a member of the MOVE Baguio Chapter, I solemnly pledge that I will never commit, condone, or remain silent about violence against women and children. I will actively promote equality, respect, and peace in my home, my workplace, and my city."
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                Men Opposed to Violence Against Women Everywhere &bull; Institutionalized under Republic Act 9262
               </p>
-              <i class="fa-solid fa-quote-right text-2xl text-slate-400 absolute right-4 bottom-4"></i>
             </div>
 
-            <!-- Call to Action Buttons -->
-            <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
-              <button onclick="switchView('roster');" class="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-2 hover:scale-105">
-                <i class="fa-solid fa-users"></i>
-                <span>Explore Chapter Roster (58)</span>
-              </button>
-              <button onclick="switchView('activities');" class="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-[#18352b] shadow-2xs transition flex items-center gap-2">
-                <i class="fa-solid fa-calendar-check text-slate-400"></i>
-                <span>View Activities &amp; Attendance</span>
-              </button>
-              <button onclick="switchView('studio');" class="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-800 dark:text-white font-bold text-xs border border-slate-200 dark:border-[#18352b] shadow-2xs transition flex items-center gap-2">
-                <i class="fa-solid fa-certificate text-slate-400"></i>
-                <span>Open Certificate Studio</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Showcase Bottom Control Bar -->
-        <div class="pt-4 border-t border-[#dce6e0] dark:border-[#18352b] flex items-center justify-between gap-4">
-          <button type="button" onclick="prevHomeSlide()" id="btnPrevHomeSlide" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#07110e] text-slate-400 dark:text-slate-600 text-xs font-bold border border-slate-200 dark:border-[#18352b] transition flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
-            <i class="fa-solid fa-chevron-left text-xs"></i>
-            <span>Previous</span>
-          </button>
-
-          <!-- Middle Progress Dots -->
-          <div class="flex items-center gap-2">
-            <span onclick="goToHomeSlide(1)" class="w-2.5 h-2.5 rounded-full bg-emerald-600 cursor-pointer transition-all" id="homeDot-1" title="1. Mandate"></span>
-            <span onclick="goToHomeSlide(2)" class="home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all" id="homeDot-2" title="2. Principles"></span>
-            <span onclick="goToHomeSlide(3)" class="home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all" id="homeDot-3" title="3. Officers"></span>
-            <span onclick="goToHomeSlide(4)" class="home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all" id="homeDot-4" title="4. Activities"></span>
-            <span onclick="goToHomeSlide(5)" class="home-dot-inactive w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-[#18352b] cursor-pointer transition-all" id="homeDot-5" title="5. Cadre Pledge"></span>
-          </div>
-
-          <button type="button" onclick="nextHomeSlide()" id="btnNextHomeSlide" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition flex items-center gap-2">
-            <span id="btnNextHomeSlideLabel">Next: Core Principles</span>
-            <i class="fa-solid fa-arrow-right text-xs"></i>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- 3. Quick Action Hub (4 Navigation Cards) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- Hub Card 1: MOVE Roster -->
-        <div onclick="switchView('roster')" class="p-5 rounded-3xl bg-white dark:bg-[#0c1c17] hover:bg-emerald-50/40 dark:hover:bg-[#122822] border border-[#dce6e0] dark:border-[#18352b] hover:border-emerald-500/40 transition cursor-pointer group shadow-sm space-y-3">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 text-base group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <div>
-            <div class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition flex items-center justify-between">
-              <span>Chapter Roster</span>
-              <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              58 registered personnel across Members, Officers, Standing Committees, and Trainees.
-            </p>
-          </div>
-          <div class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Open Roster &rarr;</div>
-        </div>
-
-        <!-- Hub Card 2: Executive Officers -->
-        <div onclick="switchView('roster'); filterRosterByStatus('officer');" class="p-5 rounded-3xl bg-white dark:bg-[#0c1c17] hover:bg-amber-50/40 dark:hover:bg-[#122822] border border-[#dce6e0] dark:border-[#18352b] hover:border-amber-500/50 transition cursor-pointer group shadow-sm space-y-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 text-base group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-ranking-star"></i>
-          </div>
-          <div>
-            <div class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition flex items-center justify-between">
-              <span>Officers Protocol</span>
-              <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              9 executive leaders in official protocol order: President, VP, Secretary, Treasurer, PRO, and Focal.
-            </p>
-          </div>
-          <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">View Officers &rarr;</div>
-        </div>
-
-        <!-- Hub Card 3: Activities & Attendance -->
-        <div onclick="switchView('activities')" class="p-5 rounded-3xl bg-white dark:bg-[#0c1c17] hover:bg-cyan-50/40 dark:hover:bg-[#122822] border border-[#dce6e0] dark:border-[#18352b] hover:border-cyan-500/50 transition cursor-pointer group shadow-sm space-y-3">
-          <div class="w-10 h-10 rounded-2xl bg-cyan-50 dark:bg-cyan-500/15 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-700 dark:text-cyan-400 text-base group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
-          <div>
-            <div class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition flex items-center justify-between">
-              <span>Activities &amp; Seminars</span>
-              <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Capacity building events with live attendance gating to protect certificate credibility.
-            </p>
-          </div>
-          <div class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400">Manage Activities &rarr;</div>
-        </div>
-
-        <!-- Hub Card 4: Unified Certificate Studio -->
-        <div onclick="switchView('studio')" class="p-5 rounded-3xl bg-white dark:bg-[#0c1c17] hover:bg-amber-50/40 dark:hover:bg-[#122822] border border-[#dce6e0] dark:border-[#18352b] hover:border-amber-500/50 transition cursor-pointer group shadow-sm space-y-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-400 text-base group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-certificate"></i>
-          </div>
-          <div>
-            <div class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition flex items-center justify-between">
-              <span>Certificate Studio</span>
-              <i class="fa-solid fa-arrow-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Generate &amp; print authenticated appearance and appreciation awards in paper-saving A5 dual layout.
-            </p>
-          </div>
-          <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400">Open Studio &rarr;</div>
-        </div>
-
-      </div>
-
-    </section>
+          </section>
 
     <!-- ==================================================================== -->
     <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER (LINEAR / SHADCN LIGHT) -->
@@ -3342,5 +3037,124 @@
 
   <!-- Application Logic (with cache buster) -->
   <script src="/frontend/js/app.js?v=20261110-1540"></script>
+
+  <!-- MODAL: LOGIN TO MANAGEMENT PORTAL (VETERANS BANK PORTAL STYLE) -->
+  <div id="modalLoginPortal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden" onclick="if(event.target === this) closeModal('modalLoginPortal')">
+    <div class="relative max-w-md w-full bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      
+      <!-- Top Header & Logos -->
+      <div class="flex items-center justify-between pb-4 border-b border-[#dce6e0] dark:border-[#18352b]">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-9 h-9 object-contain">
+            <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-9 h-9 object-contain">
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">MOVE Management Portal</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Baguio City Chapter Administration</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modalLoginPortal')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition" title="Close (Esc)">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form onsubmit="handlePortalLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Official Email or Username</label>
+          <div class="relative">
+            <i class="fa-regular fa-envelope absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="loginUsername" required value="admin@baguio.gov.ph" placeholder="e.g. officer@baguio.gov.ph" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition font-medium">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="password" id="loginPassword" required value="••••••••" placeholder="Enter password" class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition">
+          </div>
+        </div>
+
+        <div class="pt-2 space-y-2.5">
+          <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-to-bracket text-xs text-emerald-200"></i>
+            <span>Sign In to Portal</span>
+          </button>
+          
+          <button type="button" onclick="loginAndOpenDashboard()" class="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-200 dark:border-[#18352b] transition flex items-center justify-center gap-2">
+            <span>Instant Demo Access</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </button>
+        </div>
+      </form>
+
+      <p class="text-[10px] text-center text-slate-400 leading-normal">
+        Authorized administrative personnel of Baguio City GAD Council and MOVE Chapter only.
+      </p>
+    </div>
+  </div>
+
+  <!-- MODAL: ABOUT MOVE (PUBLIC MANDATE & PRINCIPLES) -->
+  <div id="modalAboutMove" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden" onclick="if(event.target === this) closeModal('modalAboutMove')">
+    <div class="relative max-w-2xl w-full max-h-[90vh] bg-white dark:bg-[#0c1c17] border border-[#dce6e0] dark:border-[#18352b] rounded-3xl p-6 sm:p-8 shadow-2xl overflow-y-auto space-y-6">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-[#dce6e0] dark:border-[#18352b]">
+        <div class="flex items-center gap-3">
+          <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Logo" class="w-10 h-10 object-contain">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">About MOVE Baguio</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Institutional Charter &bull; Republic Act 9262</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeModal('modalAboutMove')" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="space-y-5 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-landmark text-emerald-600"></i> Mandate &amp; Establishment
+          </h4>
+          <p>
+            Established under the guidance of the <strong>Philippine Commission on Women (PCW)</strong> and institutionalized by the <strong>City Government of Baguio Gender and Development (GAD) Council</strong>, MOVE stands on the firm conviction that eliminating violence against women is not solely a women's struggle—it is a societal crisis demanding the active, vocal commitment of men.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i> Core Principles
+          </h4>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><strong>Men as Active Allies:</strong> Mobilizing men to speak out, break traditional stereotypes, and protect women and children in every neighborhood.</li>
+            <li><strong>Institutional Accountability:</strong> Embedding gender-responsive governance and zero tolerance within City Hall offices and municipal departments.</li>
+            <li><strong>Community Partnership:</strong> Extending anti-VAWC education and peaceful conflict resolution directly to Baguio's 128 barangays.</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-[#f4f7f5] dark:bg-[#07110e] border border-[#dce6e0] dark:border-[#18352b] space-y-2">
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wide flex items-center gap-2">
+            <i class="fa-solid fa-hand-holding-heart text-emerald-600"></i> The Cadre Pledge
+          </h4>
+          <blockquote class="italic border-l-2 border-emerald-500 pl-3 text-slate-700 dark:text-slate-200">
+            "When good men remain silent, violence thrives. MOVE transforms male public servants into proactive advocates, mentors, and defenders of human dignity."
+          </blockquote>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-[#dce6e0] dark:border-[#18352b] flex items-center justify-between">
+        <button type="button" onclick="closeModal('modalAboutMove')" class="px-5 py-2 rounded-xl bg-slate-100 dark:bg-[#07110e] text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-200 dark:border-[#18352b]">
+          Close
+        </button>
+        <button type="button" onclick="closeModal('modalAboutMove'); openLoginModal();" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm">
+          Access Portal &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 </html>
