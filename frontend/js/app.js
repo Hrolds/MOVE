@@ -989,7 +989,7 @@ function openEnlargedHeroPhoto() {
       if (member?.gender === "F") {
         fallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-6xl";
       } else {
-        fallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-6xl";
+        fallback.className = "w-full h-full bg-gradient-to-tr from-emerald-600 via-teal-600 to-slate-700 flex items-center justify-center text-white font-black text-6xl";
       }
     }
     if (btnFull) btnFull.classList.add("hidden");
@@ -1045,17 +1045,17 @@ function syncEditToggleWithPills() {
 
   if (btnActive) {
     if (isMember) {
-      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 transition shadow-2xs";
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 transition shadow-2xs";
     } else {
-      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-800 transition";
+      btnActive.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-[#07110e] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] hover:text-slate-800 dark:hover:text-white transition";
     }
   }
 
   if (btnOfficer) {
     if (isOfficer) {
-      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300 transition shadow-2xs";
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-500/40 transition shadow-2xs";
     } else {
-      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200 hover:text-slate-800 transition";
+      btnOfficer.className = "px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-[#07110e] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-[#18352b] hover:text-slate-800 dark:hover:text-white transition";
     }
   }
 
@@ -1157,7 +1157,7 @@ function openModalEditMember(id) {
     if (member.gender === 'F') {
       heroFallback.className = "w-full h-full bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl";
     } else {
-      heroFallback.className = "w-full h-full bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl sm:text-2xl";
+      heroFallback.className = "w-full h-full bg-gradient-to-tr from-emerald-600 via-teal-600 to-slate-700 flex items-center justify-center text-white font-black text-xl sm:text-2xl";
     }
   }
 
