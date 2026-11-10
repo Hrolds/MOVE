@@ -231,6 +231,16 @@ function updateTopBreadcrumbs(sectionText, activeText) {
   if (actEl) actEl.textContent = activeText;
 }
 
+
+// Future feature: Login placeholder handler
+function handleLoginPlaceholder() {
+  if (typeof showToast === "function") {
+    showToast("Login authentication is reserved for a future release.", "info");
+  } else {
+    alert("Login feature coming soon.");
+  }
+}
+
 function switchView(viewName) {
   appState.activeView = viewName;
   const views = ['home', 'roster', 'activities', 'attendance', 'studio'];

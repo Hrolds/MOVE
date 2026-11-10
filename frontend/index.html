@@ -242,20 +242,13 @@
             <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow">
               <i class="fa-solid fa-house text-[10px]"></i> Home
             </button>
-            <button id="navTab-roster" onclick="switchView('roster')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
-              <i class="fa-solid fa-users text-[10px]"></i> Roster
-            </button>
-            <button id="navTab-activities" onclick="switchView('activities')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
-              <i class="fa-solid fa-calendar-check text-[10px]"></i> Activities
-            </button>
             <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70">
               <i class="fa-solid fa-certificate text-[10px]"></i> Studio
             </button>
           </nav>
 
-          <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5" title="Add Person to MOVE Roster">
-            <i class="fa-solid fa-user-plus text-xs"></i>
-            <span class="hidden sm:inline">Add Person</span>
+          <button type="button" id="btnTopLogin" onclick="handleLoginPlaceholder()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition" title="Login (Future Feature)">
+            Login
           </button>
         </div>
 
