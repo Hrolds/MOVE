@@ -158,7 +158,44 @@ async function checkServerHealth() {
   }
 }
 
-// --- NAVIGATION CONTROLLER ---
+// --- NAVIGATION & APP SHELL CONTROLLER (LINEAR / SHADCN) ---
+function toggleAppSidebar() {
+  const sidebar = document.getElementById("appSidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("sidebar-collapsed");
+  }
+}
+
+function toggleProfileDrawerExpand() {
+  const drawer = document.getElementById("editMemberDrawerPanel");
+  if (!drawer) return;
+  if (drawer.classList.contains("max-w-2xl")) {
+    drawer.classList.remove("max-w-2xl");
+    drawer.classList.add("max-w-5xl");
+  } else {
+    drawer.classList.remove("max-w-5xl");
+    drawer.classList.add("max-w-2xl");
+  }
+}
+
+function onGlobalTopSearch(val) {
+  if (appState.activeView !== 'roster') {
+    switchView('roster');
+  }
+  const rosterInput = document.getElementById("rosterSearchInput");
+  if (rosterInput && rosterInput.value !== val) {
+    rosterInput.value = val;
+  }
+  onRosterSearch(val);
+}
+
+function updateTopBreadcrumbs(sectionText, activeText) {
+  const secEl = document.getElementById("topBreadcrumbSection");
+  const actEl = document.getElementById("topBreadcrumbActive");
+  if (secEl) secEl.textContent = sectionText;
+  if (actEl) actEl.textContent = activeText;
+}
+
 function switchView(viewName) {
   appState.activeView = viewName;
   const views = ['home', 'roster', 'activities', 'attendance', 'studio'];
@@ -170,18 +207,68 @@ function switchView(viewName) {
     if (tab) {
       const isActive = (v === viewName) || (viewName === 'attendance' && v === 'activities');
       if (isActive) {
-        tab.className = "nav-tab-active px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow";
+        tab.className = "nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-move-orange-500 text-white shadow";
       } else {
-        tab.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
+        tab.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800";
       }
     }
   });
 
-  if (viewName === 'home') renderHomeSlide(appState.homeSlide || 1);
-  if (viewName === 'roster') loadRoster();
-  if (viewName === 'activities') loadActivities();
-  if (viewName === 'attendance') loadAttendance(appState.currentActivityId);
+  // Update Left Sidebar Navigation Buttons
+  const sidebarViews = [
+    { id: 'sidebarNav-home', match: viewName === 'home' },
+    { id: 'sidebarNav-activities', match: viewName === 'activities' || viewName === 'attendance' },
+    { id: 'sidebarNav-studio', match: viewName === 'studio' }
+  ];
+  sidebarViews.forEach(sv => {
+    const btn = document.getElementById(sv.id);
+    if (btn) {
+      if (sv.match) {
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
+      } else {
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
+      }
+    }
+  });
+
+  // Reset or highlight Roster Category buttons in Left Sidebar
+  const rosterKeys = ['all', 'officer', 'member', 'committee', 'participant'];
+  rosterKeys.forEach(k => {
+    const btn = document.getElementById(`rosterFilter-${k}`);
+    if (btn) {
+      if (viewName === 'roster' && (appState.rosterFilter || 'all') === k) {
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
+      } else {
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
+      }
+    }
+  });
+
+  if (viewName === 'home') {
+    updateTopBreadcrumbs('Overview', 'Home & Mandate');
+    renderHomeSlide(appState.homeSlide || 1);
+  }
+  if (viewName === 'roster') {
+    const labelMap = {
+      all: 'Manage Personnel',
+      officer: 'Executive Officers',
+      member: 'Members (Cadre)',
+      committee: 'Committees',
+      participant: 'Participants'
+    };
+    updateTopBreadcrumbs('Personnel Directory', labelMap[appState.rosterFilter || 'all'] || 'Manage Personnel');
+    loadRoster();
+  }
+  if (viewName === 'activities') {
+    updateTopBreadcrumbs('Operations & Studio', 'Activities & Seminars');
+    loadActivities();
+  }
+  if (viewName === 'attendance') {
+    updateTopBreadcrumbs('Operations & Studio', 'Attendance Sheet');
+    loadAttendance(appState.currentActivityId);
+  }
   if (viewName === 'studio') {
+    updateTopBreadcrumbs('Operations & Studio', 'Certificate Studio');
     loadEligibleCertificates(appState.currentActivityId);
     setTimeout(() => {
       autoFitStudioCanvas();
@@ -218,16 +305,33 @@ async function updateRosterCounts() {
       const all = data.roster;
       appState.fullRoster = all;
       populateSignatorySelects();
-      document.getElementById("count-all").textContent = all.length;
-      document.getElementById("count-member").textContent = all.filter(r => r.is_member).length;
-      document.getElementById("count-officer").textContent = all.filter(r => r.is_officer).length;
-      document.getElementById("count-committee").textContent = all.filter(r => r.is_committee).length;
-      document.getElementById("count-participant").textContent = all.filter(r => r.is_participant).length;
 
-      const homeM = document.getElementById("homeStatMembers");
-      if (homeM) homeM.textContent = all.length;
-      const homeO = document.getElementById("homeStatOfficers");
-      if (homeO) homeO.textContent = all.filter(r => r.is_officer).length;
+      const totalCount = all.length;
+      const memberCount = all.filter(r => r.is_member).length;
+      const officerCount = all.filter(r => r.is_officer).length;
+      const committeeCount = all.filter(r => r.is_committee).length;
+      const participantCount = all.filter(r => r.is_participant).length;
+
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      setTxt("count-all", totalCount);
+      setTxt("count-member", memberCount);
+      setTxt("count-officer", officerCount);
+      setTxt("count-committee", committeeCount);
+      setTxt("count-participant", participantCount);
+      setTxt("sidebarTotalBadge", totalCount);
+
+      // Update Executive KPI Cards in Roster View
+      setTxt("kpiCountAll", totalCount);
+      setTxt("kpiCountOfficer", officerCount);
+      setTxt("kpiCountMember", memberCount);
+      setTxt("kpiCountCommittee", committeeCount);
+
+      setTxt("homeStatMembers", totalCount);
+      setTxt("homeStatOfficers", officerCount);
     }
   } catch (err) {
     console.warn("Count update failed:", err);
@@ -240,7 +344,7 @@ function filterRosterByStatus(status) {
   const statuses = [
     { key: 'all', label: 'Manage Personnel', icon: 'fa-users-gear' },
     { key: 'member', label: 'Members (Cadre)', icon: 'fa-shield-halved' },
-    { key: 'officer', label: 'Officers', icon: 'fa-star' },
+    { key: 'officer', label: 'Executive Officers', icon: 'fa-star' },
     { key: 'committee', label: 'Committees', icon: 'fa-diagram-project' },
     { key: 'participant', label: 'Participants', icon: 'fa-user-check' }
   ];
@@ -248,22 +352,26 @@ function filterRosterByStatus(status) {
   statuses.forEach(s => {
     const btn = document.getElementById(`rosterFilter-${s.key}`);
     if (btn) {
-      if (s.key === status) {
-        btn.className = "w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-md border-move-orange-400/50";
+      if (s.key === status && appState.activeView === 'roster') {
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50";
       } else {
-        btn.className = "w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80";
+        btn.className = "w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70";
       }
     }
   });
 
   const activeObj = statuses.find(s => s.key === status) || statuses[0];
+  updateTopBreadcrumbs('Personnel Directory', activeObj.label);
+
   const lblCat = document.getElementById("lblActiveNavCategory");
   if (lblCat) {
     lblCat.innerHTML = `<i class="fa-solid ${activeObj.icon} text-move-orange-400"></i> ${escapeHtml(activeObj.label)}`;
   }
   const lblCount = document.getElementById("lblActiveNavCount");
   if (lblCount) {
-    lblCount.textContent = status === 'all' ? 'Full Directory & Status Manager — All updates made here' : `Directory of ${activeObj.label}`;
+    lblCount.textContent = status === 'all'
+      ? 'Click any personnel row to open their profile drawer on the right'
+      : `Filtered by ${activeObj.label} — Click any row to inspect or edit`;
   }
 
   const thStatus = document.getElementById("thSelectiveStatus");
@@ -282,6 +390,10 @@ function filterRosterByStatus(status) {
 function onRosterSearch(val) {
   appState.rosterSearch = val;
   appState.rosterPage = 1;
+  const globalInput = document.getElementById("globalTopSearchInput");
+  if (globalInput && globalInput.value !== val) {
+    globalInput.value = val;
+  }
   loadRoster();
 }
 
@@ -446,8 +558,10 @@ function renderRosterTable() {
         </td>
 
         <!-- 2. Civil Status -->
-        <td class="py-3 px-3 min-w-[120px] text-xs font-medium text-slate-300">
-          ${escapeHtml(r.civil_status || 'Married')}
+        <td class="py-3 px-3 min-w-[120px] text-xs font-medium">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${(r.civil_status || '').toLowerCase().includes('single') ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/25' : 'bg-indigo-500/10 text-indigo-300 border-indigo-500/25'}">
+            ${escapeHtml(r.civil_status || 'Married')}
+          </span>
         </td>
 
         <!-- 3. Move Position -->
@@ -471,8 +585,10 @@ function renderRosterTable() {
         </td>
 
         <!-- 4. Office -->
-        <td class="py-3 px-3 min-w-[110px] text-xs font-medium text-slate-200" title="${escapeHtml(officeInfo.fullName)}">
-          ${escapeHtml(officeInfo.code || r.office || '-')}
+        <td class="py-3 px-3 min-w-[110px] text-xs font-medium" title="${escapeHtml(officeInfo.fullName)}">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold font-mono bg-amber-500/10 text-amber-300 border border-amber-500/25">
+            ${escapeHtml(officeInfo.code || r.office || '-')}
+          </span>
         </td>
 
         <!-- 5. Actions -->
@@ -855,13 +971,31 @@ function closeEnlargedPhoto(e) {
   if (modal) modal.classList.add("hidden");
 }
 
-// Global escape key handler to close photo preview
+// Global keyboard shortcuts (Escape for photo zoom & slide-over drawer, '/' for global command search)
 window.addEventListener("keydown", function(e) {
   if (e.key === "Escape") {
     const enlargedModal = document.getElementById("modalEnlargedPhoto");
     if (enlargedModal && !enlargedModal.classList.contains("hidden")) {
       enlargedModal.classList.add("hidden");
       e.stopPropagation();
+      return;
+    }
+    const editDrawer = document.getElementById("modalEditMember");
+    if (editDrawer && !editDrawer.classList.contains("hidden")) {
+      closeModal("modalEditMember");
+      e.stopPropagation();
+      return;
+    }
+  } else if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const tag = (document.activeElement?.tagName || "").toUpperCase();
+    const isEditable = document.activeElement?.isContentEditable;
+    if (tag !== "INPUT" && tag !== "TEXTAREA" && tag !== "SELECT" && !isEditable) {
+      const searchEl = document.getElementById("globalTopSearchInput");
+      if (searchEl) {
+        e.preventDefault();
+        searchEl.focus();
+        searchEl.select();
+      }
     }
   }
 });

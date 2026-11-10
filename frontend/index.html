@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
   
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="/frontend/css/styles.css?v=1792470525">
+  <link rel="stylesheet" href="/frontend/css/styles.css?v=20261110-1420">
 
   <script>
     tailwind.config = {
@@ -33,65 +33,224 @@
     }
   </script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-move-gold-500/30 selection:text-white">
+<body class="bg-[#080d16] text-slate-100 h-screen flex flex-col overflow-hidden font-sans antialiased selection:bg-move-gold-500/30 selection:text-white">
 
   <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer"></div>
 
-  <!-- TOP NAVBAR -->
-  <header id="topNavbar" class="bg-move-navy-950/95 border-b border-slate-800/90 sticky top-0 z-40 backdrop-blur-md shadow-lg">
-    <div class="max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
-      <!-- Brand & Insignia -->
-      <div class="flex items-center gap-3">
-        <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-10 h-10 object-contain drop-shadow">
-        <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-10 h-10 object-contain drop-shadow">
-        <div>
-          <h1 class="text-sm font-black tracking-wide text-white uppercase flex items-center gap-2">
-            MOVE Baguio Chapter
-          </h1>
-          <p class="text-[11px] text-slate-400">Men Opposed to Violence Against Women Everywhere &bull; City HRIS</p>
-        </div>
-      </div>
-
-      <!-- Main Navigation Tabs -->
-      <nav class="flex flex-wrap items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 shadow-inner">
-        <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-move-orange-500 text-white shadow">
-          <i class="fa-solid fa-house"></i> Home
-        </button>
-        <button id="navTab-roster" onclick="switchView('roster')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-users"></i> MOVE Roster
-        </button>
-        <button id="navTab-activities" onclick="switchView('activities')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-calendar-check"></i> Activities
-        </button>
-        <button id="navTab-studio" onclick="switchView('studio')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
-          <i class="fa-solid fa-certificate text-move-gold-400"></i> Unified Certificate Studio
-        </button>
-      </nav>
-
-      <!-- Quick Actions -->
-      <div class="flex items-center gap-2">
-
-      </div>
-    </div>
-  </header>
-
   <!-- SERVER OFFLINE WARNING BANNER -->
-  <div id="serverOfflineBanner" class="hidden bg-rose-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-3 shadow-md">
+  <div id="serverOfflineBanner" class="hidden bg-rose-600 text-white text-xs font-bold px-4 py-2 text-center flex items-center justify-center gap-3 shadow-md shrink-0 z-50">
     <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Backend Server is Offline! Changes cannot be saved until the server is running.</span>
     <button onclick="checkServerHealth()" class="px-2.5 py-1 rounded bg-white text-rose-700 font-extrabold hover:bg-slate-100 transition shadow">
       <i class="fa-solid fa-rotate-right mr-1"></i> Retry Connection
     </button>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
-  <main id="nonPrintableContent" class="flex-1 max-w-[1700px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- ==================================================================== -->
+  <!-- LINEAR / SHADCN UNIFIED APP SHELL (Left Sidebar + Right Workspace)   -->
+  <!-- ==================================================================== -->
+  <div id="appShellWrapper" class="flex-1 flex min-h-0 overflow-hidden relative no-print">
 
-    <!-- ==================================================================== -->
-    <!-- VIEW 0: HOME / LANDING FRONT PAGE                                    -->
-    <!-- ==================================================================== -->
-    <section id="view-home" class="space-y-6">
+    <!-- PERSISTENT COLLAPSIBLE LEFT SIDEBAR (#appSidebar) -->
+    <aside id="appSidebar" class="w-64 bg-[#0b111e] border-r border-slate-800/90 flex flex-col justify-between shrink-0 transition-all duration-200 select-none z-30">
+      
+      <!-- Sidebar Top Brand Header -->
+      <div class="h-14 px-3.5 border-b border-slate-800/90 flex items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" onclick="switchView('home')" title="Go to Chapter Overview">
+          <div class="flex items-center -space-x-1.5 shrink-0">
+            <img src="/CITY HALL LOGO.png" alt="City of Baguio" class="w-7 h-7 object-contain drop-shadow">
+            <img src="/MOVE BAGUIO LOGO.png" alt="MOVE Baguio" class="w-7 h-7 object-contain drop-shadow">
+          </div>
+          <div class="min-w-0 sidebar-label">
+            <div class="text-xs font-black tracking-wide text-white uppercase truncate">MOVE Baguio</div>
+            <div class="text-[10px] text-slate-400 font-medium truncate">Chapter Admin &bull; HRIS</div>
+          </div>
+        </div>
+        <button type="button" onclick="toggleAppSidebar()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 flex items-center justify-center transition shrink-0" title="Collapse / Expand Sidebar">
+          <i class="fa-solid fa-table-columns text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Scrollable Navigation -->
+      <div class="flex-1 overflow-y-auto px-2.5 py-4 space-y-5">
+        
+        <!-- Group 1: Overview -->
+        <div class="space-y-1">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Overview</div>
+          <button onclick="switchView('home')" id="sidebarNav-home" class="w-full px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-sm border-move-orange-400/50" title="Chapter Overview">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-house w-4 text-center"></i>
+              <span class="sidebar-label">Home &amp; Mandate</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Group 2: Personnel Directory -->
+        <div class="space-y-1" id="rosterNavPanel">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between sidebar-label">
+            <span>Personnel Directory</span>
+            <span class="text-[10px] font-mono text-slate-400" id="sidebarTotalBadge">58</span>
+          </div>
+
+          <button onclick="switchView('roster'); filterRosterByStatus('all');" id="rosterFilter-all" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Manage Personnel">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-users-gear w-4 text-center text-move-orange-400"></i>
+              <span class="sidebar-label">Manage Personnel</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 sidebar-label" id="count-all">0</span>
+          </button>
+
+          <button onclick="switchView('roster'); filterRosterByStatus('officer');" id="rosterFilter-officer" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Executive Officers">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-star w-4 text-center text-amber-400"></i>
+              <span class="sidebar-label">Executive Officers</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/25 sidebar-label" id="count-officer">0</span>
+          </button>
+
+          <button onclick="switchView('roster'); filterRosterByStatus('member');" id="rosterFilter-member" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Members (Cadre)">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-400"></i>
+              <span class="sidebar-label">Members (Cadre)</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 sidebar-label" id="count-member">0</span>
+          </button>
+
+          <button onclick="switchView('roster'); filterRosterByStatus('committee');" id="rosterFilter-committee" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Standing Committees">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-diagram-project w-4 text-center text-purple-400"></i>
+              <span class="sidebar-label">Committees</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/25 sidebar-label" id="count-committee">0</span>
+          </button>
+
+          <button onclick="switchView('roster'); filterRosterByStatus('participant');" id="rosterFilter-participant" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Participants">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-user-check w-4 text-center text-cyan-400"></i>
+              <span class="sidebar-label">Participants</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/25 sidebar-label" id="count-participant">0</span>
+          </button>
+        </div>
+
+        <!-- Group 3: Operations & Studio -->
+        <div class="space-y-1">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Operations &amp; Studio</div>
+
+          <button onclick="switchView('activities')" id="sidebarNav-activities" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Activities & Seminars">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-calendar-check w-4 text-center text-cyan-400"></i>
+              <span class="sidebar-label">Activities &amp; Seminars</span>
+            </span>
+          </button>
+
+          <button onclick="switchView('studio')" id="sidebarNav-studio" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/70" title="Unified Certificate Studio">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-certificate w-4 text-center text-move-gold-400"></i>
+              <span class="sidebar-label">Certificate Studio</span>
+            </span>
+            <span class="px-1.5 py-0.2 rounded-md text-[9px] font-black uppercase bg-move-gold-500/15 text-move-gold-400 border border-move-gold-500/30 sidebar-label">Studio</span>
+          </button>
+        </div>
+
+        <!-- Group 4: Integrations & Audit -->
+        <div class="space-y-1 pt-2 border-t border-slate-800/80">
+          <div class="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 sidebar-label">Integrations</div>
+
+          <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-blue-500/25 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white group" title="Compare with HRIS API">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-scale-balanced w-4 text-center text-blue-400 group-hover:rotate-12 transition-transform"></i>
+              <span class="sidebar-label">HRIS Sync &amp; Audit</span>
+            </span>
+            <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300 font-mono sidebar-label">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="badgeHrisDiffCountText">HRIS</span>
+            </span>
+          </button>
+
+          <button onclick="openModal('modalSearchPool')" class="w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-400 hover:text-white hover:bg-slate-800/70" title="Search Employee Pool">
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-magnifying-glass w-4 text-center text-slate-400"></i>
+              <span class="sidebar-label">Employee Pool (748)</span>
+            </span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Sidebar Bottom Status Footer -->
+      <div class="p-3 border-t border-slate-800/90 bg-slate-950/60 flex items-center justify-between text-[11px]">
+        <div class="flex items-center gap-2 truncate">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <span class="text-slate-300 font-bold truncate sidebar-label">SQLite &amp; SFTP Live</span>
+        </div>
+        <span class="text-[10px] font-mono text-slate-500 sidebar-label">100%</span>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT WORKSPACE COLUMN (Top Header + Main Stage) -->
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#080d16]">
+
+      <!-- TOP HEADER BAR (#topNavbar) -->
+      <header id="topNavbar" class="h-14 bg-[#0b111e]/95 border-b border-slate-800/90 px-4 sm:px-6 flex items-center justify-between gap-4 shrink-0 z-20 backdrop-blur-md">
+        
+        <!-- Left: Sidebar Toggle & Breadcrumb Path -->
+        <div class="flex items-center gap-3 min-w-0">
+          <button type="button" onclick="toggleAppSidebar()" class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center transition shrink-0" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars-staggered text-xs"></i>
+          </button>
+          <div class="flex items-center gap-2 text-xs truncate">
+            <span class="text-slate-400 font-medium hidden sm:inline">MOVE Baguio</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600 hidden sm:inline"></i>
+            <span id="topBreadcrumbSection" class="text-slate-400 font-medium">Overview</span>
+            <i class="fa-solid fa-chevron-right text-[9px] text-slate-600"></i>
+            <span id="topBreadcrumbActive" class="text-white font-bold bg-slate-800/90 px-2.5 py-0.5 rounded-lg border border-slate-700/80 truncate">Home &amp; Mandate</span>
+          </div>
+        </div>
+
+        <!-- Center: Global Command Search Input -->
+        <div class="hidden md:flex items-center flex-1 max-w-md mx-2">
+          <div class="relative w-full">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input type="text" id="globalTopSearchInput" oninput="onGlobalTopSearch(this.value)" placeholder="Quick search personnel by name, ID, or office..." class="w-full pl-8 pr-10 py-1.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500 transition">
+            <kbd class="absolute right-2.5 top-1.5 px-1.5 py-0.2 text-[10px] font-mono font-bold text-slate-400 bg-slate-900 border border-slate-800 rounded">/</kbd>
+          </div>
+        </div>
+
+        <!-- Right: Segmented View Switcher & Quick Action -->
+        <div class="flex items-center gap-2 shrink-0">
+          <nav class="hidden xl:flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800/90">
+            <button id="navTab-home" onclick="switchView('home')" class="nav-tab-active px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 bg-move-orange-500 text-white shadow">
+              <i class="fa-solid fa-house text-[10px]"></i> Home
+            </button>
+            <button id="navTab-roster" onclick="switchView('roster')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+              <i class="fa-solid fa-users text-[10px]"></i> Roster
+            </button>
+            <button id="navTab-activities" onclick="switchView('activities')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+              <i class="fa-solid fa-calendar-check text-[10px]"></i> Activities
+            </button>
+            <button id="navTab-studio" onclick="switchView('studio')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+              <i class="fa-solid fa-certificate text-move-gold-400 text-[10px]"></i> Studio
+            </button>
+          </nav>
+
+          <button onclick="openModal('modalAddMember')" class="px-3 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5" title="Add Person to MOVE Roster">
+            <i class="fa-solid fa-user-plus text-xs"></i>
+            <span class="hidden sm:inline">Add Person</span>
+          </button>
+        </div>
+
+      </header>
+
+      <!-- MAIN SCROLLABLE WORKSPACE CONTAINER -->
+      <main id="nonPrintableContent" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7">
+        <div class="max-w-[1650px] w-full mx-auto">
+
+          <!-- ==================================================================== -->
+          <!-- VIEW 0: HOME / LANDING FRONT PAGE                                    -->
+          <!-- ==================================================================== -->
+          <section id="view-home"  class="space-y-6">
 
       <!-- 1. Hero Banner: MOVE Baguio Chapter -->
       <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-move-orange-950/30 border border-slate-800 p-6 sm:p-8 shadow-2xl">
@@ -604,141 +763,128 @@
     </section>
 
     <!-- ==================================================================== -->
-    <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER                       -->
+    <!-- VIEW 1: MOVE ROSTER & SELECTIVE STATUS MANAGER (LINEAR / SHADCN)     -->
     <!-- ==================================================================== -->
-    <section id="view-roster" class="space-y-4 hidden">
+    <section id="view-roster" class="space-y-5 hidden">
 
-      <!-- Main Layout: Left Navigation Panel + Right Table Area -->
-      <div class="flex flex-col lg:flex-row gap-5 items-start">
+      <!-- 1. Executive KPI Metric Strip (Click any card to filter directory) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         
-        <!-- LEFT: Category Navigation Panel (w-full lg:w-64 shrink-0) -->
-        <aside class="w-full lg:w-64 shrink-0 bg-slate-900/90 rounded-2xl border border-slate-800 p-4 space-y-4 shadow-xl">
-
-
-          <nav class="space-y-1.5" id="rosterNavPanel">
-            <button onclick="filterRosterByStatus('all')" id="rosterFilter-all" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between border bg-move-orange-500 text-white shadow-md border-move-orange-400/50">
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-users-gear w-4 text-center"></i>
-                <span>Manage Personnel</span>
-              </span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/20 text-white" id="count-all">0</span>
-            </button>
-
-            <button onclick="filterRosterByStatus('member')" id="rosterFilter-member" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-shield-halved w-4 text-center text-emerald-400"></i>
-                <span>Members (Cadre)</span>
-              </span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" id="count-member">0</span>
-            </button>
-
-            <button onclick="filterRosterByStatus('officer')" id="rosterFilter-officer" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-star w-4 text-center text-amber-400"></i>
-                <span>Officers</span>
-              </span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30" id="count-officer">0</span>
-            </button>
-
-            <button onclick="filterRosterByStatus('committee')" id="rosterFilter-committee" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-diagram-project w-4 text-center text-purple-400"></i>
-                <span>Committees</span>
-              </span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30" id="count-committee">0</span>
-            </button>
-
-            <button onclick="filterRosterByStatus('participant')" id="rosterFilter-participant" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border border-transparent text-slate-300 hover:text-white hover:bg-slate-800/80">
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-user-check w-4 text-center text-cyan-400"></i>
-                <span>Participants</span>
-              </span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" id="count-participant">0</span>
-            </button>
-          </nav>
-
-          <!-- Nav Panel Quick Actions -->
-          <div class="pt-3 border-t border-slate-800/80 space-y-2">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block px-1">Quick Tools</span>
-            <button onclick="openHrisCompareModal()" class="w-full px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-white text-xs font-semibold border border-blue-500/30 transition flex items-center justify-between group shadow-sm">
-              <span class="flex items-center gap-2">
-                <i class="fa-solid fa-scale-balanced text-xs text-blue-400 group-hover:rotate-12 transition-transform"></i>
-                <span>Compare with HRIS API</span>
-              </span>
-              <span id="badgeHrisIndicator" class="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="badgeHrisDiffCountText">HRIS</span>
-              </span>
-            </button>
-
-
-          </div>
-        </aside>
-
-        <!-- RIGHT: Table & Search Toolbar (flex-1 min-w-0) -->
-        <div class="flex-1 min-w-0 space-y-4">
-          
-          <!-- Toolbar: Live Search & Active Category Banner -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-            <div class="flex flex-wrap items-center gap-2">
-              <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-2">
-                <i class="fa-solid fa-users-gear text-move-orange-400"></i> Manage Personnel
-              </span>
-              <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Full Directory &amp; Status Manager &mdash; All updates made here</span>
-              <button type="button" onclick="openModalArrangeOfficers()" id="btnToolbarArrangeOfficers" class="ml-1 px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-[11px] font-bold border border-amber-500/30 transition flex items-center gap-1.5 shadow-2xs hidden">
-                <i class="fa-solid fa-arrow-down-wide-short text-amber-400"></i>
-                <span>Arrange Officers Order</span>
-              </button>
-            </div>
-
-            <!-- Search & Add Actions -->
-            <div class="flex items-center gap-2">
-              <div class="relative w-full sm:w-64">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Search name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
-              </div>
-              <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0" title="Add Person to MOVE">
-                <i class="fa-solid fa-user-plus text-xs"></i>
-                <span>Add Person</span>
-              </button>
+        <!-- KPI 1: Total Personnel -->
+        <div onclick="filterRosterByStatus('all')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-move-orange-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Total Roster</div>
+            <div class="text-2xl font-black text-white font-mono mt-0.5" id="kpiCountAll">58</div>
+            <div class="text-[11px] text-emerald-400 font-semibold mt-0.5 flex items-center gap-1">
+              <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <span>100% HRIS &amp; Photo Linked</span>
             </div>
           </div>
-
-          <!-- Roster Table Card with Side Scrollbar & Sticky Header -->
-          <div class="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl flex flex-col">
-            <div class="overflow-x-auto overflow-y-auto max-h-[70vh] roster-scroll-container">
-              <table class="w-full text-left text-xs border-collapse">
-                <thead class="bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800 sticky top-0 z-10 shadow-sm">
-                  <tr>
-                    <th class="py-3 px-3 w-10 text-slate-500 font-mono text-center bg-slate-950">#</th>
-                    <th class="py-3 px-4 min-w-[220px] bg-slate-950">Full Name</th>
-                    <th class="py-3 px-3 min-w-[120px] bg-slate-950">Civil Status</th>
-                    <th class="py-3 px-4 min-w-[180px] bg-slate-950">Move Position</th>
-                    <th class="py-3 px-3 min-w-[110px] bg-slate-950">Office</th>
-                    <th class="py-3 px-3 text-right whitespace-nowrap w-24 bg-slate-950">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
-                  <!-- Dynamically populated via JS -->
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Bottom Info Counter Bar (No paging numbering) -->
-            <div class="flex items-center justify-between px-4 py-2.5 bg-slate-950/80 border-t border-slate-800/80 text-[11px] text-slate-400">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="rosterTotalCountLabel" class="font-medium text-slate-300">Showing all personnel</span>
-              </div>
-              <div class="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
-                <i class="fa-solid fa-arrows-up-down text-[10px] text-move-orange-400"></i>
-                <span>Scroll table to view all records</span>
-              </div>
-            </div>
+          <div class="w-10 h-10 rounded-xl bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-users-gear"></i>
           </div>
+        </div>
 
+        <!-- KPI 2: Executive Officers -->
+        <div onclick="filterRosterByStatus('officer')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-amber-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Executive Officers</div>
+            <div class="text-2xl font-black text-amber-400 font-mono mt-0.5" id="kpiCountOfficer">9</div>
+            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Protocol Hierarchy Active</div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-star"></i>
+          </div>
+        </div>
+
+        <!-- KPI 3: Members (Cadre) -->
+        <div onclick="filterRosterByStatus('member')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Members (Cadre)</div>
+            <div class="text-2xl font-black text-emerald-400 font-mono mt-0.5" id="kpiCountMember">42</div>
+            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Active Chapter Advocates</div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+        </div>
+
+        <!-- KPI 4: Standing Committees -->
+        <div onclick="filterRosterByStatus('committee')" class="p-4 rounded-2xl bg-[#0b111e] hover:bg-slate-900 border border-slate-800/90 hover:border-purple-500/40 transition cursor-pointer shadow-lg flex items-center justify-between group">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-200">Committees</div>
+            <div class="text-2xl font-black text-purple-400 font-mono mt-0.5" id="kpiCountCommittee">4</div>
+            <div class="text-[11px] text-slate-400 font-medium mt-0.5">Specialized Task Forces</div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-diagram-project"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 2. Unified Action & Filter Toolbar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#0b111e] p-3.5 rounded-2xl border border-slate-800/90 shadow-md">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span id="lblActiveNavCategory" class="text-xs font-black uppercase text-white bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700/80 flex items-center gap-2 shadow-2xs">
+            <i class="fa-solid fa-users-gear text-move-orange-400"></i> Manage Personnel
+          </span>
+          <span id="lblActiveNavCount" class="text-xs text-slate-400 font-medium">Click any personnel row to open their profile drawer on the right</span>
+          <button type="button" onclick="openModalArrangeOfficers()" id="btnToolbarArrangeOfficers" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-bold border border-amber-500/30 transition flex items-center gap-1.5 shadow-2xs hidden">
+            <i class="fa-solid fa-arrow-down-wide-short text-amber-400"></i>
+            <span>Arrange Officers Order</span>
+          </button>
+        </div>
+
+        <!-- Right: Search, HRIS Audit & Add Actions -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="relative flex-1 sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+            <input type="text" id="rosterSearchInput" oninput="onRosterSearch(this.value)" placeholder="Filter by name, office, position..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-move-orange-500">
+          </div>
+          <button onclick="openHrisCompareModal()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-blue-300 hover:text-white text-xs font-semibold border border-slate-800 transition flex items-center gap-1.5 shrink-0" title="Compare Roster with Official HRIS">
+            <i class="fa-solid fa-scale-balanced text-blue-400 text-xs"></i>
+            <span class="hidden md:inline">HRIS Audit</span>
+          </button>
+          <button onclick="openModal('modalAddMember')" class="px-3.5 py-1.5 rounded-xl bg-move-orange-500 hover:bg-move-orange-600 text-white text-xs font-bold shadow transition flex items-center gap-1.5 shrink-0" title="Add Person to MOVE">
+            <i class="fa-solid fa-user-plus text-xs"></i>
+            <span>Add Person</span>
+          </button>
         </div>
       </div>
+
+      <!-- 3. Enterprise Data Table Card -->
+      <div class="bg-[#0b111e] rounded-2xl border border-slate-800/90 overflow-hidden shadow-2xl flex flex-col">
+        <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-19rem)] roster-scroll-container">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-950/95 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-800/90 sticky top-0 z-10 shadow-xs">
+              <tr>
+                <th class="py-3 px-3 w-12 text-slate-500 font-mono text-center bg-slate-950">#</th>
+                <th class="py-3 px-4 min-w-[240px] bg-slate-950">Full Name</th>
+                <th class="py-3 px-3 min-w-[120px] bg-slate-950">Civil Status</th>
+                <th class="py-3 px-4 min-w-[200px] bg-slate-950">Move Position</th>
+                <th class="py-3 px-3 min-w-[110px] bg-slate-950">Office</th>
+                <th class="py-3 px-4 text-right whitespace-nowrap w-28 bg-slate-950">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rosterTableBody" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Bottom Info Counter Bar -->
+        <div class="flex items-center justify-between px-4 py-2.5 bg-slate-950/90 border-t border-slate-800/90 text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="rosterTotalCountLabel" class="font-semibold text-slate-300">Showing all personnel</span>
+          </div>
+          <div class="text-[11px] text-slate-500 flex items-center gap-2">
+            <span><i class="fa-solid fa-hand-pointer text-move-orange-400 mr-1"></i> Click any row to open Slide-Over Profile Drawer</span>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- ==================================================================== -->
@@ -1924,7 +2070,10 @@
       </div>
     </section>
 
-  </main>
+          </div>
+      </main>
+    </div>
+  </div>
 
   <!-- ==================================================================== -->
   <!-- MODALS                                                               -->
@@ -2065,21 +2214,29 @@
     </div>
   </div>
 
-  <!-- MODAL: Edit MOVE Member (Modern Studio Profile View) -->
-  <div id="modalEditMember" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 hidden">
-    <div class="bg-[#0b1320]/95 border border-slate-700/80 rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl space-y-4 max-h-[92vh] flex flex-col overflow-y-auto text-slate-100">
+  <!-- DRAWER: Edit MOVE Member (Linear / Shadcn Right Slide-Over Profile Drawer) -->
+  <div id="modalEditMember" onclick="if(event.target === this) closeModal('modalEditMember')" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex justify-end hidden">
+    <div id="editMemberDrawerPanel" class="bg-[#0b111e] border-l border-slate-800 w-full max-w-2xl h-full p-5 sm:p-6 shadow-2xl space-y-4 flex flex-col overflow-y-auto text-slate-100 slide-over-drawer">
       
-      <!-- Modal Top Navigation Bar -->
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+      <!-- Drawer Top Navigation Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800/90 shrink-0">
         <div class="flex items-center gap-2.5">
           <span class="w-8 h-8 rounded-xl bg-move-orange-500/15 border border-move-orange-500/30 text-move-orange-400 flex items-center justify-center shadow-inner">
-            <i class="fa-solid fa-user-pen text-sm"></i>
+            <i class="fa-solid fa-id-card-clip text-sm"></i>
           </span>
-          <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">Edit Member Profile</h3>
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white tracking-tight uppercase">Personnel Profile Drawer</h3>
+            <p class="text-[11px] text-slate-400">Inspect details, edit chapter roles, or double-click photo to zoom</p>
+          </div>
         </div>
-        <button type="button" onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition" title="Close">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
+        <div class="flex items-center gap-1.5">
+          <button type="button" onclick="toggleProfileDrawerExpand()" id="btnExpandProfileDrawer" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition text-xs" title="Expand / Restore Drawer Width">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+          </button>
+          <button type="button" onclick="closeModal('modalEditMember')" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition" title="Close Drawer (Esc)">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Member Profile Hero Banner Card -->
@@ -3259,6 +3416,6 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261030-1745"></script>
+  <script src="/frontend/js/app.js?v=20261110-1420"></script>
 </body>
 </html>

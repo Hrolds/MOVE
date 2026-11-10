@@ -62,6 +62,37 @@ body {
   box-shadow: 0 4px 14px 0 rgba(249, 115, 22, 0.39) !important;
 }
 
+/* Linear / Shadcn Collapsible Sidebar */
+#appSidebar.sidebar-collapsed {
+  width: 4.25rem !important;
+}
+
+#appSidebar.sidebar-collapsed .sidebar-label {
+  display: none !important;
+}
+
+#appSidebar.sidebar-collapsed button {
+  justify-content: center !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+/* Linear / Shadcn Right Slide-Over Profile Drawer Animation */
+.slide-over-drawer {
+  animation: slideInRightDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRightDrawer {
+  from {
+    opacity: 0.6;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Studio Canvas Viewport & Scaling Stage */
 .cert-viewport-container {
   width: 100%;
@@ -250,6 +281,7 @@ body {
   }
 
   /* Hide entire UI and interactive overlays */
+  #appShellWrapper,
   #appSidebar,
   #topNavbar,
   #studioToolbar,
