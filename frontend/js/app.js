@@ -298,6 +298,7 @@ function switchView(viewName) {
   if (viewName === 'home') {
     updateTopBreadcrumbs('Overview', 'Home & Mandate');
     renderFrontHero();
+    renderHomeRecentActivities();
   }
   if (viewName === 'roster') {
     const labelMap = {
@@ -2042,6 +2043,7 @@ async function loadActivities() {
     if (data.success) {
       appState.activities = data.activities;
       renderActivitiesGrid();
+      renderHomeRecentActivities();
     }
   } catch (err) {
     console.error("Failed to load activities:", err);
@@ -6703,4 +6705,206 @@ async function deleteDocComment(commentId) {
   } catch (err) {
     alert("Delete error: " + err);
   }
+}
+
+
+// ==========================================================================
+// HOME RECENT ACTIVITIES CONTROLLER (VETERANS BANK 4-CARD SHOWCASE)
+// ==========================================================================
+
+function renderHomeRecentActivities() {
+  const container = document.getElementById("homeRecentActivitiesGrid");
+  if (!container) return;
+
+  const activities = appState.activities || [];
+
+  // Flagship Fallback / Showcase Templates (Matching Philippine Veterans Bank Style in User Image)
+  const flagshipTemplates = [
+    {
+      id: 1,
+      title: "Men in the Kitchen 2",
+      theme: "Love Served in the Kitchen",
+      activity_date: "October 20, 2026",
+      venue: "CDRRMO Building, Lower Rock Quarry",
+      category: "Culinary & Partnership",
+      icon: "fa-utensils",
+      gradient: "from-[#0b3d2e] via-[#08281e] to-[#041510]",
+      border: "border-emerald-500/30",
+      accent: "text-emerald-300",
+      pillBg: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
+      desc: "Engaging male personnel through culinary skills, shared domestic responsibilities, and dismantling traditional gender stereotypes in Baguio homes.",
+      logo: "/MEN IN THE KITCHEN 2 LOGO.png",
+      photoCount: 0,
+      commentCount: 0,
+      isLiveActivity: true
+    },
+    {
+      id: "flagship-safespaces",
+      title: "Safe Spaces & RA 9262",
+      theme: "Workplace & Domestic Dignity",
+      activity_date: "Quarterly Capacity Building",
+      venue: "Baguio City Hall Multi-Purpose",
+      category: "Legal & Ethical Mandate",
+      icon: "fa-scale-balanced",
+      gradient: "from-[#16365c] via-[#0e213b] to-[#071220]",
+      border: "border-blue-500/30",
+      accent: "text-blue-300",
+      pillBg: "bg-blue-500/20 text-blue-300 border-blue-400/30",
+      desc: "Comprehensive training on Republic Act 9262 and Safe Spaces Act RA 11313, training male public servants to identify, prevent, and report abuse.",
+      logo: null,
+      photoCount: 0,
+      commentCount: 0,
+      isLiveActivity: false
+    },
+    {
+      id: "flagship-fatherhood",
+      title: "Fatherhood & Family Circles",
+      theme: "Emotional Maturity & Respect",
+      activity_date: "Bi-Monthly Seminar Series",
+      venue: "Baguio Convention Center",
+      category: "Family & Mentorship",
+      icon: "fa-hands-holding-child",
+      gradient: "from-[#233f28] via-[#142618] to-[#09140c]",
+      border: "border-teal-500/30",
+      accent: "text-teal-300",
+      pillBg: "bg-teal-500/20 text-teal-300 border-teal-400/30",
+      desc: "Mentorship sessions emphasizing positive masculinity, non-violent communication, respectful parenting, and mutual respect between spouses.",
+      logo: null,
+      photoCount: 0,
+      commentCount: 0,
+      isLiveActivity: false
+    },
+    {
+      id: "flagship-barangay",
+      title: "128 Barangays Cadre Outreach",
+      theme: "Grassroots Violence Prevention",
+      activity_date: "Ongoing Community Mobilization",
+      venue: "Across 128 Baguio Barangays",
+      category: "Grassroots Advocacy",
+      icon: "fa-bullhorn",
+      gradient: "from-[#4a2638] via-[#2c1722] to-[#140a10]",
+      border: "border-rose-500/30",
+      accent: "text-rose-300",
+      pillBg: "bg-rose-500/20 text-rose-300 border-rose-400/30",
+      desc: "Field coordination with Barangay VAW Desks to build vigilant community networks led by proactive male leaders in every neighborhood.",
+      logo: null,
+      photoCount: 0,
+      commentCount: 0,
+      isLiveActivity: false
+    }
+  ];
+
+  // Merge real activities from DB at the top
+  const cardsToRender = [];
+
+  // Map real activities
+  activities.forEach((act, idx) => {
+    const stylePresets = [
+      { gradient: "from-[#0b3d2e] via-[#08281e] to-[#041510]", border: "border-emerald-500/30", accent: "text-emerald-300", pillBg: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30", icon: "fa-utensils" },
+      { gradient: "from-[#16365c] via-[#0e213b] to-[#071220]", border: "border-blue-500/30", accent: "text-blue-300", pillBg: "bg-blue-500/20 text-blue-300 border-blue-400/30", icon: "fa-graduation-cap" },
+      { gradient: "from-[#233f28] via-[#142618] to-[#09140c]", border: "border-teal-500/30", accent: "text-teal-300", pillBg: "bg-teal-500/20 text-teal-300 border-teal-400/30", icon: "fa-handshake-angle" },
+      { gradient: "from-[#4a2638] via-[#2c1722] to-[#140a10]", border: "border-rose-500/30", accent: "text-rose-300", pillBg: "bg-rose-500/20 text-rose-300 border-rose-400/30", icon: "fa-bullhorn" }
+    ];
+    const style = stylePresets[idx % stylePresets.length];
+    
+    cardsToRender.push({
+      id: act.id,
+      title: act.title,
+      theme: act.theme || "Capacity Building Seminar",
+      activity_date: act.activity_date || "Upcoming Date",
+      venue: act.venue || "Baguio City",
+      category: "Official Activity",
+      icon: style.icon,
+      gradient: style.gradient,
+      border: style.border,
+      accent: style.accent,
+      pillBg: style.pillBg,
+      desc: act.theme ? `Theme: "${act.theme}". ${act.target_notes || 'Interactive capacity-building engagement promoting gender equality and non-violence.'}` : (act.target_notes || "Interactive capacity-building engagement promoting gender equality."),
+      logo: (act.id === 1 || (act.title && act.title.toLowerCase().includes("kitchen"))) ? "/MEN IN THE KITCHEN 2 LOGO.png" : null,
+      photoCount: act.photo_count || 0,
+      commentCount: act.comment_count || 0,
+      isLiveActivity: true
+    });
+  });
+
+  // Fill up to 4 cards using flagship templates
+  if (cardsToRender.length < 4) {
+    flagshipTemplates.forEach(t => {
+      if (cardsToRender.length < 4 && !cardsToRender.some(c => c.title.toLowerCase() === t.title.toLowerCase())) {
+        cardsToRender.push(t);
+      }
+    });
+  }
+
+  // Render cards matching user's uploaded sample
+  container.innerHTML = cardsToRender.slice(0, 4).map(c => {
+    return `
+      <div class="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 min-h-[400px] flex flex-col justify-between border ${c.border} bg-gradient-to-b ${c.gradient} text-white p-6 cursor-pointer" onclick="${c.isLiveActivity ? `openActivityDocumentation(${c.id})` : `openModal('modalAboutMove')`}" title="Click to view details &amp; documentation">
+        
+        <!-- Top Artwork / Logo / Icon Header Area -->
+        <div class="space-y-4">
+          <!-- Top Row: Floating Icon Badge & Category Tag -->
+          <div class="flex items-center justify-between gap-2">
+            <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-base shadow-sm group-hover:scale-110 transition-transform duration-300 shrink-0">
+              <i class="fa-solid ${c.icon}"></i>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${c.pillBg}">
+              ${escapeHtml(c.category)}
+            </span>
+          </div>
+
+          <!-- Featured Artwork Thumbnail if available -->
+          ${c.logo ? `
+            <div class="w-full h-28 rounded-2xl bg-black/25 border border-white/10 flex items-center justify-center p-3 overflow-hidden backdrop-blur-xs">
+              <img src="${c.logo}" alt="${escapeHtml(c.title)}" class="max-h-full max-w-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300 select-none">
+            </div>
+          ` : `
+            <div class="w-full h-28 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center p-3 overflow-hidden">
+              <div class="text-center space-y-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                <i class="fa-solid ${c.icon} text-3xl ${c.accent}"></i>
+                <div class="text-[10px] font-bold uppercase tracking-wider text-white/60">MOVE Baguio Chapter</div>
+              </div>
+            </div>
+          `}
+        </div>
+
+        <!-- Bottom Content: Title, Date/Venue, Description & Action -->
+        <div class="space-y-3 pt-4 border-t border-white/10">
+          <div>
+            <h3 class="text-lg font-black text-white group-hover:${c.accent} transition-colors line-clamp-1">
+              ${escapeHtml(c.title)}
+            </h3>
+            <p class="text-[11px] text-white/60 font-medium flex items-center gap-1 mt-0.5">
+              <i class="fa-regular fa-calendar text-[10px]"></i>
+              <span class="truncate">${escapeHtml(c.activity_date)}</span>
+            </p>
+          </div>
+
+          <p class="text-xs text-white/80 leading-relaxed font-normal line-clamp-3">
+            ${escapeHtml(c.desc)}
+          </p>
+
+          <!-- Action Button / Pill at Bottom -->
+          <div class="pt-2 flex items-center justify-between">
+            ${c.isLiveActivity ? `
+              <button type="button" onclick="event.stopPropagation(); openActivityDocumentation(${c.id})" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-[11px] font-bold border border-white/20 transition flex items-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-camera text-xs"></i>
+                <span>Documentation${c.photoCount > 0 ? ` (${c.photoCount})` : ''}</span>
+              </button>
+            ` : `
+              <button type="button" onclick="event.stopPropagation(); openModal('modalAboutMove')" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold border border-white/20 transition flex items-center gap-1.5 shadow-xs">
+                <span>Explore Program</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            `}
+
+            <span class="text-[11px] text-white/60 group-hover:text-white transition flex items-center gap-1">
+              <span>View</span> &rarr;
+            </span>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }).join("");
 }
