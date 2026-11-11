@@ -721,4 +721,25 @@ html.dark #modalActivityDocumentation .bg-\[\#f4f7f5\] {
   color: #ffffff !important;
 }
 
-
+/* ==========================================================================
+   Calendar Date Picker Customization
+   ========================================================================== */
+input[type="date"] {
+  color-scheme: light;
+  cursor: pointer;
+}
+html.dark input[type="date"],
+.dark input[type="date"] {
+  color-scheme: dark;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+  padding: 2px;
+  border-radius: 6px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}

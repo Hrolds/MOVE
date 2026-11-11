@@ -2153,7 +2153,11 @@ async function openModalEditActivity(activityId) {
   document.getElementById("actEditId").value = act.id;
   document.getElementById("actEditTitle").value = act.title || "";
   document.getElementById("actEditTheme").value = act.theme || "";
-  document.getElementById("actEditDate").value = act.activity_date || "";
+  const editDateInput = document.getElementById("actEditDate");
+  if (editDateInput) {
+    editDateInput.value = toDateInputValue(act.activity_date || "");
+    onActDateInputChange(editDateInput.value, 'actEditDateFormatted');
+  }
   document.getElementById("actEditHours").value = act.duration_hours || "8 Hours";
   document.getElementById("actEditVenue").value = act.venue || "";
   document.getElementById("actEditTrainer").value = act.trainer_name || "";
@@ -2168,10 +2172,12 @@ async function submitEditActivity(e) {
   const actId = parseInt(document.getElementById("actEditId").value, 10);
   if (!actId) return;
 
+  const rawEditDate = document.getElementById("actEditDate").value.trim();
+  const activityEditDate = formatActivityDate(rawEditDate);
   const payload = {
     title: document.getElementById("actEditTitle").value.trim(),
     theme: document.getElementById("actEditTheme").value.trim(),
-    activity_date: document.getElementById("actEditDate").value.trim(),
+    activity_date: activityEditDate,
     duration_hours: document.getElementById("actEditHours").value.trim() || "8 Hours",
     venue: document.getElementById("actEditVenue").value.trim(),
     trainer_name: document.getElementById("actEditTrainer").value.trim(),
@@ -2325,10 +2331,12 @@ async function saveStudioActivityDetails() {
 
 async function submitCreateActivity(e) {
   e.preventDefault();
+  const rawNewDate = document.getElementById("actNewDate").value.trim();
+  const activityNewDate = formatActivityDate(rawNewDate);
   const payload = {
     title: document.getElementById("actNewTitle").value.trim(),
     theme: document.getElementById("actNewTheme").value.trim(),
-    activity_date: document.getElementById("actNewDate").value.trim(),
+    activity_date: activityNewDate,
     duration_hours: document.getElementById("actNewHours").value.trim(),
     venue: document.getElementById("actNewVenue").value.trim(),
     trainer_name: document.getElementById("actNewTrainer").value.trim(),
@@ -6191,6 +6199,10 @@ function openModal(id) {
     initQuickPickFacilitatorModal();
   }
 
+  if (id === 'modalCreateActivity') {
+    initCreateActivityModal();
+  }
+
 
 }
 
@@ -6971,4 +6983,96 @@ function renderHomeRecentActivities() {
       </div>
     `;
   }).join("");
+}
+
+// ==========================================================================
+// DATE & CALENDAR HELPER UTILITIES
+// ==========================================================================
+
+function formatActivityDate(val) {
+  if (!val) return "";
+  const s = String(val).trim();
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const year = m[1];
+    const monthIdx = parseInt(m[2], 10) - 1;
+    const day = parseInt(m[3], 10);
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    if (monthIdx >= 0 && monthIdx < 12) {
+      return `${months[monthIdx]} ${day}, ${year}`;
+    }
+  }
+  return s;
+}
+
+function toDateInputValue(str) {
+  if (!str) return "";
+  const s = String(str).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  const m = s.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+  if (m) {
+    const monthStr = m[1].toLowerCase();
+    const day = parseInt(m[2], 10);
+    const year = m[3];
+    const monthMap = {
+      jan: "01", january: "01",
+      feb: "02", february: "02",
+      mar: "03", march: "03",
+      apr: "04", april: "04",
+      may: "05",
+      jun: "06", june: "06",
+      jul: "07", july: "07",
+      aug: "08", august: "08",
+      sep: "09", sept: "09", september: "09",
+      oct: "10", october: "10",
+      nov: "11", november: "11",
+      dec: "12", december: "12"
+    };
+    const mo = monthMap[monthStr];
+    if (mo) {
+      return `${year}-${mo}-${String(day).padStart(2, '0')}`;
+    }
+  }
+
+  const parsed = Date.parse(s);
+  if (!isNaN(parsed)) {
+    const d = new Date(parsed);
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${mo}-${day}`;
+  }
+  return "";
+}
+
+function onActDateInputChange(val, previewId) {
+  const container = document.getElementById(previewId);
+  const textEl = document.getElementById(previewId + 'Text');
+  if (!container) return;
+  const formatted = formatActivityDate(val);
+  if (formatted) {
+    if (textEl) textEl.textContent = formatted;
+    else container.textContent = formatted;
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function initCreateActivityModal() {
+  const dateInput = document.getElementById("actNewDate");
+  if (dateInput && !dateInput.value) {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${y}-${m}-${d}`;
+  }
+  if (dateInput) {
+    onActDateInputChange(dateInput.value, 'actNewDateFormatted');
+  }
 }

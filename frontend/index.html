@@ -2466,8 +2466,15 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Event Date *</label>
-            <input type="text" id="actNewDate" required placeholder="e.g. November 25, 2026" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center justify-between">
+              <span>Event Date *</span>
+              <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">Calendar picker</span>
+            </label>
+            <input type="date" id="actNewDate" required onclick="try{this.showPicker()}catch(e){}" oninput="onActDateInputChange(this.value, 'actNewDateFormatted')" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 cursor-pointer font-medium" style="color-scheme: light dark;">
+            <div id="actNewDateFormatted" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1.5 hidden">
+              <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <span id="actNewDateFormattedText"></span>
+            </div>
           </div>
           <div>
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Duration</label>
@@ -2536,8 +2543,15 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Event Date *</label>
-            <input type="text" id="actEditDate" required placeholder="e.g. October 20, 2026" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1 flex items-center justify-between">
+              <span>Event Date *</span>
+              <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">Calendar picker</span>
+            </label>
+            <input type="date" id="actEditDate" required onclick="try{this.showPicker()}catch(e){}" oninput="onActDateInputChange(this.value, 'actEditDateFormatted')" class="w-full px-3 py-2 rounded-xl bg-[#f4f7f5] dark:bg-[#07110e] border border-slate-200 dark:border-[#18352b] text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 cursor-pointer font-medium" style="color-scheme: light dark;">
+            <div id="actEditDateFormatted" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1.5 hidden">
+              <i class="fa-solid fa-circle-check text-[10px]"></i>
+              <span id="actEditDateFormattedText"></span>
+            </div>
           </div>
           <div>
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Duration</label>
@@ -3577,7 +3591,7 @@
   <div id="printContainer" class="hidden"></div>
 
   <!-- Application Logic (with cache buster) -->
-  <script src="/frontend/js/app.js?v=20261111-docfix1"></script>
+  <script src="/frontend/js/app.js?v=20261111-calendar1"></script>
 
   <!-- MODAL: LOGIN TO MANAGEMENT PORTAL (VETERANS BANK PORTAL STYLE) -->
   <div id="modalLoginPortal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden" onclick="if(event.target === this) closeModal('modalLoginPortal')">
