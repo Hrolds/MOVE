@@ -2123,8 +2123,8 @@ function renderActivitiesGrid() {
             <button onclick="openActivityAttendance(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="Manage Attendance">
               <i class="fa-solid fa-clipboard-user text-slate-400"></i> Attendance
             </button>
-            <button onclick="openActivityDocumentation(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5" title="View & Add Photos and Comments">
-              <i class="fa-solid fa-camera text-slate-400"></i> Documentation
+            <button onclick="openActivityDocumentation(${act.id})" class="px-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-[#07110e] dark:hover:bg-[#122822] text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-[#18352b] shadow-xs transition text-center flex items-center justify-center gap-1.5 whitespace-nowrap" title="View & Manage Activity Documentation, Photos & Notes">
+              <i class="fa-solid fa-camera text-slate-400"></i> <span>Documentation</span>
             </button>
             <button onclick="launchStudioForSpecificActivity(${act.id})" class="px-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition text-center flex items-center justify-center gap-1.5 shadow-sm" title="Generate Certificates">
               <i class="fa-solid fa-certificate"></i> Certificates
@@ -6370,6 +6370,29 @@ function renderDocumentationUI(data) {
   if (photoPill) photoPill.textContent = photos.length;
   if (commentPill) commentPill.textContent = comments.length;
 
+  // Enforce Login-Gating for Front Page & Public Viewers
+  const isAuth = Boolean(appState.isLoggedIn);
+  const uploadBox = document.getElementById("docUploadSection");
+  const publicNotice = document.getElementById("docPublicNoticeSection");
+  const emptyUploadBtn = document.getElementById("docEmptyUploadBtn");
+  const emptyLoginBtn = document.getElementById("docEmptyLoginBtn");
+  const commentForm = document.getElementById("formDocComment");
+  const commentPublicNotice = document.getElementById("docCommentsPublicNotice");
+  const tabHint = document.getElementById("docTabHint");
+
+  if (uploadBox) uploadBox.classList.toggle("hidden", !isAuth);
+  if (publicNotice) publicNotice.classList.toggle("hidden", isAuth);
+  if (emptyUploadBtn) emptyUploadBtn.classList.toggle("hidden", !isAuth);
+  if (emptyLoginBtn) emptyLoginBtn.classList.toggle("hidden", isAuth);
+  if (commentForm) commentForm.classList.toggle("hidden", !isAuth);
+  if (commentPublicNotice) commentPublicNotice.classList.toggle("hidden", isAuth);
+
+  if (tabHint) {
+    tabHint.textContent = isAuth
+      ? "Authorized Officer Mode • Attach photos, certificates, or media"
+      : "Public Documentation View • Official Event Gallery";
+  }
+
   renderDocPhotosGrid(photos);
   renderDocCommentsList(comments);
 }
@@ -6446,9 +6469,11 @@ function renderDocPhotosGrid(photos) {
             <button type="button" onclick="openDocPhotoLightbox('${escapeHtml(p.file_path)}', '${escapeHtml(rawCaption)}', '${escapeHtml(dateStr)}')" class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
               <i class="fa-solid fa-eye text-xs"></i> View
             </button>
-            <button type="button" onclick="deleteDocPhoto(${p.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Photo">
-              <i class="fa-regular fa-trash-can"></i>
-            </button>
+            ${appState.isLoggedIn ? `
+              <button type="button" onclick="deleteDocPhoto(${p.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Photo">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -6470,6 +6495,14 @@ function openDocPhotoLightbox(imgUrl, caption, meta) {
 }
 
 function handleDocPhotosSelected(event) {
+  if (!appState.isLoggedIn) {
+    if (typeof showToast === 'function') {
+      showToast("Attaching photos requires signing into the MOVE Management Portal.", "warning");
+    }
+    openLoginModal();
+    if (event.target) event.target.value = "";
+    return;
+  }
   const files = Array.from(event.target.files || []);
   if (files.length === 0) return;
 
@@ -6514,6 +6547,13 @@ function cancelPendingPhotos() {
 }
 
 async function uploadPendingPhotos() {
+  if (!appState.isLoggedIn) {
+    if (typeof showToast === 'function') {
+      showToast("Attaching photos requires signing into the MOVE Management Portal.", "warning");
+    }
+    openLoginModal();
+    return;
+  }
   const actId = appState.currentDocActivityId;
   const files = appState.pendingDocPhotos || [];
   if (!actId || files.length === 0) return;
@@ -6578,6 +6618,13 @@ function readFileAsBase64(file) {
 }
 
 async function deleteDocPhoto(photoId) {
+  if (!appState.isLoggedIn) {
+    if (typeof showToast === 'function') {
+      showToast("Managing documentation photos requires logging in.", "warning");
+    }
+    openLoginModal();
+    return;
+  }
   const actId = appState.currentDocActivityId;
   if (!actId || !photoId) return;
 
@@ -6635,9 +6682,7 @@ function renderDocCommentsList(comments) {
               <div class="text-[10px] text-slate-400 font-mono">${escapeHtml(dateStr)}</div>
             </div>
           </div>
-          <button type="button" onclick="deleteDocComment(${c.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Note">
-            <i class="fa-regular fa-trash-can"></i>
-          </button>
+          ${appState.isLoggedIn ? `<button type="button" onclick="deleteDocComment(${c.id})" class="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs p-1 rounded transition" title="Delete Note"><i class="fa-regular fa-trash-can"></i></button>` : ""}
         </div>
         <p class="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed pl-9">
           ${escapeHtml(c.comment_text)}
@@ -6649,6 +6694,13 @@ function renderDocCommentsList(comments) {
 
 async function submitDocComment(e) {
   e.preventDefault();
+  if (!appState.isLoggedIn) {
+    if (typeof showToast === 'function') {
+      showToast("Posting field notes requires signing into the MOVE Management Portal.", "warning");
+    }
+    openLoginModal();
+    return;
+  }
   const actId = appState.currentDocActivityId;
   if (!actId) return;
 
@@ -6688,6 +6740,13 @@ async function submitDocComment(e) {
 }
 
 async function deleteDocComment(commentId) {
+  if (!appState.isLoggedIn) {
+    if (typeof showToast === 'function') {
+      showToast("Managing documentation notes requires logging in.", "warning");
+    }
+    openLoginModal();
+    return;
+  }
   const actId = appState.currentDocActivityId;
   if (!actId || !commentId) return;
 

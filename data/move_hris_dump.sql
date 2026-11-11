@@ -132,6 +132,7 @@ CREATE TABLE activity_photos (
         caption TEXT DEFAULT '',
         uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+INSERT INTO "activity_photos" VALUES(2,1,'876210273_1682446033502641_8855280709682893062_n.jpeg','/data/activity_docs/act_1_1794354059_fbf32939.jpeg',310070,'876210273_1682446033502641_8855280709682893062_n.jpeg','2026-11-10 23:40:59');
 CREATE TABLE certificate_settings (
         id INTEGER PRIMARY KEY DEFAULT 1,
         header_line_1 TEXT DEFAULT 'Republic of the Philippines • City Government of Baguio',
@@ -1014,5 +1015,5 @@ INSERT INTO "sqlite_sequence" VALUES('activities',1);
 INSERT INTO "sqlite_sequence" VALUES('activity_attendees',112);
 INSERT INTO "sqlite_sequence" VALUES('activity_facilitators',21);
 INSERT INTO "sqlite_sequence" VALUES('activity_comments',2);
-INSERT INTO "sqlite_sequence" VALUES('activity_photos',1);
+INSERT INTO "sqlite_sequence" VALUES('activity_photos',2);
 COMMIT;
